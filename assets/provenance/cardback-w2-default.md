@@ -29,3 +29,20 @@
 - Finalisierung: Punktsymmetrie-Auflage, Monogramm-Crisp-Auflage, Engine-Branding.
 - Offenes Rest-Risiko (dokumentiert): Karo-As-/Luxusartikel-Assoziation, Wirkung bei
   Spielgröße - harter Test am echten Tisch-Layout vor Release.
+
+## Nachschärfung vor Print-Master (8.7.2026, Tobsi-Review des Freeze)
+- **Fächer-Test** (5 überlappende Rücken als Gegnerhand, 3 Fassungen): Urteil
+  gemini-vision Ranking FC > FB > FA - Innenfacetten-Vergrößerung (0.64 statt 0.5)
+  = ruhigster Fächer bei voller Signet-Präsenz. In Print-Master UND CardBack.swift
+  übernommen (Code-Parität); Symmetrie-Beweis erneut [0, 0, 0].
+- **Karo-As-Assoziation entschärft** (Tobsi): Facettentiefe + 4 Juwelentöne + Monogramm
+  lesen als Signet, nicht als Kartenwert. Bindende Farbregel: kein Ton dominant,
+  Granatrot nie flächig.
+
+## Signet-Entscheid (8.7.2026, Tobsi + Vergleichstest M1/M2/M3)
+- Monogramm = **nur „1441"**, dezent (Didot-Mediävalziffern) - die Zahl trägt die
+  Marke, das P entfällt (mehrdeutig). Gemini-Ranking M2 > M3 (leer) > M1 (geschwätzig).
+- Immer als gespiegeltes Eck-Paar: ein Einzel-Monogramm bräche die Punktsymmetrie
+  („1441" ist gedreht nicht „1441") - das Paar ist der Preis des Orientierungs-Beweises.
+- Voller Name „Poch 1441" lebt überall, wo die Marke neu gelernt wird (App-Icon,
+  Splash, Store, Onboarding) - nie auf dem Rücken.

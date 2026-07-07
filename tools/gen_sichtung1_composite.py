@@ -134,7 +134,8 @@ def synth_artwork(label):
     return ground
 
 
-def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False):
+def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False,
+              mono_style="1441"):
     if art is None:
         if label == "G":
             art = g_artwork()
@@ -170,12 +171,19 @@ def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False)
     # Monogramm-Overlay: P·1441 oben links + 180 Grad gespiegelt unten rechts.
     # QA-Fassungen (mono=False) scoren ohne Overlay - das Monogramm ist austauschbar
     # und gehoert nicht in die Artwork-Bewertung (Tobsi-Feedback 7.7.).
-    if mono:
-        SS = 4  # supersampled - nie matschig (Tobsi-Auflage 7.7.: Monogramm immer crisp)
+    # Signet-Logik (Tobsi 8.7.): die 1441 traegt die Marke, nicht das P. Immer als
+    # gespiegeltes Paar - ein Einzel-Monogramm braeche die Punktsymmetrie (Orientierungs-Leak).
+    if mono and mono_style:
+        SS = 4  # supersampled - nie matschig
         layer = Image.new("RGBA", (cw * SS, ch * SS), (0, 0, 0, 0))
         md = ImageDraw.Draw(layer)
-        md.text(((inset + 38) * SS, (inset + 30) * SS), "P · 1441",
-                font=font(58 * SS), fill=(224, 218, 204, 240))
+        x, y = (inset + 38) * SS, (inset + 30) * SS
+        if mono_style == "P1441":
+            md.text((x, y + 20 * SS), "P ·", font=font(32 * SS), fill=(224, 218, 204, 215))
+            bb = md.textbbox((x, y + 20 * SS), "P ·", font=font(32 * SS))
+            md.text((bb[2] + 8 * SS, y), "1441", font=font(58 * SS), fill=(224, 218, 204, 240))
+        else:  # "1441" - dezent, die Zahl allein
+            md.text((x, y + 4 * SS), "1441", font=font(50 * SS), fill=(224, 218, 204, 210))
         layer = layer.resize((cw, ch), Image.LANCZOS)
         card.paste(layer, (0, 0), layer)
         card.paste(layer.rotate(180), (0, 0), layer.rotate(180))

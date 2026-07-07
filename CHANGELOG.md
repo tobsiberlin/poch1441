@@ -10,6 +10,11 @@
   - Provenance-Sidecar `assets/provenance/cardback-w2-default.md` (Konstruktion, KI-Anteil nur Grund-Textur mit Seed, menschliche Entscheidungskette, dokumentierte Restrisiken: Karo-As-Assoziation + Spielgrößen-Test am Tisch).
 - Cockpit verschlankt (Archiv-Galerien raus, Final + Beweis rein).
 
+### Nachschärfung vor Print-Master (Tobsi-Review des Freeze)
+- **Fächer-Test** (5 überlappende Rücken als Gegnerhand, 3 Fassungen): FC gewinnt (Innenfacetten 0.64 statt 0.5 = ruhigster Fächer bei voller Signet-Präsenz) - in Print-Master UND `CardBack.swift` übernommen, Symmetrie-Beweis erneut [0,0,0].
+- **Signet-Entscheid:** Monogramm = nur „1441" dezent (M2 im Vergleichstest; das P ist mehrdeutig, die Zahl trägt). Immer als gespiegeltes Paar - Einzel-Monogramm bräche die Punktsymmetrie. Voller Name „Poch 1441" lebt bei Icon/Splash/Store/Onboarding.
+- Karo-As-Entschärfung dokumentiert (Farbregel: kein Ton dominant, Granat nie flächig).
+
 ## [0.5.3] - Phase-3-Layout: Das Ketten-Rennen + Rücken-Runde 3 (8.7.2026, nachts)
 
 ### Hinzugefügt

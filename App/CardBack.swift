@@ -41,8 +41,10 @@ struct CardBack: View {
                 rim.append(a)
                 rim.append(CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2))
             }
+            // 0.64 statt 0.5 (Fächer-Test 8.7.: mehr Schwarzanteil = ruhiger Fächer,
+            // Signet-Präsenz bleibt - Parität zum Print-Master)
             let inner = rim.map {
-                CGPoint(x: cx + ($0.x - cx) * 0.5, y: cy + ($0.y - cy) * 0.5)
+                CGPoint(x: cx + ($0.x - cx) * 0.64, y: cy + ($0.y - cy) * 0.64)
             }
             let center = CGPoint(x: cx, y: cy)
 
@@ -99,9 +101,11 @@ struct CardBack: View {
     }
 
     private var monogramText: some View {
-        Text(verbatim: "P · 1441")
+        // Signet-Logik (Tobsi 8.7.): die 1441 trägt die Marke, das P entfällt.
+        // Voller Name "Poch 1441" lebt bei Icon/Splash/Store, nie auf dem Rücken.
+        Text(verbatim: "1441")
             .font(.system(size: 4.4 * scale, weight: .medium, design: .serif))
-            .foregroundStyle(Tokens.jewelPlatin.opacity(0.85))
+            .foregroundStyle(Tokens.jewelPlatin.opacity(0.8))
     }
 }
 

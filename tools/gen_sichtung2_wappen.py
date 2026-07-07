@@ -175,7 +175,8 @@ def lozenge_final():
     def to_center(p, t):
         return (int(cx + (p[0] - cx) * t), int(cy + (p[1] - cy) * t))
 
-    inner = [to_center(p, 0.5) for p in rim]
+    # 0.64 statt 0.5 (Fächer-Test 8.7.: FC gewinnt - mehr Schwarzanteil = ruhiger Fächer)
+    inner = [to_center(p, 0.64) for p in rim]
     cols = [GOLD, ROSE, SMARAGD, AMETHYST]  # i%4 -> punktsymmetrisch (i und i+4 gleich)
     for i in range(8):
         j = (i + 1) % 8

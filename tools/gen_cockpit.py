@@ -14,15 +14,15 @@ TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441
 # ---- Status (hier pflegen) ------------------------------------------------
 STAND = "8. Juli 2026, nachts &middot; Kartenr&uuml;cken W2 FINAL (Asset-Freeze) &middot; alle 3 Phasen-Layouts stehen"
 
-JETZT = ("<b>Kartenr&uuml;cken ist entschieden und eingefroren:</b> W2-Final unten, alle drei Auflagen erf&uuml;llt - "
-         "(1) <b>Punktsymmetrie konstruktiv erzwungen + hart bewiesen</b>: Pixel-Diff der 180-Grad-gedrehten Karte "
-         "= [0, 0, 0] je Kanal, kein Orientierungs-Leak (der E-Fehler ist strukturell behoben); "
-         "(2) <b>Monogramm crisp</b> (Vektor, Didot, 4x supersampled - nie generiert); "
-         "(3) <b>Engine-Branding</b>: `App/CardBack.swift` rendert die Facetten direkt aus den DesignTokens "
-         "(Code = Source of Truth), Print-Master + Provenance-Sidecar (`assets/provenance/`) eingecheckt. "
-         "Die Kritik-2-Restrisiken (Karo-As-Assoziation, Spielgr&ouml;&szlig;e) sind dokumentiert und werden am "
-         "echten Tisch-Layout hart getestet. <b>Es wartet nichts Aktives auf dich</b> - der Loop baut jetzt den "
-         "Phasen-Morph (&sect;5b), danach Karten-Vorderseiten.")
+JETZT = ("<b>Kartenr&uuml;cken W2 ist final, nachgesch&auml;rft und eingefroren.</b> Nach deinem Freeze-Review: "
+         "(1) <b>F&auml;cher-Test bestanden</b> - 5 &uuml;berlappende R&uuml;cken in 3 Fassungen, Urteil FC &gt; FB &gt; FA: "
+         "die dunklen Innenfacetten sind auf 0.64 vergr&ouml;&szlig;ert (ruhigster F&auml;cher, volle Signet-Pr&auml;senz), "
+         "in Print-Master UND CardBack.swift &uuml;bernommen; "
+         "(2) <b>Signet = nur &bdquo;1441&ldquo;</b> (M2 im Vergleichstest - das P entf&auml;llt, die Zahl tr&auml;gt; "
+         "immer als gespiegeltes Paar, weil ein Einzel-Monogramm die Punktsymmetrie br&auml;che); "
+         "(3) <b>Symmetrie-Beweis erneut [0, 0, 0]</b>. Voller Name &bdquo;Poch 1441&ldquo; lebt k&uuml;nftig bei "
+         "Icon/Splash/Store. <b>Es wartet nichts Aktives auf dich</b> - der Loop baut jetzt den Phasen-Morph "
+         "(&sect;5b), danach Karten-Vorderseiten.")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
