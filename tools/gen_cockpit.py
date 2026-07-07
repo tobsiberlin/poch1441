@@ -12,7 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441-cockpit.html"
 
 # ---- Status (hier pflegen) ------------------------------------------------
-STAND = "8. Juli 2026 &middot; Feel-Polish P2 (Material 5&rarr;8) &middot; Kessel-Runde + Monogramm warten auf dich"
+STAND = "8. Juli 2026 &middot; Trumpf-Beat l&auml;uft (40-ms-Kaskade + Puls) &middot; Kessel + Monogramm warten auf dich"
 
 JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hne - Tokens fliegen von der "
          "Top-Bar an die Kardinalpunkte und weiter in die Schiefer-Reihe, die Poch-Mulde l&ouml;st sich aus dem "
@@ -30,7 +30,7 @@ STRANDS = [
     ("done", "Design-Kanon", "konzept.md - Kern-Trias, Farbhierarchie, Meta", 95),
     ("work", "Fundament / UI", "Ring, Themes, Material + Phase-2-Layout (Pochen)", 58),
     ("work", "Kunst / Assets", "Kartenrücken W2 final (Freeze); Charakterstil O registriert", 52),
-    ("work", "Game-Feel / Animation", "Phasen-Morph steht (QA 9/9, 8/7); Juice-Pass folgt", 22),
+    ("work", "Game-Feel / Animation", "Morph + Trumpf-Beat + P2-Material stehen; Meld-Strom folgt", 34),
     ("plan", "Sound / Haptik", "-", 0),
     ("plan", "Meta-Progression", "Design in §7, Code = 0%", 8),
     ("plan", "Monetarisierung", "StoreKit-2-Unlock 4,99 €", 0),
@@ -39,7 +39,8 @@ STRANDS = [
     ("plan", "Beta / Release", "TestFlight, App Store", 0),
 ]
 IN_ARBEIT = [
-    ("ok", "Phasen-Morph: matchedGeometryEffect über alle drei Akte, Bewegungs-QA 9/9 und 8/7 (Frame-Serien, Feel-Regel)"),
+    ("ok", "Trumpf-Beat (§6a): 40-ms-Kaskade mit fliegenden W2-Rücken, 150-ms-Freeze, radialer Lichtpuls, 90-ms-Haptik, Skip-Tap, reduceMotion-Pfad - Bewegungs-QA bestanden"),
+    ("ok", "Phasen-Morph: matchedGeometryEffect über alle drei Akte, Bewegungs-QA 9/9 und 8/7"),
     ("ok", "Phase-3-Layout: Kaskade 180 ms, Beat-Drop 350 ms, Gold-Stopper - live verifiziert"),
     ("ok", "Rücken-Runde 3 (deine Richtungen): W1/W2 Siegel-Raute, B1/B2 Brett-Prägung, K1 Kanten-Farbe - deterministisch + ungeprimt getestet"),
     ("ok", "Phase-2-Layout (Pochen) + Charakterstil-O-Registrierung (Vorrunde)"),
