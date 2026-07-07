@@ -83,17 +83,21 @@ struct Phase2View: View {
         }
         .frame(width: 128, height: 128)
         .background(
+            // Material statt Glow (Feel-Befund 8.7.): pigmentierter Amethyst mit
+            // gefräster Innenstufe; Restschimmer nur im Neon-Theme emissiv.
             Circle()
-                .fill(LinearGradient(colors: [Tokens.jewelAmethyst.opacity(0.55),
-                                              Tokens.jewelAmethyst.opacity(0.22)],
+                .fill(LinearGradient(colors: [Tokens.jewelAmethyst.opacity(0.48),
+                                              Tokens.jewelAmethyst.opacity(0.20)],
                                      startPoint: .top, endPoint: .bottom))
                 .overlay(Circle().strokeBorder(
-                    LinearGradient(colors: [Tokens.amethystVivid.opacity(theme.isNeon ? 1 : 0.8),
-                                            Tokens.amethystVivid.opacity(0.35)],
+                    LinearGradient(colors: [Tokens.amethystVivid.opacity(theme.isNeon ? 1 : 0.75),
+                                            Tokens.amethystVivid.opacity(0.3)],
                                    startPoint: .top, endPoint: .bottom),
                     lineWidth: theme.borderWidth))
-                .shadow(color: Tokens.amethystVivid.opacity(theme.isNeon ? 0.6 : 0.25),
-                        radius: theme.isNeon ? 26 : 12)
+                .overlay(Circle().strokeBorder(.white.opacity(0.06), lineWidth: 5)
+                    .padding(7))
+                .shadow(color: Tokens.amethystVivid.opacity(theme.isNeon ? 0.6 : 0.14),
+                        radius: theme.isNeon ? 26 : 6)
         )
         // §5b Signatur-Flug: die P1-Poch-Mulde löst sich und wird zum Pott
         .matchedGeometryEffect(id: "pochPot", in: morph)
@@ -235,14 +239,28 @@ struct Phase2View: View {
                     .foregroundStyle(Tokens.amethystVivid)
                     .frame(minWidth: 34)
                     .contentTransition(.numericText())
-                Slider(value: $bid,
-                       in: Double(range.lowerBound)...Double(range.upperBound),
-                       step: 1)
-                    .tint(Tokens.amethystVivid)
-                    .disabled(range.lowerBound == range.upperBound)
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(atWall ? Tokens.jewelGold : Tokens.slate.opacity(0.7))
-                    .frame(width: 4, height: 30)
+                // Slider in gefräster Rille (Material-Befund 8.7.: kein nackter Default)
+                ZStack {
+                    Capsule().fill(.black.opacity(0.32))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.05), lineWidth: 1))
+                        .frame(height: 14)
+                    Slider(value: $bid,
+                           in: Double(range.lowerBound)...Double(range.upperBound),
+                           step: 1)
+                        .tint(Tokens.amethystVivid)
+                        .disabled(range.lowerBound == range.upperBound)
+                }
+                // Die Wand als Objekt: gefräster Pfeiler, glüht gold am Anschlag (§6b)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(LinearGradient(
+                        colors: [Tokens.jewelPlatin.opacity(atWall ? 0.9 : 0.5),
+                                 Color(hex: 0x39353F)],
+                        startPoint: .top, endPoint: .bottom))
+                    .frame(width: 9, height: 34)
+                    .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(
+                        atWall ? Tokens.goldVivid.opacity(0.9) : Tokens.slate.opacity(0.5),
+                        lineWidth: 1))
+                    .shadow(color: atWall ? Tokens.goldVivid.opacity(0.4) : .clear, radius: 5)
             }
             wallLabel(range)
         }

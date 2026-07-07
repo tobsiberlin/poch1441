@@ -12,7 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441-cockpit.html"
 
 # ---- Status (hier pflegen) ------------------------------------------------
-STAND = "8. Juli 2026, sp&auml;t &middot; Phasen-Morph l&auml;uft (QA 9/9, 8/7) &middot; W2 final &middot; als N&auml;chstes: Karten-Vorderseiten"
+STAND = "8. Juli 2026 &middot; Feel-Polish P2 (Material 5&rarr;8) &middot; Kessel-Runde + Monogramm warten auf dich"
 
 JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hne - Tokens fliegen von der "
          "Top-Bar an die Kardinalpunkte und weiter in die Schiefer-Reihe, die Poch-Mulde l&ouml;st sich aus dem "
@@ -176,11 +176,9 @@ def build_decisions():
              'w&auml;re auf dem physischen Deck der Orientierungs-Leak; digital w&auml;re es egal, weil die App '
              'Karten nie gedreht rendert - zwei Master widerspr&auml;chen aber dem Ein-Design-Freeze).</p><div class="gal">')
     FANS = [
-        ("faecher-FMA.png", "A &middot; P&middot;1441 als Paar", "Geschw&auml;tzigste Fassung im 5x-Repeat", False),
         ("faecher-FMB.png", "B &middot; 1441 als Paar", "Der aktuelle Final - ruhig, Symmetrie-Beweis intakt", True),
-        ("faecher-FMC.png", "C &middot; P&middot;1441 einzeln", "Bricht Print-Symmetrie, kaum ruhiger als A", False),
         ("faecher-FMD.png", "D &middot; 1441 einzeln", "Hauchd&uuml;nn ruhigster - aber Orientierungs-Leak im Print", False),
-        ("faecher-mono-zoom.png", "Ecken-Zoom aller 4", "Die 5x-Wiederholungszone im Detail", False),
+        ("faecher-mono-zoom.png", "Ecken-Zoom aller 4", "Die 5x-Wiederholungszone im Detail (A/C-Fassungen archiviert)", False),
     ]
     for fname, title, desc, rec in FANS:
         img = emb(os.path.join(ROOT, f"artifacts/sichtung1/{fname}"), 900)
@@ -203,10 +201,7 @@ def build_decisions():
              '(Symmetrie-Beweis erneut [0, 0, 0]); der Kontaktschatten wird Render-Eigenschaft der '
              'F&auml;cher-Darstellung im Spiel (nie ins Asset eingebacken - Lesbarkeits-Licht-Regel).</p><div class="gal">')
     WETTE = [
-        ("faecher-wette-R1.png", "1 &middot; reines W2", "verschwimmt - dein Befund best&auml;tigt", False),
-        ("faecher-wette-R2.png", "2 &middot; WK2 Farbrand", "trennt farbig, aber Label-Rauschen - letzter Platz, verworfen", False),
-        ("faecher-wette-R3.png", "3 &middot; W1 + Schatten + Graphit", "dein Kandidat - Platz 2", False),
-        ("faecher-wette-R4.png", "4 &middot; W2 + Schatten + Graphit", "SIEGER - deine Mechanik auf der Freeze-Raute", True),
+        ("faecher-wette-R4.png", "Sieger &middot; W2 + Schatten + Graphit-Kante", "Deine Mechanik auf der Freeze-Raute (Reihen 1-3 archiviert)", True),
     ]
     for fname, title, desc, rec in WETTE:
         img = emb(os.path.join(ROOT, f"artifacts/sichtung1/{fname}"), 900)
@@ -238,11 +233,6 @@ def build_decisions():
     img_final = emb(os.path.join(ROOT, "artifacts/sichtung1/back-W2.png"))
     h.append(gal_item(img_final, "W2-FINAL &middot; Facetten-Siegel",
                       "Punktsymmetrisch, crisp, eingefroren. Ungeprimt: Spielkarten, Luxus-Accessoire, Mysterium", True))
-    for lb, title, desc, rec in WAPPEN_BACKS:
-        if lb == "W2":
-            continue
-        img = emb(os.path.join(ROOT, f"artifacts/sichtung1/back-{lb}.png"))
-        h.append(gal_item(img, f"{lb} &middot; {title}", desc, False))
     h.append('</div><p class="muted">Runde 1 (A-H) und Runde 2 (X1-X4) sind archiviert (git + Assets_Raw); '
              'die Gestalt-Lesson (&bdquo;geschlossener Farbkreis = Rad&ldquo;) und die Abbruchregel stehen in '
              'tasks/lessons.md.</p></div>')
@@ -256,7 +246,7 @@ def build_decisions():
              '(3) Stil-Anker/LoRA f&uuml;r Konsistenz, (4) k&uuml;nftige Stil-Tests mit kanon-konformer Garderobe - '
              'Render-Stil und Kost&uuml;m-Fit werden nicht mehr vermischt, (5) Monogramm fliegt aus dem QA-Scoring. '
              'Referenz-Proben:</p><div class="gal">')
-    for lb, title, desc, rec in CHARS:
+    for lb, title, desc, rec in [c for c in CHARS if c[0] in ("O1", "O2")]:
         img = emb(os.path.join(ROOT, f"artifacts/sichtung1/char-{lb}.png"))
         h.append(gal_item(img, f"{lb} &middot; {title}", desc, rec))
     h.append('</div></div>')
