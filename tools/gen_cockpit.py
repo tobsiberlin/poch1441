@@ -140,15 +140,49 @@ def build_decisions():
              'Final)</b> - gleiche Ruhe wie D, aber der Print-Symmetrie-Beweis bleibt intakt (ein einzelnes Signet '
              'w&auml;re auf dem physischen Deck der Orientierungs-Leak; digital w&auml;re es egal, weil die App '
              'Karten nie gedreht rendert - zwei Master widerspr&auml;chen aber dem Ein-Design-Freeze).</p><div class="gal">')
-    fan_img = emb(os.path.join(ROOT, "artifacts/sichtung1/faecher-monogramm.png"), 700)
-    h.append(f'<div class="g" style="grid-column:1/-1"><img class="big" onclick="zm(this)" '
-             f'src="data:image/png;base64,{fan_img}" alt="Faecher-Matrix">'
-             f'<div class="cap"><b>Die 4er-Matrix</b> - A: P&middot;1441 Paar &middot; B: 1441 Paar (Final) &middot; '
-             f'C: P&middot;1441 einzeln &middot; D: 1441 einzeln. Klick = Vollbild.</div></div>')
+    FANS = [
+        ("faecher-FMA.png", "A &middot; P&middot;1441 als Paar", "Geschw&auml;tzigste Fassung im 5x-Repeat", False),
+        ("faecher-FMB.png", "B &middot; 1441 als Paar", "Der aktuelle Final - ruhig, Symmetrie-Beweis intakt", True),
+        ("faecher-FMC.png", "C &middot; P&middot;1441 einzeln", "Bricht Print-Symmetrie, kaum ruhiger als A", False),
+        ("faecher-FMD.png", "D &middot; 1441 einzeln", "Hauchd&uuml;nn ruhigster - aber Orientierungs-Leak im Print", False),
+        ("faecher-mono-zoom.png", "Ecken-Zoom aller 4", "Die 5x-Wiederholungszone im Detail", False),
+    ]
+    for fname, title, desc, rec in FANS:
+        img = emb(os.path.join(ROOT, f"artifacts/sichtung1/{fname}"), 900)
+        rechtml = ' <span class="rec">empfohlen</span>' if rec else ""
+        h.append(f'<div class="g" style="grid-column:1/-1"><img class="big" onclick="zm(this)" '
+                 f'src="data:image/png;base64,{img}" alt="{title}">'
+                 f'<div class="cap"><b>{title}</b>{rechtml}<br>{desc}</div></div>')
     h.append('</div><div class="copy">'
              '<button onclick="cp(\'Monogramm: B best&auml;tigt - 1441 als Paar bleibt der Final.\')">B best&auml;tigen (Empfehlung)</button>'
              '<button onclick="cp(\'Monogramm: D - 1441 einzeln, nur digital; Print beh&auml;lt das Paar.\')">D digital / B print</button>'
              '<button onclick="cp(\'Monogramm: anders - [beschreiben].\')">Eigene Antwort</button>'
+             '</div></div>')
+
+    h.append('<div class="decide"><h3>NEU &middot; Deine Kombi-Anfrage: Facette + K1-Rahmen (einzeln und aufgef&auml;chert)</h3>')
+    h.append('<p class="muted"><b>WK2</b> = W2-Facetten-Raute + Juwelen-Kantenrahmen, <b>WK1</b> = W1-Quadranten + '
+             'Rahmen. R&auml;te-Befund WK2-F&auml;cher: Premium 9, Deck-Echtheit 9 - der Rahmen HILFT der '
+             'Karten-Trennung (&bdquo;Klarheit statt Lautst&auml;rke&ldquo;, F&auml;cher-Ruhe 7). '
+             '<b>Ehrlicher Vorbehalt:</b> K1-Rahmen (4 Seitenfarben) und W1-Quadranten sind noch NICHT '
+             'punktsymmetrisch - w&uuml;rde eine Kombi den Freeze abl&ouml;sen, bekommt sie erst die '
+             'Paarungs-Behandlung + neuen Pixel-Beweis (wie W2-Final).</p><div class="gal">')
+    KOMBIS = [
+        ("back-WK2.png", "WK2 einzeln", "W2-Facette + Juwelen-Rahmen", False),
+        ("faecher-WK2.png", "WK2 im F&auml;cher", "Premium 9 &middot; Deck-Echtheit 9 &middot; Rahmen trennt die Karten", True),
+        ("back-WK1.png", "WK1 einzeln", "W1-Quadranten + Rahmen - ruhiger, aber Karo-n&auml;her + asymmetrisch", False),
+        ("faecher-WK1.png", "WK1 im F&auml;cher", "Zum Vergleich", False),
+    ]
+    for fname, title, desc, rec in KOMBIS:
+        img = emb(os.path.join(ROOT, f"artifacts/sichtung1/{fname}"), 900)
+        rechtml = ' <span class="rec">st&auml;rkster Herausforderer</span>' if rec else ""
+        wide = ' style="grid-column:1/-1"' if fname.startswith("faecher") else ""
+        h.append(f'<div class="g"{wide}><img class="big" onclick="zm(this)" '
+                 f'src="data:image/png;base64,{img}" alt="{title}">'
+                 f'<div class="cap"><b>{title}</b>{rechtml}<br>{desc}</div></div>')
+    h.append('</div><div class="copy">'
+             '<button onclick="cp(\'R&uuml;cken: WK2 - Rahmen kommt dazu; mit Symmetrie-Paarung ausarbeiten und neu beweisen.\')">WK2 ausarbeiten</button>'
+             '<button onclick="cp(\'R&uuml;cken: W2 bleibt rahmenlos - Freeze unver&auml;ndert.\')">W2 rahmenlos bleibt</button>'
+             '<button onclick="cp(\'R&uuml;cken: WK1-Richtung - [Anpassung beschreiben].\')">WK1-Richtung</button>'
              '</div></div>')
 
     h.append('<div class="decide"><h3>REGISTRIERT &#10003; &middot; Kartenr&uuml;cken W2-FINAL - Asset-Freeze (dein Exekutions-Befehl)</h3>')
