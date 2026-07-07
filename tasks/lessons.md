@@ -150,3 +150,9 @@
 **Beobachtung:** Kartenrücken A (gebürstetes Radial-Metall, Goldrand, Chrom-Dom) bekam Gemini-Scores 8/6 - Tobsis externe Kritik erkannte sofort: Roulette-Rad/Uhren-Lünette = der Casino-/Crypto-Read, den der Kanon explizit verbietet. "Premium messen" und "verbotene Assoziation erkennen" sind zwei verschiedene Prüfungen.
 
 **Regel:** Jede Vision-QA von Poch-Assets fragt EXPLIZIT nach verbotenen Reads als eigene Zeile: „Liest sich das als Casino/Roulette/Spielautomat, Uhren-Werbung, Crypto-Coin oder Mittelalter-Kitsch?" Score-Fragen ersetzen keine Assoziations-Fragen. Bei Marken-Kernelementen (Rücken, Icon, Splash) zusätzlich eine zweite unabhängige Vision-Frage nur auf Assoziationen.
+
+## 7.7.2026 - Gestalt schlägt Material (Roulette-Read der Ring-Signets)
+
+**Beobachtung:** Vier X-Varianten (Material, Füllung, Linienstärke, Skala variiert) - alle entweder Rad-Read (X1-X3) oder Marken-Verlust (X4, „casino-frei durch Verzicht"). Tobsis Reviewer benannte die Ursache: ein geschlossener Farbkreis um ein Zentrum IST die Rad-Gestalt - das Auge liest Roulette unabhängig vom Material. Drei Runden am selben Motiv gedreht (wörtlich: am Rad).
+
+**Regel:** Besteht ein Motiv-Problem nach 2 Varianten-Runden, zuerst fragen: Material-Problem oder GESTALT-Problem? Gestalt-Probleme (Silhouette, Symmetrie, Anordnung) erfordern Kompositions-Wechsel - Achse kippen, Symmetrie brechen, Element verlagern - nie eine weitere Material-Runde. Dokumentierte Abbruchregel für den Rücken: Sitzt auch die Wappen/Brett-Runde nicht, wandert das Rücken-Signet auf ein anderes Marken-Element (Monogramm, 1441-Relief); der Mulden-Ring bleibt, wo er unschlagbar ist - als spielbares Brett.

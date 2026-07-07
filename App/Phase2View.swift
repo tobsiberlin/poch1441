@@ -8,6 +8,7 @@ import SwiftUI
 struct Phase2View: View {
     let game: GameState
     let theme: Theme
+    let onContinue: () -> Void
     let onNewRound: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -266,10 +267,9 @@ struct Phase2View: View {
                     .font(.system(size: 12)).foregroundStyle(Tokens.slate)
             }
             HStack(spacing: 10) {
-                actionButton("Neue Runde", style: .gold) { onNewRound() }
+                actionButton("Neue Runde", style: .quiet) { onNewRound() }
+                actionButton("Weiter · Ausspielen", style: .gold) { onContinue() }
             }
-            Text("Phase 3 (Ausspielen) folgt als nächste Iteration")
-                .font(.system(size: 10)).foregroundStyle(Tokens.slate.opacity(0.7))
         }
         .padding(.top, 8)
     }

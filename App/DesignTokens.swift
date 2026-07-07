@@ -30,6 +30,12 @@ enum Tokens {
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
     static let p2PotSpring: Double = 0.35
+
+    // Phase-3-Timing (Parameter-Lock §4, konzept §6c - Tobsi-Entscheide).
+    /// Kaskaden-Takt der Zwangskarten: konstant 180 ms/Karte (Zähl-Lesbarkeit vor Whoosh).
+    static let p3CascadeStep: Double = 0.18
+    /// Beat-Drop am Kettenriss: 350 ms Stille, Stopper glüht golden, Anspielrecht wandert.
+    static let p3BeatDrop: Double = 0.35
 }
 
 extension Color {

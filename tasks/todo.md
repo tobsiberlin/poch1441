@@ -11,7 +11,7 @@
 
 ## Zum Entscheiden (Tobsi-Gate)
 
-- [ ] **AKTIV - Kartenrücken:** Synthese-Runde X1-X4 im Cockpit (A-Konzept × G-Vektor × C-Material, Tobsi-Auftrag 7.7.). Ehrlicher Befund: gefüllte Segment-Ringe lesen ungeprimt als Roulette (X1/X3); X4 (Signet-Größe, Linien) ist casino-frei, liest aber Richtung Tech-Signet. A verworfen (Casino, Tobsi-Befund); B-H bleiben wählbar; FLUX-Entgiftungen A1/A3 erneut Casino/Ornament-Slop → aussortiert (Beleg für Vektor-Weg).
+- [ ] **AKTIV - Kartenrücken Runde 3 (W/B/K):** Rad-Gestalt aufgebrochen (Tobsi-Richtungen 7.7. nachts): W1/W2 Vertikal-Siegel, B1/B2 Brett-Prägung, K1 Kanten-Farbe - alle deterministisch, ungeprimt getestet. **Empfehlung W2** (einziges „Spielkarten + Mysterium"-Profil). Abbruchregel dokumentiert: sitzt nichts → Signet auf Monogramm/1441-Relief, Ring bleibt Brett. X-Runde archiviert (Gestalt-Lesson).
 - [ ] **Theme-Held A/B** - geparkt, live am Ende, wenn zwischen Premium-matt und Vivid flippbar.
 - [ ] **Geparkt - Garderobe-Frage:** Reviewer forderte periodenechte 1441-Kleidung; widerspricht Modern-first-Kanon. Default: zeitlos-modern. Nur bei Tobsi-Votum ändern.
 
@@ -20,12 +20,16 @@
 
 ## Als Nächstes (Loop, kein Gate)
 
-- [ ] **JETZT: Phase-3-Layout (Ausspielen):** Karten-Fächer + Ketten-Kaskade (180 ms konstant, Beat-Drop 350 ms), Stopper-Gold, Anspielrecht-Signal.
-- [ ] Phasen-Morph-Transitionen (`.matchedGeometryEffect`) - Ziel-Positionen erst nach P2/P3-Layouts (§5b).
+- [ ] **JETZT: Phasen-Morph-Transitionen** (`.matchedGeometryEffect`, §5b) - P2/P3-Layouts stehen, Ziel-Positionen jetzt ableitbar. Ring → Kompression (P2) → Backdrop (P3), Tokens Top-Bar → Kardinalpunkte.
 - [ ] Clean-moderne Karten aufs Blatt (Default-Deck, code-gerendert) statt Platzhalter; Rücken nach Tobsi-Urteil.
 - [ ] Game-Feel-Pass: Deal/Meld-Juice (40 ms), „Der Poch"-Tischschlag, Ketten-Kaskade, Tells - unter Parameter-Lock (§4). Dazu P2-QA-Befund: Slider generisch, Limit-Wand nur Text → Wand als physisches Objekt gestalten.
 - [ ] Lokalisierungs-Katalog (`Localizable.xcstrings`) anlegen, bevor weitere UI-Strings wachsen (§8-Schuld aus dem Fundament).
 - [ ] Bot-Interplay am Gerät durchspielen (P2-Flow läuft headless ungetestet).
+
+### Phase-3-Layout - erledigt (8.7. nachts)
+- [x] `Phase3View`: Kaskaden-Präsentation 180 ms/Karte + 350-ms-Beat-Drop (Parameter-Lock-Tokens), Gold-Stopper, Anspielrecht-Signal, Schiefer-Tokens (§5c P3), lesbare Ketten-Sequenz, Rundenende-Banner.
+- [x] `GameState`: revealedPlays-Zeiger, displayedHand, Bot-Anspiel (niedrigste Karte, Platzhalter), humanLead; DEBUG `-ausspielStart`/`-autoLead`.
+- [x] Live-Verifikation: Kaskade + Ass-Stopper-Gold + Rundenende im Simulator geschossen; Build 0 Warnings.
 
 ### Phase-2-Layout - erledigt (7.7. nachts)
 - [x] `Phase2View` (Kardinalpunkte §5c, Poch-Pott-Held §5b, Ring-Echo), Biet-Slider mit beschrifteter Limit-Wand + `.rigid`-Bump, Passen/Mitgehen/Pochen-Erhöhen, `.heavy`-Poch-Haptik, Ergebnis-Banner (auch „ohne Aufdecken - Bluff bleibt geheim").

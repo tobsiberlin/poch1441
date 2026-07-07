@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.3] - Phase-3-Layout: Das Ketten-Rennen + Rücken-Runde 3 (8.7.2026, nachts)
+
+### Hinzugefügt
+- `Phase3View` (§6c/§5b Akt 3): Ketten-Kaskade als Präsentations-Schicht über der instanten Engine - Zwangskarten enthüllen im 180-ms-Takt (Parameter-Lock), 350-ms-Beat-Drop am Kettenriss mit golden glühender Stopper-Karte, Anspielrecht-Signal wandert sichtbar, Gegner als matte Schiefer-Tokens mit Restkarten-Zähler, gespielte Ketten bleiben als lesbare Sequenz liegen (ältere gedimmt), Rundenende-Banner (Centerpot + Restkarten-Summe).
+- `GameState`: Kaskaden-Präsentation (`revealedPlays`-Zeiger, `displayedHand` läuft der Engine nicht voraus), Bot-Anspiel (Platzhalter-Heuristik: niedrigste Karte), `humanLead`; DEBUG-Args `-ausspielStart`/`-autoLead` für Kaskaden-QA ohne UI-Tap.
+- Kartenrücken-Runde 3 (Tobsi-Richtungen, Gestalt statt Material): `tools/gen_sichtung2_wappen.py` - W1/W2 Vertikal-Siegel (Facetten-Raute), B1/B2 Brett als flache Prägung (echte Anker-Geometrie, großer Mitte-Pott), K1 Farbe als Rahmen-Signal; alle deterministisch, ungeprimter Assoziations-Test pro Kandidat (W2 = erstes Wunschprofil „Spielkarten + Mysterium").
+
+### Geändert
+- Drei-Akte-Navigation in `ContentView` (Melden → Pochen → Ausspielen), Phase-2-Banner führt in Phase 3 weiter; `CardFace` skalierbar + Gold-Stopper-Zustand.
+- X-Runde archiviert (Gestalt-Lesson: geschlossener Farbkreis = Rad; Abbruchregel dokumentiert).
+
+### Geprüft
+- Build 0 Warnings; Kaskade live im Simulator verifiziert (Mid-Chain-Shot mit Gold-Ass-Stopper + Rundenende-Shot); Cockpit mit Runde-3-Galerie + P3-Screenshot.
+
 ## [0.5.2] - Phase-2-Layout: Das Bluff-Duell (7.7.2026, nachts)
 
 ### Hinzugefügt

@@ -134,17 +134,18 @@ def synth_artwork(label):
     return ground
 
 
-def card_back(label, mono=True, suffix=""):
-    if label == "G":
-        art = g_artwork()
-    elif label in SYNTH:
-        art = synth_artwork(label)
-    else:
-        src = RAW / f"{label}.png"
-        if not src.exists():
-            print(f"[{label}] fehlt, skip")
-            return
-        art = Image.open(src).convert("RGB")
+def card_back(label, mono=True, suffix="", art=None):
+    if art is None:
+        if label == "G":
+            art = g_artwork()
+        elif label in SYNTH:
+            art = synth_artwork(label)
+        else:
+            src = RAW / f"{label}.png"
+            if not src.exists():
+                print(f"[{label}] fehlt, skip")
+                return
+            art = Image.open(src).convert("RGB")
     if label == "E":
         # eigene Eck-Marken des Artworks wegzoomen (QA: wirken wie Signaturen)
         zx, zy = int(art.width * 0.08), int(art.height * 0.08)

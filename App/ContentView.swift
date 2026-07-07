@@ -5,15 +5,19 @@ import SwiftUI
 /// Der echte Phasen-Morph (.matchedGeometryEffect, §5b) folgt, sobald das Phase-3-Layout
 /// steht - bis dahin schaltet ein harter Wechsel die Akte um.
 struct ContentView: View {
+    /// Die drei Akte (§5b) als View-Fortschritt; die Engine steht nach dem Melden
+    /// bereits in .betting. Der echte Morph ersetzt später die harten Schnitte.
+    private enum Akt { case melden, pochen, ausspielen }
+
     @State private var game = GameState()
-    /// Sichtbarer Akt (View-Fortschritt; die Engine steht nach dem Melden bereits in .betting).
-    /// DEBUG-Launch-Arg "-pochenStart" öffnet Akt 2 direkt (Screenshot-/QA-Läufe ohne Tap).
-    @State private var pochenAktiv: Bool = {
+    /// DEBUG-Launch-Args "-pochenStart"/"-ausspielStart" öffnen Akt 2/3 direkt
+    /// (Screenshot-/QA-Läufe ohne Tap).
+    @State private var akt: Akt = {
         #if DEBUG
-        ProcessInfo.processInfo.arguments.contains("-pochenStart")
-        #else
-        false
+        if ProcessInfo.processInfo.arguments.contains("-ausspielStart") { return .ausspielen }
+        if ProcessInfo.processInfo.arguments.contains("-pochenStart") { return .pochen }
         #endif
+        return .melden
     }()
     /// Theme-Umschalter (§7): Premium (matt) ↔ Vivid-Electronic/„Neon" (strahlend).
     /// Ab Start verfügbar; DEBUG-Launch-Arg "-neon YES", später Settings-Toggle.
@@ -28,27 +32,60 @@ struct ContentView: View {
                 .ignoresSafeArea()
             VStack(spacing: 0) {
                 header
-                if pochenAktiv {
-                    Phase2View(game: game, theme: theme) {
-                        game.newRound()
-                        pochenAktiv = false
-                    }
-                } else {
+                switch akt {
+                case .melden:
                     opponentTopBar
                     Spacer(minLength: 8)
                     ringView
                     Spacer(minLength: 8)
                     handView
                     phase1Footer
+                case .pochen:
+                    Phase2View(game: game, theme: theme,
+                               onContinue: {
+                                   akt = .ausspielen
+                                   game.beginPlayoutPresentation()
+                               },
+                               onNewRound: startNewRound)
+                case .ausspielen:
+                    Phase3View(game: game, theme: theme, onNewRound: startNewRound)
                 }
             }
             .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 18)
         }
+        #if DEBUG
+        .onAppear {
+            let args = ProcessInfo.processInfo.arguments
+            if args.contains("-ausspielStart") {
+                game.debugSkipToPlayout()
+                game.beginPlayoutPresentation()
+                // -autoLead: niedrigste Karte anspielen (Kaskaden-QA ohne UI-Tap)
+                if args.contains("-autoLead"),
+                   let card = game.displayedHand(of: 0)
+                       .min(by: { $0.rank.rawValue < $1.rank.rawValue }) {
+                    game.humanLead(card)
+                }
+            }
+        }
+        #endif
+    }
+
+    private func startNewRound() {
+        game.newRound()
+        akt = .melden
     }
 
     // MARK: - Kopf
+
+    private var aktLabel: (text: String, tint: Color) {
+        switch akt {
+        case .melden: return ("PHASE 1 · MELDEN", Tokens.slate)
+        case .pochen: return ("PHASE 2 · POCHEN", Tokens.amethystVivid.opacity(0.85))
+        case .ausspielen: return ("PHASE 3 · AUSSPIELEN", Tokens.smaragdVivid.opacity(0.85))
+        }
+    }
 
     private var header: some View {
         VStack(spacing: 5) {
@@ -56,9 +93,9 @@ struct ContentView: View {
                 Text("POCH").font(.system(size: 26, weight: .bold)).foregroundStyle(Tokens.jewelPlatin)
                 Text("1441").font(.system(size: 26, weight: .light)).foregroundStyle(Tokens.jewelGold)
             }
-            Text(pochenAktiv ? "PHASE 2 · POCHEN" : "PHASE 1 · MELDEN")
+            Text(aktLabel.text)
                 .font(.system(size: 11, weight: .semibold)).tracking(2.5)
-                .foregroundStyle(pochenAktiv ? Tokens.amethystVivid.opacity(0.85) : Tokens.slate)
+                .foregroundStyle(aktLabel.tint)
             trumpChip
         }
     }
@@ -67,7 +104,7 @@ struct ContentView: View {
     private var phase1Footer: some View {
         HStack(spacing: 12) {
             Button {
-                game.newRound()
+                startNewRound()
             } label: {
                 Text("Neue Runde").font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Tokens.slate)
@@ -76,7 +113,7 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             Button {
-                pochenAktiv = true
+                akt = .pochen
             } label: {
                 Text("Weiter · Pochen").font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin)

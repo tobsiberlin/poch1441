@@ -76,9 +76,11 @@ final class GameState {
 
     func newRound() {
         botTask?.cancel()
+        cascadeTask?.cancel()
         source.newRound(seed: UInt64.random(in: 1...999_999))
         round = source.round
         seatActions = Array(repeating: .none, count: round.stacks.count)
+        revealedPlays = 0
     }
 
     // MARK: - Phase 2 (Pochen) - Zustand
@@ -182,4 +184,127 @@ final class GameState {
     var humanComboRank: Rank? {
         ComboEvaluator.best(in: humanHand, trump: trump)?.rank
     }
+
+    // MARK: - Phase 3 (Ausspielen) - Kaskaden-Präsentation (§6c)
+
+    /// Die Engine löst Zwangsketten instant - die UI enthüllt die Plays im 180-ms-Takt
+    /// (Parameter-Lock), mit 350-ms-Beat-Drop am Kettenriss. `revealedPlays` ist der
+    /// Präsentations-Zeiger in den Play-Strom.
+    private(set) var revealedPlays = 0
+    private var cascadeTask: Task<Void, Never>?
+
+    var playout: PlayoutPhase? { round.playout }
+
+    /// Enthüllte Plays, in Ketten gruppiert (jede Kette beginnt mit einem Anspiel).
+    var revealedChains: [[PlayoutPhase.Play]] {
+        guard let phase = round.playout else { return [] }
+        var chains: [[PlayoutPhase.Play]] = []
+        for play in phase.plays.prefix(revealedPlays) {
+            if play.isLead || chains.isEmpty {
+                chains.append([play])
+            } else {
+                chains[chains.count - 1].append(play)
+            }
+        }
+        return chains
+    }
+
+    /// Kaskade eingeholt = alle Plays sichtbar, Tisch wartet aufs nächste Anspiel.
+    var cascadeIdle: Bool {
+        revealedPlays == (round.playout?.plays.count ?? 0)
+    }
+
+    /// Sichtbare Hand eines Sitzes: Deal minus enthüllte Plays (nicht Engine-Stand,
+    /// der der Präsentation vorausläuft).
+    func displayedHand(of seat: Int) -> [Card] {
+        guard let phase = round.playout else {
+            return seat == 0 ? humanHand : round.deal.hands[seat]
+        }
+        let played = Set(phase.plays.prefix(revealedPlays)
+            .filter { $0.player == seat }.map(\.card))
+        return round.deal.hands[seat].filter { !played.contains($0) }
+    }
+
+    /// Rundenergebnis fürs Banner (nil solange offen).
+    var roundResult: (winner: Int, centerPool: Int, payments: [Int])? {
+        for event in round.events {
+            if case .roundEnded(let winner, let pool, let payments) = event {
+                return (winner, pool, payments)
+            }
+        }
+        return nil
+    }
+
+    /// Start der Phase-3-Präsentation (Aufruf beim Aktwechsel): enthüllt bereits
+    /// gelaufene Ketten und lässt Bots anspielen, wenn sie führen.
+    func beginPlayoutPresentation() {
+        runCascadeIfNeeded()
+    }
+
+    /// Anspiel des Menschen - nur wenn er führt und die Kaskade eingeholt ist.
+    func humanLead(_ card: Card) {
+        guard stage == .playout, let phase = round.playout,
+              phase.leader == 0, cascadeIdle else { return }
+        do {
+            try round.applyLead(card)
+            revealedPlays += 1  // das eigene Anspiel erscheint sofort
+            runCascadeIfNeeded()
+        } catch {
+            log.error("Illegales Anspiel: \(String(describing: error))")
+        }
+    }
+
+    private func runCascadeIfNeeded() {
+        cascadeTask?.cancel()
+        cascadeTask = Task { await cascadeLoop() }
+    }
+
+    private func cascadeLoop() async {
+        while !Task.isCancelled {
+            guard let phase = round.playout else { return }
+            if revealedPlays < phase.plays.count {
+                // Zwangskarte im Kaskaden-Takt enthüllen
+                try? await Task.sleep(for: .seconds(Tokens.p3CascadeStep))
+                guard !Task.isCancelled else { return }
+                revealedPlays += 1
+                let chainEnded = revealedPlays == phase.plays.count
+                    || phase.plays[revealedPlays].isLead
+                if chainEnded {
+                    // Beat-Drop: Stille, Stopper glüht, Anspielrecht wandert (§6c)
+                    try? await Task.sleep(for: .seconds(Tokens.p3BeatDrop))
+                }
+            } else if stage != .playout {
+                return  // Runde vorbei - Banner übernimmt
+            } else if phase.leader != 0 {
+                // Bot spielt an: kurze Denkpause, dann niedrigste Karte
+                // (Platzhalter-Heuristik; echte Anspiel-Taktik kommt mit den Bot-Profilen)
+                let pause = BotBrain.thinkSeconds(profile: .neutral, rng: &botRNG)
+                try? await Task.sleep(for: .seconds(pause))
+                guard !Task.isCancelled, stage == .playout, cascadeIdle,
+                      let current = round.playout, current.leader != 0,
+                      let card = current.hands[current.leader]
+                          .min(by: { $0.rank.rawValue < $1.rank.rawValue })
+                else { continue }
+                do {
+                    try round.applyLead(card)
+                    revealedPlays += 1
+                } catch {
+                    log.error("Illegales Bot-Anspiel: \(String(describing: error))")
+                    return
+                }
+            } else {
+                return  // Mensch führt - warten auf Tap
+            }
+        }
+    }
+
+    #if DEBUG
+    /// QA-Helfer (Launch-Arg -ausspielStart): Bietrunde per Alle-passen überspringen,
+    /// damit Screenshots direkt in Phase 3 starten. Nur DEBUG, nie Release (§6).
+    func debugSkipToPlayout() {
+        while stage == .betting {
+            do { try round.applyBet(.pass, by: betting.turn) } catch { return }
+        }
+    }
+    #endif
 }
