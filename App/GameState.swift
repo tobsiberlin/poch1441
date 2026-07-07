@@ -346,28 +346,73 @@ final class GameState {
         return dealOrder.prefix(max(0, dealtCount - 2)).filter { $0.seat == 0 }.count
     }
 
+    // MARK: - Melde-Strom (§6a b) - Anzeige läuft der Engine hinterher
+
+    /// Melde-Ereignisse der Runde in Engine-Reihenfolge.
+    var meldEvents: [(player: Int, pool: Pool, chips: Int)] {
+        round.events.compactMap {
+            if case .melded(let player, let pool, let chips) = $0 {
+                return (player, pool, chips)
+            }
+            return nil
+        }
+    }
+
+    /// Bereits präsentierte Meldungen (0...meldEvents.count).
+    private(set) var meldShown = 0
+    /// Mulde, die gerade pulst (aktive Meldung).
+    private(set) var pulsingPool: Pool?
+
+    /// Anzeige-Wert einer Mulde: Engine-Stand PLUS noch nicht präsentierte Melde-Chips
+    /// (die Engine hat beim Runden-Init längst kassiert - die Inszenierung zahlt einzeln aus).
+    func displayedChips(in pool: Pool) -> Int {
+        round.board[pool] + meldEvents.dropFirst(meldShown)
+            .filter { $0.pool == pool }
+            .reduce(0) { $0 + $1.chips }
+    }
+
+    /// Anzeige-Konto eines Sitzes: Engine-Stand MINUS noch nicht präsentierte Melde-Gewinne.
+    func displayedStack(of seat: Int) -> Int {
+        let stack = stage == .betting
+            ? betting.seats[seat].stack + betting.seats[seat].committed
+            : round.stacks[seat]
+        return stack - meldEvents.dropFirst(meldShown)
+            .filter { $0.player == seat }
+            .reduce(0) { $0 + $1.chips }
+    }
+
     func runDealPresentation(reduceMotion: Bool) {
         dealTask?.cancel()
         dealtCount = 0
         trumpRevealed = false
+        meldShown = 0
+        pulsingPool = nil
         guard !reduceMotion else {
             // Safe-Mode (§6 Auflage 2): keine Flüge, sanfter Dissolve statt Puls -
             // Belohnung wandert in Haptik (ein einzelner Tick).
             dealtCount = totalDeals
             trumpRevealed = true
+            meldShown = meldEvents.count
             hapticTick += 1
             return
         }
         dealTask = Task { await dealLoop() }
     }
 
-    /// Tap überspringt die Kaskade sofort (§6b-Prinzip: nie warten müssen).
+    /// Tap überspringt sofort (§6a b): Kaskade bricht ab, Meldungen saugen sich
+    /// in Lichtgeschwindigkeit zu den Gewinnern.
     func skipDeal() {
-        guard dealtCount < totalDeals || !trumpRevealed else { return }
+        guard dealtCount < totalDeals || !trumpRevealed || meldShown < meldEvents.count
+        else { return }
         dealTask?.cancel()
         dealtCount = totalDeals
-        trumpRevealed = true
-        lightPulse += 1
+        if !trumpRevealed {
+            trumpRevealed = true
+            lightPulse += 1
+        }
+        meldShown = meldEvents.count
+        pulsingPool = nil
+        hapticTick += 1
     }
 
     private func dealLoop() async {
@@ -391,5 +436,16 @@ final class GameState {
         trumpRevealed = true
         lightPulse += 1
         hapticTick += 1
+
+        // Melde-Strom (§6a b): rhythmisch reihum, Mulde pulst, Münzen fliegen
+        try? await Task.sleep(for: .seconds(0.35))
+        while meldShown < meldEvents.count, !Task.isCancelled {
+            pulsingPool = meldEvents[meldShown].pool
+            hapticTick += 1
+            try? await Task.sleep(for: .seconds(Tokens.p1MeldStep))
+            guard !Task.isCancelled else { break }
+            meldShown += 1
+        }
+        pulsingPool = nil
     }
 }

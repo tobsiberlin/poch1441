@@ -177,16 +177,20 @@ struct ContentView: View {
 
     private var opponentTopBar: some View {
         HStack(spacing: 14) {
-            ForEach(Array(game.opponentStacks.enumerated()), id: \.offset) { idx, stack in
+            ForEach(1..<4, id: \.self) { seat in
                 VStack(spacing: 3) {
                     Circle().fill(.white.opacity(0.08))
                         .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.35), lineWidth: 1))
                         .frame(width: 34, height: 34)
-                        .overlay(Text("\(idx + 1)").font(.system(size: 13, weight: .semibold))
+                        .overlay(Text("\(seat)").font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Tokens.slate))
-                        .matchedGeometryEffect(id: "token\(idx + 1)", in: morph)
-                    Text("\(stack)").font(.system(size: 12, weight: .medium))
+                        .matchedGeometryEffect(id: "token\(seat)", in: morph)
+                    // Konto rollt hoch, wenn der Melde-Strom auszahlt (§6a b)
+                    Text("\(game.displayedStack(of: seat))")
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Tokens.jewelGold.opacity(0.9))
+                        .contentTransition(.numericText())
+                        .animation(.easeOut(duration: 0.3), value: game.meldShown)
                 }
             }
         }
@@ -223,11 +227,17 @@ struct ContentView: View {
     private func muldeTile(_ pool: Pool) -> some View {
         let long = pool.indexLabel.count > 2
         let tint = theme.tint(pool)
+        let pulsing = game.pulsingPool == pool
         return VStack(spacing: 1) {
             Text(pool.indexLabel).font(.system(size: long ? 9 : 16, weight: .bold))
-            Text("\(game.chips(in: pool))").font(.system(size: 13, weight: .semibold))
+            // Anzeige-Wert: zahlt erst aus, wenn der Melde-Strom die Mulde erreicht
+            Text("\(game.displayedChips(in: pool))").font(.system(size: 13, weight: .semibold))
+                .contentTransition(.numericText())
         }
         .foregroundStyle(tint)
+        .scaleEffect(pulsing ? 1.14 : 1)
+        .animation(.spring(duration: 0.25), value: pulsing)
+        .animation(.easeOut(duration: 0.3), value: game.meldShown)
         .frame(width: Tokens.tileDiameter, height: Tokens.tileDiameter)
         .background(
             RoundedRectangle(cornerRadius: Tokens.tileCorner)
@@ -249,7 +259,8 @@ struct ContentView: View {
     private var centerTile: some View {
         VStack(spacing: 1) {
             Text("MITTE").font(.system(size: 8, weight: .semibold)).tracking(1)
-            Text("\(game.chips(in: .center))").font(.system(size: 19, weight: .bold))
+            Text("\(game.displayedChips(in: .center))").font(.system(size: 19, weight: .bold))
+                .contentTransition(.numericText())
         }
         .foregroundStyle(Tokens.jewelPlatin)
         .frame(width: Tokens.centerDiameter, height: Tokens.centerDiameter)

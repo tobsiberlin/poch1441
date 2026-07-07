@@ -45,6 +45,10 @@ enum Tokens {
     static let p1Pulse: Double = 0.6
     /// Haptik-Kadenz, von der Karten-Anzahl ENTKOPPELT (§6 Auflage 4): exakt 90 ms.
     static let hapticCadence: Double = 0.09
+    /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
+    static let p1MeldStep: Double = 0.55
+    /// Flugdauer der Münzen von der Mulde zum Spieler.
+    static let p1CoinFlight: Double = 0.4
 
     // Phase-3-Timing (Parameter-Lock §4, konzept §6c - Tobsi-Entscheide).
     /// Kaskaden-Takt der Zwangskarten: konstant 180 ms/Karte (Zähl-Lesbarkeit vor Whoosh).

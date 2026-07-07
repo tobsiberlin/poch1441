@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.8] - Der Melde-Strom (§6a b) - 8.7.2026
+
+### Hinzugefügt
+- Melde-Strom nach dem Trumpf-Beat: Mulden zahlen rhythmisch reihum aus (Takt 550 ms, Parameter-Lock p1MeldStep) - Mulde pulst in Kategorie-Farbe, Münz-Chips in Juwel-Tint fliegen gestaffelt zur Gewinner-Position, Konten + Mulden-Zähler rollen numerisch (contentTransition).
+- Dramaturgie-Fix: der Ring zeigt jetzt PRÄ-Melde-Werte (displayedChips/displayedStack laufen der Engine hinterher) - vorher standen die Mulden schon beim Einstieg auf 0, der Strom hatte nichts zu erzählen.
+- Tap-Skip deckt jetzt Deal UND Melde-Strom ab; reduceMotion überspringt den Strom komplett (Safe-Mode §6 Auflage 2). Bogen-Flugbahn der Münzen = dokumentiertes Hand-Gate (v1 gerade + gestaffelt).
+
+### Geprüft
+- Bewegungs-QA (Frame-Serie): Auszahlungs-Sequenz klar lesbar (wandernder Fokus, Münzflüge, Konten-Updates), Räte 7/10 Lesbarkeit. Farb-Kritik (Münzen immer gelb) als Fehllesung geprüft: Tint ist kategoriegebunden, die sichtbaren Melds waren Gold-Mulden.
+
+
 ## [0.5.7] - Der Trumpf-Beat (§6a) - 8.7.2026
 
 ### Hinzugefügt
