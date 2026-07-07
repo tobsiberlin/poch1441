@@ -34,6 +34,18 @@ enum Tokens {
     // Phasen-Morph (§5b, Parameter-Lock §4): Ring/Tokens fliegen zwischen den Akten.
     static let aktMorph: Double = 0.55
 
+    // Phase-1-Deal / Trumpf-Beat (§6a, Parameter-Lock - Tobsi-Entscheide).
+    /// Kaskaden-Takt des Austeilens: 40 ms/Karte.
+    static let p1DealStep: Double = 0.04
+    /// Flugdauer einer einzelnen Karte vom Stapel in die Hand.
+    static let p1Flight: Double = 0.14
+    /// Freeze vor dem Trumpf-Flip: 150 ms.
+    static let p1TrumpFreeze: Double = 0.15
+    /// Radialer Lichtpuls übers Brett nach dem Trumpf-Flip.
+    static let p1Pulse: Double = 0.6
+    /// Haptik-Kadenz, von der Karten-Anzahl ENTKOPPELT (§6 Auflage 4): exakt 90 ms.
+    static let hapticCadence: Double = 0.09
+
     // Phase-3-Timing (Parameter-Lock §4, konzept §6c - Tobsi-Entscheide).
     /// Kaskaden-Takt der Zwangskarten: konstant 180 ms/Karte (Zähl-Lesbarkeit vor Whoosh).
     static let p3CascadeStep: Double = 0.18

@@ -23,6 +23,7 @@ struct ContentView: View {
     /// Ab Start verfügbar; DEBUG-Launch-Arg "-neon YES", später Settings-Toggle.
     @AppStorage("neon") private var neon = false
     private var theme: Theme { neon ? .neon : .premium }
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Phasen-Morph (§5b): ein Namespace über alle drei Akte - Tokens, Poch-Tile und
     /// Mulden fliegen via matchedGeometryEffect an ihre neuen Positionen.
     @Namespace private var morph
@@ -40,6 +41,8 @@ struct ContentView: View {
                     opponentTopBar
                     Spacer(minLength: 8)
                     ringView
+                        .contentShape(Circle())
+                        .onTapGesture { game.skipDeal() }  // Tap überspringt die Kaskade
                     Spacer(minLength: 8)
                     handView
                     phase1Footer
@@ -60,7 +63,13 @@ struct ContentView: View {
             .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 18)
+            // Trumpf-Beat-Inszenierung liegt als hitTest-freie Schicht über Akt 1
+            .overlay { if akt == .melden { DealOverlay(game: game) } }
         }
+        .onAppear {
+            if akt == .melden { game.runDealPresentation(reduceMotion: reduceMotion) }
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: game.hapticTick)
         #if DEBUG
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
@@ -92,6 +101,7 @@ struct ContentView: View {
     private func startNewRound() {
         game.newRound()
         withAnimation(.spring(duration: Tokens.aktMorph)) { akt = .melden }
+        game.runDealPresentation(reduceMotion: reduceMotion)
     }
 
     // MARK: - Kopf
@@ -145,11 +155,17 @@ struct ContentView: View {
 
     private var trumpChip: some View {
         let up = game.upcard
+        // Der Trumpf bleibt verdeckt, bis der Beat ihn flippt (§6a)
+        let revealed = game.trumpRevealed || akt != .melden
         return HStack(spacing: 5) {
             Text("Trumpf").font(.system(size: 12, weight: .medium)).foregroundStyle(Tokens.slate)
-            Text("\(up.rank.index)\(up.suit.symbol)")
+            Text(revealed ? "\(up.rank.index)\(up.suit.symbol)" : "· ·")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(up.suit.isRed ? Color(hex: 0xD07A85) : Tokens.jewelPlatin)
+                .foregroundStyle(revealed
+                                 ? (up.suit.isRed ? Color(hex: 0xD07A85) : Tokens.jewelPlatin)
+                                 : Tokens.slate)
+                .contentTransition(.opacity)
+                .animation(.easeIn(duration: 0.2), value: revealed)
         }
         .padding(.horizontal, 12).padding(.vertical, 5)
         .background(Capsule().fill(.white.opacity(0.05))
@@ -249,14 +265,18 @@ struct ContentView: View {
         )
     }
 
-    // MARK: - Hand (clean Platzhalter-Karten, geteilt: CardFace)
+    // MARK: - Hand (baut sich im Kaskaden-Takt auf, §6a)
 
     private var handView: some View {
         HStack(spacing: -14) {
-            ForEach(Array(game.humanHand.enumerated()), id: \.offset) { _, card in
+            ForEach(Array(game.humanHand.prefix(game.humanDealtVisible).enumerated()),
+                    id: \.offset) { _, card in
                 CardFace(card: card)
+                    .transition(.scale(scale: 0.86).combined(with: .opacity))
             }
         }
+        .animation(.easeOut(duration: 0.12), value: game.humanDealtVisible)
+        .frame(minHeight: 74)
     }
 }
 

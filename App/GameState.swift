@@ -307,4 +307,89 @@ final class GameState {
         }
     }
     #endif
+
+    // MARK: - Phase 1: Deal-Präsentation / Trumpf-Beat (§6a)
+
+    /// Visuell ausgeteilte Karten (0...31). Die Engine hat längst gegeben - das hier
+    /// ist reine Inszenierung im 40-ms-Takt (Parameter-Lock).
+    private(set) var dealtCount = 0
+    private(set) var trumpRevealed = false
+    /// Trigger des radialen Lichtpulses (Trumpf-Flip).
+    private(set) var lightPulse = 0
+    /// Haptik-Ticker in fester 90-ms-Kadenz - entkoppelt von der Karten-Anzahl
+    /// (§6 Auflage 4: Taptic Engine schluckt zu schnelle Haptiks).
+    private(set) var hapticTick = 0
+    private var dealTask: Task<Void, Never>?
+
+    var totalDeals: Int { round.deal.hands.map(\.count).reduce(0, +) }
+
+    /// Austeil-Reihenfolge: reihum ab Sitz 0, erschöpfte Hände übersprungen (8/8/8/7).
+    var dealOrder: [(seat: Int, slot: Int)] {
+        let counts = round.deal.hands.map(\.count)
+        var slots = Array(repeating: 0, count: counts.count)
+        var order: [(seat: Int, slot: Int)] = []
+        var seat = 0
+        while order.count < counts.reduce(0, +) {
+            if slots[seat] < counts[seat] {
+                order.append((seat, slots[seat]))
+                slots[seat] += 1
+            }
+            seat = (seat + 1) % counts.count
+        }
+        return order
+    }
+
+    /// Sichtbare Handkarten des Menschen - hinkt dem Austeil-Zeiger um die Flugdauer
+    /// (~2 Takte) hinterher, damit Karte erst "ankommt", dann erscheint.
+    var humanDealtVisible: Int {
+        if dealtCount >= totalDeals { return round.deal.hands[0].count }
+        return dealOrder.prefix(max(0, dealtCount - 2)).filter { $0.seat == 0 }.count
+    }
+
+    func runDealPresentation(reduceMotion: Bool) {
+        dealTask?.cancel()
+        dealtCount = 0
+        trumpRevealed = false
+        guard !reduceMotion else {
+            // Safe-Mode (§6 Auflage 2): keine Flüge, sanfter Dissolve statt Puls -
+            // Belohnung wandert in Haptik (ein einzelner Tick).
+            dealtCount = totalDeals
+            trumpRevealed = true
+            hapticTick += 1
+            return
+        }
+        dealTask = Task { await dealLoop() }
+    }
+
+    /// Tap überspringt die Kaskade sofort (§6b-Prinzip: nie warten müssen).
+    func skipDeal() {
+        guard dealtCount < totalDeals || !trumpRevealed else { return }
+        dealTask?.cancel()
+        dealtCount = totalDeals
+        trumpRevealed = true
+        lightPulse += 1
+    }
+
+    private func dealLoop() async {
+        let total = totalDeals
+        let haptics = Task { [weak self] in
+            while let self, !Task.isCancelled, self.dealtCount < total {
+                self.hapticTick += 1
+                try? await Task.sleep(for: .seconds(Tokens.hapticCadence))
+            }
+        }
+        while dealtCount < total, !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(Tokens.p1DealStep))
+            guard !Task.isCancelled else { break }
+            dealtCount += 1
+        }
+        haptics.cancel()
+        guard !Task.isCancelled else { return }
+        // Der Beat: Spiel friert ein, dann Trumpf-Flip + radialer Puls (§6a)
+        try? await Task.sleep(for: .seconds(Tokens.p1TrumpFreeze))
+        guard !Task.isCancelled else { return }
+        trumpRevealed = true
+        lightPulse += 1
+        hapticTick += 1
+    }
 }

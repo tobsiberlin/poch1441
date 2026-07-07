@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.7] - Der Trumpf-Beat (§6a) - 8.7.2026
+
+### Hinzugefügt
+- Deal-Präsentation Phase 1: 31 Kartenrücken (CardBack) fliegen im 40-ms-Kaskaden-Takt vom Ring-Zentrum in die Hände, die Hand baut sich mit Ankunfts-Verzögerung auf, der Trumpf bleibt verdeckt bis zum Beat: 150-ms-Freeze, dann Flip + radialer Lichtpuls in Trumpffarbe (Rot-Suits = Rosé, Schwarz = Platin). Alle Werte als Parameter-Lock-Tokens (p1DealStep/p1Flight/p1TrumpFreeze/p1Pulse).
+- Haptik-Kadenz exakt 90 ms, von der Karten-Anzahl ENTKOPPELT (§6 Auflage 4); Tap auf den Ring überspringt die Kaskade (skipDeal); reduceMotion-Pfad: keine Flüge, sanfter Dissolve, Beat wandert in einen Haptik-Tick (§6 Auflage 2).
+- DealOverlay als hitTest-freie Präsentations-Schicht (schluckt keine Taps - bekannte Falle §7).
+
+### Geprüft
+- Bewegungs-QA (Frame-Serie 12fps): Kaskade spec-genau (31 Karten ≈ 1,3 s), Puls + Trumpf-Flip sichtbar. Räte-Timing-Kritik als Fehlmessung widerlegt (Judge zählte nur die 8 Menschen-Karten = 160-ms-Sichtabstand); gelockte Parameter unangetastet, nur Puls-Sichtbarkeit angehoben (0.7->0.9, Breite 14->22).
+
+
 ## [0.5.6] - Feel-Polish P2 + Kessel-Runde + Cockpit-Diät (8.7.2026)
 
 ### Geändert
