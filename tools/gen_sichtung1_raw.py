@@ -67,6 +67,30 @@ JOBS = [
      "symmetrical interlocking geometry, debossed into matte black lacquer, tone-on-tone "
      "black-on-black shallow relief, no seams, no panels, one hair-thin matte amethyst "
      "accent ring near the center, deep luxury minimalism, " + BACK_STYLE),
+    # ---- Synthese-Runde (Tobsi 7.7. nachts): A-Konzept x G-Produktion x C-Material ----
+    # Gruende fuer den Vektor-Juwelenring - schwarz-auf-schwarz, KEINE Farbe, kein Metall.
+    ("GR1", "flux", "2:3", 93441,
+     "minimal concentric embossed ripple rings expanding from the center, matte "
+     "black-on-black relief, tone-on-tone, extremely restrained, tactile embossed feel, "
+     "premium playing card back ground texture, no color accents, no gold, no metal shine, "
+     "no chrome, deep warm ink-black, soft directional light from top"),
+    ("GR2", "flux", "2:3", 93442,
+     "matte black lacquer surface with an extremely subtle debossed geometric texture, "
+     "tone-on-tone black-on-black, almost invisible, soft directional light from top, "
+     "premium playing card back ground texture, no color, no gold, no metal, no chrome"),
+    # Entgiftete A-Ausfuehrungen (Anti-Casino: kein Radial-Metall, kein Dom, kein Goldrand).
+    ("A1", "flux", "2:3", 92441,
+     "a perfectly centered flat emblem: a ring of eight segments inlaid flush into warm "
+     "ink-black stone, each segment a different matte jewel pigment (matte gold ochre, deep "
+     "garnet rose, muted emerald, dusty amethyst), around a small flat warm-grey center dot, "
+     "completely flat marquetry inlay, no metal shine, no chrome, no gloss, no radial "
+     "brushed texture, no roulette wheel, matte mineral surfaces, soft even light, "
+     + BACK_STYLE),
+    ("A3", "flux", "2:3", 92443,
+     "a ring of eight segments debossed into matte black lacquer, tone-on-tone relief, each "
+     "recess holding a whisper of muted jewel pigment (gold ochre, garnet, emerald, "
+     "amethyst), extremely restrained, tactile pressed feel, no metal, no shine, no chrome, "
+     "no roulette wheel, " + BACK_STYLE),
     # ---- Charakter-Stil-Proben (1:1) ----
     ("O1", "recraft", "1024x1024", None,
      PORTRAIT_NOVA + ", warm gouache portrait with painterly textured brushwork, visible "

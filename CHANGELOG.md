@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.2] - Phase-2-Layout: Das Bluff-Duell (7.7.2026, nachts)
+
+### Hinzugefügt
+- `Phase2View`: Kompressions-Layout (§5b Akt 2) - Gegner als Kardinalpunkt-Tokens (Platzhalter bis Charakterstil-Urteil), violetter Poch-Pott als wachsender Held im Zentrum, entsättigter Ring als Echo, Hand mit leuchtendem Kunststück (§6b, nur eigene Hand).
+- Biet-Steuerung: Slider bis zur harten Decke mit personifizierter Limit-Wand („Limit 51 · Nova kann nicht mehr mit", rückt nach Passen hoch), Passen/Mitgehen/Pochen-Erhöhen, `.rigid`-Haptik am Anschlag, `.heavy` beim Poch.
+- `GameState`: Phase-2-Zustand (Pott, Poch-Mulde, Wand-Besitzer, legale Aktionen aus der Engine) + Bot-Schleife mit variablen Denkpausen (BotBrain, öffentliche State-API - Bluff-Integrität strukturell gewahrt) + Action-Bubbles („pocht 5!", „passt").
+- `CardFace` extrahiert (geteilt P1/P2, Amethyst-Glow fürs qualifizierende Kunststück); DEBUG-Launch-Arg `-pochenStart` für QA-Läufe.
+
+### Geprüft
+- Build ohne Warnings, Simulator-Screenshots beider Akte verifiziert, gemini-vision-QA aufs Layout (Befund fürs Feel-Pass notiert: Slider generisch, Wand nur Text - kommt mit Game-Feel-Iteration).
+- Offen: Bot-Interplay am Gerät noch nicht durchgespielt (kein UI-Tap headless) - erster Playtest deckt das.
+
+### Entschieden (Tobsi, 7.7. nachts)
+- **Charakterstil O (Öl/Gouache painterly)** mit Auflagen: Pflicht-Paintover pro Porträt, V bleibt Konsistenz-Fallback bis Konsistenz-Beweis (1 Charakter × alle Emotionen), Anker/LoRA, Garderobe-Test entkoppelt, Monogramm raus aus dem QA-Scoring.
+- **Kartenrücken A verworfen** (Casino-Read: Radial-Metall + Chrom-Dom = Roulette). Stattdessen Synthese-Runde X1-X4 gebaut: Vektor-Juwelenring (Token-Farben, Brett-Reihenfolge) auf schwarz-auf-schwarz-Prägung; ungeprimter Assoziations-Test etabliert (Lesson: Vision-QA misst „premium", übersieht Assoziations-Reads). Befund: gefüllte Segment-Ringe lesen als Roulette, X4 (Signet-Größe, Linien) casino-frei. FLUX-Entgiftungsversuche A1/A3 drifteten erneut in Casino/Ornament-Slop - aussortiert.
+
 ## [0.5.1] - Sichtung 1: Kartenrücken + Charakterstil (7.7.2026, abends)
 
 ### Hinzugefügt

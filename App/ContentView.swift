@@ -1,11 +1,20 @@
 import PochKit
 import SwiftUI
 
-/// Phase 1 (Melden) - erster echter Screen: der Poch-Ring rendert die echten Mulden-Werte
-/// aus PochKit, Gegner als schmale Top-Bar (§5c Phase-1-Zustand), die Hand unten.
-/// Feel-Animationen (40-ms-Deal, Meld-Juice) und die Phasen 2/3 folgen.
+/// Spieltisch-Container: Phase 1 (Melde-Tableau, Poch-Ring) und Phase 2 (Pochen, §6b).
+/// Der echte Phasen-Morph (.matchedGeometryEffect, §5b) folgt, sobald das Phase-3-Layout
+/// steht - bis dahin schaltet ein harter Wechsel die Akte um.
 struct ContentView: View {
     @State private var game = GameState()
+    /// Sichtbarer Akt (View-Fortschritt; die Engine steht nach dem Melden bereits in .betting).
+    /// DEBUG-Launch-Arg "-pochenStart" öffnet Akt 2 direkt (Screenshot-/QA-Läufe ohne Tap).
+    @State private var pochenAktiv: Bool = {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-pochenStart")
+        #else
+        false
+        #endif
+    }()
     /// Theme-Umschalter (§7): Premium (matt) ↔ Vivid-Electronic/„Neon" (strahlend).
     /// Ab Start verfügbar; DEBUG-Launch-Arg "-neon YES", später Settings-Toggle.
     @AppStorage("neon") private var neon = false
@@ -19,19 +28,24 @@ struct ContentView: View {
                 .ignoresSafeArea()
             VStack(spacing: 0) {
                 header
-                opponentTopBar
-                Spacer(minLength: 8)
-                ringView
-                Spacer(minLength: 8)
-                handView
+                if pochenAktiv {
+                    Phase2View(game: game, theme: theme) {
+                        game.newRound()
+                        pochenAktiv = false
+                    }
+                } else {
+                    opponentTopBar
+                    Spacer(minLength: 8)
+                    ringView
+                    Spacer(minLength: 8)
+                    handView
+                    phase1Footer
+                }
             }
             .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 18)
         }
-        // Tap = neue Runde (Fundament-QA, bis das echte Spiel drankommt)
-        .contentShape(Rectangle())
-        .onTapGesture { game.newRound() }
     }
 
     // MARK: - Kopf
@@ -42,11 +56,37 @@ struct ContentView: View {
                 Text("POCH").font(.system(size: 26, weight: .bold)).foregroundStyle(Tokens.jewelPlatin)
                 Text("1441").font(.system(size: 26, weight: .light)).foregroundStyle(Tokens.jewelGold)
             }
-            Text("PHASE 1 · MELDEN")
+            Text(pochenAktiv ? "PHASE 2 · POCHEN" : "PHASE 1 · MELDEN")
                 .font(.system(size: 11, weight: .semibold)).tracking(2.5)
-                .foregroundStyle(Tokens.slate)
+                .foregroundStyle(pochenAktiv ? Tokens.amethystVivid.opacity(0.85) : Tokens.slate)
             trumpChip
         }
+    }
+
+    /// Übergang zu Akt 2 - später ersetzt der Phasen-Morph diesen Schnitt (§5b).
+    private var phase1Footer: some View {
+        HStack(spacing: 12) {
+            Button {
+                game.newRound()
+            } label: {
+                Text("Neue Runde").font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Tokens.slate)
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(Capsule().strokeBorder(Tokens.slate.opacity(0.4), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            Button {
+                pochenAktiv = true
+            } label: {
+                Text("Weiter · Pochen").font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Tokens.jewelPlatin)
+                    .padding(.horizontal, 18).padding(.vertical, 9)
+                    .background(Capsule().fill(Tokens.jewelAmethyst.opacity(0.65))
+                        .overlay(Capsule().strokeBorder(Tokens.amethystVivid.opacity(0.8), lineWidth: 1)))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 14)
     }
 
     private var trumpChip: some View {
@@ -146,35 +186,14 @@ struct ContentView: View {
         )
     }
 
-    // MARK: - Hand (clean Platzhalter-Karten)
+    // MARK: - Hand (clean Platzhalter-Karten, geteilt: CardFace)
 
     private var handView: some View {
         HStack(spacing: -14) {
             ForEach(Array(game.humanHand.enumerated()), id: \.offset) { _, card in
-                cardView(card)
+                CardFace(card: card)
             }
         }
-    }
-
-    private func cardView(_ card: Card) -> some View {
-        VStack(spacing: 0) {
-            HStack {
-                VStack(spacing: -2) {
-                    Text(card.rank.index).font(.system(size: 15, weight: .bold))
-                    Text(card.suit.symbol).font(.system(size: 12))
-                }
-                Spacer()
-            }
-            Spacer()
-            Text(card.suit.symbol).font(.system(size: 22))
-            Spacer()
-        }
-        .foregroundStyle(card.suit.isRed ? Color(hex: 0xB22A2A) : Color(hex: 0x1A1A22))
-        .padding(7)
-        .frame(width: 52, height: 74)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(hex: 0xF3EFE6)))
-        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.black.opacity(0.15), lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.4), radius: 3, y: 2)
     }
 }
 

@@ -144,3 +144,9 @@
 **Beobachtung:** Tobsi (bei der Kartenrücken-/Charakterstil-Frage): „bitte nichts als zip, sondern immer in cockpit html einbauen und html öffnen" - die ZIP-Auslieferung nach iCloud-TEMP ist damit komplett abgelöst (Verschärfung der 5.7.-Lesson „Sichtungen als HTML öffnen").
 
 **Regel:** Jede Sichtung (Stil-Kandidaten, Asset-Chargen) wird direkt ins Cockpit-HTML eingebettet (gelabelte Bilder, Base64), das Cockpit nach iCloud-TEMP gespiegelt und per `open` geöffnet. Keine ZIP-Pakete mehr, auch nicht zusätzlich.
+
+## 7.7.2026 - Vision-QA misst "premium", übersieht aber Assoziations-Reads (Casino)
+
+**Beobachtung:** Kartenrücken A (gebürstetes Radial-Metall, Goldrand, Chrom-Dom) bekam Gemini-Scores 8/6 - Tobsis externe Kritik erkannte sofort: Roulette-Rad/Uhren-Lünette = der Casino-/Crypto-Read, den der Kanon explizit verbietet. "Premium messen" und "verbotene Assoziation erkennen" sind zwei verschiedene Prüfungen.
+
+**Regel:** Jede Vision-QA von Poch-Assets fragt EXPLIZIT nach verbotenen Reads als eigene Zeile: „Liest sich das als Casino/Roulette/Spielautomat, Uhren-Werbung, Crypto-Coin oder Mittelalter-Kitsch?" Score-Fragen ersetzen keine Assoziations-Fragen. Bei Marken-Kernelementen (Rücken, Icon, Splash) zusätzlich eine zweite unabhängige Vision-Frage nur auf Assoziationen.

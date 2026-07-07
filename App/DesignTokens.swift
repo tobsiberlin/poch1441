@@ -26,6 +26,10 @@ enum Tokens {
     static let tileDiameter: CGFloat = 54
     static let centerDiameter: CGFloat = 76
     static let tileCorner: CGFloat = 16
+
+    // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
+    /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
+    static let p2PotSpring: Double = 0.35
 }
 
 extension Color {

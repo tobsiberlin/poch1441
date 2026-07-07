@@ -9,19 +9,28 @@
 - [x] **SwiftUI-Fundament:** Ring-Geometrie (8 Mulden + Mitte), GameState←PochKit-Bridge (echte Werte), 2-Theme-System (Premium-matt + Vivid), MatchSource-Seam.
 - [x] **Material-Fundament (Iter. 1-3):** warmes Tinten-Schwarz + Vignette, Metallkanten statt Dauer-Glow, gefräste Ring-Linie + Mitte-Pott. Beide Themes grün + screenshot-verifiziert.
 
-## Zum Entscheiden (Tobsi-Gate) - Sichtung 1 liegt im Cockpit (7.7. abends)
+## Zum Entscheiden (Tobsi-Gate)
 
-- [ ] **AKTIV - Kartenrücken-Signet:** 8 Richtungen (A-H) QA-gefiltert im Cockpit. Empfehlung A (Mulden-Ring, Markenlogik GPT-Top-1 + Kanon §4); stärkste Alternativen E (Art-Deco), C (Schockwelle). Antwort-Buttons im Cockpit.
-- [ ] **DANACH - Charakter-Render-Stil:** 6 Proben (O/V/S je Nova+Blade) im Cockpit. Empfehlung O (Öl/Gouache painterly - Kanon + GPT + Wärme-Scores 9/7). Nach Urteil: Stil ankern (Referenz-Familie, ggf. LoRA), dann Roster.
+- [ ] **AKTIV - Kartenrücken:** Synthese-Runde X1-X4 im Cockpit (A-Konzept × G-Vektor × C-Material, Tobsi-Auftrag 7.7.). Ehrlicher Befund: gefüllte Segment-Ringe lesen ungeprimt als Roulette (X1/X3); X4 (Signet-Größe, Linien) ist casino-frei, liest aber Richtung Tech-Signet. A verworfen (Casino, Tobsi-Befund); B-H bleiben wählbar; FLUX-Entgiftungen A1/A3 erneut Casino/Ornament-Slop → aussortiert (Beleg für Vektor-Weg).
 - [ ] **Theme-Held A/B** - geparkt, live am Ende, wenn zwischen Premium-matt und Vivid flippbar.
+- [ ] **Geparkt - Garderobe-Frage:** Reviewer forderte periodenechte 1441-Kleidung; widerspricht Modern-first-Kanon. Default: zeitlos-modern. Nur bei Tobsi-Votum ändern.
+
+### Entschieden 7.7. nachts
+- [x] **Charakter-Render-Stil: O (Öl/Gouache painterly)** - mit Auflagen: (1) Pflicht-Paintover pro finalem Porträt (Midjourney-Öl-Tell), (2) V bleibt Konsistenz-/Slop-Fallback bis painterly über 1 kompletten Charakter × alle Emotionen bewiesen (Konsistenztest VOR Vollproduktion, CLAUDE.md §5), (3) Anker/LoRA, (4) Stil-Test künftig mit kanon-konformer Garderobe (Confound raus), (5) Monogramm fliegt aus dem QA-Scoring.
 
 ## Als Nächstes (Loop, kein Gate)
 
-- [ ] **JETZT: Phase-2-Layout (Pochen):** Biet-Slider + Limit-Wand (personifiziert, „rückt hoch nach Passen"), PASS/MITGEHEN/ERHÖHEN, violetter Poch-Pott als Held, Kardinalpunkte-Präsenz (§5c). Platzhalter-Tokens bis Charakterstil entschieden.
-- [ ] Phase-3-Layout (Ausspielen): Karten-Fächer + Ketten-Kaskade (180 ms konstant, Beat-Drop 350 ms).
+- [ ] **JETZT: Phase-3-Layout (Ausspielen):** Karten-Fächer + Ketten-Kaskade (180 ms konstant, Beat-Drop 350 ms), Stopper-Gold, Anspielrecht-Signal.
 - [ ] Phasen-Morph-Transitionen (`.matchedGeometryEffect`) - Ziel-Positionen erst nach P2/P3-Layouts (§5b).
 - [ ] Clean-moderne Karten aufs Blatt (Default-Deck, code-gerendert) statt Platzhalter; Rücken nach Tobsi-Urteil.
-- [ ] Game-Feel-Pass: Deal/Meld-Juice (40 ms), „Der Poch", Ketten-Kaskade, Tells - unter Parameter-Lock (§4).
+- [ ] Game-Feel-Pass: Deal/Meld-Juice (40 ms), „Der Poch"-Tischschlag, Ketten-Kaskade, Tells - unter Parameter-Lock (§4). Dazu P2-QA-Befund: Slider generisch, Limit-Wand nur Text → Wand als physisches Objekt gestalten.
+- [ ] Lokalisierungs-Katalog (`Localizable.xcstrings`) anlegen, bevor weitere UI-Strings wachsen (§8-Schuld aus dem Fundament).
+- [ ] Bot-Interplay am Gerät durchspielen (P2-Flow läuft headless ungetestet).
+
+### Phase-2-Layout - erledigt (7.7. nachts)
+- [x] `Phase2View` (Kardinalpunkte §5c, Poch-Pott-Held §5b, Ring-Echo), Biet-Slider mit beschrifteter Limit-Wand + `.rigid`-Bump, Passen/Mitgehen/Pochen-Erhöhen, `.heavy`-Poch-Haptik, Ergebnis-Banner (auch „ohne Aufdecken - Bluff bleibt geheim").
+- [x] `GameState`: Phase-2-API (Pott, Wand-Besitzer, legale Aktionen), Bot-Loop mit BotBrain-Denkpausen, Action-Bubbles; `CardFace` extrahiert (Kunststück-Glow §6b); DEBUG-Arg `-pochenStart`.
+- [x] Build 0 Warnings, Screenshots beider Akte verifiziert, gemini-vision-QA.
 
 ### Sichtung 1 - erledigt (7.7. abends)
 - [x] Kartenrücken-Frage beantwortet (JA: Trumpf-Beat, Gegner-Hände, Cosmetic-Anker, Marke) + 8 Richtungen generiert (FLUX/Recraft/PIL), QA via gemini-vision + GPT-Räte, 8 Retakes.
