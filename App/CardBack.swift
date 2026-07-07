@@ -69,7 +69,7 @@ struct CardBack: View {
                 lines.move(to: inner[i]); lines.addLine(to: inner[j])
                 context.stroke(lines, with: .color(Self.platin), lineWidth: 0.6 * scale)
             }
-            // Platin-Kern (die 9. Mulde) - kleine Raute, Tinten-Fuellung
+            // Platin-Kern (die 9. Mulde) - kleine Raute, Tinten-Füllung
             let kr = rw * 0.16
             var core = Path()
             core.move(to: CGPoint(x: cx, y: cy - kr))
