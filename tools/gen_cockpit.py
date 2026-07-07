@@ -12,17 +12,17 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441-cockpit.html"
 
 # ---- Status (hier pflegen) ------------------------------------------------
-STAND = "8. Juli 2026, nachts &middot; Wappen/Brett-Runde (W/B/K) + Phase-3-Layout fertig"
+STAND = "8. Juli 2026, nachts &middot; Kartenr&uuml;cken W2 FINAL (Asset-Freeze) &middot; alle 3 Phasen-Layouts stehen"
 
-JETZT = ("<b>Deine Gestalt-Kritik ist umgesetzt:</b> die X-Runde ist als &bdquo;dieselbe Rad-Gestalt in vier "
-         "Materialst&auml;rken&ldquo; archiviert (dein Reviewer hatte recht - dokumentiert als Lesson inkl. "
-         "Abbruchregel). Neu unten: <b>Runde 3</b> mit deinen drei Richtungen, alle deterministisch (G-Weg) auf "
-         "ruhigem Lack: <b>W1/W2</b> Vertikal-Siegel (Facetten-Raute), <b>B1/B2</b> Brett als flache Pr&auml;gung, "
-         "<b>K1</b> Farbe als Rahmen-Signal. Ungeprimter Assoziations-Test pro Kandidat liegt bei - "
-         "<b>W2 ist der erste Kandidat mit dem Wunschprofil</b> (&bdquo;Spielkarten, luxuri&ouml;ses Accessoire, "
-         "Mysterium&ldquo; - kein Rad, kein Tech). Nebenbei fertig: das <b>Phase-3-Layout (Ausspielen)</b> - "
-         "Kaskade 180 ms, Beat-Drop 350 ms, goldener Stopper, Anspielrecht-Signal, live im Simulator verifiziert. "
-         "Aktiv wartet nur: dein R&uuml;cken-Urteil (Runde 3).")
+JETZT = ("<b>Kartenr&uuml;cken ist entschieden und eingefroren:</b> W2-Final unten, alle drei Auflagen erf&uuml;llt - "
+         "(1) <b>Punktsymmetrie konstruktiv erzwungen + hart bewiesen</b>: Pixel-Diff der 180-Grad-gedrehten Karte "
+         "= [0, 0, 0] je Kanal, kein Orientierungs-Leak (der E-Fehler ist strukturell behoben); "
+         "(2) <b>Monogramm crisp</b> (Vektor, Didot, 4x supersampled - nie generiert); "
+         "(3) <b>Engine-Branding</b>: `App/CardBack.swift` rendert die Facetten direkt aus den DesignTokens "
+         "(Code = Source of Truth), Print-Master + Provenance-Sidecar (`assets/provenance/`) eingecheckt. "
+         "Die Kritik-2-Restrisiken (Karo-As-Assoziation, Spielgr&ouml;&szlig;e) sind dokumentiert und werden am "
+         "echten Tisch-Layout hart getestet. <b>Es wartet nichts Aktives auf dich</b> - der Loop baut jetzt den "
+         "Phasen-Morph (&sect;5b), danach Karten-Vorderseiten.")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
@@ -47,7 +47,8 @@ IN_ARBEIT = [
 ]
 
 REGISTRIERT = [
-    ("7.7.", "Rücken-Runde X (Synthese)", "VERWORFEN (deine Gestalt-Analyse): geschlossener Farbkreis = Rad, egal welches Material; X4 = Marke wegoptimiert. Runde 3 (W/B/K) beauftragt + Abbruchregel dokumentiert."),
+    ("7.7.", "Kartenrücken FINAL", "W2 Facetten-Siegel - Asset-Freeze per Exekutions-Befehl. Auflagen erfüllt: Punktsymmetrie (Pixel-Beweis 0/0/0), crisp Vektor-Monogramm, Engine-Branding (CardBack.swift aus DesignTokens), Provenance-Sidecar. Restrisiken (Karo-As, Spielgröße) dokumentiert -> Tisch-Test."),
+    ("7.7.", "Rücken-Runde X (Synthese)", "VERWORFEN (deine Gestalt-Analyse): geschlossener Farbkreis = Rad, egal welches Material; X4 = Marke wegoptimiert. Runde 3 (W/B/K) brachte W2."),
     ("7.7.", "Charakter-Render-Stil", "O (Öl/Gouache painterly) - MIT Auflagen: Pflicht-Paintover pro Porträt, V bleibt Konsistenz-Fallback bis painterly über 1 Charakter x alle Emotionen bewiesen, Anker/LoRA. Garderobe-Test künftig entkoppelt vom Stil-Test."),
     ("7.7.", "Kartenrücken A", "VERWORFEN (dein Befund): gebürstetes Radial-Metall + Chrom-Dom = Roulette/Casino-Read. Marken-Logik bleibt, Synthese X beauftragt."),
     ("7.7.", "Kartenrücken nötig?", "Ja - Trumpf-Beat zeigt jede Runde 31 Rücken, Gegner-Hände, Cosmetic-Anker, Marke."),
@@ -129,35 +130,28 @@ def gal_item(img_b64, title, desc, rec, button_txt=None, copy_txt=None):
             f'<div class="minirow">Spielgr&ouml;&szlig;e: <span class="minislot"></span></div>{btn}</div>')
 
 def build_decisions():
-    h = ['<div class="decide"><h3>AKTIV &middot; Kartenr&uuml;cken Runde 3 - die Rad-Gestalt aufgebrochen (deine 3 Richtungen)</h3>']
-    h.append('<p class="muted">Deine Analyse ist als Lesson dokumentiert: <b>ein geschlossener Farbkreis um ein '
-             'Zentrum IST ein Rad</b> - die X-Runde war viermal dieselbe Gestalt in vier Materialst&auml;rken. '
-             'Runde 3 bricht die Gestalt statt das Material zu entkernen: <b>W</b> = heraldisches Vertikal-Siegel '
-             '(Facetten-Raute, clean-modern, keine Schn&ouml;rkel), <b>B</b> = das Brett als flache Pr&auml;gung '
-             '(echte Anker-Geometrie, gro&szlig;er Mitte-Pott bricht die Symmetrie, keine Umfassungslinie), '
-             '<b>K</b> = Farbe raus aus dem Kreis (Rahmen-Signal). Alle deterministisch gezeichnet, Grund = ruhiger '
-             'Lack. Bei jedem Kandidaten: der ungeprimte Assoziations-Test. <b>Empfehlung: W2</b> - als einziger '
-             'liefert er &bdquo;Spielkarten + Mysterium&ldquo; zur&uuml;ck. <b>Abbruchregel (dokumentiert):</b> sitzt '
-             'auch diese Runde nicht, wandert das R&uuml;cken-Signet auf ein anderes Marken-Element (Monogramm, '
-             '1441-Relief) - der Mulden-Ring bleibt als spielbares Brett unschlagbar.</p><div class="gal">')
+    h = ['<div class="decide"><h3>REGISTRIERT &#10003; &middot; Kartenr&uuml;cken W2-FINAL - Asset-Freeze (dein Exekutions-Befehl)</h3>']
+    h.append('<p class="muted"><b>Alle drei Finalisierungs-Auflagen erf&uuml;llt:</b> '
+             '(1) <b>Punktsymmetrie</b> - die 8 Facetten sind konstruktiv gepaart (Facette i = i+4), Grund und Karte '
+             'mathematisch symmetrisiert; harter Beweis: <b>Pixel-Diff der 180-Grad-gedrehten Karte = [0, 0, 0]</b> - '
+             'kein Orientierungs-Leak (der E-Fehler ist strukturell unm&ouml;glich). '
+             '(2) <b>Monogramm crisp</b> - Vektor-Overlay (Didot), 4x supersampled, nie generiert. '
+             '(3) <b>Engine-Branding</b> - <code>App/CardBack.swift</code> rendert die Facetten direkt aus den '
+             'DesignTokens (Code = Source of Truth der Label-Farben); Print-Master + Provenance-Sidecar eingecheckt. '
+             '<b>Dokumentierte Restrisiken</b> (deine Kritik 2): Karo-As-/Luxusartikel-Assoziation und Wirkung bei '
+             'Spielgr&ouml;&szlig;e - harter Test am echten Tisch-Layout vor Release (Mini-Vorschau unten gibt den '
+             'ersten Eindruck).</p><div class="gal">')
+    img_final = emb(os.path.join(ROOT, "artifacts/sichtung1/back-W2.png"))
+    h.append(gal_item(img_final, "W2-FINAL &middot; Facetten-Siegel",
+                      "Punktsymmetrisch, crisp, eingefroren. Ungeprimt: Spielkarten, Luxus-Accessoire, Mysterium", True))
     for lb, title, desc, rec in WAPPEN_BACKS:
+        if lb == "W2":
+            continue
         img = emb(os.path.join(ROOT, f"artifacts/sichtung1/back-{lb}.png"))
-        h.append(gal_item(img, f"{lb} &middot; {title}", desc, rec,
-                          f"Antwort kopieren: {lb}", f"Kartenr&uuml;cken: {lb} - ausarbeiten."))
-    h.append('</div><div class="copy">'
-             '<button onclick="cp(\'Kartenr&uuml;cken: W2 - ausarbeiten (Facetten-Siegel).\')">W2 (Empfehlung)</button>'
-             '<button onclick="cp(\'Kartenr&uuml;cken: Abbruchregel ziehen - Signet auf Monogramm/1441-Relief, neue Runde.\')">Abbruchregel ziehen</button>'
-             '<button onclick="cp(\'Kartenr&uuml;cken: Mix aus __ und __ - [dein Wunsch].\')">Eigene Antwort (Vorlage)</button>'
-             '</div>')
-    h.append('<p class="muted" style="margin-top:14px"><b>Runde 2 (X, archiviert):</b> Rad-Gestalt in vier '
-             'Materialst&auml;rken - X1/X3 ungeprimt &bdquo;Rouletterad&ldquo;, X4 casino-frei durch Marken-Verzicht '
-             '(deine Gegenfallen-Analyse). <b>Runde 1 (A-H):</b> A verworfen (Casino-Read), FLUX-Entgiftungen '
-             'drifteten erneut in Slop. B-H bleiben theoretisch w&auml;hlbar:</p><div class="gal">')
-    for lb, title, desc, rec in SYNTH_BACKS + BACKS:
-        img = emb(os.path.join(ROOT, f"artifacts/sichtung1/back-{lb}.png"))
-        h.append(gal_item(img, f"{lb} &middot; {title}", desc, rec,
-                          f"Antwort kopieren: {lb}", f"Kartenr&uuml;cken: {lb} ({title}) - ausarbeiten."))
-    h.append('</div></div>')
+        h.append(gal_item(img, f"{lb} &middot; {title}", desc, False))
+    h.append('</div><p class="muted">Runde 1 (A-H) und Runde 2 (X1-X4) sind archiviert (git + Assets_Raw); '
+             'die Gestalt-Lesson (&bdquo;geschlossener Farbkreis = Rad&ldquo;) und die Abbruchregel stehen in '
+             'tasks/lessons.md.</p></div>')
 
     h.append('<div class="decide"><h3>REGISTRIERT &#10003; &middot; Charakterstil O (&Ouml;l/Gouache painterly) - mit deinen Auflagen</h3>')
     h.append('<p class="muted"><b>Entschieden (7.7. nachts):</b> O gewinnt - Menschlichkeit, Narben, Disco-Elysium-Vibe '

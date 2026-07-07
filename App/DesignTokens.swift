@@ -31,6 +31,9 @@ enum Tokens {
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
     static let p2PotSpring: Double = 0.35
 
+    // Phasen-Morph (§5b, Parameter-Lock §4): Ring/Tokens fliegen zwischen den Akten.
+    static let aktMorph: Double = 0.55
+
     // Phase-3-Timing (Parameter-Lock §4, konzept §6c - Tobsi-Entscheide).
     /// Kaskaden-Takt der Zwangskarten: konstant 180 ms/Karte (Zähl-Lesbarkeit vor Whoosh).
     static let p3CascadeStep: Double = 0.18

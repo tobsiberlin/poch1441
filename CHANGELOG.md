@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.4] - Kartenrücken W2 FINAL: Asset-Freeze (8.7.2026, nachts)
+
+### Entschieden (Tobsi-Exekutions-Befehl)
+- **W2 (Facetten-Siegel) ist der verbindliche Default-Kartenrücken.** Finalisierungs-Auflagen umgesetzt:
+  - **Punktsymmetrie:** 8 Facetten konstruktiv gepaart (i = i+4), Grund + Karte mathematisch symmetrisiert (Blend mit 180°-Rotation). Harter Beweis: Pixel-Diff Karte vs. gedrehte Karte = [0, 0, 0] - kein Orientierungs-Leak (E-Fehler strukturell unmöglich).
+  - **Monogramm crisp:** P·1441 als Vektor-Overlay (Didot), 4x supersampled - nie generiert.
+  - **Engine-Branding:** `App/CardBack.swift` rendert die Facetten-Raute direkt aus `DesignTokens` (Code = Source of Truth der Label-Farben), punktsymmetrisch, skalierbar, Monogramm ab Faktor 1.2.
+  - Provenance-Sidecar `assets/provenance/cardback-w2-default.md` (Konstruktion, KI-Anteil nur Grund-Textur mit Seed, menschliche Entscheidungskette, dokumentierte Restrisiken: Karo-As-Assoziation + Spielgrößen-Test am Tisch).
+- Cockpit verschlankt (Archiv-Galerien raus, Final + Beweis rein).
+
 ## [0.5.3] - Phase-3-Layout: Das Ketten-Rennen + Rücken-Runde 3 (8.7.2026, nachts)
 
 ### Hinzugefügt

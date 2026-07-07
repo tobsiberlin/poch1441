@@ -11,11 +11,11 @@
 
 ## Zum Entscheiden (Tobsi-Gate)
 
-- [ ] **AKTIV - Kartenrücken Runde 3 (W/B/K):** Rad-Gestalt aufgebrochen (Tobsi-Richtungen 7.7. nachts): W1/W2 Vertikal-Siegel, B1/B2 Brett-Prägung, K1 Kanten-Farbe - alle deterministisch, ungeprimt getestet. **Empfehlung W2** (einziges „Spielkarten + Mysterium"-Profil). Abbruchregel dokumentiert: sitzt nichts → Signet auf Monogramm/1441-Relief, Ring bleibt Brett. X-Runde archiviert (Gestalt-Lesson).
 - [ ] **Theme-Held A/B** - geparkt, live am Ende, wenn zwischen Premium-matt und Vivid flippbar.
 - [ ] **Geparkt - Garderobe-Frage:** Reviewer forderte periodenechte 1441-Kleidung; widerspricht Modern-first-Kanon. Default: zeitlos-modern. Nur bei Tobsi-Votum ändern.
 
 ### Entschieden 7.7. nachts
+- [x] **Kartenrücken: W2 FINAL (Asset-Freeze, Exekutions-Befehl).** Auflagen erfüllt: Punktsymmetrie mit Pixel-Beweis [0,0,0] (E-Fehler strukturell unmöglich), crisp Vektor-Monogramm (4x supersampled), Engine-Branding (`CardBack.swift` rendert aus DesignTokens), Provenance-Sidecar `assets/provenance/cardback-w2-default.md`. Restrisiken dokumentiert (Karo-As-Assoziation, Spielgröße → harter Tisch-Test vor Release). Runden 1-3 archiviert.
 - [x] **Charakter-Render-Stil: O (Öl/Gouache painterly)** - mit Auflagen: (1) Pflicht-Paintover pro finalem Porträt (Midjourney-Öl-Tell), (2) V bleibt Konsistenz-/Slop-Fallback bis painterly über 1 kompletten Charakter × alle Emotionen bewiesen (Konsistenztest VOR Vollproduktion, CLAUDE.md §5), (3) Anker/LoRA, (4) Stil-Test künftig mit kanon-konformer Garderobe (Confound raus), (5) Monogramm fliegt aus dem QA-Scoring.
 
 ## Als Nächstes (Loop, kein Gate)

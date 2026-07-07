@@ -149,3 +149,48 @@ if __name__ == "__main__":
     for label, art in jobs.items():
         comp.card_back(label, art=art)
         comp.card_back(label, mono=False, suffix="-qa", art=art)
+
+
+# ---- W2-FINAL (Tobsi-Auflagen 7.7. nachts) ---------------------------------
+def symmetrize(img):
+    return Image.blend(img, img.rotate(180), 0.5)
+
+
+def lozenge_final():
+    """W2-final: 8 Facetten PUNKTSYMMETRISCH (Facette i = Facette i+4 in Farbe) -
+    gedrehte Karte ist identisch, kein Orientierungs-Leak (E-Fehler behoben).
+    Größen-Bump gegen Spielgrößen-Verlorenheit (Kritik 2). Grund + Artwork werden
+    zusätzlich mathematisch symmetrisiert."""
+    img = overlay()
+    d = ImageDraw.Draw(img)
+    cx, cy = W * S // 2, H * S // 2
+    rw, rh = 200 * S, 280 * S
+    corners = [(cx, cy - rh), (cx + rw, cy), (cx, cy + rh), (cx - rw, cy)]
+    rim = []
+    for i in range(4):
+        a, b = corners[i], corners[(i + 1) % 4]
+        rim.append(a)
+        rim.append(((a[0] + b[0]) // 2, (a[1] + b[1]) // 2))
+
+    def to_center(p, t):
+        return (int(cx + (p[0] - cx) * t), int(cy + (p[1] - cy) * t))
+
+    inner = [to_center(p, 0.5) for p in rim]
+    cols = [GOLD, ROSE, SMARAGD, AMETHYST]  # i%4 -> punktsymmetrisch (i und i+4 gleich)
+    for i in range(8):
+        j = (i + 1) % 8
+        col = cols[i % 4]
+        d.polygon([rim[i], rim[j], inner[j], inner[i]], fill=col)
+        d.polygon([inner[i], inner[j], (cx, cy)], fill=darker(col, 0.55))
+    for i in range(8):
+        j = (i + 1) % 8
+        d.line([rim[i], rim[j]], fill=PLATIN, width=3 * S)
+        d.line([rim[i], inner[i]], fill=PLATIN, width=2 * S)
+        d.line([inner[i], inner[j]], fill=PLATIN, width=2 * S)
+    kr = 32 * S
+    d.polygon([(cx, cy - kr), (cx + kr, cy), (cx, cy + kr), (cx - kr, cy)],
+              fill=(24, 21, 27), outline=PLATIN, width=3 * S)
+    base = symmetrize(ground())
+    small = img.resize((W, H), Image.LANCZOS)
+    base.paste(small, (0, 0), small)
+    return symmetrize(base)

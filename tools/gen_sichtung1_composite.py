@@ -134,7 +134,7 @@ def synth_artwork(label):
     return ground
 
 
-def card_back(label, mono=True, suffix="", art=None):
+def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False):
     if art is None:
         if label == "G":
             art = g_artwork()
@@ -171,11 +171,21 @@ def card_back(label, mono=True, suffix="", art=None):
     # QA-Fassungen (mono=False) scoren ohne Overlay - das Monogramm ist austauschbar
     # und gehoert nicht in die Artwork-Bewertung (Tobsi-Feedback 7.7.).
     if mono:
-        layer = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+        SS = 4  # supersampled - nie matschig (Tobsi-Auflage 7.7.: Monogramm immer crisp)
+        layer = Image.new("RGBA", (cw * SS, ch * SS), (0, 0, 0, 0))
         md = ImageDraw.Draw(layer)
-        md.text((inset + 38, inset + 30), "P · 1441", font=font(58), fill=(224, 218, 204, 240))
+        md.text(((inset + 38) * SS, (inset + 30) * SS), "P · 1441",
+                font=font(58 * SS), fill=(224, 218, 204, 240))
+        layer = layer.resize((cw, ch), Image.LANCZOS)
         card.paste(layer, (0, 0), layer)
         card.paste(layer.rotate(180), (0, 0), layer.rotate(180))
+
+    if sym:
+        # Punktsymmetrie mathematisch erzwungen (Tobsi-Auflage 7.7.: Karte gedreht =
+        # identisch, kein Orientierungs-Leak). Blend mit der 180-Grad-Rotation.
+        card = Image.blend(card, card.rotate(180), 0.5)
+    if save_card:
+        card.save(OUT / f"card-{label}{suffix}.png")
 
     # Präsentations-Tile mit Schatten + Label
     tw, th = 1240, 1720
