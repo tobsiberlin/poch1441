@@ -21,6 +21,7 @@
 ## Als Nächstes (Loop, kein Gate)
 
 - [ ] **JETZT: Clean Karten-Vorderseiten** (code-gerendert, Premium-Material statt weißer Platzhalter - größter taste-gate-Befund) + `CardBack` im Deal einsetzen.
+- [ ] **Umsetzungs-To-dos Rücken (Tobsi 8.7., kein Geschmack):** (a) Print-Master-Monogramm bei Druckdaten-Abnahme auf Vektor-Schärfe prüfen (App = SwiftUI-Text, immer crisp; Garbling nur in Raster-Mockups), (b) Fächer-Kontaktschatten am echten SpriteKit-Tisch mit Kerzenlicht-Layer verifizieren (Schatten muss mit Lichtstimmung spielen, nicht dagegen).
 - [ ] Game-Feel-Pass: Deal/Meld-Juice (40 ms), „Der Poch"-Tischschlag, Ketten-Kaskade, Tells - unter Parameter-Lock (§4). Dazu P2-QA-Befund: Slider generisch, Limit-Wand nur Text → Wand als physisches Objekt gestalten.
 - [ ] Lokalisierungs-Katalog (`Localizable.xcstrings`) anlegen, bevor weitere UI-Strings wachsen (§8-Schuld aus dem Fundament).
 - [ ] Bot-Interplay am Gerät durchspielen (P2-Flow läuft headless ungetestet).

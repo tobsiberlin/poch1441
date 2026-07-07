@@ -21,7 +21,9 @@ JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hn
          "(Befunde f&uuml;r den Feel-Pass notiert). Das neue taste-gate lief als Erst-Check: sein FAIL zeigt exakt "
          "die bekannten Platzhalter - die <b>clean Karten-Vorderseiten sind gerade im Bau</b> (Elfenbein-Karton, "
          "Serif-Indizes, punktsymmetrischer Zweit-Index). Deine <b>F&auml;cher-Wette ist entschieden und umgesetzt</b> "
-         "(Details unten). F&uuml;r dich zu tun: nur noch das Monogramm-Urteil (B empfohlen).")
+         "(Details unten). Deine zwei Umsetzungs-To-dos sind verankert (Vektor-Monogramm in der App immer "
+         "crisp, Schatten-x-Kerzenlicht-Check am SpriteKit-Tisch im Game-Feel-Gate). "
+         "F&uuml;r dich zu tun: Monogramm-Urteil (B) + Kessel-Runde oben.")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
@@ -131,7 +133,39 @@ def gal_item(img_b64, title, desc, rec, button_txt=None, copy_txt=None):
             f'<div class="minirow">Spielgr&ouml;&szlig;e: <span class="minislot"></span></div>{btn}</div>')
 
 def build_decisions():
-    h = ['<div class="decide"><h3>DEINE NACHPR&Uuml;FUNG &middot; Monogramm-Konstellationen im F&auml;cher (8.7. sp&auml;t)</h3>']
+    h = []
+    h.append('<div class="decide"><h3>NEU &middot; Kessel-Runde - Zentralmotive mit Poch-Kessel-Anklang (dein Zuruf, 8.7. sp&auml;t)</h3>')
+    h.append('<p class="muted">Rezept fix (Schatten + Graphit-Kante + 1441-Signet), nur das Motiv variiert - '
+             'stilisiert, punktsymmetrisch konstruiert, Gestalt-Regel beachtet. Ungeprimte Assoziationen: '
+             '<b>KA</b> = Tarot/Geheimgesellschaft (Mysterium-Nachbarschaft, kein Kessel-Read), '
+             '<b>KB</b> = SPIELKARTE + Klangbild (bestes Profil der Runde), '
+             '<b>KC</b> = Spielkarte, aber CASINO-Setting kehrt zur&uuml;ck - raus. '
+             '<b>Ehrliches Fazit:</b> keiner schl&auml;gt W2s Profil (&bdquo;Spielkarten + Mysterium&ldquo;) - '
+             'die Kessel-Abstraktion verliert den Kessel oder holt das Casino zur&uuml;ck. '
+             '<b>Empfehlung:</b> Default bleibt W2; KA/KB wandern als Kandidaten in den '
+             'Unlock-Deck-Pool (&sect;7.2 braucht ohnehin mehrere R&uuml;cken).</p><div class="gal">')
+    KESSEL = [
+        ("back-KA.png", "KA &middot; Kessel-Querschnitt gespiegelt", "Ungeprimt: Tarot, Sci-Fi, Geheimgesellschaft", False),
+        ("back-KB.png", "KB &middot; angeschnittene Mulden-B&ouml;gen", "Ungeprimt: Spielkarte, Klangbild - bestes Profil", False),
+        ("back-KC.png", "KC &middot; vertikale Mulden-Pr&auml;gung", "Casino-R&uuml;ckfall im ungeprimten Test - raus", False),
+        ("faecher-kessel-KA.png", "KA im Schatten-F&auml;cher", "", False),
+        ("faecher-kessel-KB.png", "KB im Schatten-F&auml;cher", "", False),
+        ("faecher-kessel-W2.png", "Referenz: W2 im Schatten-F&auml;cher", "Der Freeze - weiter die Messlatte", True),
+    ]
+    for fname, title, desc, rec in KESSEL:
+        img = emb(os.path.join(ROOT, f"artifacts/sichtung1/{fname}"), 900)
+        rechtml = ' <span class="rec">Messlatte</span>' if rec else ""
+        wide = ' style="grid-column:1/-1"' if fname.startswith("faecher") else ""
+        h.append(f'<div class="g"{wide}><img class="big" onclick="zm(this)" '
+                 f'src="data:image/png;base64,{img}" alt="{title}">'
+                 f'<div class="cap"><b>{title}</b>{rechtml}<br>{desc}</div></div>')
+    h.append('</div><div class="copy">'
+             '<button onclick="cp(\'Kessel-Runde: Default bleibt W2; KA/KB in den Unlock-Pool.\')">W2 bleibt, KA/KB in den Pool (Empfehlung)</button>'
+             '<button onclick="cp(\'Kessel-Runde: [KA/KB] als neuer Default ausarbeiten.\')">Kessel-Motiv als Default</button>'
+             '<button onclick="cp(\'Kessel-Runde: neue Richtung - [beschreiben].\')">Neue Richtung</button>'
+             '</div></div>')
+
+    h.append('<div class="decide"><h3>DEINE NACHPR&Uuml;FUNG &middot; Monogramm-Konstellationen im F&auml;cher (8.7. sp&auml;t)</h3>')
     h.append('<p class="muted">Dein Auftrag: F&auml;cher-Test der Konstellationen <b>P&middot;1441 vs. 1441</b> und '
              '<b>einzeln vs. Paar</b>. Wichtig: im F&auml;cher zeigt jede &uuml;berlappte Karte ihre linke obere Ecke - '
              'das Monogramm wiederholt sich 5x. Befund (Gemini-Ranking D &gt; B &gt; C &gt; A + eigener Zoom-Blick): '

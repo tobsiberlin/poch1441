@@ -43,7 +43,7 @@ struct Phase2View: View {
             ZStack {
                 ringEcho(cx: cx, cy: cy + 8)
                 pochPot.position(x: cx, y: cy + 26)
-                token(seat: 2).position(x: cx, y: cy - 132)
+                token(seat: 2).position(x: cx, y: cy - 118)
                 token(seat: 1).position(x: cx - 122, y: cy - 26)
                 token(seat: 3).position(x: cx + 122, y: cy - 26)
             }
@@ -108,8 +108,17 @@ struct Phase2View: View {
         let isTurn = game.turnIndex == seat && game.stage == .betting
         return VStack(spacing: 4) {
             ZStack {
+                // Verdeckte Hand als Mini-Fächer (§6b Bluff-Sprache) - lugt hinter dem
+                // Token hervor. Kontaktschatten = Render-Eigenschaft (Fächer-Wette 8.7.),
+                // nie ins Asset eingebacken.
+                ForEach(-1...1, id: \.self) { i in
+                    CardBack(scale: 0.42)
+                        .rotationEffect(.degrees(Double(i) * 14), anchor: .bottom)
+                        .offset(x: CGFloat(i) * 7, y: -30)
+                        .shadow(color: .black.opacity(0.45), radius: 3, x: -2, y: 2)
+                }
                 Circle()
-                    .fill(.white.opacity(0.07))
+                    .fill(Color(hex: 0x201D24))
                     .overlay(Circle().strokeBorder(
                         isTurn ? Tokens.amethystVivid : Tokens.jewelGold.opacity(0.35),
                         lineWidth: isTurn ? 2 : 1))
