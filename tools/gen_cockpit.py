@@ -19,8 +19,9 @@ JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hn
          "Ring und w&auml;chst zum Pott (Signatur-Flug &sect;5b), die Mulden konvergieren zu Echo-Dots. "
          "Bewegungs-QA vor dem Commit: Morph 1 = Kontinuit&auml;t 9/10 + Premium 9/10, Morph 2 = 8/10 + 7/10 "
          "(Befunde f&uuml;r den Feel-Pass notiert). Das neue taste-gate lief als Erst-Check: sein FAIL zeigt exakt "
-         "die bekannten Platzhalter (wei&szlig;e Karten, generische Tokens) - <b>darum jetzt: clean "
-         "Karten-Vorderseiten</b> als n&auml;chste Iteration. F&uuml;r dich zu tun: nichts.")
+         "die bekannten Platzhalter (wei&szlig;e Karten, generische Tokens) - <b>darum als N&auml;chstes: clean "
+         "Karten-Vorderseiten</b>. Frisch eingetroffen: dein <b>Monogramm-F&auml;cher-Test</b> liegt als oberster "
+         "Block bereit (Empfehlung: B best&auml;tigen). F&uuml;r dich zu tun: nur das Monogramm-Urteil.")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
@@ -129,7 +130,28 @@ def gal_item(img_b64, title, desc, rec, button_txt=None, copy_txt=None):
             f'<div class="minirow">Spielgr&ouml;&szlig;e: <span class="minislot"></span></div>{btn}</div>')
 
 def build_decisions():
-    h = ['<div class="decide"><h3>REGISTRIERT &#10003; &middot; Kartenr&uuml;cken W2-FINAL - Asset-Freeze (dein Exekutions-Befehl)</h3>']
+    h = ['<div class="decide"><h3>DEINE NACHPR&Uuml;FUNG &middot; Monogramm-Konstellationen im F&auml;cher (8.7. sp&auml;t)</h3>']
+    h.append('<p class="muted">Dein Auftrag: F&auml;cher-Test der Konstellationen <b>P&middot;1441 vs. 1441</b> und '
+             '<b>einzeln vs. Paar</b>. Wichtig: im F&auml;cher zeigt jede &uuml;berlappte Karte ihre linke obere Ecke - '
+             'das Monogramm wiederholt sich 5x. Befund (Gemini-Ranking D &gt; B &gt; C &gt; A + eigener Zoom-Blick): '
+             '<b>1441 schl&auml;gt P&middot;1441 klar</b> (die P-Fassungen sind im F&auml;cher die geschw&auml;tzigsten); '
+             '<b>einzeln (D) vs. Paar (B) ist im F&auml;cher praktisch identisch</b>, weil das zweite Signet unten '
+             'rechts in der &Uuml;berlappung verschwindet. <b>Empfehlung: B behalten (1441 als Paar, der aktuelle '
+             'Final)</b> - gleiche Ruhe wie D, aber der Print-Symmetrie-Beweis bleibt intakt (ein einzelnes Signet '
+             'w&auml;re auf dem physischen Deck der Orientierungs-Leak; digital w&auml;re es egal, weil die App '
+             'Karten nie gedreht rendert - zwei Master widerspr&auml;chen aber dem Ein-Design-Freeze).</p><div class="gal">')
+    fan_img = emb(os.path.join(ROOT, "artifacts/sichtung1/faecher-monogramm.png"), 700)
+    h.append(f'<div class="g" style="grid-column:1/-1"><img class="big" onclick="zm(this)" '
+             f'src="data:image/png;base64,{fan_img}" alt="Faecher-Matrix">'
+             f'<div class="cap"><b>Die 4er-Matrix</b> - A: P&middot;1441 Paar &middot; B: 1441 Paar (Final) &middot; '
+             f'C: P&middot;1441 einzeln &middot; D: 1441 einzeln. Klick = Vollbild.</div></div>')
+    h.append('</div><div class="copy">'
+             '<button onclick="cp(\'Monogramm: B best&auml;tigt - 1441 als Paar bleibt der Final.\')">B best&auml;tigen (Empfehlung)</button>'
+             '<button onclick="cp(\'Monogramm: D - 1441 einzeln, nur digital; Print beh&auml;lt das Paar.\')">D digital / B print</button>'
+             '<button onclick="cp(\'Monogramm: anders - [beschreiben].\')">Eigene Antwort</button>'
+             '</div></div>')
+
+    h.append('<div class="decide"><h3>REGISTRIERT &#10003; &middot; Kartenr&uuml;cken W2-FINAL - Asset-Freeze (dein Exekutions-Befehl)</h3>')
     h.append('<p class="muted"><b>Alle drei Finalisierungs-Auflagen erf&uuml;llt:</b> '
              '(1) <b>Punktsymmetrie</b> - die 8 Facetten sind konstruktiv gepaart (Facette i = i+4), Grund und Karte '
              'mathematisch symmetrisiert; harter Beweis: <b>Pixel-Diff der 180-Grad-gedrehten Karte = [0, 0, 0]</b> - '

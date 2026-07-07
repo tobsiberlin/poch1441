@@ -135,7 +135,7 @@ def synth_artwork(label):
 
 
 def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False,
-              mono_style="1441"):
+              mono_style="1441", mono_pair=True):
     if art is None:
         if label == "G":
             art = g_artwork()
@@ -186,7 +186,9 @@ def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False,
             md.text((x, y + 4 * SS), "1441", font=font(50 * SS), fill=(224, 218, 204, 210))
         layer = layer.resize((cw, ch), Image.LANCZOS)
         card.paste(layer, (0, 0), layer)
-        card.paste(layer.rotate(180), (0, 0), layer.rotate(180))
+        if mono_pair:  # gespiegeltes Paar = Pflicht fuer Punktsymmetrie (Print);
+            # einzeln nur digital vertretbar (App rendert nie gedreht)
+            card.paste(layer.rotate(180), (0, 0), layer.rotate(180))
 
     if sym:
         # Punktsymmetrie mathematisch erzwungen (Tobsi-Auflage 7.7.: Karte gedreht =
