@@ -19,9 +19,9 @@ JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hn
          "Ring und w&auml;chst zum Pott (Signatur-Flug &sect;5b), die Mulden konvergieren zu Echo-Dots. "
          "Bewegungs-QA vor dem Commit: Morph 1 = Kontinuit&auml;t 9/10 + Premium 9/10, Morph 2 = 8/10 + 7/10 "
          "(Befunde f&uuml;r den Feel-Pass notiert). Das neue taste-gate lief als Erst-Check: sein FAIL zeigt exakt "
-         "die bekannten Platzhalter (wei&szlig;e Karten, generische Tokens) - <b>darum als N&auml;chstes: clean "
-         "Karten-Vorderseiten</b>. Frisch eingetroffen: dein <b>Monogramm-F&auml;cher-Test</b> liegt als oberster "
-         "Block bereit (Empfehlung: B best&auml;tigen). F&uuml;r dich zu tun: nur das Monogramm-Urteil.")
+         "die bekannten Platzhalter - die <b>clean Karten-Vorderseiten sind gerade im Bau</b> (Elfenbein-Karton, "
+         "Serif-Indizes, punktsymmetrischer Zweit-Index). Deine <b>F&auml;cher-Wette ist entschieden und umgesetzt</b> "
+         "(Details unten). F&uuml;r dich zu tun: nur noch das Monogramm-Urteil (B empfohlen).")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
@@ -47,6 +47,7 @@ IN_ARBEIT = [
 ]
 
 REGISTRIERT = [
+    ("8.7.", "Fächer-Wette (Kanten-Mechanik)", "Tobsis Hypothese gewinnt: Kontaktschatten + Graphit-Hairline schlägt Farbrand (WK2 verworfen, letzter Platz). W2-Facette bleibt Freeze; Graphit-Kante in Master + CardBack.swift, Schatten = Render-Eigenschaft."),
     ("7.7.", "Kartenrücken FINAL", "W2 Facetten-Siegel - Asset-Freeze per Exekutions-Befehl. Auflagen erfüllt: Punktsymmetrie (Pixel-Beweis 0/0/0), crisp Vektor-Monogramm, Engine-Branding (CardBack.swift aus DesignTokens), Provenance-Sidecar. Restrisiken (Karo-As, Spielgröße) dokumentiert -> Tisch-Test."),
     ("7.7.", "Rücken-Runde X (Synthese)", "VERWORFEN (deine Gestalt-Analyse): geschlossener Farbkreis = Rad, egal welches Material; X4 = Marke wegoptimiert. Runde 3 (W/B/K) brachte W2."),
     ("7.7.", "Charakter-Render-Stil", "O (Öl/Gouache painterly) - MIT Auflagen: Pflicht-Paintover pro Porträt, V bleibt Konsistenz-Fallback bis painterly über 1 Charakter x alle Emotionen bewiesen, Anker/LoRA. Garderobe-Test künftig entkoppelt vom Stil-Test."),
@@ -159,26 +160,30 @@ def build_decisions():
              '<button onclick="cp(\'Monogramm: anders - [beschreiben].\')">Eigene Antwort</button>'
              '</div></div>')
 
-    h.append('<div class="decide"><h3>NEU &middot; Deine Kombi-Anfrage: Facette + K1-Rahmen (einzeln und aufgef&auml;chert)</h3>')
-    h.append('<p class="muted"><b>WK2</b> = W2-Facetten-Raute + Juwelen-Kantenrahmen, <b>WK1</b> = W1-Quadranten + '
-             'Rahmen. R&auml;te-Befund WK2-F&auml;cher: Premium 9, Deck-Echtheit 9 - der Rahmen HILFT der '
-             'Karten-Trennung (&bdquo;Klarheit statt Lautst&auml;rke&ldquo;, F&auml;cher-Ruhe 7). '
-             '<b>Ehrlicher Vorbehalt:</b> K1-Rahmen (4 Seitenfarben) und W1-Quadranten sind noch NICHT '
-             'punktsymmetrisch - w&uuml;rde eine Kombi den Freeze abl&ouml;sen, bekommt sie erst die '
-             'Paarungs-Behandlung + neuen Pixel-Beweis (wie W2-Final).</p><div class="gal">')
-    KOMBIS = [
-        ("back-WK2.png", "WK2 einzeln", "W2-Facette + Juwelen-Rahmen", False),
-        ("faecher-WK2.png", "WK2 im F&auml;cher", "Premium 9 &middot; Deck-Echtheit 9 &middot; Rahmen trennt die Karten", True),
-        ("back-WK1.png", "WK1 einzeln", "W1-Quadranten + Rahmen - ruhiger, aber Karo-n&auml;her + asymmetrisch", False),
-        ("faecher-WK1.png", "WK1 im F&auml;cher", "Zum Vergleich", False),
+    h.append('<div class="decide"><h3>WETTE ENTSCHIEDEN &#10003; &middot; Kontaktschatten + Graphit-Kante schl&auml;gt alles (8.7. sp&auml;t)</h3>')
+    h.append('<p class="muted"><b>Deine Hypothese hat gewonnen:</b> Ranking <b>4 &gt; 3 &gt; 1 &gt; 2</b> - '
+             'Kontaktschatten + neutrale Graphit-Hairline trennt die Karten am besten UND sieht am teuersten aus; '
+             'der Juwelen-Farbrand (WK2) landet auf dem letzten Platz und ist VERWORFEN. Bonus-Befund aus Reihe 4: '
+             'die <b>W2-Facetten-Raute tr&auml;gt deine Mechanik noch besser als die W1-Quadranten</b> - der Freeze '
+             'bleibt also bestehen. Umgesetzt: Graphit-Hairline jetzt in Print-Master + CardBack.swift '
+             '(Symmetrie-Beweis erneut [0, 0, 0]); der Kontaktschatten wird Render-Eigenschaft der '
+             'F&auml;cher-Darstellung im Spiel (nie ins Asset eingebacken - Lesbarkeits-Licht-Regel).</p><div class="gal">')
+    WETTE = [
+        ("faecher-wette-R1.png", "1 &middot; reines W2", "verschwimmt - dein Befund best&auml;tigt", False),
+        ("faecher-wette-R2.png", "2 &middot; WK2 Farbrand", "trennt farbig, aber Label-Rauschen - letzter Platz, verworfen", False),
+        ("faecher-wette-R3.png", "3 &middot; W1 + Schatten + Graphit", "dein Kandidat - Platz 2", False),
+        ("faecher-wette-R4.png", "4 &middot; W2 + Schatten + Graphit", "SIEGER - deine Mechanik auf der Freeze-Raute", True),
     ]
-    for fname, title, desc, rec in KOMBIS:
+    for fname, title, desc, rec in WETTE:
         img = emb(os.path.join(ROOT, f"artifacts/sichtung1/{fname}"), 900)
-        rechtml = ' <span class="rec">st&auml;rkster Herausforderer</span>' if rec else ""
-        wide = ' style="grid-column:1/-1"' if fname.startswith("faecher") else ""
-        h.append(f'<div class="g"{wide}><img class="big" onclick="zm(this)" '
+        rechtml = ' <span class="rec">Sieger</span>' if rec else ""
+        h.append(f'<div class="g" style="grid-column:1/-1"><img class="big" onclick="zm(this)" '
                  f'src="data:image/png;base64,{img}" alt="{title}">'
                  f'<div class="cap"><b>{title}</b>{rechtml}<br>{desc}</div></div>')
+    h.append('</div><div class="copy">'
+             '<button onclick="cp(\'Wette-Ergebnis best&auml;tigt - W2 + Graphit-Kante + Render-Schatten ist final.\')">Ergebnis best&auml;tigen</button>'
+             '<button onclick="cp(\'R&uuml;cken-Kante: anders - [beschreiben].\')">Eigene Antwort</button>'
+             '</div></div>')
     h.append('</div><div class="copy">'
              '<button onclick="cp(\'R&uuml;cken: WK2 - Rahmen kommt dazu; mit Symmetrie-Paarung ausarbeiten und neu beweisen.\')">WK2 ausarbeiten</button>'
              '<button onclick="cp(\'R&uuml;cken: W2 bleibt rahmenlos - Freeze unver&auml;ndert.\')">W2 rahmenlos bleibt</button>'

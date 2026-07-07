@@ -22,8 +22,11 @@ struct CardBack: View {
             if scale >= 1.2 { monograms }
         }
         .frame(width: 52 * scale, height: 74 * scale)
+        // Graphit-Hairline (Fächer-Wette 8.7.): trennt überlappte Rücken ohne
+        // Farbrauschen. Im Fächer-Kontext zusätzlich Kontaktschatten rendern
+        // (Render-Eigenschaft, nicht Teil des Assets - Game-Feel-Pass).
         .overlay(RoundedRectangle(cornerRadius: 8 * scale)
-            .strokeBorder(.white.opacity(0.14), lineWidth: 0.5))
+            .strokeBorder(Color(hex: 0x626268).opacity(0.9), lineWidth: 0.6 * scale))
     }
 
     private var facetLozenge: some View {

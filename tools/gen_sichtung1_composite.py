@@ -135,7 +135,7 @@ def synth_artwork(label):
 
 
 def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False,
-              mono_style="1441", mono_pair=True):
+              mono_style="1441", mono_pair=True, edge=None):
     if art is None:
         if label == "G":
             art = g_artwork()
@@ -190,6 +190,10 @@ def card_back(label, mono=True, suffix="", art=None, save_card=False, sym=False,
             # einzeln nur digital vertretbar (App rendert nie gedreht)
             card.paste(layer.rotate(180), (0, 0), layer.rotate(180))
 
+    if edge:
+        # Graphit-Hairline auf der Kartenkante (Fächer-Wette 8.7.: Trennung ohne
+        # Farbrauschen; uniform = punktsymmetrisch unkritisch)
+        d.rounded_rectangle([1, 1, cw - 2, ch - 2], 56, outline=edge, width=4)
     if sym:
         # Punktsymmetrie mathematisch erzwungen (Tobsi-Auflage 7.7.: Karte gedreht =
         # identisch, kein Orientierungs-Leak). Blend mit der 180-Grad-Rotation.

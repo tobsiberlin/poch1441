@@ -46,3 +46,14 @@
   („1441" ist gedreht nicht „1441") - das Paar ist der Preis des Orientierungs-Beweises.
 - Voller Name „Poch 1441" lebt überall, wo die Marke neu gelernt wird (App-Icon,
   Splash, Store, Onboarding) - nie auf dem Rücken.
+
+## Fächer-Wette entschieden (8.7.2026 spät, Tobsi-Hypothese bestätigt)
+- Vergleich der Trennungs-Mechanismen im Fächer: rahmenlos / Juwelen-Farbrand (WK2) /
+  Kontaktschatten + Graphit-Hairline. **Ranking 4 > 3 > 1 > 2**: Schatten + Graphit
+  gewinnt klar (Tobsis Mechanik), der Farbrand landet auf dem letzten Platz und ist
+  VERWORFEN. Bonus-Befund: die W2-FACETTEN-Raute trägt die Mechanik besser als die
+  W1-Quadranten - der Freeze bleibt bestehen.
+- Konsequenz: **Graphit-Hairline (98,98,104) auf der Kartenkante** in Print-Master
+  UND CardBack.swift (uniform = punktsymmetrisch unkritisch, Beweis erneut [0,0,0]);
+  der **Kontaktschatten ist Render-Eigenschaft** der Fächer-Darstellung im Spiel
+  (Game-Feel-Pass), nie ins Asset eingebacken (Lesbarkeits-Licht-Regel §5).
