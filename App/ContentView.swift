@@ -83,6 +83,15 @@ struct ContentView: View {
                     game.humanLead(card)
                 }
             }
+            // -pochDemo: automatisches Eröffnungs-Gebot für die Tischschlag-QA
+            if args.contains("-pochDemo") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.5))
+                    if let legal = game.humanLegal, let open = legal.openRange {
+                        game.humanOpen(min(3, open.upperBound))
+                    }
+                }
+            }
             // -morphDemo: automatischer Akt-Durchlauf für die Bewegungs-QA (Video ohne Tap)
             if args.contains("-morphDemo") {
                 Task { @MainActor in

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.9] - "Der Poch": Der Tischschlag (§6b) - 8.7.2026
+
+### Hinzugefügt
+- Signaturgeste: bei jedem Eröffnen/Erhöhen (Mensch UND Bot) zittert die Tisch-Welt (Duell-Bühne) für 300 ms mit 4-pt-Amplitude - das HUD bleibt ruhig (GeometryEffect, nur Offset, kein Layout-Thrashing §9). Trigger `pochShock` in GameState, gekoppelte .heavy-Haptik; reduceMotion nullt die Amplitude.
+- Gebots-Gewicht: Chip-Stapel wächst sichtbar mit dem Slider in der Bietzone (max. 9 Chips, Feder-Animation).
+- DEBUG `-pochDemo` für Tischschlag-QA ohne UI-Tap.
+
+### Geprüft
+- Deterministischer Bewegungs-Beweis statt Judge: Frame-Diff-Kurve der Duell-Bühne zeigt den Schlag-Burst (0,57/1,17/0,66/0,70 über ~300 ms = pochShake-Token) gegen ~0,1 Grundrauschen; Kontaktbogen bestätigt Chip-Stapel, Pott-Roll 0->3 und ruhiges HUD.
+
+
 ## [0.5.8] - Der Melde-Strom (§6a b) - 8.7.2026
 
 ### Hinzugefügt

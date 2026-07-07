@@ -30,7 +30,7 @@ STRANDS = [
     ("done", "Design-Kanon", "konzept.md - Kern-Trias, Farbhierarchie, Meta", 95),
     ("work", "Fundament / UI", "Ring, Themes, Material + Phase-2-Layout (Pochen)", 58),
     ("work", "Kunst / Assets", "Kartenrücken W2 final (Freeze); Charakterstil O registriert", 52),
-    ("work", "Game-Feel / Animation", "Morph + P1-Juice + P2-Material stehen; Poch-Schlag folgt", 42),
+    ("work", "Game-Feel / Animation", "Morph, P1-Juice, Poch-Tischschlag, P2-Material stehen", 48),
     ("plan", "Sound / Haptik", "-", 0),
     ("plan", "Meta-Progression", "Design in §7, Code = 0%", 8),
     ("plan", "Monetarisierung", "StoreKit-2-Unlock 4,99 €", 0),

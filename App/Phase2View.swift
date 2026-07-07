@@ -15,13 +15,15 @@ struct Phase2View: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var bid = 1.0
-    /// Zählt Poch-Schläge des Spielers für die .heavy-Haptik (§6b Signaturgeste;
-    /// Tischschlag-Animation folgt im Game-Feel-Pass unter Parameter-Lock).
-    @State private var pochBeat = 0
 
     var body: some View {
         VStack(spacing: 0) {
             duelArea
+                // "Der Poch" (§6b): die Tisch-Welt zittert beim Schlag, das HUD bleibt ruhig
+                .modifier(TableShake(
+                    amplitude: reduceMotion ? 0 : Tokens.pochShakeAmp,
+                    animatableData: CGFloat(game.pochShock)))
+                .animation(.linear(duration: Tokens.pochShake), value: game.pochShock)
             Spacer(minLength: 6)
             handView
             controls
@@ -30,7 +32,7 @@ struct Phase2View: View {
         }
         .onAppear(perform: resetBid)
         .onChange(of: game.turnIndex) { resetBid() }
-        .sensoryFeedback(.impact(weight: .heavy), trigger: pochBeat)
+        .sensoryFeedback(.impact(weight: .heavy), trigger: game.pochShock)
     }
 
     // MARK: - Duell-Bühne (Kardinalpunkte um den Poch-Pott)
@@ -214,12 +216,10 @@ struct Phase2View: View {
                 }
                 if let open = legal.openRange {
                     actionButton("Pochen \(Int(bid))!", style: .amethyst) {
-                        pochBeat += 1
                         game.humanOpen(Int(bid).clamped(to: open))
                     }
                 } else if let raise = legal.raiseRange {
                     actionButton("Erhöhen auf \(Int(bid))", style: .amethyst) {
-                        pochBeat += 1
                         game.humanRaise(to: Int(bid).clamped(to: raise))
                     }
                 }
@@ -234,6 +234,8 @@ struct Phase2View: View {
         let atWall = Int(bid) >= range.upperBound
         return VStack(spacing: 5) {
             HStack(spacing: 10) {
+                // Gewicht des Gebots: Chips stapeln sich sichtbar in der Bietzone (§6b)
+                chipStack(count: Int(bid))
                 Text("\(Int(bid))")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Tokens.amethystVivid)
@@ -335,10 +337,40 @@ struct Phase2View: View {
         .buttonStyle(.plain)
     }
 
+    /// Chip-Stapel in der Bietzone: wächst mit dem Gebot (max. 9 sichtbar).
+    private func chipStack(count: Int) -> some View {
+        let shown = min(max(count, 1), 9)
+        return ZStack(alignment: .bottom) {
+            ForEach(0..<shown, id: \.self) { i in
+                Capsule()
+                    .fill(LinearGradient(colors: [Tokens.amethystVivid.opacity(0.85),
+                                                  Tokens.jewelAmethyst],
+                                         startPoint: .top, endPoint: .bottom))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+                    .frame(width: 20, height: 6)
+                    .offset(y: CGFloat(-i) * 4)
+            }
+        }
+        .frame(width: 22, height: 44, alignment: .bottom)
+        .animation(.spring(duration: 0.2), value: shown)
+    }
+
     private func resetBid() {
         if let legal = game.humanLegal, let range = legal.openRange ?? legal.raiseRange {
             bid = Double(range.lowerBound)
         }
+    }
+}
+
+/// Tisch-Zittern des Poch-Schlags: N volle Oszillationen pro Trigger, endet exakt
+/// bei 0 (Integer-Zustände sind Ruhelage) - nur Offset, kein Layout-Thrashing (§9).
+private struct TableShake: GeometryEffect {
+    var amplitude: Double
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let x = amplitude * sin(Double(animatableData) * .pi * 6)
+        return ProjectionTransform(CGAffineTransform(translationX: x, y: 0))
     }
 }
 

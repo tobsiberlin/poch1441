@@ -130,11 +130,17 @@ final class GameState {
     func humanCall() { applyHuman(.call) }
     func humanRaise(to amount: Int) { applyHuman(.raise(to: amount)) }
 
+    /// "Der Poch" (§6b): jeder Tischschlag (Eröffnen/Erhöhen, Mensch wie Bot)
+    /// triggert Zittern der Tisch-Welt + .heavy-Haptik.
+    private(set) var pochShock = 0
+
     private func applyHuman(_ action: BettingPhase.Action) {
         guard stage == .betting, betting.turn == 0 else { return }
         do {
             try round.applyBet(action, by: 0)
             seatActions[0] = Self.display(action)
+            if case .open = action { pochShock += 1 }
+            if case .raise = action { pochShock += 1 }
             runBotsIfNeeded()
         } catch {
             // UI bezieht Grenzen aus legalActions - hier zu landen ist ein Programmierfehler.
@@ -163,6 +169,8 @@ final class GameState {
             do {
                 try round.applyBet(action, by: seat)
                 seatActions[seat] = Self.display(action)
+                if case .open = action { pochShock += 1 }
+                if case .raise = action { pochShock += 1 }
             } catch {
                 log.error("Illegale Bot-Aktion Sitz \(seat): \(String(describing: error))")
                 return

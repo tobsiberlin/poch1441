@@ -47,6 +47,12 @@ enum Tokens {
     static let hapticCadence: Double = 0.09
     /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
     static let p1MeldStep: Double = 0.55
+
+    // "Der Poch" (§6b Signaturgeste, Parameter-Lock): Tischschlag.
+    /// Dauer des Tisch-Zitterns (nur Tisch-Welt, HUD ruhig).
+    static let pochShake: Double = 0.30
+    /// Amplitude des Zitterns in Punkten (reduceMotion: 0).
+    static let pochShakeAmp: Double = 4
     /// Flugdauer der Münzen von der Mulde zum Spieler.
     static let p1CoinFlight: Double = 0.4
 
