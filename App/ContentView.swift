@@ -23,6 +23,9 @@ struct ContentView: View {
     /// Ab Start verfügbar; DEBUG-Launch-Arg "-neon YES", später Settings-Toggle.
     @AppStorage("neon") private var neon = false
     private var theme: Theme { neon ? .neon : .premium }
+    /// Phasen-Morph (§5b): ein Namespace über alle drei Akte - Tokens, Poch-Tile und
+    /// Mulden fliegen via matchedGeometryEffect an ihre neuen Positionen.
+    @Namespace private var morph
 
     var body: some View {
         ZStack {
@@ -41,14 +44,17 @@ struct ContentView: View {
                     handView
                     phase1Footer
                 case .pochen:
-                    Phase2View(game: game, theme: theme,
+                    Phase2View(game: game, theme: theme, morph: morph,
                                onContinue: {
-                                   akt = .ausspielen
+                                   withAnimation(.spring(duration: Tokens.aktMorph)) {
+                                       akt = .ausspielen
+                                   }
                                    game.beginPlayoutPresentation()
                                },
                                onNewRound: startNewRound)
                 case .ausspielen:
-                    Phase3View(game: game, theme: theme, onNewRound: startNewRound)
+                    Phase3View(game: game, theme: theme, morph: morph,
+                               onNewRound: startNewRound)
                 }
             }
             .padding(.horizontal, 18)
@@ -68,13 +74,24 @@ struct ContentView: View {
                     game.humanLead(card)
                 }
             }
+            // -morphDemo: automatischer Akt-Durchlauf für die Bewegungs-QA (Video ohne Tap)
+            if args.contains("-morphDemo") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(2))
+                    withAnimation(.spring(duration: Tokens.aktMorph)) { akt = .pochen }
+                    try? await Task.sleep(for: .seconds(3))
+                    game.debugSkipToPlayout()
+                    withAnimation(.spring(duration: Tokens.aktMorph)) { akt = .ausspielen }
+                    game.beginPlayoutPresentation()
+                }
+            }
         }
         #endif
     }
 
     private func startNewRound() {
         game.newRound()
-        akt = .melden
+        withAnimation(.spring(duration: Tokens.aktMorph)) { akt = .melden }
     }
 
     // MARK: - Kopf
@@ -113,7 +130,7 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             Button {
-                akt = .pochen
+                withAnimation(.spring(duration: Tokens.aktMorph)) { akt = .pochen }
             } label: {
                 Text("Weiter · Pochen").font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin)
@@ -151,6 +168,7 @@ struct ContentView: View {
                         .frame(width: 34, height: 34)
                         .overlay(Text("\(idx + 1)").font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Tokens.slate))
+                        .matchedGeometryEffect(id: "token\(idx + 1)", in: morph)
                     Text("\(stack)").font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Tokens.jewelGold.opacity(0.9))
                 }
@@ -163,6 +181,8 @@ struct ContentView: View {
 
     private var ringView: some View {
         let d = Tokens.ringRadius * 2 + Tokens.tileDiameter
+        // .position statt .offset: echte Layout-Frames, damit matchedGeometryEffect
+        // beim Morph die korrekten Flugbahnen misst (§5b).
         return ZStack {
             Circle().strokeBorder(
                 LinearGradient(colors: [Tokens.jewelGold.opacity(theme.ringLineOpacity * 1.6),
@@ -170,9 +190,15 @@ struct ContentView: View {
                                startPoint: .top, endPoint: .bottom),
                 lineWidth: 1)
                 .frame(width: Tokens.ringRadius * 2, height: Tokens.ringRadius * 2)
-            centerTile
+                .position(x: d / 2, y: d / 2)
+            centerTile.position(x: d / 2, y: d / 2)
             ForEach(PochRing.anchors) { anchor in
-                muldeTile(anchor.pool).offset(anchor.offset)
+                muldeTile(anchor.pool)
+                    .matchedGeometryEffect(
+                        id: anchor.pool == .poch ? "pochPot" : "tile-\(anchor.pool.rawValue)",
+                        in: morph)
+                    .position(x: d / 2 + anchor.offset.width,
+                              y: d / 2 + anchor.offset.height)
             }
         }
         .frame(width: d, height: d)

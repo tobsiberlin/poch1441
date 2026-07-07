@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.5] - Phasen-Morph: Drei Akte, eine Bühne (8.7.2026, nachts)
+
+### Hinzugefügt
+- Phasen-Morph (§5b) via `matchedGeometryEffect` + geteiltem Namespace über alle drei Akte: Gegner-Tokens fliegen Top-Bar → Kardinalpunkte → Schiefer-Reihe, die Poch-Mulde löst sich aus dem Ring und wird zum Poch-Pott (Signatur-Flug), die 7 übrigen Mulden konvergieren zu Echo-Dots. `.position` statt `.offset` für echte Layout-Frames, `withAnimation(.spring(0.55))` unter Parameter-Lock (`Tokens.aktMorph`).
+- DEBUG `-morphDemo`: automatischer Akt-Durchlauf für Bewegungs-QA (Video ohne UI-Tap); Frame-Extraktion nativ via AVFoundation (ffmpeg-Havarie umgangen).
+
+### Geprüft (Feel-Regel: Räte VOR Commit)
+- Bewegungs-QA auf Frame-Serien (15fps-Kontaktbögen): Morph 1 (P1→P2) Kontinuität 9/10, Premium 9/10; Morph 2 (P2→P3) 8/10, 7/10. Befund für den Game-Feel-Pass: Text-Crossfade macht fliegende Tokens leicht undeutlich; Poch-Pott eher Glow als Material.
+- taste-gate (Erstlauf, unkalibriert): FAIL auf bekannter Platzhalter-Ebene (generische Karten/Tokens = eingeplante Tasks); drei Overflow-Claims per eigenem Blick als Judge-Rauschen widerlegt.
+
+
 ## [0.5.4] - Kartenrücken W2 FINAL: Asset-Freeze (8.7.2026, nachts)
 
 ### Entschieden (Tobsi-Exekutions-Befehl)

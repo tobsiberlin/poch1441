@@ -8,6 +8,8 @@ import SwiftUI
 struct Phase3View: View {
     let game: GameState
     let theme: Theme
+    /// Phasen-Morph-Namespace (§5b) - geteilt mit ContentView/Phase2View.
+    let morph: Namespace.ID
     let onNewRound: () -> Void
 
     var body: some View {
@@ -49,6 +51,7 @@ struct Phase3View: View {
                     .foregroundStyle(isLeader ? Tokens.jewelPlatin : Tokens.slate)
             }
             .frame(width: 44, height: 44)
+            .matchedGeometryEffect(id: "token\(seat)", in: morph)
             Text(game.name(of: seat)).font(.system(size: 10, weight: .medium))
                 .foregroundStyle(isLeader ? Tokens.jewelPlatin.opacity(0.9) : Tokens.slate)
             Text("\(restCards) Karten").font(.system(size: 9))

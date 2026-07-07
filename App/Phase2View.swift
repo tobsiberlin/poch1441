@@ -8,6 +8,8 @@ import SwiftUI
 struct Phase2View: View {
     let game: GameState
     let theme: Theme
+    /// Phasen-Morph-Namespace (§5b) - geteilt mit ContentView/Phase3View.
+    let morph: Namespace.ID
     let onContinue: () -> Void
     let onNewRound: () -> Void
 
@@ -34,31 +36,36 @@ struct Phase2View: View {
     // MARK: - Duell-Bühne (Kardinalpunkte um den Poch-Pott)
 
     private var duelArea: some View {
-        ZStack {
-            ringEcho
-            pochPot
-            token(seat: 2).offset(y: -132)
-            token(seat: 1).offset(x: -122, y: -26)
-            token(seat: 3).offset(x: 122, y: -26)
+        // .position statt .offset: echte Layout-Frames für die Morph-Flugbahnen (§5b).
+        GeometryReader { geo in
+            let cx = geo.size.width / 2
+            let cy = geo.size.height / 2
+            ZStack {
+                ringEcho(cx: cx, cy: cy + 8)
+                pochPot.position(x: cx, y: cy + 26)
+                token(seat: 2).position(x: cx, y: cy - 132)
+                token(seat: 1).position(x: cx - 122, y: cy - 26)
+                token(seat: 3).position(x: cx + 122, y: cy - 26)
+            }
         }
         .frame(maxWidth: .infinity)
         .frame(height: 372)
     }
 
-    /// §5b Akt 2: die 8 Mulden entsättigen zu Schiefer und weichen zurück - hier als
-    /// ruhiges Echo, der volle Morph kommt mit .matchedGeometryEffect.
-    private var ringEcho: some View {
-        ZStack {
-            Circle().strokeBorder(Tokens.slate.opacity(0.10), lineWidth: 1)
-                .frame(width: Tokens.ringRadius * 1.7, height: Tokens.ringRadius * 1.7)
-            ForEach(PochRing.anchors) { anchor in
-                Circle().fill(Tokens.slate.opacity(anchor.pool == .poch ? 0 : 0.16))
-                    .frame(width: 9, height: 9)
-                    .offset(CGSize(width: anchor.offset.width * 0.85,
-                                   height: anchor.offset.height * 0.85))
-            }
+    /// §5b Akt 2: die 8 Mulden entsättigen zu Schiefer und weichen zurück - die
+    /// P1-Tiles fliegen per matchedGeometryEffect in diese Echo-Dots.
+    @ViewBuilder
+    private func ringEcho(cx: CGFloat, cy: CGFloat) -> some View {
+        Circle().strokeBorder(Tokens.slate.opacity(0.10), lineWidth: 1)
+            .frame(width: Tokens.ringRadius * 1.7, height: Tokens.ringRadius * 1.7)
+            .position(x: cx, y: cy)
+        ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
+            Circle().fill(Tokens.slate.opacity(0.16))
+                .frame(width: 9, height: 9)
+                .matchedGeometryEffect(id: "tile-\(anchor.pool.rawValue)", in: morph)
+                .position(x: cx + anchor.offset.width * 0.85,
+                          y: cy + anchor.offset.height * 0.85)
         }
-        .offset(y: 8)
     }
 
     /// Der violette Poch-Pott - der Preis und Anker von Phase 2 (§5b: wird promotet,
@@ -88,9 +95,10 @@ struct Phase2View: View {
                 .shadow(color: Tokens.amethystVivid.opacity(theme.isNeon ? 0.6 : 0.25),
                         radius: theme.isNeon ? 26 : 12)
         )
+        // §5b Signatur-Flug: die P1-Poch-Mulde löst sich und wird zum Pott
+        .matchedGeometryEffect(id: "pochPot", in: morph)
         .scaleEffect(reduceMotion ? 1 : growth)
         .animation(.spring(duration: Tokens.p2PotSpring), value: game.pot)
-        .offset(y: 26)
     }
 
     // MARK: - Gegner-Token (Platzhalter-Vektor bis Charakterstil entschieden)
@@ -110,6 +118,7 @@ struct Phase2View: View {
                     .foregroundStyle(Tokens.jewelPlatin)
             }
             .frame(width: 62, height: 62)
+            .matchedGeometryEffect(id: "token\(seat)", in: morph)
             .scaleEffect(isTurn && !reduceMotion ? 1.07 : 1)
             .animation(.easeInOut(duration: 0.28), value: isTurn)
 

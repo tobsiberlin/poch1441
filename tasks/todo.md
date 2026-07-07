@@ -20,11 +20,14 @@
 
 ## Als Nächstes (Loop, kein Gate)
 
-- [ ] **JETZT: Phasen-Morph-Transitionen** (`.matchedGeometryEffect`, §5b) - P2/P3-Layouts stehen, Ziel-Positionen jetzt ableitbar. Ring → Kompression (P2) → Backdrop (P3), Tokens Top-Bar → Kardinalpunkte.
-- [ ] Clean-moderne Karten aufs Blatt (Default-Deck, code-gerendert) statt Platzhalter; Rücken nach Tobsi-Urteil.
+- [ ] **JETZT: Clean Karten-Vorderseiten** (code-gerendert, Premium-Material statt weißer Platzhalter - größter taste-gate-Befund) + `CardBack` im Deal einsetzen.
 - [ ] Game-Feel-Pass: Deal/Meld-Juice (40 ms), „Der Poch"-Tischschlag, Ketten-Kaskade, Tells - unter Parameter-Lock (§4). Dazu P2-QA-Befund: Slider generisch, Limit-Wand nur Text → Wand als physisches Objekt gestalten.
 - [ ] Lokalisierungs-Katalog (`Localizable.xcstrings`) anlegen, bevor weitere UI-Strings wachsen (§8-Schuld aus dem Fundament).
 - [ ] Bot-Interplay am Gerät durchspielen (P2-Flow läuft headless ungetestet).
+
+### Phasen-Morph - erledigt (8.7. nachts)
+- [x] `matchedGeometryEffect` + Namespace über alle drei Akte (Tokens, Poch-Tile→Pott, Mulden→Echo-Dots), `.position`-Frames, Spring 0.55 (Parameter-Lock). Bewegungs-QA: 9/9 und 8/7.
+- [x] Feel-Pass-Befunde notiert: Token-Label-Crossfade undeutlich (Morph 2), Poch-Pott Glow→Material, Slider-Materialität.
 
 ### Phase-3-Layout - erledigt (8.7. nachts)
 - [x] `Phase3View`: Kaskaden-Präsentation 180 ms/Karte + 350-ms-Beat-Drop (Parameter-Lock-Tokens), Gold-Stopper, Anspielrecht-Signal, Schiefer-Tokens (§5c P3), lesbare Ketten-Sequenz, Rundenende-Banner.
