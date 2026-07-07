@@ -81,6 +81,7 @@ final class GameState {
         round = source.round
         seatActions = Array(repeating: .none, count: round.stacks.count)
         revealedPlays = 0
+        kollapsInfo = nil
     }
 
     // MARK: - Phase 2 (Pochen) - Zustand
@@ -368,6 +369,20 @@ final class GameState {
 
     /// Bereits präsentierte Meldungen (0...meldEvents.count).
     private(set) var meldShown = 0
+    /// Stufe-2-Kollaps (§6a e): Trigger + Kontext der Explosion.
+    private(set) var kollapsShock = 0
+    private(set) var kollapsInfo: (pool: Pool, chips: Int, player: Int)?
+    #if DEBUG
+    /// QA-Override (-kollapsDemo): erzwingt Zündung bei jedem Meld.
+    static var kollapsThresholdOverride: Int?
+    #endif
+
+    private var effectiveKollapsThreshold: Int {
+        #if DEBUG
+        if let override = Self.kollapsThresholdOverride { return override }
+        #endif
+        return Tokens.jackpotKollapsThreshold
+    }
     /// Mulde, die gerade pulst (aktive Meldung).
     private(set) var pulsingPool: Pool?
 
@@ -448,8 +463,14 @@ final class GameState {
         // Melde-Strom (§6a b): rhythmisch reihum, Mulde pulst, Münzen fliegen
         try? await Task.sleep(for: .seconds(0.35))
         while meldShown < meldEvents.count, !Task.isCancelled {
-            pulsingPool = meldEvents[meldShown].pool
+            let meld = meldEvents[meldShown]
+            pulsingPool = meld.pool
             hapticTick += 1
+            // Stufe 2: der Balatro-Kollaps zündet nur beim fetten Pott (Rarity-Lock)
+            if meld.chips >= effectiveKollapsThreshold {
+                kollapsInfo = (meld.pool, meld.chips, meld.player)
+                kollapsShock += 1
+            }
             try? await Task.sleep(for: .seconds(Tokens.p1MeldStep))
             guard !Task.isCancelled else { break }
             meldShown += 1

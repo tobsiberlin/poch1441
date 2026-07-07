@@ -7,6 +7,12 @@ if CommandLine.arguments.contains("balance") {
     exit(0)
 }
 
+// Subkommando "kollaps": jackpotKollapsThreshold kalibrieren (konzept §6 Auflage 3).
+if CommandLine.arguments.contains("kollaps") {
+    runKollapsCalibration(matches: 1000)
+    exit(0)
+}
+
 // Monte-Carlo-Sweep für die Economy-Kalibrierung (Spec Abschnitt 14, Phase-1-Exit).
 // Zufalls-Baseline: alle Entscheidungen gleichverteilt legal - Bot-Profile ersetzen das in
 // Phase 4, dann wird nachkalibriert (nur Parameter, nie Regeln).

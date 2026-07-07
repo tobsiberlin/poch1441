@@ -40,6 +40,18 @@ struct DealOverlay: View {
                     CoinStream(from: from, to: to, tint: pool.jewelVivid)
                         .id("meld\(game.meldShown)")
                 }
+                // Stufe 2 - der Balatro-Kollaps (§6a e): Tile birst in Kategorie-Farbe,
+                // schwebendes +N beim Gewinner. Rar per Sim-Threshold (Rarity-Lock).
+                if game.kollapsShock > 0, let info = game.kollapsInfo {
+                    KollapsBurst(at: poolPosition(info.pool, deck: deck),
+                                 tint: info.pool.jewelVivid,
+                                 reduceMotion: reduceMotion)
+                        .id("kollaps\(game.kollapsShock)")
+                    FloatingGain(text: "+\(info.chips)",
+                                 at: playerTarget(info.player, w: w, h: h),
+                                 tint: info.pool.jewelVivid)
+                        .id("gain\(game.kollapsShock)")
+                }
             }
         }
         .allowsHitTesting(false)
@@ -72,6 +84,60 @@ struct DealOverlay: View {
                            y: deck.y + anchor.offset.height)
         }
         return deck  // .center
+    }
+}
+
+/// Kollaps-Partikel: ~30 Splitter bersten radial in Kategorie-Farbe (goldener Winkel
+/// statt RNG - deterministisch reproduzierbar). reduceMotion: nur kurzer Farb-Blink.
+private struct KollapsBurst: View {
+    let at: CGPoint
+    let tint: Color
+    let reduceMotion: Bool
+    @State private var fired = false
+
+    var body: some View {
+        ZStack {
+            if reduceMotion {
+                Circle().fill(tint.opacity(fired ? 0 : 0.5))
+                    .frame(width: 54, height: 54)
+                    .position(at)
+                    .animation(.easeOut(duration: 0.05), value: fired)
+            } else {
+                ForEach(0..<30, id: \.self) { i in
+                    let angle = Double(i) * 137.5 * .pi / 180
+                    let dist: CGFloat = 44 + CGFloat(i % 3) * 22
+                    Circle()
+                        .fill(tint)
+                        .frame(width: CGFloat(3 + i % 3), height: CGFloat(3 + i % 3))
+                        .position(x: at.x + (fired ? dist * cos(angle) : 0),
+                                  y: at.y + (fired ? dist * sin(angle) : 0))
+                        .opacity(fired ? 0 : 1)
+                        .animation(.easeOut(duration: 0.55)
+                            .delay(Double(i % 5) * 0.02), value: fired)
+                }
+            }
+        }
+        .onAppear { fired = true }
+        .allowsHitTesting(false)
+    }
+}
+
+/// Schwebendes "+N": steigt beim Gewinner auf und verblasst (§6a e).
+private struct FloatingGain: View {
+    let text: String
+    let at: CGPoint
+    let tint: Color
+    @State private var risen = false
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 22, weight: .heavy))
+            .foregroundStyle(tint)
+            .shadow(color: .black.opacity(0.6), radius: 2, y: 1)
+            .position(x: at.x, y: at.y + (risen ? 6 : 40))
+            .opacity(risen ? 0 : 1)
+            .animation(.easeOut(duration: 0.9), value: risen)
+            .onAppear { risen = true }
     }
 }
 

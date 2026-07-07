@@ -48,6 +48,17 @@ enum Tokens {
     /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
     static let p1MeldStep: Double = 0.55
 
+    // Balatro-Kollaps Stufe 2 (§6a e, Parameter-Lock).
+    /// Zünd-Schwelle: per Headless-Sim kalibriert (pochsim kollaps, 11.557 Runden,
+    /// 8.7.2026): T=12 -> 16,2% Zünd-Rate (Zielband 15-20%, rares Ende - konzept §6
+    /// Auflage 3). Bei Ante-Eskalation später dynamisch Richtung 15+.
+    static let jackpotKollapsThreshold = 12
+    /// Screen-Shake des Kollaps: 150 ms, 3 pt (konzept: 2-3 px) - reduceMotion: 0.
+    static let kollapsShake: Double = 0.15
+    static let kollapsShakeAmp: Double = 3
+    /// Farbgetönter Vignetten-Flash ("Wimpernschlag"); reduceMotion: 50-ms-Dissolve.
+    static let kollapsFlash: Double = 0.28
+
     // "Der Poch" (§6b Signaturgeste, Parameter-Lock): Tischschlag.
     /// Dauer des Tisch-Zitterns (nur Tisch-Welt, HUD ruhig).
     static let pochShake: Double = 0.30

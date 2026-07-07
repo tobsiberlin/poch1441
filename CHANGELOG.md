@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0] - Der Balatro-Kollaps (§6a e) - 8.7.2026
+
+### Hinzugefügt
+- **Threshold-Kalibrierung per Headless-Sim** (§6 Auflage 3): neues pochsim-Subkommando `kollaps` - 1.000 Partien / 11.557 Tisch-Runden, Zünd-Raten-Tabelle T=6..20. Ergebnis: Zielband 15-20% bei T=9..12; gewählt **T=12 (16,2%)**, das rare Ende (konzeptkonform Richtung 15+ bei Ante-Eskalation). Als dokumentierter Token `jackpotKollapsThreshold`.
+- **Stufe-2-Inszenierung:** beim fetten Meld birst das Tile in ~30 Partikeln in Kategorie-Farbe (goldener Winkel statt RNG - deterministisch), Screen-Shake 150 ms / 3 pt (nur Ring), farbgetönter Vignetten-Flash für einen Wimpernschlag (Ränder glühen, Spielfläche bleibt lesbar - Lesbarkeits-Licht-Regel), schwebendes „+N" beim Gewinner, .heavy-Haptik.
+- reduceMotion (§6 Auflage 2): Shake genullt, Flash wird 50-ms-Dissolve, Partikel werden Farb-Blink - Wucht wandert in die Haptik. DEBUG `-kollapsDemo` (Threshold 1) für QA.
+
+### Geprüft
+- Frame-Serie: Vignetten-Wimpernschlag, Partikel-Streuung und +N sichtbar; Rarity-Lock bleibt gewahrt (Demo zündet nur per Override).
+
+
 ## [0.5.9] - "Der Poch": Der Tischschlag (§6b) - 8.7.2026
 
 ### Hinzugefügt

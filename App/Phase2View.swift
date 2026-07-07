@@ -362,17 +362,6 @@ struct Phase2View: View {
     }
 }
 
-/// Tisch-Zittern des Poch-Schlags: N volle Oszillationen pro Trigger, endet exakt
-/// bei 0 (Integer-Zustände sind Ruhelage) - nur Offset, kein Layout-Thrashing (§9).
-private struct TableShake: GeometryEffect {
-    var amplitude: Double
-    var animatableData: CGFloat
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        let x = amplitude * sin(Double(animatableData) * .pi * 6)
-        return ProjectionTransform(CGAffineTransform(translationX: x, y: 0))
-    }
-}
 
 extension Int {
     func clamped(to range: ClosedRange<Int>) -> Int {

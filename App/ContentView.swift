@@ -43,6 +43,12 @@ struct ContentView: View {
                     ringView
                         .contentShape(Circle())
                         .onTapGesture { game.skipDeal() }  // Tap überspringt die Kaskade
+                        // Kollaps-Shake: 150 ms / 3 pt (§6a e), reduceMotion genullt
+                        .modifier(TableShake(
+                            amplitude: reduceMotion ? 0 : Tokens.kollapsShakeAmp,
+                            animatableData: CGFloat(game.kollapsShock)))
+                        .animation(.linear(duration: Tokens.kollapsShake),
+                                   value: game.kollapsShock)
                     Spacer(minLength: 8)
                     handView
                     phase1Footer
@@ -65,11 +71,22 @@ struct ContentView: View {
             .padding(.bottom, 18)
             // Trumpf-Beat-Inszenierung liegt als hitTest-freie Schicht über Akt 1
             .overlay { if akt == .melden { DealOverlay(game: game) } }
+            // Kollaps-Vignette: farbgetönter Wimpernschlag (§6a e);
+            // reduceMotion: 50-ms-Dissolve statt Flash (§6 Auflage 2)
+            .overlay {
+                if game.kollapsShock > 0, let info = game.kollapsInfo, akt == .melden {
+                    KollapsVignette(tint: theme.tint(info.pool),
+                                    duration: reduceMotion ? 0.05 : Tokens.kollapsFlash)
+                        .id("vignette\(game.kollapsShock)")
+                        .allowsHitTesting(false)
+                }
+            }
         }
         .onAppear {
             if akt == .melden { game.runDealPresentation(reduceMotion: reduceMotion) }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: game.hapticTick)
+        .sensoryFeedback(.impact(weight: .heavy), trigger: game.kollapsShock)
         #if DEBUG
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
@@ -82,6 +99,10 @@ struct ContentView: View {
                        .min(by: { $0.rank.rawValue < $1.rank.rawValue }) {
                     game.humanLead(card)
                 }
+            }
+            // -kollapsDemo: Threshold auf 1 - jede Meldung zündet (Kollaps-QA)
+            if args.contains("-kollapsDemo") {
+                GameState.kollapsThresholdOverride = 1
             }
             // -pochDemo: automatisches Eröffnungs-Gebot für die Tischschlag-QA
             if args.contains("-pochDemo") {
