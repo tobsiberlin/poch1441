@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.6] - Feel-Polish P2 + Kessel-Runde + Cockpit-Diät (8.7.2026)
+
+### Geändert
+- Material > Glow umgesetzt (Feel-Befunde): Poch-Pott mit gefräster Innenstufe + reduziertem Schein (Premium: Radius 12->6, Opacity 0.25->0.14), Biet-Slider in dunkler Rille, Limit-Wand als gefräster Platin-Pfeiler mit Gold-Anschlag. Räte-Vergleich Vorher/Nachher: 5 -> 8 (Material-Premium). Rest-Befund (flache Token-Kreise) erledigt sich mit der O-Porträt-Produktion.
+- Cockpit entschlackt: 10 MB -> 6.5 MB (Archiv-Galerien raus, aktive Entscheidungen + Sieger-Referenzen bleiben).
+
+### Hinzugefügt
+- Kessel-Runde KA/KB/KC (tools/gen_kessel_varianten.py): stilisierte Poch-Kessel-Motive, punktsymmetrisch; ungeprimte QA: KB bestes Profil, KC Casino-Rückfall (raus), keiner schlägt W2 - Empfehlung: KA/KB in den Unlock-Deck-Pool (§7.2).
+- Phase 2: CardBack-Mini-Fächer hinter den Gegner-Tokens (verdeckte Hand §6b, Kontaktschatten als Render-Eigenschaft).
+- Morph-2-Label-Crossfade als Hand-Gate dokumentiert (braucht Geräte-Tuning, kein Blind-Fix).
+
+
 ## [0.5.5] - Phasen-Morph: Drei Akte, eine Bühne (8.7.2026, nachts)
 
 ### Hinzugefügt
