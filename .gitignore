@@ -10,3 +10,5 @@ Assets_Raw/
 artifacts/qa/
 *.mp4
 *.wav
+# Sichtungs-Kacheln sind Wegwerf - das Cockpit traegt die Embeds, Skripte+Seeds reproduzieren
+artifacts/sichtung1/

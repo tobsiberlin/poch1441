@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.1] - Sichtung 1: Kartenrücken + Charakterstil (7.7.2026, abends)
+
+### Hinzugefügt
+- Asset-Pipeline neu (clean-modern-jewel): `tools/gen_sichtung1_raw.py` (FLUX 1.1 Pro + Recraft V3 via Replicate, Modellwahl live geprüft) + `tools/gen_sichtung1_composite.py` (Atom-Prinzip: Artwork + Vektor-Rahmen + Didot-Monogramm P·1441 + Kandidaten-Label; G-Signet deterministisch in PIL gezeichnet).
+- Sichtung 1 generiert + QA-gefiltert (gemini-vision 3-Zeilen-Kritik pro Bild, GPT-Zweitmeinung zur Markenlogik, 8 Retakes inkl. Hebelwechsel): 8 Kartenrücken-Richtungen (A-H) + 6 Charakter-Stil-Proben (Öl/Gouache, Vektor, Stilisiert-3D je Nova/Blade) in `artifacts/sichtung1/`.
+- Cockpit-Umbau: feste Struktur (Jetzt gerade / Wartet auf dich / Entscheidungen-registriert / Gesamtbild), eingebettete Sichtungs-Galerien mit Lightbox, Mini-Vorschau in Spielgröße (GPT-Hinweis: Skalierungs-Realität) und Antwort-Kopier-Buttons pro Kandidat.
+
+### Geändert
+- Auslieferungsweg Sichtungen (Tobsi-Ansage): keine ZIPs mehr - alles direkt ins Cockpit-HTML, per `open` geöffnet (CLAUDE.md §10, lessons.md, Memory aktualisiert).
+
 ## [0.5.0] - Fundament (7.7.2026)
 
 ### Engine

@@ -119,7 +119,7 @@ xcrun simctl install booted "$DIR/$NAME" && xcrun simctl launch booted com.tobc.
 ## 10. Tobsi-Kommunikation im Loop (earned 5.7., Tobsi-Feedback)
 
 - `artifacts/poch-1441-cockpit.html` (auch nach iCloud-TEMP gespiegelt, Generator `tools/gen_cockpit.py`) ist das lebende Status-Cockpit: nach jeder Loop-Iteration aktualisieren. Offene Tobsi-Entscheidungen stehen immer als oberster Block - **jede mit kopierbarem Antwort-Prompt** (Copy-Button, vorformulierte Antwort zum Einfügen in den Chat; earned 5.7., Tobsi kam ohne nicht mehr mit). Bei neuem Entscheidungsbedarf die Datei per `open` öffnen. Chat-Zusammenfassungen ersetzen das Cockpit nicht. **Chat-zuerst-Regel (earned 5.7.):** Fragen und Entscheidungen werden IMMER direkt im Chat gestellt - mit fertigen Antwortzeilen zum Kopieren; das Cockpit spiegelt sie nur. **Eine-Frage-Regel (earned 5.7., Tobsi: „alles verwirrend"):** Immer nur EINE aktive Tobsi-Entscheidung, alle weiteren explizit als geparkt führen; wartet der Loop auf Tobsi, endet die Nachricht mit „Ich warte auf: X - solange passiert nichts."
-- Auswahl-Artefakte (Stil-Kandidaten etc.) IMMER als gelabelte ZIPs (Kandidaten-Buchstabe oben links im Bild) nach `~/Library/Mobile Documents/com~apple~CloudDocs/TEMP/` - für die externen Reviews von Tobsi. Jedes Kandidaten-Generierungs-Tool bekommt denselben Auslieferungsschritt (`deliver_labeled_zip`-Muster).
+- Auswahl-Artefakte (Stil-Kandidaten etc.) werden NICHT als ZIP geliefert (Tobsi 7.7.): gelabelte Bilder (Kandidaten-Buchstabe im Bild) direkt ins Cockpit-HTML einbetten (Base64), Cockpit nach `~/Library/Mobile Documents/com~apple~CloudDocs/TEMP/` spiegeln und per `open` öffnen.
 
 ## 11. Commits & Secrets
 

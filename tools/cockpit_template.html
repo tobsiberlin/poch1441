@@ -70,6 +70,18 @@
   .swatch{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:5px;border:1px solid rgba(255,255,255,.15)}
   footer{text-align:center;color:#3F4855;font-size:11.5px;margin-top:46px}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--smaragd);color:#04120C;padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:12px}
+  .gal .g{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column}
+  .gal img{width:100%;border-radius:10px;cursor:zoom-in}
+  .gal .cap{font-size:12.5px;color:#B8C0CC;margin:9px 2px 4px;flex:1}
+  .gal .cap b{color:var(--ink)}
+  .gal button{margin-top:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:7px 10px;font-size:12px;cursor:pointer}
+  .gal button:hover{background:rgba(255,255,255,.1);border-color:var(--gold)}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}
+  .lightbox img{max-width:94vw;max-height:94vh;border-radius:12px}
+  .lightbox.on{display:flex}
+  .minirow{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--slate);font-size:11px}
+  .mini{width:62px;border-radius:5px;border:1px solid var(--line)}
   .toast.on{opacity:1}
   .newbadge{background:rgba(44,212,168,.16);color:var(--smaragd);font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:1px;text-transform:uppercase;margin-left:8px}
 </style></head>
@@ -86,27 +98,20 @@
 
 <!-- ===================== ENTSCHEIDEN ===================== -->
 <section id="entscheiden">
-  <h2>Zum Entscheiden (morgen fr&uuml;h)</h2>
-  <p class="muted">Der Loop l&auml;uft nachts autonom weiter und baut alles, was <b>keinen</b> Geschmack braucht. Offen ist der <b>Charakter-Render-Stil</b> - w&auml;hle per Kopier-Antwort, ich setze es um. Prinzip: die Charaktere sind das eine warme Material im cleanen Rahmen (Kontrast = Eigenst&auml;ndigkeit).</p>
+  <h2>Jetzt gerade</h2>
+  <p>__JETZT__</p>
+</section>
 
-  <div class="decide">
-    <h3>1 &middot; Karten-Stil - Default clean</h3>
-    <p class="muted">Beim Repo-Aufr&auml;umen ist das painterly Deck ins Archiv gewandert - <b>Default = clean-moderne Karten</b> (wie im Mockup), passend zu „Karten = System/clean, Charaktere = warm". Painterly bleibt sp&auml;ter als freischaltbares Unlock-Deck m&ouml;glich (aus dem Archiv).</p>
-  </div>
+<section>
+  <h2>Wartet auf dich</h2>
+  <!--DECISIONS-->
+</section>
 
-  <div class="decide">
-    <h3>2 &middot; Charakter-Look</h3>
-    <p class="muted">Kleine runde Avatare wirken kalt/beliebig; warme Pers&ouml;nlichkeit als Kontrast. Offen ist der Render-Stil.</p>
-    <div class="opt"><b>A - warm-painterly &Ouml;l/Gouache</b><span class="rec">empfohlen</span><br><span class="muted">Gedämpft (Disco-Elysium-Referenz), presence-over-persistence: gross am Pochen-Beat, ruhiger Token sonst. Das eine warme Material.</span></div>
-    <div class="opt"><b>B - reduzierter moderner Vektor</b><br><span class="muted">Cleaner, n&auml;her am Digital-Look - aber die Reviews warnen: wirkt k&uuml;hl/beliebig.</span></div>
-    <div class="opt"><b>C - 3D-Holo-B&uuml;ste</b><br><span class="muted">Sehr premium, aber Uncanny-/Cyber-Risiko (genau die Falle aus Frage 1).</span></div>
-    <div class="copy">
-      <button onclick="cp('Charaktere A - warm-painterly Oel/Gouache, presence-over-persistence.')">Kopieren: A</button>
-      <button onclick="cp('Charaktere B - reduzierter moderner Vektor.')">Kopieren: B</button>
-      <button onclick="cp('Charaktere C - 3D-Holo-Bueste.')">Kopieren: C</button>
-    </div>
-  </div>
-  <p class="muted">Geparkt (kein Morgen-Gate): <b>Theme-Held A/B</b> - entscheidest du live am Ende, wenn du zwischen Premium-matt und Vivid flippen kannst.</p>
+<section>
+  <h2>Deine Entscheidungen - registriert &#10003;</h2>
+  <table><thead><tr><th>Datum</th><th>Entscheidung</th><th>Urteil</th></tr></thead><tbody>
+  <!--REGISTRIERT-->
+  </tbody></table>
 </section>
 
 <!-- ===================== COCKPIT ===================== -->
@@ -242,5 +247,12 @@
 <footer>Poch 1441 &middot; ein Dokument (Cockpit + Kanon) &middot; iCloud-TEMP &middot; wird nach jeder Loop-Iteration aktualisiert</footer>
 </div>
 <div class="toast" id="toast">Kopiert</div>
-<script>function cp(t){navigator.clipboard.writeText(t).then(()=>{var e=document.getElementById('toast');e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1400)})}</script>
+<div class="lightbox" id="lb" onclick="this.classList.remove('on')"><img id="lbimg" alt=""></div>
+<script>
+function cp(t){navigator.clipboard.writeText(t).then(()=>{var e=document.getElementById('toast');e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1400)})}
+function zm(el){document.getElementById('lbimg').src=el.src;document.getElementById('lb').classList.add('on')}
+addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.gal .g img.big').forEach(b=>{
+  const s=b.closest('.g').querySelector('.minislot');
+  if(s){const m=document.createElement('img');m.src=b.src;m.className='mini';s.appendChild(m)}})})
+</script>
 </body></html>

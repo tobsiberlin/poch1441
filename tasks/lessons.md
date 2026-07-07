@@ -138,3 +138,9 @@
 ## 6.7.2026 - Monolith-Skripte + gechainte Commits = halbe Zustände
 - **Beobachtet:** Ein großes Python-Heredoc starb am Anführungszeichen-Syntaxfehler; der per && gechainte git-commit lief trotzdem mit einer VERALTETEN /tmp/commitmsg.txt durch (zweimal, inkl. Force-Push mit falscher Message).
 - **Regel:** Auslieferungs-Pakete in kleine, einzeln verifizierte Schritte teilen (Assets → HTML → Message → Commit als getrennte Aufrufe). `git commit` nie im selben Shell-Block wie ein fehlbares Skript chainen. /tmp/commitmsg.txt vor jedem Commit per `head -1` gegenlesen. Deutsche Anführungszeichen in Python-Strings meiden oder Single-Quotes nutzen.
+
+## 7.7.2026 - Keine ZIPs mehr: Sichtungen leben im Cockpit-HTML
+
+**Beobachtung:** Tobsi (bei der Kartenrücken-/Charakterstil-Frage): „bitte nichts als zip, sondern immer in cockpit html einbauen und html öffnen" - die ZIP-Auslieferung nach iCloud-TEMP ist damit komplett abgelöst (Verschärfung der 5.7.-Lesson „Sichtungen als HTML öffnen").
+
+**Regel:** Jede Sichtung (Stil-Kandidaten, Asset-Chargen) wird direkt ins Cockpit-HTML eingebettet (gelabelte Bilder, Base64), das Cockpit nach iCloud-TEMP gespiegelt und per `open` geöffnet. Keine ZIP-Pakete mehr, auch nicht zusätzlich.
