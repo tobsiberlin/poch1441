@@ -12,24 +12,22 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441-cockpit.html"
 
 # ---- Status (hier pflegen) ------------------------------------------------
-STAND = "8. Juli 2026, nachts &middot; Kartenr&uuml;cken W2 FINAL (Asset-Freeze) &middot; alle 3 Phasen-Layouts stehen"
+STAND = "8. Juli 2026, sp&auml;t &middot; Phasen-Morph l&auml;uft (QA 9/9, 8/7) &middot; W2 final &middot; als N&auml;chstes: Karten-Vorderseiten"
 
-JETZT = ("<b>Kartenr&uuml;cken W2 ist final, nachgesch&auml;rft und eingefroren.</b> Nach deinem Freeze-Review: "
-         "(1) <b>F&auml;cher-Test bestanden</b> - 5 &uuml;berlappende R&uuml;cken in 3 Fassungen, Urteil FC &gt; FB &gt; FA: "
-         "die dunklen Innenfacetten sind auf 0.64 vergr&ouml;&szlig;ert (ruhigster F&auml;cher, volle Signet-Pr&auml;senz), "
-         "in Print-Master UND CardBack.swift &uuml;bernommen; "
-         "(2) <b>Signet = nur &bdquo;1441&ldquo;</b> (M2 im Vergleichstest - das P entf&auml;llt, die Zahl tr&auml;gt; "
-         "immer als gespiegeltes Paar, weil ein Einzel-Monogramm die Punktsymmetrie br&auml;che); "
-         "(3) <b>Symmetrie-Beweis erneut [0, 0, 0]</b>. Voller Name &bdquo;Poch 1441&ldquo; lebt k&uuml;nftig bei "
-         "Icon/Splash/Store. <b>Es wartet nichts Aktives auf dich</b> - der Loop baut jetzt den Phasen-Morph "
-         "(&sect;5b), danach Karten-Vorderseiten.")
+JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hne - Tokens fliegen von der "
+         "Top-Bar an die Kardinalpunkte und weiter in die Schiefer-Reihe, die Poch-Mulde l&ouml;st sich aus dem "
+         "Ring und w&auml;chst zum Pott (Signatur-Flug &sect;5b), die Mulden konvergieren zu Echo-Dots. "
+         "Bewegungs-QA vor dem Commit: Morph 1 = Kontinuit&auml;t 9/10 + Premium 9/10, Morph 2 = 8/10 + 7/10 "
+         "(Befunde f&uuml;r den Feel-Pass notiert). Das neue taste-gate lief als Erst-Check: sein FAIL zeigt exakt "
+         "die bekannten Platzhalter (wei&szlig;e Karten, generische Tokens) - <b>darum jetzt: clean "
+         "Karten-Vorderseiten</b> als n&auml;chste Iteration. F&uuml;r dich zu tun: nichts.")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
     ("done", "Design-Kanon", "konzept.md - Kern-Trias, Farbhierarchie, Meta", 95),
     ("work", "Fundament / UI", "Ring, Themes, Material + Phase-2-Layout (Pochen)", 58),
-    ("work", "Kunst / Assets", "Charakterstil O registriert; Rücken-Synthese X1-X4 wartet", 44),
-    ("plan", "Game-Feel / Animation", "Deal/Meld-Juice, Phasen-Morph, Tells", 4),
+    ("work", "Kunst / Assets", "Kartenrücken W2 final (Freeze); Charakterstil O registriert", 52),
+    ("work", "Game-Feel / Animation", "Phasen-Morph steht (QA 9/9, 8/7); Juice-Pass folgt", 22),
     ("plan", "Sound / Haptik", "-", 0),
     ("plan", "Meta-Progression", "Design in §7, Code = 0%", 8),
     ("plan", "Monetarisierung", "StoreKit-2-Unlock 4,99 €", 0),
@@ -38,11 +36,12 @@ STRANDS = [
     ("plan", "Beta / Release", "TestFlight, App Store", 0),
 ]
 IN_ARBEIT = [
-    ("ok", "Phase-3-Layout (Ausspielen): Ketten-Kaskade 180 ms, Beat-Drop 350 ms mit Gold-Stopper, Anspielrecht-Signal, Schiefer-Tokens, Rundenende-Banner - live verifiziert (-autoLead-QA)"),
+    ("ok", "Phasen-Morph: matchedGeometryEffect über alle drei Akte, Bewegungs-QA 9/9 und 8/7 (Frame-Serien, Feel-Regel)"),
+    ("ok", "Phase-3-Layout: Kaskade 180 ms, Beat-Drop 350 ms, Gold-Stopper - live verifiziert"),
     ("ok", "Rücken-Runde 3 (deine Richtungen): W1/W2 Siegel-Raute, B1/B2 Brett-Prägung, K1 Kanten-Farbe - deterministisch + ungeprimt getestet"),
     ("ok", "Phase-2-Layout (Pochen) + Charakterstil-O-Registrierung (Vorrunde)"),
-    ("", "Phasen-Morph-Transitionen (.matchedGeometryEffect) - läuft als Nächstes"),
-    ("", "Clean Karten-Vorderseiten (code-gerendert) - danach"),
+    ("", "Clean Karten-Vorderseiten (Premium-Material statt weißer Platzhalter) - läuft jetzt"),
+    
     ("", "Feel-Polish P2/P3 (Slider-Materialität, Eiszeit-Vakuum, Straf-Strom) - Game-Feel-Pass"),
 ]
 
