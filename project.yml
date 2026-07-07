@@ -1,0 +1,31 @@
+name: Poch1441
+options:
+  bundleIdPrefix: com.tobc
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+packages:
+  PochKit:
+    path: PochKit
+targets:
+  Poch1441:
+    type: application
+    platform: iOS
+    sources:
+      - App
+    dependencies:
+      - package: PochKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tobc.poch1441
+        DEVELOPMENT_TEAM: GWP236628H
+        SWIFT_VERSION: "5.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        # Orientierung: Arbeitsstand Portrait (iPhone); finale Entscheidung fällt mit dem Tisch-Layout in Phase 3
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1

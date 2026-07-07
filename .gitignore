@@ -1,0 +1,12 @@
+.DS_Store
+DerivedData/
+xcuserdata/
+*.xcodeproj
+.build/
+Assets_Raw/
+*.p8
+*.key
+# Wegwerf-QA (Screenshots/Videos) - nicht ins Repo, Cockpit hat Downscale-Embeds
+artifacts/qa/
+*.mp4
+*.wav

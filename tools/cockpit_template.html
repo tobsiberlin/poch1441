@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Poch 1441 - Cockpit & Kanon</title>
+<style>
+  :root{--bg:#0B0E14;--ink:#E2E8F0;--slate:#6B7280;--line:rgba(255,255,255,.08);
+    --gold:#C5A059;--rose:#8E2A43;--smaragd:#2CD4A8;--amethyst:#A06BE0;--gold-v:#F0CE7A;--panel:rgba(255,255,255,.03);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(130% 80% at 50% -8%,#15121A 0%,var(--bg) 55%,#07060A 100%);
+    color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:0 0 80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  nav{position:sticky;top:0;z-index:20;background:rgba(11,14,20,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:8px}
+  nav .wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  nav b{font-size:14px;margin-right:auto}
+  nav b i{color:var(--gold);font-style:normal;font-weight:300}
+  nav a{color:var(--slate);text-decoration:none;font-size:12.5px;padding:6px 12px;border-radius:8px;border:1px solid transparent}
+  nav a:hover{color:var(--ink);border-color:var(--line)}
+  header{text-align:center;padding:34px 0 6px}
+  h1{font-size:30px;font-weight:700}h1 span{color:var(--gold);font-weight:300}
+  .arrow{color:var(--smaragd);font-weight:600}
+  .sub{color:var(--slate);font-size:12px;letter-spacing:2.5px;text-transform:uppercase;margin-top:8px}
+  .stand{color:var(--slate);font-size:12px;margin-top:4px}
+  section{margin-top:38px;scroll-margin-top:70px}
+  h2{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;
+     padding-bottom:8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+  h2 .pct{color:var(--slate);letter-spacing:0}
+  h3{font-size:16px;margin:18px 0 6px}
+  h4{font-size:14.5px;margin-bottom:6px}
+  p{margin-bottom:8px}.muted{color:var(--slate)}
+  .decide{background:linear-gradient(180deg,rgba(240,206,122,.10),rgba(240,206,122,.02));
+    border:1px solid rgba(240,206,122,.28);border-radius:16px;padding:20px 22px;margin-bottom:14px}
+  .decide h3{color:var(--gold-v);margin:0 0 8px}
+  .opt{padding:8px 0;border-top:1px solid var(--line)}
+  .opt:first-of-type{border-top:0}
+  .opt b{color:var(--ink)} .opt .rec{color:var(--smaragd);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-left:6px}
+  .copy{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .copy button{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);
+    border-radius:9px;padding:7px 12px;font-size:12.5px;cursor:pointer;transition:.15s}
+  .copy button:hover{background:rgba(255,255,255,.1);border-color:var(--gold)}
+  .strand{display:grid;grid-template-columns:200px 1fr 54px;gap:14px;align-items:center;padding:8px 0}
+  .strand .name{font-weight:600;font-size:13px}.strand .name small{display:block;color:var(--slate);font-weight:400;font-size:11px;margin-top:2px}
+  .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px}
+  .val{text-align:right;color:var(--slate);font-size:12px}
+  .g-done i{background:linear-gradient(90deg,var(--smaragd),#1A5E4E)}
+  .g-work i{background:linear-gradient(90deg,var(--gold-v),var(--gold))}
+  .g-plan i{background:linear-gradient(90deg,var(--amethyst),#4A2E65)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:99px;display:inline-block;margin-bottom:10px}
+  .t-done{background:rgba(44,212,168,.14);color:var(--smaragd)}.t-work{background:rgba(240,206,122,.14);color:var(--gold-v)}.t-plan{background:rgba(160,107,224,.14);color:var(--amethyst)}
+  ul{list-style:none}.card li,.klist li{padding:4px 0 4px 18px;position:relative;color:#B8C0CC;font-size:13px}
+  .card li::before,.klist li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+  .card li.ok::before{background:var(--smaragd)}.card li.ok{color:#9AA4B2}
+  .phones{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+  .phone{width:220px;text-align:center}
+  .phone img{width:100%;border-radius:26px;border:1px solid var(--line);box-shadow:0 16px 44px rgba(0,0,0,.5)}
+  .phone .cap{color:var(--slate);font-size:12px;margin-top:10px}
+  .mock img{width:100%;border-radius:14px;border:1px solid var(--line);margin-top:6px}
+  .kcard{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+  .kcard img{width:90px;border-radius:8px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0 4px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--slate);font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:1px}
+  td code{color:var(--gold-v)}
+  .phase{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}.phase:last-child{border-bottom:0}
+  .phase .n{flex:0 0 32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+  .phase.now .n{background:rgba(240,206,122,.16);color:var(--gold-v);border-color:rgba(240,206,122,.4)}
+  .phase .body h4{margin-bottom:2px}.phase .body p{color:var(--slate);font-size:12.5px;margin:0}
+  .swatch{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:5px;border:1px solid rgba(255,255,255,.15)}
+  footer{text-align:center;color:#3F4855;font-size:11.5px;margin-top:46px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--smaragd);color:#04120C;padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
+  .toast.on{opacity:1}
+  .newbadge{background:rgba(44,212,168,.16);color:var(--smaragd);font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:1px;text-transform:uppercase;margin-left:8px}
+</style></head>
+<body>
+<nav><div class="wrap"><b>POCH <i>1441</i></b>
+  <a href="#entscheiden">Entscheiden</a><a href="#cockpit">Cockpit</a><a href="#look">Look</a>
+  <a href="#kanon">Kanon</a><a href="#phasen">Phasen</a><a href="#meta">Meta</a></div></nav>
+
+<div class="wrap">
+<header><h1>POCH <span>1441</span> &nbsp;<span class="arrow">&rarr;</span>&nbsp; GOTY 2026</h1>
+  <div class="sub">Ein Dokument: lebendes Cockpit + kompletter Design-Kanon</div>
+  <div class="stand">Stand: __STAND__</div>
+</header>
+
+<!-- ===================== ENTSCHEIDEN ===================== -->
+<section id="entscheiden">
+  <h2>Zum Entscheiden (morgen fr&uuml;h)</h2>
+  <p class="muted">Der Loop l&auml;uft nachts autonom weiter und baut alles, was <b>keinen</b> Geschmack braucht. Offen ist der <b>Charakter-Render-Stil</b> - w&auml;hle per Kopier-Antwort, ich setze es um. Prinzip: die Charaktere sind das eine warme Material im cleanen Rahmen (Kontrast = Eigenst&auml;ndigkeit).</p>
+
+  <div class="decide">
+    <h3>1 &middot; Karten-Stil - Default clean</h3>
+    <p class="muted">Beim Repo-Aufr&auml;umen ist das painterly Deck ins Archiv gewandert - <b>Default = clean-moderne Karten</b> (wie im Mockup), passend zu „Karten = System/clean, Charaktere = warm". Painterly bleibt sp&auml;ter als freischaltbares Unlock-Deck m&ouml;glich (aus dem Archiv).</p>
+  </div>
+
+  <div class="decide">
+    <h3>2 &middot; Charakter-Look</h3>
+    <p class="muted">Kleine runde Avatare wirken kalt/beliebig; warme Pers&ouml;nlichkeit als Kontrast. Offen ist der Render-Stil.</p>
+    <div class="opt"><b>A - warm-painterly &Ouml;l/Gouache</b><span class="rec">empfohlen</span><br><span class="muted">Gedämpft (Disco-Elysium-Referenz), presence-over-persistence: gross am Pochen-Beat, ruhiger Token sonst. Das eine warme Material.</span></div>
+    <div class="opt"><b>B - reduzierter moderner Vektor</b><br><span class="muted">Cleaner, n&auml;her am Digital-Look - aber die Reviews warnen: wirkt k&uuml;hl/beliebig.</span></div>
+    <div class="opt"><b>C - 3D-Holo-B&uuml;ste</b><br><span class="muted">Sehr premium, aber Uncanny-/Cyber-Risiko (genau die Falle aus Frage 1).</span></div>
+    <div class="copy">
+      <button onclick="cp('Charaktere A - warm-painterly Oel/Gouache, presence-over-persistence.')">Kopieren: A</button>
+      <button onclick="cp('Charaktere B - reduzierter moderner Vektor.')">Kopieren: B</button>
+      <button onclick="cp('Charaktere C - 3D-Holo-Bueste.')">Kopieren: C</button>
+    </div>
+  </div>
+  <p class="muted">Geparkt (kein Morgen-Gate): <b>Theme-Held A/B</b> - entscheidest du live am Ende, wenn du zwischen Premium-matt und Vivid flippen kannst.</p>
+</section>
+
+<!-- ===================== COCKPIT ===================== -->
+<section id="cockpit">
+  <h2>Str&auml;nge <span class="pct">grober Fortschritt Richtung GOTY</span></h2>
+  <!--STRANDS-->
+</section>
+
+<section>
+  <h2>Erledigt</h2>
+  <div class="cards">
+    <div class="card"><span class="tag t-done">Fertig</span><h4>Regel-Engine (Gate A)</h4><ul>
+      <li class="ok">Alle 3 Phasen: Melden, Pochen, Ausspielen</li>
+      <li class="ok">Deterministisch, headless simulierbar</li>
+      <li class="ok">47 Tests, 0 Failures</li>
+      <li class="ok">Bots = gleiche API wie Mensch (kein Karten-Peek)</li></ul></div>
+    <div class="card"><span class="tag t-done">Fertig</span><h4>Design-Kanon</h4><ul>
+      <li class="ok">Produkt-Linie X, Bluff heilig</li>
+      <li class="ok">Clean-modern-premium, Poch-Ring-Signatur</li>
+      <li class="ok">Farbe=Label Juwelen-T&ouml;ne</li>
+      <li class="ok">Material &gt; Glow, Farbe=Label</li></ul></div>
+    <div class="card"><span class="tag t-done">Fertig</span><h4>SwiftUI-Fundament</h4><ul>
+      <li class="ok">Poch-Ring-Geometrie</li>
+      <li class="ok">GameState &larr; PochKit-Bridge</li>
+      <li class="ok">2-Theme-System</li>
+      <li class="ok">Material-Fundament (Iter. 1-3)</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>In Arbeit - aktueller Loop</h2>
+  <div class="card"><span class="tag t-work">Iteration l&auml;uft</span><h4>Material-Fundament (A+B gemeinsam)</h4><ul>
+    <!--INARBEIT--></ul></div>
+</section>
+
+<!-- ===================== LOOK ===================== -->
+<section id="look">
+  <h2>Look - Stand vs. Style-Anker</h2>
+  <div class="phones">
+    <div class="phone"><img src="data:image/png;base64,__PREM__" alt="Premium"><div class="cap">Premium-matt (Held-Kandidat A)</div></div>
+    <div class="phone"><img src="data:image/png;base64,__NEON__" alt="Vivid"><div class="cap">Vivid (Held-Kandidat B)</div></div>
+  </div>
+  <div class="mock"><p class="muted" style="margin-top:20px">Style-Anker (Mockup) - Layout/Kompositions-Sprache &uuml;bernommen, Cyber-Elemente (All-in, Spielhalle, Cyber-Namen) raus, AI-Slop nicht reproduziert:</p>
+    <img src="data:image/png;base64,__MOCKUP__" alt="Mockup Style-Anker"></div>
+</section>
+
+<!-- ===================== KANON ===================== -->
+<section id="kanon">
+  <h2>Design-Kanon <span class="pct">aus konzept / poch-stand</span></h2>
+
+  <h3>1 &middot; Das Fundament (bindend)</h3>
+  <p><b>Produkt-Linie X - der heilige Kern.</b> Reines Poch: 3 Phasen, Charaktere, Cosmetics, Rangliste - der Bluff ist heilig. Kein Roguelike/Joker/Consumable im Kern; NIE eine F&auml;higkeit, die verdeckte Info aufdeckt. Regelwerk eingefroren, Hausregeln opt-in. Roguelite = optionale Linie Y, sp&auml;ter.</p>
+  <p><b>Balatro-Doktrin.</b> Balatros <i>Feel</i> klauen (Eskalations-Drama, Juice, Kaskaden-Payoff, cleane Optik), Balatros <i>Struktur</i> nicht (kein Joker/Draft). Der Jackpot IST der native Multiplikator. Der Bluff ist die native Tiefe.</p>
+  <p><b>Positionierung.</b> „Das Strategiespiel, aus dem Poker wurde." Modern-first; 1441/Stra&szlig;burg = Lore + Prestige-Reveal, nie das Hauptargument. 18+, kein Zock-Marketing.</p>
+
+  <h3>2 &middot; Visuelle Identit&auml;t</h3>
+  <ul class="klist">
+    <li>Clean, minimalistisch, edel, modern - Premium-Gef&uuml;hl, wenn Karten sliden und der Jackpot explodiert.</li>
+    <li>Farbe = Label: jede Mulden-Kategorie hat eine feste Farbe - in Juwelen-T&ouml;nen, NIE Neon.</li>
+    <li>Der Poch-Ring (rundes 9-F&auml;cher-Brett) ist die Signatur. Kein 3&times;3-Raster.</li>
+    <li>Kartenr&uuml;cken = Marken-Hero + Anker fürs Cosmetic-Unlock-System.</li>
+    <li>Karten international A/K/Q/J/10; deutsche Prosa „Dame/Bube".</li>
+    <li>Clean-digitaler Look, dunkel (warmes Tinten-Schwarz), kein Holztisch.</li>
+    <li>Material &gt; Glow: Farben pigmentiert (geschliffener Stein) statt beleuchtet, Glow nur als Belohnung. Charaktere = das eine warme painterly Material (Kontrast = Eigenst&auml;ndigkeit).</li>
+  </ul>
+</section>
+
+<!-- ===================== PHASEN ===================== -->
+<section id="phasen">
+  <h2>3 &middot; Kern-Trias - die drei Phasen</h2>
+  <div class="cards">
+    <div class="card"><h4><span class="swatch" style="background:#C5A059"></span>Phase 1 &middot; Melden</h4>
+      <p class="muted">High-Speed-Dopamin (2-4 s)</p><ul>
+      <li>Kaskaden-Deal alle 40 ms; letzte Karte deckt Trumpf auf &rarr; 150 ms Freeze + radialer Lichtpuls in Trumpffarbe.</li>
+      <li>Melde-Strom: Karte leuchtet &rarr; Mulde pulst &rarr; M&uuml;nzen im Bogen &rarr; Z&auml;hler rollt. Tap &uuml;berspringt.</li>
+      <li>Skalierungs-Matrix Stufe 1 (helles Ching) vs. Stufe 2 („Balatro-Kollaps": Sub-Bass-Boom, Partikel, 2-3 px Shake).</li>
+      <li>Rarity-Lock: Stufe 2 nur ~15-20% (Headless-Sim-kalibriert) - rarer „Holy Shit"-Moment.</li>
+      <li>Safe-Mode bei reduceMotion: Wucht wandert in Audio + Haptik.</li></ul></div>
+    <div class="card"><h4><span class="swatch" style="background:#A06BE0"></span>Phase 2 &middot; Pochen</h4>
+      <p class="muted">Der psychologische Kern</p><ul>
+      <li>Biet-Slider mit personifizierter Limit-Wand („der Wirt kann nicht mehr mit"), .rigid-Bump. Nie All-in.</li>
+      <li>Der Poch (Signaturgeste): Tischschlag + .heavy + „Poch!" + Welt-Zittern; Eins&auml;tze in den violetten Poch-Pott.</li>
+      <li><b>Bluff-Integrit&auml;t (eiserne Regel):</b> kein UI-Element korreliert je mit der Handst&auml;rke. Tells = Pers&ouml;nlichkeit + Rauschen, beweisbar handunabh&auml;ngig.</li>
+      <li>Dein qualifizierendes Paar leuchtet (kein Gegner-Leak).</li></ul></div>
+    <div class="card"><h4><span class="swatch" style="background:#2CD4A8"></span>Phase 3 &middot; Ausspielen</h4>
+      <p class="muted">Die Ketten-Kaskade</p><ul>
+      <li>Domino-Kaskade: Zwangskarten 180 ms/Karte, Pitch steigt (Do-Re-Mi), .light-Ticks.</li>
+      <li>Beat-Drop am Stopp (350 ms): „Klack" + .medium + Stille, Stopper-Karte gl&uuml;ht golden. Stopps: Ass / offene Trumpfkarte / bereits gespielt.</li>
+      <li>„Der Z&auml;hler" (fairer Assist-Toggle): Juwelen-Aura auf Handkarten, die beweisbar stoppen (nur &ouml;ffentliche Info). „Meister/Pur" schaltet aus.</li>
+      <li>Rundenende: Hand leer &rarr; sofort Freeze; Centerpot (Platin) einziehen; Straf-Strom pro Verlierer.</li></ul></div>
+  </div>
+
+  <h3>3b &middot; Phasen-Morph - drei Akte, eine B&uuml;hne</h3>
+  <p class="muted">Gegen Repetitivit&auml;t: der Ring steht nicht starr zentral. Das Interface morpht mit dem Spielfluss (dieselbe Welt, pro Phase andere Komposition/Energie/Farb-Logik). Verbunden &uuml;ber <code>.matchedGeometryEffect</code> (Raum) + gekoppelte Opacity-/Farb-Transitionen (Fokus).</p>
+  <ul class="klist">
+    <li><b>&rarr; Phase 2:</b> die 8 Mulden ents&auml;ttigen (Jewel &rarr; Slate, ~20% Opacity), weichen zur&uuml;ck; der Poch-Pott l&ouml;st sich, wandert erh&ouml;ht ins Zentrum, w&auml;chst +15% und pulst im Amethyst-Takt.</li>
+    <li><b>&rarr; Phase 3:</b> Ring/Pots blenden fast aus; der Karten-F&auml;cher &ouml;ffnet sich, schafft Raum f&uuml;r die Domino-Kaskade.</li>
+  </ul>
+</section>
+
+<!-- ===================== META ===================== -->
+<section id="meta">
+  <h2>4 &middot; Meta-Progression (Architektur)</h2>
+  <div class="cards">
+    <div class="card"><h4>Charakter-Roster</h4><p class="muted" style="font-size:13px">Archetypen mappen 1:1 auf BotProfile-Parameter. Blade (aggressiv), Nova (Mathematikerin, konservativ), Glitch (unberechenbar).</p></div>
+    <div class="card"><h4>Deck-Unlocks</h4><p class="muted" style="font-size:13px">Kern der Progression = Kartenr&uuml;cken-Signets, freigeschaltet &uuml;ber Saisons. Kein Pay2Win; f&auml;rbt die funktionalen Mulden-Farben NICHT um.</p></div>
+    <div class="card"><h4>Rangliste &amp; Saisons</h4><p class="muted" style="font-size:13px">Ligen „Hinterzimmer &rarr; Gildenhalle &rarr; K&ouml;nigliche Krypta". v1 = async Single-Player-Wertung; Live-PvP = v2.</p></div>
+    <div class="card"><h4>Gilden-Chronik</h4><p class="muted" style="font-size:13px">Edles Buch statt Statistik-Men&uuml;: demaskiert KI-Tendenzen („Nova knickt bei 12-Chip-Erh&ouml;hungen zu 84% ein"). Nie Live-Handinfo.</p></div>
+  </div>
+
+  <h3>5 &middot; Poch-Ring-Blueprint</h3>
+  <table><thead><tr><th>Tile</th><th>Winkel</th><th>Token</th><th>Index</th></tr></thead><tbody>
+    <tr><td>K&ouml;nig</td><td>0&deg;</td><td><span class="swatch" style="background:#C5A059"></span>Gold</td><td><code>K</code></td></tr>
+    <tr><td>Dame</td><td>45&deg;</td><td><span class="swatch" style="background:#C5A059"></span>Gold</td><td><code>Q</code></td></tr>
+    <tr><td>Mariage</td><td>90&deg;</td><td><span class="swatch" style="background:#8E2A43"></span>Rose</td><td><code>K+Q</code></td></tr>
+    <tr><td>Bube</td><td>135&deg;</td><td><span class="swatch" style="background:#C5A059"></span>Gold</td><td><code>J</code></td></tr>
+    <tr><td>Zehn</td><td>180&deg;</td><td><span class="swatch" style="background:#C5A059"></span>Gold</td><td><code>10</code></td></tr>
+    <tr><td>Sequenz</td><td>225&deg;</td><td><span class="swatch" style="background:#1A5E4E"></span>Smaragd</td><td><code>7-8-9</code></td></tr>
+    <tr><td>Poch-Pot</td><td>270&deg;</td><td><span class="swatch" style="background:#4A2E65"></span>Amethyst</td><td>&rarr; Ph.2</td></tr>
+    <tr><td>Ass</td><td>315&deg;</td><td><span class="swatch" style="background:#C5A059"></span>Gold</td><td><code>A</code></td></tr>
+  </tbody></table>
+
+  <h3>6 &middot; Offene Entscheidungen</h3>
+  <ul class="klist">
+    <li>Karten-Stil + Charakter-Look &rarr; <b>siehe oben „Zum Entscheiden"</b>.</li>
+    <li>Theme-Held A/B &rarr; live am Ende.</li>
+    <li>jackpotKollapsThreshold per Headless-Sim kalibrieren (~15-20% Z&uuml;nd-Rate).</li>
+    <li>Kartenr&uuml;cken-Signet final (Empfehlung: Mulden-Ring, premium-ged&auml;mpft).</li>
+  </ul>
+  <p class="muted" style="margin-top:10px"><b>Bereits entschieden:</b> Produkt-Linie X &middot; Balatro-Feel-nicht-Struktur &middot; Farbe=Label Juwelen &middot; Poch-Ring &middot; Karten A/K/Q/J/10 &middot; Kern-Trias &middot; Style-Anker (Mockup) &middot; Material&gt;Glow.</p>
+</section>
+
+<footer>Poch 1441 &middot; ein Dokument (Cockpit + Kanon) &middot; iCloud-TEMP &middot; wird nach jeder Loop-Iteration aktualisiert</footer>
+</div>
+<div class="toast" id="toast">Kopiert</div>
+<script>function cp(t){navigator.clipboard.writeText(t).then(()=>{var e=document.getElementById('toast');e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1400)})}</script>
+</body></html>
