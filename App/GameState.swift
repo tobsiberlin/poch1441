@@ -82,6 +82,7 @@ final class GameState {
         seatActions = Array(repeating: .none, count: round.stacks.count)
         revealedPlays = 0
         kollapsInfo = nil
+        endPhase = .none
     }
 
     // MARK: - Phase 2 (Pochen) - Zustand
@@ -223,6 +224,22 @@ final class GameState {
         revealedPlays == (round.playout?.plays.count ?? 0)
     }
 
+    /// Rundenende-Inszenierung (§6c c): Eiszeit-Vakuum -> Straf-Strom -> Banner.
+    enum EndPhase: Comparable { case none, frozen, punishing, done }
+    private(set) var endPhase: EndPhase = .none
+
+    /// Anzeige-Konto am Rundenende: im Freeze noch VOR den Strafzahlungen, ab dem
+    /// Straf-Strom rollen die Zähler auf den Endstand.
+    func displayedEndStack(of seat: Int) -> Int {
+        guard let result = roundResult, endPhase == .frozen || endPhase == .none else {
+            return round.stacks[seat]
+        }
+        if seat == result.winner {
+            return round.stacks[seat] - result.centerPool - result.payments.reduce(0, +)
+        }
+        return round.stacks[seat] + result.payments[seat]
+    }
+
     /// Sichtbare Hand eines Sitzes: Deal minus enthüllte Plays (nicht Engine-Stand,
     /// der der Präsentation vorausläuft).
     func displayedHand(of seat: Int) -> [Card] {
@@ -283,7 +300,8 @@ final class GameState {
                     try? await Task.sleep(for: .seconds(Tokens.p3BeatDrop))
                 }
             } else if stage != .playout {
-                return  // Runde vorbei - Banner übernimmt
+                await runEndSequence()
+                return
             } else if phase.leader != 0 {
                 // Bot spielt an: kurze Denkpause, dann niedrigste Karte
                 // (Platzhalter-Heuristik; echte Anspiel-Taktik kommt mit den Bot-Profilen)
@@ -305,6 +323,27 @@ final class GameState {
                 return  // Mensch führt - warten auf Tap
             }
         }
+    }
+
+    /// Eiszeit-Vakuum (§6c c): sofortiger Freeze -> 400-ms-Zäsur (Centerpot glüht) ->
+    /// paralleler Straf-Strom mit gedeckelter 90-ms-Tick-Kadenz -> Banner.
+    private func runEndSequence() async {
+        guard endPhase == .none else { return }
+        endPhase = .frozen
+        hapticTick += 1
+        try? await Task.sleep(for: .seconds(Tokens.p3Vakuum))
+        guard !Task.isCancelled else { return }
+        endPhase = .punishing
+        let totalPayment = roundResult?.payments.reduce(0, +) ?? 0
+        let ticks = min(totalPayment, Tokens.p3PunishTickCap)
+        for _ in 0..<ticks {
+            hapticTick += 1
+            try? await Task.sleep(for: .seconds(Tokens.hapticCadence))
+            if Task.isCancelled { return }
+        }
+        try? await Task.sleep(for: .seconds(0.45))
+        guard !Task.isCancelled else { return }
+        endPhase = .done
     }
 
     #if DEBUG

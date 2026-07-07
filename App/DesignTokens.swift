@@ -72,6 +72,10 @@ enum Tokens {
     static let p3CascadeStep: Double = 0.18
     /// Beat-Drop am Kettenriss: 350 ms Stille, Stopper glüht golden, Anspielrecht wandert.
     static let p3BeatDrop: Double = 0.35
+    /// Eiszeit-Vakuum (§6c c, Tobsi-Entscheid): bewusste Zäsur nach dem Freeze.
+    static let p3Vakuum: Double = 0.4
+    /// Straf-Strom: Haptik-Ticks gedeckelt (viele Restkarten = beschleunigt, nie zäh).
+    static let p3PunishTickCap = 12
 }
 
 extension Color {

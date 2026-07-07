@@ -15,16 +15,37 @@ struct Phase3View: View {
     var body: some View {
         VStack(spacing: 0) {
             opponentsRow
+            centerpotChip
             chainsArea
             Spacer(minLength: 8)
-            if game.stage == .playout {
+            if game.stage == .playout || game.endPhase < .done {
                 statusLine
                 handView
             } else {
                 resultBanner
             }
         }
+        // Straf-Strom (§6c c): Chips fliegen PARALLEL von jedem Verlierer zum Sieger
+        .overlay {
+            if game.endPhase == .punishing, let result = game.roundResult, !reduceMotion {
+                PunishStreams(result: result)
+                    .allowsHitTesting(false)
+            }
+        }
+        // Rundenende-Juice skaliert mit dem Pott (§6c Auflage 1): Platin-Vignette
+        // nur beim genuin fetten Centerpot, nie als Dauer-Ritual
+        .overlay {
+            if game.endPhase == .punishing, let result = game.roundResult,
+               result.centerPool + result.payments.reduce(0, +)
+                   >= Tokens.jackpotKollapsThreshold {
+                KollapsVignette(tint: Tokens.jewelPlatin,
+                                duration: reduceMotion ? 0.05 : Tokens.kollapsFlash)
+                    .allowsHitTesting(false)
+            }
+        }
     }
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - Gegner als ruhiger Rahmen (§5c Phase 3: matter Schiefer, Fokus aufs Rennen)
 
@@ -56,16 +77,43 @@ struct Phase3View: View {
                 .foregroundStyle(isLeader ? Tokens.jewelPlatin.opacity(0.9) : Tokens.slate)
             Text("\(restCards) Karten").font(.system(size: 9))
                 .foregroundStyle(Tokens.slate.opacity(0.8))
+            Text("\(game.displayedEndStack(of: seat))")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Tokens.jewelGold.opacity(0.9))
+                .contentTransition(.numericText())
+                .animation(.easeOut(duration: 0.6), value: game.endPhase)
         }
         .saturation(isLeader ? 1 : 0.2)
         .opacity(isLeader ? 1 : 0.55)
         .animation(.easeInOut(duration: 0.25), value: isLeader)
     }
 
+    /// Der Centerpot (Platin) - ruhiger Anker; leuchtet im Eiszeit-Vakuum auf (§6c c).
+    private var centerpotChip: some View {
+        let glowing = game.endPhase == .frozen || game.endPhase == .punishing
+        let value = game.roundResult?.centerPool ?? game.chips(in: .center)
+        return HStack(spacing: 5) {
+            Text("Centerpot").font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Tokens.slate)
+            Text("\(value)").font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Tokens.jewelPlatin)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 4)
+        .background(Capsule().fill(.white.opacity(glowing ? 0.10 : 0.04))
+            .overlay(Capsule().strokeBorder(
+                Tokens.jewelPlatin.opacity(glowing ? 0.9 : 0.3), lineWidth: 1))
+            .shadow(color: Tokens.jewelPlatin.opacity(glowing ? 0.5 : 0),
+                    radius: glowing ? 10 : 0))
+        .scaleEffect(glowing ? 1.12 : 1)
+        .animation(.spring(duration: 0.3), value: glowing)
+        .padding(.top, 8)
+    }
+
     // MARK: - Die Ketten (lesbare Sequenz, §6c a)
 
     private var chainsArea: some View {
         let chains = game.revealedChains
+        let frozen = game.endPhase >= .frozen
         return ScrollViewReader { proxy in
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 10) {
@@ -80,6 +128,10 @@ struct Phase3View: View {
                 .frame(maxWidth: .infinity)
             }
             .frame(maxHeight: 330)
+            // Eiszeit-Vakuum (§6c c): in der ms des Rundenendes entsättigt alles zu Schiefer
+            .saturation(frozen ? 0.08 : 1)
+            .opacity(frozen ? 0.55 : 1)
+            .animation(.easeOut(duration: 0.12), value: frozen)
             .onChange(of: chains.count) {
                 withAnimation { proxy.scrollTo(chains.count - 1, anchor: .bottom) }
             }
@@ -162,5 +214,45 @@ struct Phase3View: View {
                 .font(.system(size: 10)).foregroundStyle(Tokens.slate.opacity(0.7))
         }
         .padding(.bottom, 16)
+    }
+}
+
+/// Straf-Strom (§6c c): pro Verlierer ein PARALLELER Chip-Strom zum Sieger
+/// (nie sequenzielle Einzelflüge - Auflage). Zahlungen visuell auf 5 Chips gedeckelt.
+private struct PunishStreams: View {
+    let result: (winner: Int, centerPool: Int, payments: [Int])
+    @State private var flown = false
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            let winnerPos = position(seat: result.winner, w: w, h: h)
+            ZStack {
+                ForEach(Array(result.payments.enumerated()), id: \.offset) { seat, payment in
+                    if payment > 0, seat != result.winner {
+                        let from = position(seat: seat, w: w, h: h)
+                        ForEach(0..<min(payment, 5), id: \.self) { i in
+                            Circle()
+                                .fill(LinearGradient(
+                                    colors: [Tokens.jewelPlatin.opacity(0.9),
+                                             Tokens.jewelGold.opacity(0.7)],
+                                    startPoint: .top, endPoint: .bottom))
+                                .frame(width: 9, height: 9)
+                                .position(flown ? winnerPos : from)
+                                .opacity(flown ? 0.05 : 1)
+                                .animation(.easeIn(duration: 0.5)
+                                    .delay(Double(i) * 0.07), value: flown)
+                        }
+                    }
+                }
+            }
+            .onAppear { flown = true }
+        }
+    }
+
+    private func position(seat: Int, w: CGFloat, h: CGFloat) -> CGPoint {
+        seat == 0 ? CGPoint(x: w / 2, y: h - 90)
+                  : CGPoint(x: w / 2 + CGFloat(seat - 2) * 70, y: 46)
     }
 }

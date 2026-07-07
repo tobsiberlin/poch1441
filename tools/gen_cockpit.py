@@ -12,7 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441-cockpit.html"
 
 # ---- Status (hier pflegen) ------------------------------------------------
-STAND = "8. Juli 2026 &middot; Phase-1-Juice komplett (Trumpf-Beat + Melde-Strom) &middot; Kessel + Monogramm warten auf dich"
+STAND = "8. Juli 2026 &middot; Kern-Trias-Feel v1 KOMPLETT &middot; Kessel + Monogramm warten auf dich"
 
 JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hne - Tokens fliegen von der "
          "Top-Bar an die Kardinalpunkte und weiter in die Schiefer-Reihe, die Poch-Mulde l&ouml;st sich aus dem "
@@ -30,7 +30,7 @@ STRANDS = [
     ("done", "Design-Kanon", "konzept.md - Kern-Trias, Farbhierarchie, Meta", 95),
     ("work", "Fundament / UI", "Ring, Themes, Material + Phase-2-Layout (Pochen)", 58),
     ("work", "Kunst / Assets", "Kartenrücken W2 final (Freeze); Charakterstil O registriert", 52),
-    ("work", "Game-Feel / Animation", "P1 komplett inkl. Balatro-Kollaps (T=12 sim-kalibriert), Poch-Schlag, Morph", 55),
+    ("work", "Game-Feel / Animation", "Kern-Trias-Feel v1 KOMPLETT (P1-Juice, Poch-Schlag, Kaskade, Eiszeit-Vakuum, Morph)", 62),
     ("plan", "Sound / Haptik", "-", 0),
     ("plan", "Meta-Progression", "Design in §7, Code = 0%", 8),
     ("plan", "Monetarisierung", "StoreKit-2-Unlock 4,99 €", 0),

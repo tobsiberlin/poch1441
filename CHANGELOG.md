@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.1] - Das Eiszeit-Vakuum (§6c c) - 8.7.2026
+
+### Hinzugefügt
+- Rundenende-Inszenierung als State-Machine (frozen -> punishing -> done): in der ms der letzten Karte entsättigen alle Ketten zu Schiefer (Freeze), der Centerpot (Platin) leuchtet auf, dann die bewusste **400-ms-Zäsur** (Parameter-Lock p3Vakuum), dann der **Straf-Strom PARALLEL pro Verlierer** (Chip-Ströme zum Sieger, visuell auf 5 Chips gedeckelt) mit gedeckelter 90-ms-Tick-Kadenz (max. 12 Ticks - nie zäh), Konten rollen numerisch, erst danach das Banner.
+- Rundenende-Juice skaliert mit dem Pott (§6c Auflage 1): Platin-Vignette nur beim genuin fetten Centerpot (>= Kollaps-Threshold), Baseline bleibt ruhig.
+- reduceMotion: keine Chip-Flüge, sanfte Fades (§6c Auflage 2); Stack-Labels an den Schiefer-Tokens.
+
+### Geprüft
+- Frame-Serie einer echten Runde (-ausspielStart -autoLead): Farbe -> Schiefer-Freeze -> glühender Centerpot -> Zäsur -> Banner klar sichtbar; Timing Freeze->Banner ~1,7 s wie ausgelegt.
+
+
 ## [0.6.0] - Der Balatro-Kollaps (§6a e) - 8.7.2026
 
 ### Hinzugefügt
