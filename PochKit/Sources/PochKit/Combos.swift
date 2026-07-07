@@ -34,7 +34,9 @@ public enum ComboEvaluator {
         }
 
         var best: Combo?
-        for (rank, count) in countsByRank where count >= 2 {
+        // Nach Rang absteigend iterieren - Ergebnis ist zwar per `beats` ordnungsunabhängig,
+        // aber feste Iterationsreihenfolge macht den Determinismus strukturell statt zufällig.
+        for (rank, count) in countsByRank.sorted(by: { $0.key.rawValue > $1.key.rawValue }) where count >= 2 {
             let kind: Combo.Kind = count >= 4 ? .quad : (count == 3 ? .triple : .pair)
             let candidate = Combo(
                 kind: kind,

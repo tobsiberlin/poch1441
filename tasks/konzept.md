@@ -46,6 +46,8 @@ Poch 1441 ist das **reine Poch**: drei Phasen, Charaktere mit Persönlichkeit, C
 
 Matte, satte **Juwelen-Töne** auf tiefdunklem, fast schwarzem Grund - NIE Neon. Tiles flach, rahmenlos. Zahlen: fetter, serifenloser Font, sofort lesbar.
 
+**Glow-Budget (bindend, Material > Glow):** Emission ist ein *rarer belohnter Akzent* („Der Poch", Balatro-Kollaps, Stich gewonnen) - **nie die Grundstimmung**. Die glow-Formulierungen in den Feel-Specs (§6/6b/6c: „Lichtpuls", „pulsierendes Glühen", „Poch-Pott pulst") gelten unter diesem Budget: kurz aufleuchten, dann zurück auf matt/Material. Dauer-Glow ist der Casino-/Cyber-Rückfall - verboten. (Der Mockup-Anker ist eine **Layout**-Referenz; sein Glow ist NICHT die Rendering-Vorgabe.)
+
 **Entschieden (Tobsi, 6.7.): internationale Notation A, K, Q, J, 10** auf den Karten und den Index-Labels des Poch-Rings. Begründung: Poch 1441 positioniert sich als Ur-Poker-Strategiespiel; die Zielgruppe kennt A/K/Q/J aus Poker/Balatro (sofortige Vertrautheit), und es eliminiert Lokalisierungs-Clashes im Code (kein D/B↔Q/J-Umschalten je Systemsprache). In deutschen Menü-/Erklärtexten weiter „Dame"/„Bube", aber auf Karten + Index-Labels international.
 
 ## 5b. Phasen-Morph - Drei Akte, eine Bühne (Regie-Ebene, Tobsi 6.7.)
@@ -157,7 +159,7 @@ Radikaler Tempowechsel: aus dem psychologischen Belauern (Phase 2) wird ein blit
 
 ## 7. Meta-Progression (Architektur, Tobsi 6.7. - mit Präzisierungen)
 
-Ohne Meta trägt das Regelwerk ~6-12 h; mit Meta 100 h+. Vier Säulen, alle rein kosmetisch/kompetitiv - **kein Pay2Win, kein Echtgeld-Vorteil, Core unangetastet.**
+Ohne Meta trägt das Regelwerk ~6-12 h; mit Meta 100 h+. Vier Säulen, alle rein kosmetisch/kompetitiv - **kein Pay2Win, kein Echtgeld-Vorteil, Core unangetastet.** **Status (7.7.): Architektur steht, Code = 0 %** - die 100-h-Tragfähigkeit ist geplant/gezeichnet, noch nicht gebaut (kommt nach dem Look-Layer).
 
 **1. Charakter-Roster & KI-Persönlichkeiten**
 - Markante Archetypen statt austauschbarer Profilbilder, jeder bringt „faires Wissen" (Persönlichkeit + Rauschen) in Phase 2. Reduzierter, ausdrucksstarker Vektor-Porträt-Stil, modern.

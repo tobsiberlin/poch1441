@@ -14,13 +14,13 @@ TEMP = "/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/poch-1441
 # ---- Status (hier pflegen) ------------------------------------------------
 STAND = "7. Juli 2026, nachts &middot; Iterationen 1-3 (Material-Fundament) fertig"
 STRANDS = [
-    ("done", "Regelwerk / Engine", "PochKit - Gate A, 47 Tests grün", 100),
+    ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
     ("done", "Design-Kanon", "konzept.md - Kern-Trias, Farbhierarchie, Meta", 95),
     ("work", "Fundament / UI", "Ring, Engine-Bridge, 2 Themes, Material-Craft", 48),
     ("work", "Kunst / Assets", "painterly Deck + Gesichter, Integration wartet auf Entscheidung", 30),
     ("plan", "Game-Feel / Animation", "Deal/Meld-Juice, Phasen-Morph, Tells", 4),
     ("plan", "Sound / Haptik", "-", 0),
-    ("plan", "Meta-Progression", "Design in §4, kein Code", 8),
+    ("plan", "Meta-Progression", "Design in §7, Code = 0%", 8),
     ("plan", "Monetarisierung", "StoreKit-2-Unlock 4,99 €", 0),
     ("plan", "Tutorial", "-", 0),
     ("plan", "Lokalisierung 7 Sprachen", "ab erstem String", 0),

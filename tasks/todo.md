@@ -4,7 +4,7 @@
 
 ## Fertig
 
-- [x] **Engine (PochKit) - Gate A eingefroren.** Alle 3 Phasen (Melden/Pochen/Ausspielen), Combos, Dealing (8/8/8/7), Match-Modi, Bot-Profile. Deterministisch, headless simulierbar. **47 Tests, 0 Failures.**
+- [x] **Engine (PochKit) - Gate A eingefroren.** Alle 3 Phasen (Melden/Pochen/Ausspielen), Combos, Dealing (8/8/8/7), Match-Modi, Bot-Profile. Deterministisch, headless simulierbar. **55 Tests, 0 Failures.**
 - [x] **Design-Kanon** (`konzept.md`): Produkt-Linie X, Balatro-Feel-nicht-Struktur, Farbe=Label (Juwelen), Poch-Ring, Kern-Trias-Feel-Specs, Meta-Architektur, Phasen-Morph.
 - [x] **SwiftUI-Fundament:** Ring-Geometrie (8 Mulden + Mitte), GameState←PochKit-Bridge (echte Werte), 2-Theme-System (Premium-matt + Vivid), MatchSource-Seam.
 - [x] **Material-Fundament (Iter. 1-3):** warmes Tinten-Schwarz + Vignette, Metallkanten statt Dauer-Glow, gefräste Ring-Linie + Mitte-Pott. Beide Themes grün + screenshot-verifiziert.

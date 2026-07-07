@@ -11,7 +11,7 @@ public struct Deal: Equatable, Sendable {
     public static func deal(playerCount: Int, seed: UInt64) -> Deal {
         precondition((3...6).contains(playerCount), "Poch trägt 3-6 Spieler (Spec Abschnitt 3)")
         var rng = SeededRNG(seed: seed)
-        let shuffled = Deck.standard32.shuffled(using: &rng)
+        let shuffled = rng.shuffled(Deck.standard32)
 
         var hands = Array(repeating: [Card](), count: playerCount)
         for (index, card) in shuffled.dropLast().enumerated() {

@@ -52,7 +52,7 @@ public enum BotBrain {
                               legal: BettingPhase.LegalActions,
                               rng: inout SeededRNG) -> BettingPhase.Action {
         let honest = strength(hand: round.deal.hands[player], trump: round.deal.trump)
-        let bluffing = honest < 0.4 && Double.random(in: 0..<1, using: &rng) < profile.bluffFrequency
+        let bluffing = honest < 0.4 && rng.nextDouble01() < profile.bluffFrequency
         let effective = min(1.0, honest + (bluffing ? 0.38 : 0))
 
         if let open = legal.openRange {
@@ -89,7 +89,7 @@ public enum BotBrain {
     public static func thinkSeconds(profile: BotProfile, rng: inout SeededRNG) -> Double {
         let low = min(profile.thinkSecondsMin, profile.thinkSecondsMax)
         let high = max(profile.thinkSecondsMin, profile.thinkSecondsMax)
-        return Double.random(in: low...high, using: &rng)
+        return rng.nextDouble(in: low...high)
     }
 }
 

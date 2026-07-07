@@ -53,7 +53,7 @@ final class BettingTests: XCTestCase {
 
     /// Spec Abschnitt 3 (Kantenfall): 0-Chip-Spieler kann nur passen - und drückt den Cap nicht auf 0.
     func testZeroChipPlayerOnlyPassesAndDoesNotLowerCap() throws {
-        var p = phase(stacks: [10, 0, 6])
+        let p = phase(stacks: [10, 0, 6])
         XCTAssertEqual(p.bidCap, 6, "Cap zählt nur bietberechtigte Spieler - der 0-Chip-Sitz nicht")
         let legalZero = try XCTUnwrap({ () -> BettingPhase.LegalActions? in
             var copy = p

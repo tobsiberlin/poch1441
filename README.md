@@ -5,7 +5,7 @@ Modernes Premium-Strategie-/Bluffspiel für iOS - der Urahn des Pokers (1441 in 
 - **Design-Kanon:** `tasks/konzept.md` (Kurzfassung in `CLAUDE.md §0`)
 - **Regelwerk & Roadmap:** `tasks/poch-spec.md` · **Status/Cockpit:** `artifacts/poch-1441-cockpit.html`
 - **Stack:** Swift, SwiftUI + PochKit (Engine als UI-freies, deterministisches Swift Package); SpriteKit für die Spieltisch-Juice-Ebene geplant
-- **Status:** Engine (Gate A) eingefroren, 47 Tests grün · SwiftUI-Fundament (Poch-Ring, 2 Themes Premium-matt/Vivid, Material-Basis) in Arbeit · Gate 0.5 (Naming/Rating) offen
+- **Status:** Engine (Gate A) eingefroren, 55 Tests grün · SwiftUI-Fundament (Poch-Ring, 2 Themes Premium-matt/Vivid, Material-Basis) in Arbeit · Gate 0.5 (Naming/Rating) offen
 
 ## Struktur
 

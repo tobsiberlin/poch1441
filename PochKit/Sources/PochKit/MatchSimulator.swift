@@ -56,7 +56,7 @@ public enum MatchSimulator {
                     let hand = phase.hands[phase.leader]
                     guard !hand.isEmpty else { break }
                     decisions += 1
-                    let card = policy == .random ? hand[Int.random(in: 0..<hand.count, using: &rng)] : hand[0]
+                    let card = policy == .random ? hand[rng.nextInt(in: 0..<hand.count)] : hand[0]
                     try? round.applyLead(card)
                 case .finished:
                     break
@@ -87,10 +87,10 @@ public enum MatchSimulator {
         switch policy {
         case .random:
             var actions: [BettingPhase.Action] = [.pass]
-            if let open = legal.openRange { actions.append(.open(Int.random(in: open, using: &rng))) }
+            if let open = legal.openRange { actions.append(.open(rng.nextInt(in: open))) }
             if legal.canCall { actions.append(.call) }
-            if let raise = legal.raiseRange { actions.append(.raise(to: Int.random(in: raise, using: &rng))) }
-            return actions[Int.random(in: 0..<actions.count, using: &rng)]
+            if let raise = legal.raiseRange { actions.append(.raise(to: rng.nextInt(in: raise))) }
+            return actions[rng.nextInt(in: 0..<actions.count)]
 
         case .cautious:
             guard let combo = ComboEvaluator.best(in: round.deal.hands[player], trump: round.deal.trump) else {

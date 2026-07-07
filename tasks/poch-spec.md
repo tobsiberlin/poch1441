@@ -1,19 +1,21 @@
 # Poch - Spec & Projektplan (v1)
 
-**Stand:** 5. Juli 2026
-**Status:** Phasen 0+1 abgeschlossen; **GATE A BESTANDEN - Regelwerk EINGEFROREN (Tobsi, 5.7.2026)**. Phase 2 läuft (LoRA-Weg-Entscheidung offen). 10 Review-Runden dokumentiert (Abschnitt 16)
+**Stand:** 7. Juli 2026
+**Status:** Regelwerk EINGEFROREN (Gate A). Engine + SwiftUI-Fundament stehen; **55 Tests grün** (50 XCTest + 5 swift-testing). 10 Review-Runden dokumentiert (Abschnitt 16)
+
+> **Design/Art-Direction:** kanonische Quelle ist `tasks/konzept.md` + `CLAUDE.md §0` (clean-modern-premium, Material>Glow, 2 Themes Premium-matt/Vivid). Wo dieses Dokument noch ältere Design-/Theme-/Wirtshaus-Formulierungen enthält, **überstimmt der Kanon** - dieses Dokument trägt das Regelwerk + den Projektplan, nicht die Art-Direction.
 **Name:** Poch 1441 (entschieden 5.7.; Markenrecherche vor Store-Festlegung ausstehend) - Repo: github.com/tobsiberlin/poch1441
 
 ---
 
 ## 1. Vision & Positionierung
 
-Poch (Pochspiel, erstmals 1441 in Straßburg erwähnt) ist der dokumentierte Urahn des Pokers - und es existiert keine polierte Mobile-Umsetzung. Wir bauen die definitive iOS-Version: ein Premium-Kartenspiel mit handgemalter Wirtshaus-Ästhetik (Referenz: Carcassonne-App), Balatro-artigem Game-Feel (Juice, nicht Pixel-Look) und KI-Gegnern mit Bluff-Persönlichkeiten.
+Poch (Pochspiel, erstmals 1441 in Straßburg erwähnt) ist der dokumentierte Urahn des Pokers - und es existiert keine polierte Mobile-Umsetzung. Wir bauen die definitive iOS-Version: ein modernes Premium-Kartenspiel (clean-digital, Material>Glow - Art-Direction in `tasks/konzept.md`), mit Balatro-artigem Game-Feel (Juice, nicht Pixel-Look) und KI-Gegnern mit Bluff-Persönlichkeiten.
 
 **Positionierung v2 „Modern-first" (Tobsi, 6.7.2026, bindend - ersetzt die Historie-zuerst-Lesart):**
 *„Ein modernes Premium-Kartenspiel, gestaltet mit zeitlosen Materialien, inspiriert von einem Spiel, das seit 1441 gespielt wird."* Die Reihenfolge ist Programm: Erst „außergewöhnliches Strategiespiel" (Hook), dann „seit 1441 gespielt" als Prestige-Stempel und Überraschung (Trojanisches Pferd im Splash/Onboarding). Die Historie ist Gütesiegel („zeitlos gut, weil jahrhundertelang bewährt"), nie staubiges Hauptverkaufsargument. Poch positioniert sich als Brettspiel-Erbe (Materialwelt von Schach/Backgammon/Go), ausdrücklich NICHT in der Poker-/Casino-Kategorie - dort wartet nur der Budget-Kampf gegen PokerStars-Polish.
-- **Design-Nordstern: „Scandinavian luxury meets 1441"** - als hätte ein skandinavisches Premium-Studio (B&O-/Carl-Hansen-Klasse) ein historisches Pochbrett neu interpretiert: Nussbaum, dunkler Filz, Messing, perfekte Fräsungen, moderne reduzierte Geometrie. Doppeltes Verbot: Mittelalter-Kitsch (Pergament-Menüs, Fraktur, Ritter/Burg/Drachen, Wappen-Flut) UND Generic-Casino (Navy-Filz+Gold-Pokertisch).
-- **Distinctive-warm schlägt generic-premium:** Die ownable Painterly-Welt + die Charaktere sind das Marken-Asset (2026: character-oriented + cozy zieht; Hades/Balatro/Gris gewannen über Eigenständigkeit, nie über „premium wie die Großen"). Warm + präzise schlägt kalt + austauschbar.
+- **Design-Richtung:** clean-modern-premium, dunkel (warmes Tinten-Schwarz), matte/pigmentierte Juwelen-Töne, gefräste Ringe, **Material > Glow**. Kein Holztisch, kein Mittelalter, kein Casino-Neon. Kanonische Art-Direction: `tasks/konzept.md` / `CLAUDE.md §0`.
+- **Distinctive schlägt generic-premium:** die Charaktere - das *eine* warme, painterly Material im cleanen Rahmen - sind das Marken-Asset; der Kontrast warme Menschen / präzises System ist die Eigenständigkeit (2026: character-oriented + cozy zieht; Hades/Balatro/Gris gewannen über Eigenständigkeit, nie über „premium wie die Großen").
 
 Store-sichere Alt-Formulierung bleibt gültig: „Europäisches Kartenspiel des 15. Jahrhunderts, einer der historischen Vorläufer des Pokers" - keine Fremdmarken und keine angreifbaren Superlative in Store-Metadaten; freche Zeilen wie „älter als Amerika" nur in Social-Content, nicht im Store.
 
@@ -74,7 +76,7 @@ Quelle: Pagat.com (McLeod, „Poch"), abgeglichen mit de.wikipedia.org/wiki/Poch
 - Erhöhungs-Cap formal: Eine Erhöhung auf Höchstgebot H ist nur zulässig, wenn für jeden noch aktiven Spieler gilt: H minus sein bereits gesetzter Einsatz <= sein Reststack. Der Cap wird nach jedem Passen über die verbliebenen Aktiven neu berechnet; gesetzte Chips eines Passenden bleiben im Pott.
 - Geberrecht rotiert im Uhrzeigersinn über die verbliebenen Spieler; „links vom Geber" meint den nächsten aktiven Spieler.
 - Bei Partie-Ende verfallen nicht gewonnene Mulden ersatzlos - das ist die klassische Regel (Pagat wörtlich: „Any unclaimed chips on the board remain there and are not won by anybody"; nur die Geldspiel-Variante teilt sie auf).
-- **Hausregel-Toggle „Jackpot-Finale" (v1, Default AUS; umbenannt in Runde 9 - „Dramatisches Finale" klang zu actionlastig):** Zu Beginn der letzten Runde wandern alle Restmulden in die Mitte - unhistorisch, aber inszenierungsstark (Review-Runde-7-Idee). Nur in Modi mit Rundenlimit anwendbar (im klassischen Modus ist die letzte Runde nicht vorhersehbar). Wird als Toggle mitkalibriert und getestet, Teil von Gate A.
+- **Hausregel-Toggle „Jackpot-Finale" (v1, Default AUS; umbenannt in Runde 9 - „Dramatisches Finale" klang zu actionlastig):** Zu Beginn der letzten Runde wandern alle Restmulden in die Mitte - unhistorisch, aber inszenierungsstark (Review-Runde-7-Idee). Nur in Modi mit Rundenlimit anwendbar (im klassischen Modus ist die letzte Runde nicht vorhersehbar). **Status (7.7.): geplant, noch NICHT gebaut/getestet** - es gibt keinen `Match.Mode`-Toggle im Code; gehört zu post-Gate-A. (Gate A = das eingefrorene Kern-Regelwerk, nicht die optionalen Toggles - Ähnliches gilt für die Hausregeln „Sequenz-Variante" und „Pochen ohne Paar": spezifiziert, aber noch nicht implementiert.)
 - Wertungsgleichstand: Tie-Break über die Anzahl gewonnener Ausspiel-Phasen; danach geteilter Sieg.
 - Melde-Reihenfolge (aus Review-Runde 5): nicht simultan, sondern der Reihe nach ab links vom Geber - jede Meldung wird einzeln aufgedeckt und ausgezahlt (passt zur inszenierten Melde-Dramaturgie aus Runde 4).
 - Cap-Berechnung zählt nur bietberechtigte aktive Spieler (mit Paar und Stack+Gesetztes > 0): Ein 0-Chip-Spieler oder Spieler ohne Paar kann nie bieten und wird vom Cap nicht geschützt - sonst würde er jedes Bieten auf 0 deckeln. Wer zum Mitgehen exakt seinen ganzen Stack brauchte, deckelt weitere Erhöhungen auf das aktuelle Gebot. Passen ist auch vor der Eröffnung endgültig (kein „Checken"). (Implementierungs-Präzisierung 5.7., Phase-1-Block 2.)
@@ -212,10 +214,9 @@ Skip jederzeit möglich; Tutorial aus dem Menü wiederholbar; alle Texte lokalis
 
 ## 9. Art Direction & Themes
 
-**Art Direction FINAL (Tobsi, 6.7.2026 früh, bindend - präzisiert die Neuausrichtung):**
-Das Default-Gesicht ist der **moderne Premium-Tisch der J-/N-Linie** (dunkles Edelholz, tiefblauer Filz, Gold-/Messing-Präzision, gefräste Rahmen-Fächer; Arbeitsbasis JREF-N2, Provenance atome-jref-2026-07-06.json) - die Ästhetik, die Poker-Spieler als hochwertig erkennen; der 1441-Reveal liefert ihnen die Story „Urahn des Pokers". Design-Übersetzung: die Rahmen-Fächer werden die 8 Mulden, das Filz-Feld trägt Stich + Mitte. Die warmen Painterly-Charaktere bleiben als Marken-Asset am Tisch (Kontrast = Eigenständigkeit). JREF-W2 (Nussbaum+Anthrazit+Messing) ist als Alternativ-/Zweit-Theme dokumentiert. Verbote: kein Kitsch, nichts Verwaschenes, kein Zock-Marketing.
+**Art Direction → `tasks/konzept.md` (kanonisch).** Kurz: clean-modern-premium, dunkel (warmes Tinten-Schwarz), Farbe=Label in Juwelen-Tönen (nie Neon), Poch-Ring als Signatur, **Material > Glow**. Kein Holztisch, kein Mittelalter, kein Casino. Die warmen painterly Charaktere sind das *eine* warme Material im cleanen Rahmen (Kontrast = Eigenständigkeit). Verbote: kein Kitsch, nichts Verwaschenes, kein Zock-Marketing.
 
-**Theme-System:** 3 Themes, umschaltbar (Einstellungen + Schnellwechsel im Pausenmenü). Gleiche Layout-Geometrie, ausgetauscht werden Texturen, Paletten, Musik-Set, Partikel-Stil.
+**Theme-System (kanonisch, `konzept.md`):** 2 Themes mit gleicher Geometrie - **Premium-matt** + **Vivid-Electronic** (dieselben Juwelen-Töne, matt vs. strahlend), der Held wird live gewählt. *Die drei Themes unten (Wirtshaus / Salon / Mitternacht) sind historisch und durch den Kanon ersetzt - hier nur als Archiv-Notiz.*
 
 1. **„Wirtshaus 1441" (Default):** handgemalte, warme Storybook-Ästhetik (Aquarell-Wärme, kein glattes 3D). Holztisch, Kerzenlicht, Pergament, Straßburg-Flavor. **Stil-DNA aus 3 Kandidaten-Runden + 4 externen Reviews (5.7.): Komposition wie Kandidat X** (8 Schalen im Ring + größere 9. Mulde als Pott, Kerze außerhalb, klare Hierarchie), **auf echtes Top-down flachgezogen** (Schräg-Perspektive killt Tap-Targets - Review-4-Punkt, deckt sich mit der Code-Schablone), **Malweise Richtung Kandidat U** (gemalt statt 3D-Render). Polish-Vorgaben aus Review 3: Mittelmulde ~10-15% kleiner, Muldenverbindungen als Gravuren statt dunkler Risse, Holz dunkler/geölter für Münzkontrast. **Rustikal-Auflage (Tobsi, 5.7., bindend): nicht zu clean** - Gebrauchsspuren, raue/imperfekte Texturen, gedecktes Kerzenlicht statt Hochglanz. **Periodengerecht 1441:** Kleidung (Leinen/Wolle/Lederschürze, keine modernen Hemdkragen), Gefäße (Holz/Steinzeug, nie modernes Glas), Bier = trübes Ale mit bescheidenem Schaum (kein Sahnehaufen). Jedes LoRA-Referenz-Set wird VOR dem Training von Tobsi gesichtet (Prozess-Regel nach dem abgebrochenen Erst-Training). **Anti-Slop-Auflagen (Tobsi, 5.7.): nichts Verwaschenes; NIEMALS Schrift/Zahlen im Artwork generieren** (KI-Schrift ist fast immer Slop) - jede Beschriftung inkl. „1441"-Relief kommt als Vektor-Overlay bzw. menschliches Compositing; gemini-vision-QA prüft explizit auf Verwaschenheit und Slop-Schriften.
 2. **„Salon":** modern-clean, ruhig, premium (Apple-Design-Award-Ästhetik). **Stil-Referenz gepinnt (Tobsi, 5.7.): Kandidat J** - tiefblauer Samt-/Filzbezug mit gebürstetem Gold, glasartige Chips, „schön pokerartig"; Seed 2444, Provenance `stil-kandidaten-salon-2026-07-05.json`.
@@ -293,7 +294,7 @@ Das Default-Gesicht ist der **moderne Premium-Tisch der J-/N-Linie** (dunkles Ed
 
 **Implementation-Readiness-Checkliste:**
 - Gate 0.5: [ ] Markenrecherche als Ähnlichkeitssuche (DPMA + EUIPO/TMview + App Store + offenes Web) [ ] Rating-Dry-Run dokumentiert [ ] Bild-/Musikmodell-Lizenzen archiviert
-- Gate A ✅ BESTANDEN (5.7.2026): [x] Invarianten + Property-Tests grün (47 Tests) [x] Economy kalibriert [x] Phasen-Balance-Analyse + Replays (tasks/balance-report.md) [x] Regel-Freeze durch Tobsi erteilt
+- Gate A ✅ BESTANDEN (5.7.2026): [x] Invarianten + Property-Tests grün (55 Tests) [x] Economy kalibriert [x] Phasen-Balance-Analyse + Replays (tasks/balance-report.md) [x] Regel-Freeze durch Tobsi erteilt
 - Gate 7b: [ ] Zielwerte vor Testlauf fixiert [ ] alle Playtest-Metriken erhoben [ ] Go/No-Go für Beta + Launch-Vorbereitung dokumentiert
 
 Sobald ein Launch-Fenster festgezurrt wird, werden die Gates terminiert; bis dahin entscheidet Qualität, nicht Kalender.
