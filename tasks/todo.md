@@ -1,8 +1,8 @@
 # Poch 1441 - Todo / Status
 
-**Stand:** 8. Juli 2026, spät (nach Karten-Session). Kanon: `tasks/konzept.md` · Kurzfassung: `CLAUDE.md §0`
+**Stand:** 8. Juli 2026, Abend (nach Mockup-Delta-Session). Kanon: `tasks/konzept.md` · Kurzfassung: `CLAUDE.md §0`
 **Nordstern-Mockup:** `artifacts/style-ref/mockup-anchor.png` + iCloud TEMP `935b2c31-45a6-44d1-b74d-0dfd39cc8817.JPG`
-**Letzter Commit:** `0.6.7` - Karton-Wölbung im Kartenfächer (CardWarp.metal), alles gepusht
+**Letzter Commit:** `0.7.1` - Phase-1-Ring-Skalierung, alles gepusht
 
 ---
 
@@ -96,14 +96,20 @@ in `CardFace.swift` (numberCard/pipGrid/indexBlock, seit 0.6.4 ungenutzt).
 
 ---
 
+## GERADE ERLEDIGT (Mockup-Delta-Session 0.6.9 → 0.7.1)
+
+- [x] **0.6.9 - Phase-3-Fan:** PlayedCardsFan (scale 2.0, bis 66°), Poch-Medaillon (♥), handFan (angewinkelt)
+- [x] **0.7.0 - Phase-2-Layout:** Slider links (vertikal), Ring rechts (kompakt, Tiles mit Chip-Werten),
+  Portraits UNTEN, handFan (kleiner Fächer)
+- [x] **0.7.1 - Phase-1-Ring:** ringRadius 130→145, Chip-Werte mit „+"-Präfix, Token diskret
+
 ## Nächste Session - Empfohlene Reihenfolge
 
-1. **Phase 3 Fan** - PlayedCardsFan korrekt implementieren (war gebaut, dann reverted
-   wegen Bugs; Muster vom Phase-1-Fächer übernehmen)
-2. **Phase 2 Layout** - Slider links / Ring rechts / Portraits unten
-3. **Phase 1 Ring-Skalierung** - Ring größer, Mulden-Values prominenter
+1. **Morph-QA** - Phasenübergang 1→2→3 am Simulator prüfen (matchedGeometryEffect-Flugbahnen)
+2. **Phase-1 Footer** - Pochen›-Button minimaler / noch diskreter (todo §SOLL)
+3. **Phase-2 Tierschlag-Tuning** - Poch-Pott-Wachstum sichtbarer, kompakter Ring polieren
 
-Wiedereinstieg: „Lies tasks/todo.md, weiter mit Task 1 (Phase-3-Fan)."
+Wiedereinstieg: „Lies tasks/todo.md, weiter mit Morph-QA."
 
 ---
 
