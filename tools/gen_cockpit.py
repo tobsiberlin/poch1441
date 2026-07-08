@@ -23,7 +23,8 @@ JETZT = ("<b>Der Phasen-Morph steht:</b> die drei Akte sind jetzt eine B&uuml;hn
          "Serif-Indizes, punktsymmetrischer Zweit-Index). Deine <b>F&auml;cher-Wette ist entschieden und umgesetzt</b> "
          "(Details unten). Deine zwei Umsetzungs-To-dos sind verankert (Vektor-Monogramm in der App immer "
          "crisp, Schatten-x-Kerzenlicht-Check am SpriteKit-Tisch im Game-Feel-Gate). "
-         "F&uuml;r dich zu tun: Monogramm-Urteil (B) + Kessel-Runde oben.")
+         "<b>R&uuml;cken-Thema ist GESCHLOSSEN</b> (deine Best&auml;tigung 8.7.) - Wiederaufnahme-Kit liegt in "
+         "tasks/kartenruecken-dossier.md. F&uuml;r dich zu tun: nichts.")
 
 STRANDS = [
     ("done", "Regelwerk / Engine", "PochKit - Gate A, 55 Tests grün", 100),
@@ -50,6 +51,7 @@ IN_ARBEIT = [
 ]
 
 REGISTRIERT = [
+    ("8.7.", "Kartenrücken GESCHLOSSEN", "Tobsi bestätigt die Wette: W2 + Kontaktschatten + Graphit-Kante + 1441-Paar = Default. Später änderbar - Wiederaufnahme-Kit in tasks/kartenruecken-dossier.md. KB/KE -> Unlock-Pool."),
     ("8.7.", "Fächer-Wette (Kanten-Mechanik)", "Tobsis Hypothese gewinnt: Kontaktschatten + Graphit-Hairline schlägt Farbrand (WK2 verworfen, letzter Platz). W2-Facette bleibt Freeze; Graphit-Kante in Master + CardBack.swift, Schatten = Render-Eigenschaft."),
     ("7.7.", "Kartenrücken FINAL", "W2 Facetten-Siegel - Asset-Freeze per Exekutions-Befehl. Auflagen erfüllt: Punktsymmetrie (Pixel-Beweis 0/0/0), crisp Vektor-Monogramm, Engine-Branding (CardBack.swift aus DesignTokens), Provenance-Sidecar. Restrisiken (Karo-As, Spielgröße) dokumentiert -> Tisch-Test."),
     ("7.7.", "Rücken-Runde X (Synthese)", "VERWORFEN (deine Gestalt-Analyse): geschlossener Farbkreis = Rad, egal welches Material; X4 = Marke wegoptimiert. Runde 3 (W/B/K) brachte W2."),
@@ -135,7 +137,7 @@ def gal_item(img_b64, title, desc, rec, button_txt=None, copy_txt=None):
 
 def build_decisions():
     h = []
-    h.append('<div class="decide"><h3>NEU &middot; Kessel-Runde - Zentralmotive mit Poch-Kessel-Anklang (dein Zuruf, 8.7. sp&auml;t)</h3>')
+    h.append('<div class="decide"><h3>ERLEDIGT &#10003; &middot; Kessel-Runde (R&uuml;cken geschlossen - Varianten = Unlock-Pool) - Zentralmotive mit Poch-Kessel-Anklang (dein Zuruf, 8.7. sp&auml;t)</h3>')
     h.append('<p class="muted">Rezept fix (Schatten + Graphit-Kante + 1441-Signet), nur das Motiv variiert - '
              'stilisiert, punktsymmetrisch konstruiert, Gestalt-Regel beachtet. Ungeprimte Assoziationen: '
              '<b>KA</b> = Tarot/Geheimgesellschaft (Mysterium-Nachbarschaft, kein Kessel-Read), '
