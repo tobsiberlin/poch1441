@@ -1,41 +1,49 @@
 # Poch 1441 - Todo / Status
 
-**Stand:** 8. Juli 2026. Kanon: `tasks/konzept.md` · Kurzfassung: `CLAUDE.md §0`
+**Stand:** 8. Juli 2026, spät (nach Karten-Session). Kanon: `tasks/konzept.md` · Kurzfassung: `CLAUDE.md §0`
 **Nordstern-Mockup:** `artifacts/style-ref/mockup-anchor.png` + iCloud TEMP `935b2c31-45a6-44d1-b74d-0dfd39cc8817.JPG`
-**Letzter Commit:** `68225e2` - Kartenfächer Phase 1 (Bleed-Ästhetik)
+**Letzter Commit:** `0.6.7` - Karton-Wölbung im Kartenfächer (CardWarp.metal), alles gepusht
 
 ---
 
-## JETZT: Mockup-Delta (8.7. Abend - Pixel-für-Pixel-Vergleich)
+## GERADE ERLEDIGT (diese Session, 0.6.5 → 0.6.7)
 
-Der aktuelle Stand hat massive Abweichungen vom Nordstern-Mockup. Reihenfolge nach Priorität:
+Die komplette Karten-Ästhetik ist neu und von Tobsi iterativ abgenommen („besser") - NICHT wieder anfassen ohne Auftrag:
 
-### KARTEN-ÄSTHETIK (kritisch, alle Phasen)
-- **IST:** SVG-Assets (htdebeer, LGPL) - Bildkarten zweiköpfig korrekt, aber zu DUNKEL und pixelig in der App-Darstellung
-- **SOLL (Mockup):** Karten sind WEISS/sehr hell, crisp, groß, dominieren das Bild
-- **Fix:** SVG-Assets bei @3x rendern (aktuell @2x = 156×225px), Helligkeit prüfen, ggf. neu rendern mit höherer Auflösung
-- **Assets:** `Assets_Raw/svg-cards/png/` → `App/Assets.xcassets/Cards/`
-- **Code:** `CardFace.swift` - `svgCard(named:)` Funktion
+- **0.6.5 - Final-Template:** Alle 32 Vorderseiten aus EINER deterministischen Vorlage
+  (`tools/gen_cards_final.py`, kein KI-Bild): weiße Karte, große Bold-Sans-Indizes
+  (Helvetica Neue Bold) mit Pip darunter (oben-links + unten-rechts, identisches Tile 180°
+  gedreht), htdebeer-Hoffiguren per SVG-Chirurgie OHNE Alt-Indizes, Asse mit großem
+  Zentral-Pip, klassische Pip-Raster. @2x 312×444 + @3x 468×666. Eckradius = CardFace-Clip.
+- **0.6.6 - Mockup-Tiefe:** SVG-Recolor auf tiefe Juwelen-Töne (Gewänder-Weinrot #7E2333,
+  Pip-Karmesin #B51D27, Antikgold #B8933A, staubiges Royal #465685 - Gewänder-/Pip-Rot
+  in der Quelle disjunkt, getrennt gemappt), Papier-Textur (seeded rng(1441), identisch
+  auf allen 32), Pip-Tiefengradient (Licht immer von oben).
+- **0.6.7 - Karton-Wölbung:** `App/CardWarp.metal` als SwiftUI-layerEffect in
+  `CardFace.swift` - obere Ecken rollen subtil hoch (2.4pt × scale), Einroll-Zug an den
+  Seiten, Licht erzählt die Krümmung, deterministischer Seed pro Karte. Layout unverändert
+  (padding/-padding-Paar). Kontaktschatten kräftiger (0.5/4/2.5). taste-gate: PASS.
+- **Index-Report geprüft:** „Falsche Indizes in verdeckten Ecken" = Overlap-Illusion,
+  KEIN Bug (obere rechte Ecke ist designbedingt leer; „fremder" Index gehört der
+  Nachbarkarte; Gewandfarbe verrät seit Recolor nicht mehr die Kartenfarbe - Index zählt).
+- Einmalig installiert: Xcode MetalToolchain (~700 MB, Build-Voraussetzung für .metal).
+- Provenance: `assets/provenance/cardfronts-final.md`. QA-Loop: gemini-vision 3 Runden
+  + taste-gate, Befunde pixelweise verifiziert (nie blind übernommen).
 
-### PHASE 1 - MELDEN
-- **IST:** Ring relativ klein (ca. 40% Screen), Tokens oben numerisch (1/2/3), Fächer angewinkelt aber Karten zu klein/dunkel, Buttons ↺ + "Pochen ›" über Karten
-- **SOLL (Mockup):**
-  - Ring ist GROSS, dominiert 55-60% des Screens
-  - Mulden-Values als große Chip-Anzeige (+130, +20 etc.), nicht kleine Zahlen
-  - Karten-Fächer: GRÖSSER, weißere Karten, Fan-Bogen mit Bleed
-  - Keine sichtbaren Buttons im normalen Spielfluss (oder minimal)
-  - Gegner-Tokens: klein, diskret (nur Buchstabe + Stack)
-- **Dateien:** `ContentView.swift` (handView, ringView, opponentTopBar, phase1Footer)
+**Offener Feinschliff-Kandidat (nur falls Tobsi es live stört):** taste-gate-Restpunkt
+„Kantenbeleuchtung stellenweise zu uniform scharf" (CardWarp-Shading-Konstanten).
 
-### PHASE 2 - POCHEN
-- **IST:** Poch-Pott dominiert Mitte, Gegner-Tokens (B/N/G) drumherum, Slider kaum sichtbar links, Karten in horizontaler Reihe, Buttons "Passen" + "Pochen 1!"
-- **SOLL (Mockup):**
-  - Slider: LINKS, vertikal, groß + Label "RANGE"
-  - Poch-Ring: RECHTS, kompakt, zeigt A/K/Q/J/10 an den Positionen
-  - Action-Buttons: 2×2-Grid mittig (PASS | MITGEHEN / ERHÖHEN | ALL-IN → ohne ALL-IN)
-  - Charakter-Portraits: UNTEN links/rechts mit Status-Bubble ("PASSED")
-  - Karten: kleiner Fächer ganz unten
-- **Dateien:** `Phase2View.swift` - komplettes Layout-Refactoring nötig
+**Geparkte Tobsi-Entscheidung (aus 0.6.6, unbeantwortet):** Custom-Hoffiguren-Sichtung
+via FLUX neben dem jetzigen Stand? (Letzte echte Mockup-Abweichung: einzigartige
+Charakter-Gesichter. Konsistenz-Risiko dokumentiert.)
+
+**Cleanup-Kandidaten (erwähnt, nicht beauftragt):** untrackter Duplikat-Ordner
+`Poch1441/Assets.xcassets/` (Build nutzt nur `App/`); toter Zahlkarten-Rendering-Code
+in `CardFace.swift` (numberCard/pipGrid/indexBlock, seit 0.6.4 ungenutzt).
+
+---
+
+## JETZT: Mockup-Delta (verbleibend, Reihenfolge nach Priorität)
 
 ### PHASE 3 - AUSSPIELEN
 - **IST:** Kleine Karten-Reihen (face-down + face-up), winzige Kartenstapel, viel leerer Raum
@@ -45,7 +53,30 @@ Der aktuelle Stand hat massive Abweichungen vom Nordstern-Mockup. Reihenfolge na
   - Poch-Medallion (Herz-Symbol) prominent im Zentrum
   - Spielerhand-Fächer unten (ebenfalls angewinkelt)
 - **Dateien:** `Phase3View.swift` - PlayedCardsFan (war mal implementiert, wurde reverted)
-- **Technisch:** Korrekte SwiftUI Fan-Implementierung ohne GeometryReader+position-Konflikt (alter Bug). Richtig: `.offset(x:).rotationEffect(.degrees(), anchor: .bottom)` in ZStack
+- **Technisch:** Korrekte SwiftUI Fan-Implementierung ohne GeometryReader+position-Konflikt
+  (alter Bug). Richtig: `.offset(x:).rotationEffect(.degrees(), anchor: .bottom)` in ZStack
+  (so macht es der Phase-1-Fächer in `ContentView.swift::handView`)
+
+### PHASE 2 - POCHEN
+- **IST:** Poch-Pott dominiert Mitte, Gegner-Tokens (B/N/G) drumherum, Slider kaum sichtbar
+  links, Karten in horizontaler Reihe, Buttons „Passen" + „Pochen 1!"
+- **SOLL (Mockup):**
+  - Slider: LINKS, vertikal, groß + Label „RANGE"
+  - Poch-Ring: RECHTS, kompakt, zeigt A/K/Q/J/10 an den Positionen
+  - Action-Buttons: 2×2-Grid mittig (PASS | MITGEHEN / ERHÖHEN | ALL-IN → ohne ALL-IN)
+  - Charakter-Portraits: UNTEN links/rechts mit Status-Bubble („PASSED")
+  - Karten: kleiner Fächer ganz unten
+- **Dateien:** `Phase2View.swift` - komplettes Layout-Refactoring nötig
+
+### PHASE 1 - MELDEN
+- **IST:** Ring relativ klein (ca. 40% Screen), Tokens oben numerisch, Buttons ↺ + „Pochen ›"
+  über Karten (Fächer selbst ist seit dieser Session mockup-nah)
+- **SOLL (Mockup):**
+  - Ring ist GROSS, dominiert 55-60% des Screens
+  - Mulden-Values als große Chip-Anzeige (+130, +20 etc.), nicht kleine Zahlen
+  - Keine sichtbaren Buttons im normalen Spielfluss (oder minimal)
+  - Gegner-Tokens: klein, diskret (nur Buchstabe + Stack)
+- **Dateien:** `ContentView.swift` (handView, ringView, opponentTopBar, phase1Footer)
 
 ---
 
@@ -53,9 +84,12 @@ Der aktuelle Stand hat massive Abweichungen vom Nordstern-Mockup. Reihenfolge na
 
 - [x] **Engine (PochKit) - Gate A.** 55 Tests, 0 Failures. Alle 3 Phasen, Combos, Dealing, Bots.
 - [x] **Kartenrücken W2** - FINAL, Exekutions-Befehl ausgeführt. `CardBack.swift` + Provenance.
-- [x] **Kartenvorderseiten - SVG-Assets (htdebeer/SVG-cards, LGPL)** - 32 klassische Spielkarten eingebunden. Bildkarten (K/D/B) zweiköpfig korrekt, Zahlkarten (7-10) mit Pip-Anordnung. Aktuell @2x - Auflösungs-Fix noch offen.
-- [x] **Kern-Trias-Feel-Spec v1 komplett** (8.7.): Trumpf-Beat §6a, Melde-Strom §6a-b, Poch-Tischschlag §6b, Balatro-Kollaps §6a-e (T=12, 11.557-Runden-Sim), Eiszeit-Vakuum + Straf-Strom §6c.
-- [x] **Phase-1-Fächer** - angewinkelt, Bleed-Ästhetik, Buttons kompakt oben.
+- [x] **Kartenvorderseiten Final-Template 0.6.5-0.6.7** - siehe oben. Generator:
+  `tools/gen_cards_final.py` (deterministisch, reproduzierbar - bei Änderungswunsch
+  Konstanten im Skript anpassen und neu laufen lassen, NIE einzelne PNGs von Hand).
+- [x] **Kern-Trias-Feel-Spec v1 komplett** (8.7.): Trumpf-Beat §6a, Melde-Strom §6a-b,
+  Poch-Tischschlag §6b, Balatro-Kollaps §6a-e (T=12, 11.557-Runden-Sim), Eiszeit-Vakuum §6c.
+- [x] **Phase-1-Fächer** - angewinkelt, Bleed-Ästhetik, jetzt mit Karton-Wölbung.
 - [x] **Phasen-Morph** - matchedGeometryEffect über alle 3 Akte.
 - [x] **Design-Kanon** (`konzept.md`): alle §-Specs dokumentiert.
 - [x] **Naming/Recht:** „POCH 1441" schützbar als Komposit-Marke.
@@ -64,15 +98,18 @@ Der aktuelle Stand hat massive Abweichungen vom Nordstern-Mockup. Reihenfolge na
 
 ## Nächste Session - Empfohlene Reihenfolge
 
-1. **Karten-Ästhetik fixen** (SVG @3x re-rendern, Helligkeit) - schneller Win, alle Phasen profitieren
-2. **Phase 3 Fan** - PlayedCardsFan korrekt implementieren (war gebaut, dann reverted wegen Bugs)
-3. **Phase 2 Layout** - Slider links / Ring rechts / Portraits unten
-4. **Phase 1 Ring-Skalierung** - Ring größer, Mulden-Values prominenter
+1. **Phase 3 Fan** - PlayedCardsFan korrekt implementieren (war gebaut, dann reverted
+   wegen Bugs; Muster vom Phase-1-Fächer übernehmen)
+2. **Phase 2 Layout** - Slider links / Ring rechts / Portraits unten
+3. **Phase 1 Ring-Skalierung** - Ring größer, Mulden-Values prominenter
+
+Wiedereinstieg: „Lies tasks/todo.md, weiter mit Task 1 (Phase-3-Fan)."
 
 ---
 
 ## Offene Tobsi-Gates
 
+- Custom-Hoffiguren-Sichtung ja/nein (geparkt, siehe oben)
 - Charaktere (Stil O = painterly, Konsistenztest VOR Vollproduktion)
 - Theme-Held A/B
 - Juice-Feel, Sound, Haptik
