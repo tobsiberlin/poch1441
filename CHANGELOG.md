@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.3] - Premium-Kartenvorderseiten (Rang-differenziertes Zentrum) - 8.7.2026
+
+### Geändert
+- `CardFace`: rang-differenziertes Zentrum statt einheitlichem Einzel-Pip:
+  - **Zahlkarten 7-10**: klassische 2-spaltige Pip-Anordnung (7/8/9/10 Pips)
+  - **Bildkarten J/Q/K**: großer Serif-Rang-Buchstabe allein (kein redundantes Pip darunter)
+  - **Ass**: ikonische einzelne große Pip mit Tiefenschatten
+- gemini-vision-QA nach je einer Iteration: Lesbarkeit 9/10, Rang-Differenzierung 8/10, Premium-Anmutung 7/10 (von 6/10 vorher). Verbleibende Schwäche = keine Bildkarten-Illustrationen (Phase-2-Asset-Task, kein Code-Fix möglich).
+
+### Hinweis
+- `CardBack` (W2-Final) war bereits in `DealOverlay` eingebaut - bleibt unverändert.
+
+
 ## [0.6.2] - Kostenbremse: Kontext- & Token-Disziplin (Doku) - 8.7.2026
 
 ### Geändert
