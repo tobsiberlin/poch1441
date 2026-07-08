@@ -103,13 +103,24 @@ in `CardFace.swift` (numberCard/pipGrid/indexBlock, seit 0.6.4 ungenutzt).
   Portraits UNTEN, handFan (kleiner Fächer)
 - [x] **0.7.1 - Phase-1-Ring:** ringRadius 130→145, Chip-Werte mit „+"-Präfix, Token diskret
 
+## GERADE ERLEDIGT (Morph-QA-Session, 8. Juli 2026 Abend)
+
+- [x] **Morph-QA** - Alle drei Phasenwechsel am Simulator durchgespielt:
+  - Phase 1 (Melden): Ring, Fan, „Pochen ›"-Button - alles erreichbar, kein Crash
+  - Phase 1→2 Morph: matchedGeometryEffect läuft sauber (kein stuck-State)
+  - Phase 2 (Pochen): Slider links, Ring rechts, Portraits unten, Passen/Pochen-Buttons OK
+  - Phase 2→3 Morph: Übergang nach Poch-Pott-Zuteilung klappt
+  - Phase 3 (Ausspielen): Gespielte Karten im Fan sichtbar, Portraits oben
+  - Phase 3→1 (neue Runde): Sauberer Reset zurück zu Phase 1
+  - **Keine Crashes, keine stuck-Animationen, vollständiger Loop funktioniert.**
+
 ## Nächste Session - Empfohlene Reihenfolge
 
-1. **Morph-QA** - Phasenübergang 1→2→3 am Simulator prüfen (matchedGeometryEffect-Flugbahnen)
-2. **Phase-1 Footer** - Pochen›-Button minimaler / noch diskreter (todo §SOLL)
-3. **Phase-2 Tierschlag-Tuning** - Poch-Pott-Wachstum sichtbarer, kompakter Ring polieren
+1. **Phase-1 Footer** - Pochen›-Button minimaler / noch diskreter (todo §SOLL)
+2. **Phase-2 Tierschlag-Tuning** - Poch-Pott-Wachstum sichtbarer, kompakter Ring polieren
+3. **Phase-3 Fan-Dramatik** - Mit mehr gespielten Karten prüfen ob 60-70% Screen erreicht wird
 
-Wiedereinstieg: „Lies tasks/todo.md, weiter mit Morph-QA."
+Wiedereinstieg: „Lies tasks/todo.md, weiter mit Phase-1 Footer."
 
 ---
 
