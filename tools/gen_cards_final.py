@@ -8,7 +8,9 @@ EINE deterministische Vorlage für alle 32 Karten - keine KI-Generierung:
   deren Basis/Eck-Indizes; Figurenrahmen nahezu vollflächig, Index mit weißem Knockout
 - Asse: ein großes zentrales Pip
 - Zahlkarten (7-10): klassisches Pip-Raster, untere Hälfte 180° gedreht
-- Farben exakt aus der Quelle: Rot #E6180A, Schwarz #000000
+- Tiefe Juwelen-Palette statt greller Quell-Farben (Mockup-Look, Runde 2):
+  Gewänder-Rot -> Weinrot, Pips/Indizes -> tiefes Karmesin, Gold -> Antikgold,
+  Blau -> Tinten-Navy. Dazu Papier-Textur + dezenter Pip-Tiefengradient.
 
 Output: Master-PNGs (624x888) nach Assets_Raw/cards/final/,
 Imagesets (@2x/@3x) nach App/Assets.xcassets/Cards/.
@@ -19,6 +21,7 @@ import re
 import subprocess
 import tempfile
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -48,8 +51,25 @@ COURT_BOX_W = 530            # Figurenrahmen 85% Breite (nahezu vollflächig, wi
 KNOCKOUT_PAD = 16
 KNOCKOUT_R = 24
 
-RED = (230, 24, 10, 255)     # #E6180A - identisch mit Pip-/Figuren-Rot der Quelle
+RED = (181, 29, 39, 255)     # #B51D27 - tiefes Karmesin, identisch mit Pip-Remap
 BLACK = (0, 0, 0, 255)
+
+# Quell-Palette (htdebeer, grell/flach) -> tiefe Juwelen-Töne (Mockup-Look).
+# #E61408 lebt NUR in den Figuren-Defs (Gewänder), #e6180a/#E6180A nur in
+# Pips/Akzenten - der Split ist verifiziert (Strip-Skript 8.7.), daher getrennt mappbar.
+REPAINT = {
+    "#E61408": "#7E2333",  # Gewänder-Rot -> tiefes Weinrot
+    "#e6180a": "#B51D27",  # Pip-/Akzent-Rot -> tiefes Karmesin
+    "#E6180A": "#B51D27",
+    "#F8C20F": "#B8933A",  # Neon-Gelb -> gedämpftes Antikgold
+    "#1C1585": "#465685",  # Violett-Blau -> staubiges Royal (Mockup: heller, gedämpft)
+}
+
+
+def repaint(svg):
+    for old, new in REPAINT.items():
+        svg = svg.replace(f"fill:{old}", f"fill:{new}")
+    return svg
 
 SUITS = {"heart": "hearts", "diamond": "diamonds", "spade": "spades", "club": "clubs"}
 RANKS = {"1": "ace", "king": "king", "queen": "queen", "jack": "jack",
@@ -122,6 +142,7 @@ def render_courts(tmpdir):
                          f'xmlns:xlink="http://www.w3.org/1999/xlink" '
                          f'viewBox="0 0 {VIEWBOX[0]} {VIEWBOX[1]}">', stripped, count=1)
             doc = doc.replace("</svg>", f'<use xlink:href="#{gid}"/></svg>')
+            doc = repaint(doc)
             svg_path = os.path.join(tmpdir, f"{gid}.svg")
             png_path = os.path.join(tmpdir, f"{gid}.png")
             open(svg_path, "w").write(doc)
@@ -138,22 +159,57 @@ def render_courts(tmpdir):
 
 
 def render_pips(tmpdir):
-    """4 Farb-Pips aus der Quelle rendern (Rot/Schwarz sind dort fest verdrahtet)."""
+    """4 Farb-Pips rendern - aus der umgefärbten Quelle (tiefes Karmesin)."""
+    recolored = os.path.join(tmpdir, "recolored.svg")
+    open(recolored, "w").write(repaint(open(SRC).read()))
     pips = {}
     for suit in SUITS:
         png_path = os.path.join(tmpdir, f"pip_{suit}.png")
         subprocess.run(["rsvg-convert", f"--export-id={suit}", "-w", "900",
-                        "-o", png_path, SRC], check=True, capture_output=True)
+                        "-o", png_path, recolored], check=True, capture_output=True)
         im = Image.open(png_path).convert("RGBA")
         pips[suit] = im.crop(im.getbbox())
     return pips
+
+
+def pip_depth(pip):
+    """Dezenter vertikaler Tiefengradient (Licht von oben) - nach der Rotation
+    anwenden, damit die Lichtrichtung auf allen Pips identisch bleibt."""
+    a = np.asarray(pip, dtype=np.float32)
+    grad = np.linspace(1.06, 0.93, a.shape[0], dtype=np.float32)[:, None, None]
+    a[:, :, :3] = np.clip(a[:, :, :3] * grad, 0, 255)
+    return Image.fromarray(a.astype(np.uint8))
 
 
 def scaled_pip(pips, suit, target_h, rotated=False):
     pip = pips[suit]
     w = round(pip.width * target_h / pip.height)
     pip = pip.resize((w, target_h), Image.LANCZOS)
-    return pip.rotate(180) if rotated else pip
+    if rotated:
+        pip = pip.rotate(180)
+    return pip_depth(pip)
+
+
+_TEXTURE = None
+
+
+def paper_texture():
+    """Papier-Feel statt steriler Vektor-Fläche: warmes Weiß, feines Korn,
+    Leinen-Anmutung, sanfter Licht-Sheen von oben-links. Seeded und für alle
+    32 Karten identisch (Konsistenz); Amplituden ~1% - Lesbarkeit unberührt."""
+    global _TEXTURE
+    if _TEXTURE is None:
+        rng = np.random.default_rng(1441)
+        small = rng.normal(0.0, 1.0, (H // 2, W // 2)).astype(np.float32)
+        grain = np.asarray(Image.fromarray(small, mode="F").resize((W, H), Image.BILINEAR))
+        y = np.arange(H, dtype=np.float32)[:, None]
+        x = np.arange(W, dtype=np.float32)[None, :]
+        linen = 0.7 * (np.sin(y * 2 * np.pi / 4.3) + np.sin(x * 2 * np.pi / 5.9))
+        sheen = 1.022 - 0.045 * ((x / W) * 0.45 + (y / H) * 0.55)
+        tex = sheen + (grain * 3.2 + linen) / 255.0
+        warm = np.array([1.0, 0.996, 0.988], dtype=np.float32)
+        _TEXTURE = tex[:, :, None] * warm[None, None, :]
+    return _TEXTURE
 
 
 def make_index_tile(font, rank_key, suit, pips):
@@ -211,7 +267,10 @@ def compose_card(suit, rank_key, figures, pips, font):
 
     img.alpha_composite(tile, tl)
     img.alpha_composite(tile.rotate(180), br)
-    return img.resize((W, H), Image.LANCZOS)
+    out = img.resize((W, H), Image.LANCZOS)
+    a = np.asarray(out, dtype=np.float32)
+    a[:, :, :3] = np.clip(a[:, :, :3] * paper_texture(), 0, 255)
+    return Image.fromarray(a.astype(np.uint8))
 
 
 def write_imageset(name, master):

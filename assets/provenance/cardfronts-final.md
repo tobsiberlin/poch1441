@@ -10,6 +10,11 @@
   (deckungsgleich mit CardFace-Clip), große fette Eck-Indizes (Helvetica Neue Bold,
   Cap ~12.5% Kartenhöhe) mit Pip darunter, oben-links + unten-rechts (identisches
   Tile, 180° gedreht - Verschiebung mathematisch ausgeschlossen).
+- Runde 2 (8.7., Tobsi-Feedback „zu flach/grell vs Mockup"): Recolor auf
+  SVG-Ebene auf tiefe Juwelen-Töne (Weinrot #7E2333, Karmesin #B51D27,
+  Antikgold #B8933A, staubiges Royal #465685 - Gewänder-/Pip-Rot disjunkt
+  verifiziert), Papier-Textur (seeded rng(1441), Korn+Leinen+Sheen ~1-2%,
+  identisch auf allen Karten) und Pip-Tiefengradient (Licht immer von oben).
 - Asse: ein großes zentrales Pip (34% Kartenhöhe, geometrisch zentriert, Beweis
   Pixel-Messung 443.5/444). Zahlkarten 7-10: klassisches Pip-Raster, untere
   Hälfte 180° gedreht. Farben: Rot #E6180A (exakt Quell-Rot), Schwarz #000000.

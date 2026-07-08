@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.6.6] - Kartenvorderseiten Runde 2: Mockup-Tiefe (Juwelen-Palette + Papier-Feel) - 8.7.2026
+
+### Geändert
+- Tiefe Juwelen-Palette statt greller htdebeer-Quellfarben (Tobsi-Feedback: „im
+  Vergleich zum Mockup leicht anders" - zu flach/grell):
+  - Gewänder-Rot `#E61408` → tiefes Weinrot `#7E2333`
+  - Pip-/Index-Rot `#e6180a` → tiefes Karmesin `#B51D27`
+  - Neon-Gelb `#F8C20F` → gedämpftes Antikgold `#B8933A`
+  - Violett-Blau `#1C1585` → staubiges Royal `#465685`
+  (Remap auf SVG-Ebene - saubere Kanten, getrennt mappbar, da Gewänder- und
+  Pip-Rot in der Quelle nachweislich disjunkt sind)
+- Papier-Feel statt steriler Vektor-Fläche: warmes Weiß, feines Korn, Leinen-
+  Anmutung, sanfter Licht-Sheen von oben-links (seeded, identisch auf allen 32
+  Karten, Amplituden ~1-2% - Lesbarkeit unberührt)
+- Pips mit dezentem Tiefengradient (Licht von oben, nach Rotation angewandt -
+  Lichtrichtung auf allen Pips identisch)
+- QA: 2 gemini-vision-Iterationen gegen das Mockup („gedeckt, physisch, edel"
+  bestätigt), 32er-Montage ohne Inkonsistenzen/Artefakte
+
 ## [0.6.5] - Kartenvorderseiten Final-Template (100% Konsistenz) - 8.7.2026
 
 ### Geändert
