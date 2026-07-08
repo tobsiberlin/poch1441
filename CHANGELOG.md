@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0] - Phase-2-Layout: Slider links / Ring rechts / Portraits unten - 8.7.2026
+
+### Geändert
+- `Phase2View.swift`: Komplettes Layout-Refactoring (Mockup-Delta Phase 2):
+  - `duelArea` (GeometryReader 372pt) → `topArea` (HStack: sliderPanel | compactRing)
+  - Vertikaler Biet-Slider LINKS: rotierter SwiftUI-Slider in gefräster Rille, RANGE-Label,
+    Chip-Stapel, Wand-Indikator (glüht gold am Anschlag), Wall-Label
+  - Kompakter Poch-Ring RECHTS (scale 0.40): miniaturisierte Pool-Kacheln mit Chip-Werten,
+    Morph-Anker via matchedGeometryEffect (IDs aus Phase 1 erhalten), POCH-Pott im Zentrum
+  - Action-Buttons als 2-Spalten-Layout (PASSEN + MITGEHEN / ERHÖHEN-Zeile)
+  - Gegner-Portraits UNTEN als horizontale Reihe (token() wiederverwendet)
+  - `handView` (flat HStack) → `handFan` (angewinkelter Fächer, scale 1.0, am Bildschirmrand)
+
 ## [0.6.9] - Phase-3-Fächer: grosser dramatischer Fan + Poch-Medaillon + Handfächer - 8.7.2026
 
 ### Geändert

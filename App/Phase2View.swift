@@ -18,93 +18,172 @@ struct Phase2View: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            duelArea
-                // "Der Poch" (§6b): die Tisch-Welt zittert beim Schlag, das HUD bleibt ruhig
+            topArea
                 .modifier(TableShake(
                     amplitude: reduceMotion ? 0 : Tokens.pochShakeAmp,
                     animatableData: CGFloat(game.pochShock)))
                 .animation(.linear(duration: Tokens.pochShake), value: game.pochShock)
+            Spacer(minLength: 8)
+            actionArea
+                .frame(minHeight: 90, alignment: .top)
+            Spacer(minLength: 8)
+            portraitsRow
             Spacer(minLength: 6)
-            handView
-            controls
-                .frame(minHeight: 148, alignment: .top)
-                .padding(.top, 12)
+            handFan
         }
         .onAppear(perform: resetBid)
         .onChange(of: game.turnIndex) { resetBid() }
         .sensoryFeedback(.impact(weight: .heavy), trigger: game.pochShock)
     }
 
-    // MARK: - Duell-Bühne (Kardinalpunkte um den Poch-Pott)
+    // MARK: - Slider LINKS / Ring RECHTS (Mockup-Delta Phase 2)
 
-    private var duelArea: some View {
-        // .position statt .offset: echte Layout-Frames für die Morph-Flugbahnen (§5b).
-        GeometryReader { geo in
-            let cx = geo.size.width / 2
-            let cy = geo.size.height / 2
+    private var topArea: some View {
+        HStack(alignment: .center, spacing: 0) {
+            sliderPanel
+            Spacer()
+            compactRing
+        }
+        .frame(maxHeight: 230)
+        .padding(.top, 8)
+    }
+
+    /// Vertikaler Biet-Slider links: Drehtrick (.rotationEffect), Track als gefräste Rille.
+    private var sliderPanel: some View {
+        let sliderRange = game.humanLegal.flatMap { l in l.openRange ?? l.raiseRange }
+        let isActive = game.turnIndex == 0 && game.stage == .betting && sliderRange != nil
+        let atWall = sliderRange.map { Int(bid) >= $0.upperBound } ?? false
+
+        return VStack(spacing: 6) {
+            Text("RANGE")
+                .font(.system(size: 10, weight: .semibold)).tracking(2.5)
+                .foregroundStyle(Tokens.slate)
+
             ZStack {
-                ringEcho(cx: cx, cy: cy + 8)
-                pochPot.position(x: cx, y: cy + 26)
-                token(seat: 2).position(x: cx, y: cy - 118)
-                token(seat: 1).position(x: cx - 122, y: cy - 26)
-                token(seat: 3).position(x: cx + 122, y: cy - 26)
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(.black.opacity(0.28))
+                    .overlay(RoundedRectangle(cornerRadius: 6)
+                        .strokeBorder(.white.opacity(0.06), lineWidth: 1))
+                    .frame(width: 30, height: 150)
+                if let range = sliderRange {
+                    Slider(value: $bid,
+                           in: Double(range.lowerBound)...Double(range.upperBound),
+                           step: 1)
+                        .tint(Tokens.amethystVivid)
+                        .frame(width: 150)
+                        .rotationEffect(.degrees(-90))
+                        .disabled(!isActive)
+                }
+            }
+            .sensoryFeedback(.impact(flexibility: .rigid), trigger: atWall)
+
+            Text("\(Int(bid))")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(isActive ? Tokens.amethystVivid : Tokens.slate.opacity(0.3))
+                .contentTransition(.numericText())
+                .frame(minWidth: 48)
+
+            chipStack(count: Int(bid))
+
+            if let range = sliderRange {
+                // Wand-Indikator: glüht gold am Anschlag (§6b)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(LinearGradient(
+                        colors: [Tokens.jewelPlatin.opacity(atWall ? 0.9 : 0.5),
+                                 Color(hex: 0x39353F)],
+                        startPoint: .top, endPoint: .bottom))
+                    .frame(width: 22, height: 6)
+                    .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(
+                        atWall ? Tokens.goldVivid.opacity(0.9) : Tokens.slate.opacity(0.3),
+                        lineWidth: 1))
+                    .shadow(color: atWall ? Tokens.goldVivid.opacity(0.4) : .clear, radius: 4)
+                wallLabel(range)
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 372)
+        .opacity(isActive ? 1 : 0.45)
+        .animation(.easeOut(duration: 0.2), value: isActive)
+        .frame(width: 90)
     }
 
-    /// §5b Akt 2: die 8 Mulden entsättigen zu Schiefer und weichen zurück - die
-    /// P1-Tiles fliegen per matchedGeometryEffect in diese Echo-Dots.
-    @ViewBuilder
-    private func ringEcho(cx: CGFloat, cy: CGFloat) -> some View {
-        Circle().strokeBorder(Tokens.slate.opacity(0.10), lineWidth: 1)
-            .frame(width: Tokens.ringRadius * 1.7, height: Tokens.ringRadius * 1.7)
-            .position(x: cx, y: cy)
-        ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
-            Circle().fill(Tokens.slate.opacity(0.16))
-                .frame(width: 9, height: 9)
-                .matchedGeometryEffect(id: "tile-\(anchor.pool.rawValue)", in: morph)
-                .position(x: cx + anchor.offset.width * 0.85,
-                          y: cy + anchor.offset.height * 0.85)
+    /// Kompakter Poch-Ring rechts: miniaturisierte Mulden mit Chip-Werten (§5b Morph-Anker).
+    private var compactRing: some View {
+        let scale: CGFloat = 0.40
+        let r = Tokens.ringRadius * scale
+        let tileDia = Tokens.tileDiameter * scale
+        let d = r * 2 + tileDia
+        return ZStack {
+            Circle()
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Tokens.jewelAmethyst.opacity(0.28),
+                                 Tokens.jewelAmethyst.opacity(0.08)],
+                        startPoint: .top, endPoint: .bottom),
+                    lineWidth: 0.75)
+                .frame(width: r * 2, height: r * 2)
+                .position(x: d / 2, y: d / 2)
+            pochPotMini.position(x: d / 2, y: d / 2)
+            ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
+                miniTile(anchor.pool, dia: tileDia)
+                    .matchedGeometryEffect(id: "tile-\(anchor.pool.rawValue)", in: morph)
+                    .position(x: d / 2 + anchor.offset.width * scale,
+                              y: d / 2 + anchor.offset.height * scale)
+            }
         }
+        .frame(width: d, height: d)
     }
 
-    /// Der violette Poch-Pott - der Preis und Anker von Phase 2 (§5b: wird promotet,
-    /// während der Ring zurücktritt). Wächst sichtbar mit den Einsätzen.
-    private var pochPot: some View {
+    /// §5b Signatur-Flug: P1-Poch-Mulde löst sich und wird zum Pott im Ring-Zentrum.
+    private var pochPotMini: some View {
         let growth = 1 + CGFloat(min(game.pot, 40)) / 400
-        return VStack(spacing: 1) {
-            Text("POCH-POTT").font(.system(size: 9, weight: .semibold)).tracking(1.5)
-                .foregroundStyle(Tokens.amethystVivid.opacity(0.85))
-            Text("\(game.pot)").font(.system(size: 34, weight: .bold))
+        return VStack(spacing: 0) {
+            Text("POCH").font(.system(size: 7, weight: .semibold)).tracking(1)
+                .foregroundStyle(Tokens.amethystVivid.opacity(0.8))
+            Text("\(game.pot)").font(.system(size: 18, weight: .bold))
                 .foregroundStyle(Tokens.jewelPlatin)
                 .contentTransition(.numericText())
-            Text("+ Mulde \(game.pochPool)").font(.system(size: 11, weight: .medium))
-                .foregroundStyle(Tokens.amethystVivid.opacity(0.75))
+            Text("+ \(game.pochPool)").font(.system(size: 7))
+                .foregroundStyle(Tokens.amethystVivid.opacity(0.65))
         }
-        .frame(width: 128, height: 128)
+        .frame(width: Tokens.centerDiameter * 0.54, height: Tokens.centerDiameter * 0.54)
         .background(
-            // Material statt Glow (Feel-Befund 8.7.): pigmentierter Amethyst mit
-            // gefräster Innenstufe; Restschimmer nur im Neon-Theme emissiv.
             Circle()
-                .fill(LinearGradient(colors: [Tokens.jewelAmethyst.opacity(0.48),
-                                              Tokens.jewelAmethyst.opacity(0.20)],
-                                     startPoint: .top, endPoint: .bottom))
+                .fill(LinearGradient(
+                    colors: [Tokens.jewelAmethyst.opacity(0.45),
+                             Tokens.jewelAmethyst.opacity(0.18)],
+                    startPoint: .top, endPoint: .bottom))
                 .overlay(Circle().strokeBorder(
-                    LinearGradient(colors: [Tokens.amethystVivid.opacity(theme.isNeon ? 1 : 0.75),
-                                            Tokens.amethystVivid.opacity(0.3)],
-                                   startPoint: .top, endPoint: .bottom),
-                    lineWidth: theme.borderWidth))
-                .overlay(Circle().strokeBorder(.white.opacity(0.06), lineWidth: 5)
-                    .padding(7))
-                .shadow(color: Tokens.amethystVivid.opacity(theme.isNeon ? 0.6 : 0.14),
-                        radius: theme.isNeon ? 26 : 6)
+                    LinearGradient(
+                        colors: [Tokens.amethystVivid.opacity(theme.isNeon ? 1 : 0.72),
+                                 Tokens.amethystVivid.opacity(0.3)],
+                        startPoint: .top, endPoint: .bottom),
+                    lineWidth: 0.75))
+                .shadow(color: Tokens.amethystVivid.opacity(theme.isNeon ? 0.5 : 0.12), radius: 5)
         )
-        // §5b Signatur-Flug: die P1-Poch-Mulde löst sich und wird zum Pott
         .matchedGeometryEffect(id: "pochPot", in: morph)
         .scaleEffect(reduceMotion ? 1 : growth)
         .animation(.spring(duration: Tokens.p2PotSpring), value: game.pot)
+    }
+
+    private func miniTile(_ pool: Pool, dia: CGFloat) -> some View {
+        let tint = theme.tint(pool)
+        let label = pool.indexLabel
+        return VStack(spacing: 0) {
+            Text(label).font(.system(size: label.count > 2 ? 6 : 9, weight: .bold))
+            Text("\(game.chips(in: pool))").font(.system(size: 8, weight: .semibold))
+                .contentTransition(.numericText())
+        }
+        .foregroundStyle(tint)
+        .frame(width: dia, height: dia)
+        .background(
+            RoundedRectangle(cornerRadius: Tokens.tileCorner * 0.4)
+                .fill(.black.opacity(theme.tileFillOpacity))
+                .overlay(RoundedRectangle(cornerRadius: Tokens.tileCorner * 0.4)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [tint.opacity(theme.isNeon ? 1 : 0.85), tint.opacity(0.3)],
+                            startPoint: .top, endPoint: .bottom),
+                        lineWidth: 0.5))
+        )
     }
 
     // MARK: - Gegner-Token (Platzhalter-Vektor bis Charakterstil entschieden)
@@ -169,24 +248,51 @@ struct Phase2View: View {
             .background(Capsule().fill(tone.opacity(tone == .clear ? 0 : 0.28)))
     }
 
-    // MARK: - Hand (§6b: dein Kunststück leuchtet - nur deine Hand, kein Gegner-Leak)
+    // MARK: - Gegner-Portraits UNTEN (§5c Akt 2)
 
-    private var handView: some View {
-        HStack(spacing: -14) {
-            ForEach(Array(game.humanHand.enumerated()), id: \.offset) { _, card in
-                CardFace(card: card, highlighted: card.rank == game.humanComboRank
-                         && game.stage == .betting)
-            }
+    private var portraitsRow: some View {
+        HStack(spacing: 0) {
+            token(seat: 1)
+            Spacer()
+            token(seat: 2)
+            Spacer()
+            token(seat: 3)
         }
+        .padding(.horizontal, 4)
     }
 
-    // MARK: - Biet-Steuerung
+    // MARK: - Hand (§6b: dein Kunststück leuchtet, kleiner Fächer ganz unten)
 
-    @ViewBuilder private var controls: some View {
+    private var handFan: some View {
+        let cards = game.humanHand
+        let isHighlighted = game.stage == .betting
+        let N = cards.count
+        let cardScale: CGFloat = 1.0
+        let spreadDeg = min(Double(N) * 6.5, 32.0)
+        let totalW: CGFloat = min(CGFloat(N) * 28, 180)
+        return ZStack {
+            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
+                let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
+                let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
+                let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
+                CardFace(card: card,
+                         highlighted: isHighlighted && card.rank == game.humanComboRank,
+                         scale: cardScale)
+                    .offset(x: xOff)
+                    .rotationEffect(.degrees(angle), anchor: .bottom)
+                    .zIndex(Double(i))
+            }
+        }
+        .frame(height: 74 * cardScale * 0.60)
+    }
+
+    // MARK: - Aktions-Buttons (2-spaltig)
+
+    @ViewBuilder private var actionArea: some View {
         if game.stage != .betting {
             resultBanner
         } else if game.turnIndex == 0, let legal = game.humanLegal {
-            humanControls(legal)
+            humanActionButtons(legal)
         } else {
             waitHint
         }
@@ -196,77 +302,33 @@ struct Phase2View: View {
         Text("\(game.name(of: game.turnIndex)) überlegt …")
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(Tokens.slate)
-            .padding(.top, 26)
+            .padding(.top, 20)
     }
 
-    @ViewBuilder private func humanControls(_ legal: BettingPhase.LegalActions) -> some View {
-        let sliderRange = legal.openRange ?? legal.raiseRange
-        VStack(spacing: 10) {
-            if let range = sliderRange {
-                bidSlider(range)
-            } else if legal.canPass && !legal.canCall {
-                Text("Ohne Kunststück kein Gebot - du kannst nur passen.")
-                    .font(.system(size: 12)).foregroundStyle(Tokens.slate)
-            }
-            HStack(spacing: 10) {
+    @ViewBuilder private func humanActionButtons(_ legal: BettingPhase.LegalActions) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
                 actionButton("Passen", style: .quiet) { game.humanPass() }
                 if legal.canCall {
                     let cost = game.betting.currentBet - game.betting.seats[0].committed
                     actionButton("Mitgehen · \(cost)", style: .gold) { game.humanCall() }
                 }
-                if let open = legal.openRange {
-                    actionButton("Pochen \(Int(bid))!", style: .amethyst) {
-                        game.humanOpen(Int(bid).clamped(to: open))
-                    }
-                } else if let raise = legal.raiseRange {
-                    actionButton("Erhöhen auf \(Int(bid))", style: .amethyst) {
-                        game.humanRaise(to: Int(bid).clamped(to: raise))
-                    }
+            }
+            if let open = legal.openRange {
+                actionButton("Pochen \(Int(bid))!", style: .amethyst) {
+                    game.humanOpen(Int(bid).clamped(to: open))
                 }
+            } else if let raise = legal.raiseRange {
+                actionButton("Erhöhen auf \(Int(bid))", style: .amethyst) {
+                    game.humanRaise(to: Int(bid).clamped(to: raise))
+                }
+            }
+            if legal.canPass && !legal.canCall && legal.openRange == nil {
+                Text("Ohne Kunststück kein Gebot - du kannst nur passen.")
+                    .font(.system(size: 12)).foregroundStyle(Tokens.slate)
             }
         }
         .padding(.horizontal, 4)
-    }
-
-    /// Slider bis zur HARTEN Decke: die Wand am Spurende gehört dem knappsten Spieler
-    /// und ist mit ihm beschriftet (§6b) - transparent statt Rätsel.
-    private func bidSlider(_ range: ClosedRange<Int>) -> some View {
-        let atWall = Int(bid) >= range.upperBound
-        return VStack(spacing: 5) {
-            HStack(spacing: 10) {
-                // Gewicht des Gebots: Chips stapeln sich sichtbar in der Bietzone (§6b)
-                chipStack(count: Int(bid))
-                Text("\(Int(bid))")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(Tokens.amethystVivid)
-                    .frame(minWidth: 34)
-                    .contentTransition(.numericText())
-                // Slider in gefräster Rille (Material-Befund 8.7.: kein nackter Default)
-                ZStack {
-                    Capsule().fill(.black.opacity(0.32))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.05), lineWidth: 1))
-                        .frame(height: 14)
-                    Slider(value: $bid,
-                           in: Double(range.lowerBound)...Double(range.upperBound),
-                           step: 1)
-                        .tint(Tokens.amethystVivid)
-                        .disabled(range.lowerBound == range.upperBound)
-                }
-                // Die Wand als Objekt: gefräster Pfeiler, glüht gold am Anschlag (§6b)
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(LinearGradient(
-                        colors: [Tokens.jewelPlatin.opacity(atWall ? 0.9 : 0.5),
-                                 Color(hex: 0x39353F)],
-                        startPoint: .top, endPoint: .bottom))
-                    .frame(width: 9, height: 34)
-                    .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(
-                        atWall ? Tokens.goldVivid.opacity(0.9) : Tokens.slate.opacity(0.5),
-                        lineWidth: 1))
-                    .shadow(color: atWall ? Tokens.goldVivid.opacity(0.4) : .clear, radius: 5)
-            }
-            wallLabel(range)
-        }
-        .sensoryFeedback(.impact(flexibility: .rigid), trigger: atWall)
     }
 
     private func wallLabel(_ range: ClosedRange<Int>) -> some View {
