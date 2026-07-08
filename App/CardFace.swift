@@ -1,9 +1,9 @@
 import PochKit
 import SwiftUI
 
-/// Kartenvorderseite mit klassischen SVG-Assets (htdebeer/SVG-cards, LGPL).
-/// Bildkarten (J/Q/K) und Asse: echtes zweiköpfiges Spielkartendesign aus dem Asset-Katalog.
-/// Zahlkarten (7-10): code-gerendertes Pip-Muster (sauber, konsistent, kein Asset-Overhead).
+/// Kartenvorderseite: alle 32 Karten aus EINER deterministischen Vorlage
+/// (`tools/gen_cards_final.py`) - weiße Karte, große Eck-Indizes, klassische
+/// Hoffiguren (htdebeer/SVG-cards, LGPL), Provenance: assets/provenance/cardfronts-final.md.
 /// Geteilt zwischen Phase 1 (Hand), Phase 2 (Kunststück-Glow §6b) und Phase 3 (Stopper §6c).
 struct CardFace: View {
     let card: Card

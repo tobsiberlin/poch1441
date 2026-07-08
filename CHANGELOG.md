@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.6.5] - Kartenvorderseiten Final-Template (100% Konsistenz) - 8.7.2026
+
+### Geändert
+- Alle 32 Kartenvorderseiten aus EINER deterministischen Vorlage neu generiert
+  (`tools/gen_cards_final.py`) - behebt die Inkonsistenzen des 0.6.4-Satzes
+  (Rahmen mal ja/mal nein, Indizes zu randnah, abweichende Designs):
+  - Weiße Karte, Eckradius deckungsgleich mit CardFace-Clip (8/52 der Breite)
+  - Große fette Eck-Indizes (Helvetica Neue Bold) mit Pip darunter, oben-links +
+    unten-rechts als identisches, 180° gedrehtes Tile (Mockup-Look)
+  - Hoffiguren J/Q/K: htdebeer-Figuren per SVG-Chirurgie OHNE Alt-Indizes/Basis
+    extrahiert, einheitlich platziert, weißes Knockout hinter den Indizes
+  - Asse: großes zentrales Pip; Zahlkarten: klassisches Raster, untere Hälfte gedreht
+  - Auflösung erhöht: @2x 312x444 + @3x 468x666 (vorher nur @2x 156x225)
+- `CardFace.swift`: Header-Kommentar auf neuen Asset-Stand korrigiert
+
+### Hinzugefügt
+- `assets/provenance/cardfronts-final.md` - Provenance inkl. QA-Nachweis
+- `Assets_Raw/cards/final/` - 32 Master-PNGs 624x888 (lokal, gitignored - via Generator reproduzierbar)
+
 ## [0.6.4] - Klassische Spielkarten (SVG Open-Source Assets) - 8.7.2026
 
 ### Hinzugefügt
