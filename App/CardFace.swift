@@ -47,6 +47,15 @@ struct CardFace: View {
         return "card_\(suitStr)_\(rankStr)"
     }
 
+    /// Karton-Wölbung: deterministischer Seed pro Karte (leichte Asymmetrie im Fächer).
+    private var bendPhase: Double {
+        let sum = assetName.unicodeScalars.reduce(0) { $0 + Int($1.value) }
+        return Double(sum % 63) / 10.0
+    }
+
+    /// Transparenter Rand, in den die gehobenen Ecken hineinwölben (kein Clipping).
+    private var bendPad: CGFloat { 3 * scale }
+
     var body: some View {
         ZStack {
             // Alle 32 Karten als klassisches SVG-Asset
@@ -57,9 +66,22 @@ struct CardFace: View {
             .strokeBorder(
                 accent?.opacity(0.85) ?? .clear,
                 lineWidth: accent != nil ? 2 : 0))
+        // Physische Wölbung als Render-Effekt (CardWarp.metal) - Layout bleibt
+        // durch das padding/-padding-Paar unverändert, der Schatten folgt der
+        // gewölbten Silhouette
+        .padding(bendPad)
+        .layerEffect(
+            ShaderLibrary.cardWarp(
+                .float2(52 * scale + 2 * bendPad, 74 * scale + 2 * bendPad),
+                .float(2.4 * scale),
+                .float(bendPhase)),
+            maxSampleOffset: CGSize(width: 0.84 * scale, height: 2.4 * scale))
+        .padding(-bendPad)
+        // Kontaktschatten zwischen überlappenden Karten (Fächer-Wette 8.7.:
+        // Schatten ist Render-Eigenschaft, nie im Asset)
         .shadow(
-            color: accent?.opacity(0.6) ?? .black.opacity(0.4),
-            radius: accent != nil ? 8 : 3, y: accent != nil ? 0 : 2)
+            color: accent?.opacity(0.6) ?? .black.opacity(0.5),
+            radius: accent != nil ? 8 : 4, y: accent != nil ? 0 : 2.5)
     }
 
     // MARK: - SVG-Asset (Bildkarten + Asse)

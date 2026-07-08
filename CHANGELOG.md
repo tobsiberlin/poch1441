@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.6.7] - Karton-Wölbung im Kartenfächer (CardWarp-Shader) - 8.7.2026
+
+### Hinzugefügt
+- `App/CardWarp.metal` - physische Karton-Wölbung als SwiftUI-layerEffect:
+  obere Kartenecken rollen subtil nach oben (max. 2.4pt × Kartenskala),
+  Einroll-Zug krümmt die Seitenkanten, Licht folgt der gebogenen Fläche
+  (Highlight auf gehobenen Ecken, Mulde liegt tiefer). Deterministischer
+  Seed pro Karte (leichte Asymmetrie - Fächer wirkt nicht geklont).
+  Render-Eigenschaft, nie ins Asset gebacken (Lesbarkeits-Licht-Regel §5).
+
+### Geändert
+- `CardFace.swift`: Wölbungs-Shader via padding/-padding-Paar (Layout
+  unverändert, kein Clipping der gehobenen Ecken); Kontaktschatten kräftiger
+  (0.5/4/2.5 statt 0.4/3/2) - Fächer-Wette 8.7.: Schatten ist Render-Eigenschaft
+- Index-Prüfung nach Tobsi-Report „falsche Indizes in verdeckten Ecken":
+  Befund = Overlap-Illusion, kein Bug (jede Karte trägt nur eigene Indizes
+  oben-links/unten-rechts; der „fremde" Index gehört der Nachbarkarte).
+  Q-Karte im Screenshot war eine schwarze Dame - Gewänder sind seit 0.6.6
+  bei allen Damen weinrot, Farb-Wahrheit liegt allein beim Index
+- Einmalig: Xcode MetalToolchain-Komponente installiert (Build-Voraussetzung)
+
+### QA
+- taste-gate (gemini-vision): Runde 1 FAIL (Krümmung las sich nicht) →
+  Licht-Erzählung verstärkt, Einroll-Zug, Kontaktschatten → Runde 2 PASS
+  („sehr physisch und premium, Wölbung natürlich, Schatten sauber")
+
 ## [0.6.6] - Kartenvorderseiten Runde 2: Mockup-Tiefe (Juwelen-Palette + Papier-Feel) - 8.7.2026
 
 ### Geändert
