@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.9] - Phase-3-Fächer: grosser dramatischer Fan + Poch-Medaillon + Handfächer - 8.7.2026
+
+### Geändert
+- `Phase3View.swift`: `chainsArea`/`chainRow` durch `playedCardsFan` ersetzt - aktueller Stich als
+  grosser angewinkelter Fächer (scale 2.0, bis 66° Spreizung), Muster von ContentView::handView
+- Poch-Medaillon (♥, Amethyst-Kreis) im Zentrum des Fächers als subtiler Hintergrund-Anker
+- `handView` → `handFan`: Spielerhand ebenfalls angewinkelt (scale 1.55, bis 40° Spreizung),
+  identisches `.offset + .rotationEffect(anchor:.bottom)`-Muster
+- `centerpotChip` → `centerpotRow`: Centerpot-Chip + „N Stiche"-Badge in einer Zeile
+- Ältere Ketten nicht mehr als ScrollView - stattdessen Stich-Zähler im Header
+
 ## [0.6.8] - Kantenphysik: Kartonstärke, Ebenen-Schatten, Kanten-Licht - 8.7.2026
 
 ### Geändert

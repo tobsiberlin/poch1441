@@ -15,12 +15,13 @@ struct Phase3View: View {
     var body: some View {
         VStack(spacing: 0) {
             opponentsRow
-            centerpotChip
-            chainsArea
+            centerpotRow
             Spacer(minLength: 8)
+            playedCardsFan
+            Spacer(minLength: 12)
             if game.stage == .playout || game.endPhase < .done {
                 statusLine
-                handView
+                handFan
             } else {
                 resultBanner
             }
@@ -88,68 +89,93 @@ struct Phase3View: View {
         .animation(.easeInOut(duration: 0.25), value: isLeader)
     }
 
-    /// Der Centerpot (Platin) - ruhiger Anker; leuchtet im Eiszeit-Vakuum auf (§6c c).
-    private var centerpotChip: some View {
+    /// Centerpot + Kettenhistorie in einer kompakten Zeile.
+    private var centerpotRow: some View {
         let glowing = game.endPhase == .frozen || game.endPhase == .punishing
         let value = game.roundResult?.centerPool ?? game.chips(in: .center)
-        return HStack(spacing: 5) {
-            Text("Centerpot").font(.system(size: 11, weight: .medium))
-                .foregroundStyle(Tokens.slate)
-            Text("\(value)").font(.system(size: 13, weight: .bold))
-                .foregroundStyle(Tokens.jewelPlatin)
+        let pastChains = max(0, game.revealedChains.count - 1)
+        return HStack(spacing: 10) {
+            HStack(spacing: 5) {
+                Text("Centerpot").font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Tokens.slate)
+                Text("\(value)").font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Tokens.jewelPlatin)
+                    .contentTransition(.numericText())
+            }
+            .padding(.horizontal, 12).padding(.vertical, 4)
+            .background(Capsule().fill(.white.opacity(glowing ? 0.10 : 0.04))
+                .overlay(Capsule().strokeBorder(
+                    Tokens.jewelPlatin.opacity(glowing ? 0.9 : 0.3), lineWidth: 1))
+                .shadow(color: Tokens.jewelPlatin.opacity(glowing ? 0.5 : 0),
+                        radius: glowing ? 10 : 0))
+            .scaleEffect(glowing ? 1.12 : 1)
+            .animation(.spring(duration: 0.3), value: glowing)
+
+            if pastChains > 0 {
+                Text("\(pastChains) \(pastChains == 1 ? "Stich" : "Stiche")")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Tokens.slate.opacity(0.7))
+                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .background(Capsule().fill(.white.opacity(0.04))
+                        .overlay(Capsule().strokeBorder(Tokens.slate.opacity(0.25), lineWidth: 1)))
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
         }
-        .padding(.horizontal, 12).padding(.vertical, 4)
-        .background(Capsule().fill(.white.opacity(glowing ? 0.10 : 0.04))
-            .overlay(Capsule().strokeBorder(
-                Tokens.jewelPlatin.opacity(glowing ? 0.9 : 0.3), lineWidth: 1))
-            .shadow(color: Tokens.jewelPlatin.opacity(glowing ? 0.5 : 0),
-                    radius: glowing ? 10 : 0))
-        .scaleEffect(glowing ? 1.12 : 1)
-        .animation(.spring(duration: 0.3), value: glowing)
+        .animation(.easeOut(duration: 0.2), value: pastChains)
         .padding(.top, 8)
     }
 
-    // MARK: - Die Ketten (lesbare Sequenz, §6c a)
+    // MARK: - Dramatischer Fächer (§5b Akt 3, Mockup-Delta)
 
-    private var chainsArea: some View {
+    /// Grosser angewinkelter Fächer der aktuellen Kette + Poch-Medaillon.
+    /// Muster identisch mit ContentView::handView (.offset + .rotationEffect anchor:.bottom).
+    private var playedCardsFan: some View {
         let chains = game.revealedChains
+        let currentChain = chains.last ?? []
         let frozen = game.endPhase >= .frozen
-        return ScrollViewReader { proxy in
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 10) {
-                    ForEach(Array(chains.enumerated()), id: \.offset) { index, chain in
-                        chainRow(chain,
-                                 isCurrent: index == chains.count - 1,
-                                 chainClosed: index < chains.count - 1 || game.cascadeIdle)
-                            .id(index)
-                    }
-                }
-                .padding(.vertical, 14)
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxHeight: 330)
-            // Eiszeit-Vakuum (§6c c): in der ms des Rundenendes entsättigt alles zu Schiefer
-            .saturation(frozen ? 0.08 : 1)
-            .opacity(frozen ? 0.55 : 1)
-            .animation(.easeOut(duration: 0.12), value: frozen)
-            .onChange(of: chains.count) {
-                withAnimation { proxy.scrollTo(chains.count - 1, anchor: .bottom) }
+        let N = currentChain.count
+        let cardScale: CGFloat = 2.0
+        let spreadDeg = N > 1 ? min(Double(N) * 14.0, 66.0) : 0.0
+        let totalW: CGFloat = N > 1 ? min(CGFloat(N - 1) * 80, 300) : 0
+
+        return ZStack {
+            medallion
+
+            ForEach(Array(currentChain.enumerated()), id: \.offset) { i, play in
+                let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
+                let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
+                let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
+
+                CardFace(card: play.card,
+                         goldenStopper: game.cascadeIdle && i == N - 1
+                             && game.stage == .playout,
+                         scale: cardScale)
+                    .offset(x: xOff)
+                    .rotationEffect(.degrees(angle), anchor: .bottom)
+                    .zIndex(Double(i + 1))
+                    .transition(.scale(scale: 0.85, anchor: .bottom).combined(with: .opacity))
             }
         }
+        .frame(height: 74 * cardScale)
+        .saturation(frozen ? 0.08 : 1)
+        .opacity(frozen ? 0.55 : 1)
+        .animation(.easeOut(duration: 0.12), value: frozen)
+        .animation(.easeOut(duration: 0.2), value: N)
     }
 
-    private func chainRow(_ chain: [PlayoutPhase.Play], isCurrent: Bool,
-                          chainClosed: Bool) -> some View {
-        HStack(spacing: -22) {
-            ForEach(Array(chain.enumerated()), id: \.offset) { index, play in
-                CardFace(card: play.card,
-                         goldenStopper: isCurrent && chainClosed && index == chain.count - 1
-                             && game.stage == .playout,
-                         scale: isCurrent ? 0.86 : 0.62)
-            }
+    /// Poch-Medaillon: Herz-Symbol als Zentrum des Fächers (§0 Signatur).
+    private var medallion: some View {
+        ZStack {
+            Circle()
+                .fill(.white.opacity(0.04))
+                .overlay(Circle().strokeBorder(Tokens.jewelAmethyst.opacity(0.22), lineWidth: 1.5))
+                .frame(width: 80, height: 80)
+            Text("♥")
+                .font(.system(size: 40))
+                .foregroundStyle(Tokens.jewelAmethyst.opacity(0.45))
         }
-        .opacity(isCurrent ? 1 : 0.42)
-        .animation(.easeOut(duration: 0.15), value: chain.count)
+        .shadow(color: Tokens.jewelAmethyst.opacity(0.18), radius: 18)
+        .zIndex(0)
     }
 
     // MARK: - Status + Hand
@@ -169,22 +195,36 @@ struct Phase3View: View {
             .animation(.easeInOut(duration: 0.2), value: game.cascadeIdle)
     }
 
-    private var handView: some View {
+    /// Angewinkelter Handfächer (Muster von ContentView::handView, §5b Akt 3 Spielerhand).
+    private var handFan: some View {
+        let cards = game.displayedHand(of: 0)
         let canLead = game.cascadeIdle && game.playout?.leader == 0
             && game.stage == .playout
-        return HStack(spacing: -14) {
-            ForEach(Array(game.displayedHand(of: 0).enumerated()), id: \.offset) { _, card in
-                Button {
-                    game.humanLead(card)
-                } label: {
-                    CardFace(card: card)
+        let N = cards.count
+        let cardScale: CGFloat = 1.55
+        let spreadDeg = min(Double(N) * 7.5, 40.0)
+        let totalW: CGFloat = min(CGFloat(N) * 38, 252)
+
+        return ZStack {
+            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
+                let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
+                let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
+                let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
+
+                Button { game.humanLead(card) } label: {
+                    CardFace(card: card, scale: cardScale)
                 }
                 .buttonStyle(.plain)
                 .disabled(!canLead)
+                .offset(x: xOff)
+                .rotationEffect(.degrees(angle), anchor: .bottom)
+                .zIndex(Double(i))
+                .transition(.scale(scale: 0.86, anchor: .bottom).combined(with: .opacity))
             }
         }
         .opacity(canLead ? 1 : 0.75)
-        .padding(.bottom, 4)
+        .animation(.easeOut(duration: 0.12), value: N)
+        .frame(height: 74 * cardScale * 0.60)
     }
 
     // MARK: - Rundenende (Baseline-Banner; Eiszeit-Vakuum kommt im Game-Feel-Pass §6c)
