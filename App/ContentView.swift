@@ -218,25 +218,26 @@ struct ContentView: View {
     // MARK: - §5c Phase-1: Gegner als schmale Top-Bar
 
     private var opponentTopBar: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 20) {
             ForEach(1..<4, id: \.self) { seat in
-                VStack(spacing: 3) {
-                    Circle().fill(.white.opacity(0.08))
-                        .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.35), lineWidth: 1))
-                        .frame(width: 34, height: 34)
-                        .overlay(Text("\(seat)").font(.system(size: 13, weight: .semibold))
+                VStack(spacing: 2) {
+                    Circle().fill(.white.opacity(0.05))
+                        .overlay(Circle().strokeBorder(Tokens.slate.opacity(0.3), lineWidth: 1))
+                        .frame(width: 28, height: 28)
+                        .overlay(Text(String(game.name(of: seat).prefix(1)))
+                            .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(Tokens.slate))
                         .matchedGeometryEffect(id: "token\(seat)", in: morph)
                     // Konto rollt hoch, wenn der Melde-Strom auszahlt (§6a b)
                     Text("\(game.displayedStack(of: seat))")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Tokens.jewelGold.opacity(0.9))
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(Tokens.slate.opacity(0.8))
                         .contentTransition(.numericText())
                         .animation(.easeOut(duration: 0.3), value: game.meldShown)
                 }
             }
         }
-        .padding(.top, 16)
+        .padding(.top, 10)
     }
 
     // MARK: - Der Poch-Ring
@@ -270,10 +271,12 @@ struct ContentView: View {
         let long = pool.indexLabel.count > 2
         let tint = theme.tint(pool)
         let pulsing = game.pulsingPool == pool
+        let chips = game.displayedChips(in: pool)
         return VStack(spacing: 1) {
-            Text(pool.indexLabel).font(.system(size: long ? 9 : 16, weight: .bold))
+            Text(pool.indexLabel).font(.system(size: long ? 8 : 14, weight: .bold))
             // Anzeige-Wert: zahlt erst aus, wenn der Melde-Strom die Mulde erreicht
-            Text("\(game.displayedChips(in: pool))").font(.system(size: 13, weight: .semibold))
+            Text(chips > 0 ? "+\(chips)" : "·")
+                .font(.system(size: 15, weight: .bold))
                 .contentTransition(.numericText())
         }
         .foregroundStyle(tint)

@@ -21,8 +21,8 @@ enum Tokens {
     static let smaragdVivid  = Color(hex: 0x2CD4A8)
     static let amethystVivid = Color(hex: 0xA06BE0)
 
-    // Ring-Geometrie (konzept §5): R = 130, Tiles Ø 54, Mitte Ø 76.
-    static let ringRadius: CGFloat = 130
+    // Ring-Geometrie (konzept §5): R = 145, Tiles Ø 54, Mitte Ø 76.
+    static let ringRadius: CGFloat = 145
     static let tileDiameter: CGFloat = 54
     static let centerDiameter: CGFloat = 76
     static let tileCorner: CGFloat = 16

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.1] - Phase-1-Ring-Skalierung: grösserer Ring, prominente Chip-Werte, diskrete Tokens - 8.7.2026
+
+### Geändert
+- `DesignTokens.swift`: `ringRadius` 130 → 145 (Ring ~10% grösser, Frame 314 → 344pt)
+- `ContentView.swift::muldeTile`: Chip-Werte mit „+"-Präfix (`+4` statt `4`), font 13 → 15pt bold;
+  Null-Mulden zeigen „·" statt „0"; label-font leicht angepasst (14/8pt statt 16/9pt)
+- `ContentView.swift::opponentTopBar`: Token-Kreis 34 → 28pt, Name-Initial statt Sitz-Nummer,
+  Farbe auf `Tokens.slate` reduziert (diskret), padding-top 16 → 10pt
+
 ## [0.7.0] - Phase-2-Layout: Slider links / Ring rechts / Portraits unten - 8.7.2026
 
 ### Geändert
