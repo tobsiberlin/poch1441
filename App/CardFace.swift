@@ -25,7 +25,7 @@ struct CardFace: View {
     }
 
     /// Asset-Name im Katalog: card_{suit}_{rank}
-    private var assetName: String? {
+    private var assetName: String {
         let suitStr: String
         switch card.suit {
         case .hearts:   suitStr = "hearts"
@@ -39,20 +39,18 @@ struct CardFace: View {
         case .king:  rankStr = "king"
         case .queen: rankStr = "queen"
         case .jack:  rankStr = "jack"
-        default:     return nil  // Zahlkarten: code-gerendert
+        case .ten:   rankStr = "ten"
+        case .nine:  rankStr = "nine"
+        case .eight: rankStr = "eight"
+        case .seven: rankStr = "seven"
         }
         return "card_\(suitStr)_\(rankStr)"
     }
 
     var body: some View {
         ZStack {
-            if let name = assetName {
-                // Bildkarte / Ass: klassisches SVG-Asset
-                svgCard(named: name)
-            } else {
-                // Zahlkarte 7-10: code-gerendert
-                numberCard
-            }
+            // Alle 32 Karten als klassisches SVG-Asset
+            svgCard(named: assetName)
         }
         .frame(width: 52 * scale, height: 74 * scale)
         .overlay(RoundedRectangle(cornerRadius: 8 * scale)
