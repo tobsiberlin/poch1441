@@ -42,16 +42,17 @@ struct ContentView: View {
                     Spacer(minLength: 8)
                     ringView
                         .contentShape(Circle())
-                        .onTapGesture { game.skipDeal() }  // Tap überspringt die Kaskade
-                        // Kollaps-Shake: 150 ms / 3 pt (§6a e), reduceMotion genullt
+                        .onTapGesture { game.skipDeal() }
                         .modifier(TableShake(
                             amplitude: reduceMotion ? 0 : Tokens.kollapsShakeAmp,
                             animatableData: CGFloat(game.kollapsShock)))
                         .animation(.linear(duration: Tokens.kollapsShake),
                                    value: game.kollapsShock)
-                    Spacer(minLength: 8)
-                    handView
+                    Spacer(minLength: 10)
+                    // Buttons ÜBER den Karten (nicht darunter) - Mockup-Komposition
                     phase1Footer
+                    // Kartenfächer blendet am unteren Bildschirmrand aus (Bleed-Ästhetik)
+                    handView
                 case .pochen:
                     Phase2View(game: game, theme: theme, morph: morph,
                                onContinue: {
@@ -68,7 +69,8 @@ struct ContentView: View {
             }
             .padding(.horizontal, 18)
             .padding(.top, 6)
-            .padding(.bottom, 18)
+            // Phase 1: kein Bottom-Padding - Kartenfächer blendet am Bildschirmrand aus
+            .padding(.bottom, akt == .melden ? 0 : 18)
             // Trumpf-Beat-Inszenierung liegt als hitTest-freie Schicht über Akt 1
             .overlay { if akt == .melden { DealOverlay(game: game) } }
             // Kollaps-Vignette: farbgetönter Wimpernschlag (§6a e);
@@ -157,30 +159,40 @@ struct ContentView: View {
         }
     }
 
-    /// Übergang zu Akt 2 - später ersetzt der Phasen-Morph diesen Schnitt (§5b).
+    /// Übergang zu Akt 2 - kompakte Pill-Zeile direkt über dem Kartenfächer.
+    /// Mockup-Stil: kein Clutter, nur eine klare Weiter-Aktion + dezente Neue-Runde.
     private var phase1Footer: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             Button {
                 startNewRound()
             } label: {
-                Text("Neue Runde").font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Tokens.slate)
-                    .padding(.horizontal, 14).padding(.vertical, 8)
-                    .background(Capsule().strokeBorder(Tokens.slate.opacity(0.4), lineWidth: 1))
+                Text("↺").font(.system(size: 15))
+                    .foregroundStyle(Tokens.slate.opacity(0.7))
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(.white.opacity(0.06))
+                        .overlay(Circle().strokeBorder(Tokens.slate.opacity(0.3), lineWidth: 1)))
             }
             .buttonStyle(.plain)
+
+            Spacer()
+
             Button {
                 withAnimation(.spring(duration: Tokens.aktMorph)) { akt = .pochen }
             } label: {
-                Text("Weiter · Pochen").font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Tokens.jewelPlatin)
-                    .padding(.horizontal, 18).padding(.vertical, 9)
-                    .background(Capsule().fill(Tokens.jewelAmethyst.opacity(0.65))
-                        .overlay(Capsule().strokeBorder(Tokens.amethystVivid.opacity(0.8), lineWidth: 1)))
+                HStack(spacing: 6) {
+                    Text("Pochen").font(.system(size: 15, weight: .semibold))
+                    Text("›").font(.system(size: 17, weight: .medium))
+                }
+                .foregroundStyle(Tokens.jewelPlatin)
+                .padding(.horizontal, 20).padding(.vertical, 10)
+                .background(Capsule().fill(Tokens.jewelAmethyst.opacity(0.7))
+                    .overlay(Capsule().strokeBorder(Tokens.amethystVivid.opacity(0.85), lineWidth: 1)))
             }
             .buttonStyle(.plain)
         }
-        .padding(.top, 14)
+        .padding(.horizontal, 4)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
     }
 
     private var trumpChip: some View {
@@ -306,18 +318,32 @@ struct ContentView: View {
         )
     }
 
-    // MARK: - Hand (baut sich im Kaskaden-Takt auf, §6a)
+    // MARK: - Hand (Mockup-Fächer: groß, angewinkelt, Bleed am unteren Bildschirmrand)
 
     private var handView: some View {
-        HStack(spacing: -14) {
-            ForEach(Array(game.humanHand.prefix(game.humanDealtVisible).enumerated()),
-                    id: \.offset) { _, card in
-                CardFace(card: card)
-                    .transition(.scale(scale: 0.86).combined(with: .opacity))
+        let cards = Array(game.humanHand.prefix(game.humanDealtVisible))
+        let N = cards.count
+        // Fächer-Parameter: breite Spreizung, Karten leicht überlappend, Mockup-Optik
+        let spreadDeg = min(Double(N) * 7.5, 40.0)
+        let totalW: CGFloat = min(CGFloat(N) * 38, 252)
+        let cardScale: CGFloat = 1.55
+
+        return ZStack {
+            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
+                let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
+                let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0
+                let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
+
+                CardFace(card: card, scale: cardScale)
+                    .offset(x: xOff)
+                    .rotationEffect(.degrees(angle), anchor: .bottom)
+                    .zIndex(Double(i))
+                    .transition(.scale(scale: 0.86, anchor: .bottom).combined(with: .opacity))
             }
         }
         .animation(.easeOut(duration: 0.12), value: game.humanDealtVisible)
-        .frame(minHeight: 74)
+        // Nur ~60% der Kartenhöhe sichtbar - Rest blendet am Bildschirmrand aus
+        .frame(height: 74 * cardScale * 0.60)
     }
 }
 
