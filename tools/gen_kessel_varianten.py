@@ -175,3 +175,71 @@ if __name__ == "__main__":
         d.text((28, idx * 660 + 6), titles[name], fill=(212, 206, 192))
     strip.save(OUT / "faecher-kessel.png")
     print("Kessel-Runde gebaut")
+
+
+# ---- Runde 2 (Tobsi 8.7. nachts: "noch paar mehr Varianten") -----------------
+def kessel_stapel():
+    """KD: drei gestapelte Kessel-Schalen (Seitenansicht, gedrechselt) - vertikale
+    Achse, Hofkarten-Spiegelung."""
+    ov = half_canvas()
+    d = ImageDraw.Draw(ov)
+    cx = W * S // 2
+    cols = [w.GOLD, w.SMARAGD, w.AMETHYST]
+    for k, col in enumerate(cols):
+        cy = (230 + k * 128) * S
+        bw = (150 - k * 18) * S
+        d.arc([cx - bw, cy - 40 * S, cx + bw, cy + 76 * S], 10, 170,
+              fill=w.PLATIN, width=3 * S)
+        d.ellipse([cx - bw, cy - 22 * S, cx + bw, cy + 22 * S],
+                  outline=w.PLATIN, width=3 * S)
+        r = 8 * S
+        d.ellipse([cx - r, cy + 22 * S - r, cx + r, cy + 22 * S + r],
+                  fill=col, outline=w.PLATIN, width=1 * S)
+    return mirror_compose(ov)
+
+
+def kessel_angeschnitten():
+    """KE: der Kessel-Rand von oben, GROSS angeschnitten - nur ein Bogen-Ausschnitt
+    mit Mulden-Kerben läuft durch die Ecke (kein geschlossener Kreis)."""
+    import math
+    ov = half_canvas()
+    d = ImageDraw.Draw(ov)
+    ccx, ccy = -80 * S, 60 * S
+    for rad, wd in [(430, 4), (500, 3)]:
+        r = rad * S
+        d.arc([ccx - r, ccy - r, ccx + r, ccy + r], 5, 80, fill=w.PLATIN, width=wd * S)
+    cols = [w.GOLD, w.ROSE, w.SMARAGD, w.AMETHYST]
+    for i, col in enumerate(cols):
+        ang = math.radians(16 + i * 18)
+        px = ccx + int(465 * S * math.cos(ang))
+        py = ccy + int(465 * S * math.sin(ang))
+        r = 13 * S
+        d.ellipse([px - r, py - r, px + r, py + r], fill=col,
+                  outline=w.PLATIN, width=2 * S)
+    return mirror_compose(ov)
+
+
+def kessel_silhouette():
+    """KF: die Kessel-Silhouette als tone-on-tone Prägung (fast schwarz-auf-schwarz),
+    nur die 4 Mulden-Punkte tragen Farbe - C-Materialsprache pur."""
+    ov = half_canvas()
+    d = ImageDraw.Draw(ov)
+    cx, cy = W * S // 2, 420 * S
+    bw = 190 * S
+    body = [cx - bw, cy - 120 * S, cx + bw, cy + 140 * S]
+    mask = Image.new("L", ov.size, 0)
+    ImageDraw.Draw(mask).pieslice(body, 0, 180, fill=255)
+    ov.paste(Image.new("RGBA", ov.size, (30, 26, 34, 255)), (0, 0), mask)
+    d.arc(body, 0, 180, fill=(58, 53, 64, 255), width=4 * S)
+    d.ellipse([cx - bw, cy - 34 * S, cx + bw, cy + 34 * S],
+              outline=(58, 53, 64, 255), width=4 * S)
+    cols = [w.GOLD, w.ROSE, w.SMARAGD, w.AMETHYST]
+    for i, col in enumerate(cols):
+        t = -0.6 + i * 0.4
+        px = cx + int(bw * t)
+        import math
+        py = cy + int(34 * S * math.sqrt(max(0.0, 1 - t * t)))
+        r = 10 * S
+        d.ellipse([px - r, py - r, px + r, py + r], fill=col,
+                  outline=w.PLATIN, width=1 * S)
+    return mirror_compose(ov)

@@ -144,13 +144,16 @@ def build_decisions():
              '<b>Ehrliches Fazit:</b> keiner schl&auml;gt W2s Profil (&bdquo;Spielkarten + Mysterium&ldquo;) - '
              'die Kessel-Abstraktion verliert den Kessel oder holt das Casino zur&uuml;ck. '
              '<b>Empfehlung:</b> Default bleibt W2; KA/KB wandern als Kandidaten in den '
-             'Unlock-Deck-Pool (&sect;7.2 braucht ohnehin mehrere R&uuml;cken).</p><div class="gal">')
+             'Unlock-Deck-Pool (&sect;7.2 braucht ohnehin mehrere R&uuml;cken). <b>Runde 2 (KD/KE/KF)</b> auf deinen Zuruf - Eigen-Urteil in den Captions (Gemini-Sparmodus wegen Kontingent); der externe Generierungs-Prompt liegt im Chat.</p><div class="gal">')
     KESSEL = [
         ("back-KA.png", "KA &middot; Kessel-Querschnitt gespiegelt", "Ungeprimt: Tarot, Sci-Fi, Geheimgesellschaft", False),
-        ("back-KB.png", "KB &middot; angeschnittene Mulden-B&ouml;gen", "Ungeprimt: Spielkarte, Klangbild - bestes Profil", False),
+        ("back-KB.png", "KB &middot; angeschnittene Mulden-B&ouml;gen", "Ungeprimt: Spielkarte, Klangbild - bestes Profil R1", False),
         ("back-KC.png", "KC &middot; vertikale Mulden-Pr&auml;gung", "Casino-R&uuml;ckfall im ungeprimten Test - raus", False),
-        ("faecher-kessel-KA.png", "KA im Schatten-F&auml;cher", "", False),
-        ("faecher-kessel-KB.png", "KB im Schatten-F&auml;cher", "", False),
+        ("back-KD.png", "KD &middot; gestapelte Kessel-Schalen (NEU)", "Drei gedrechselte Schalen, Hofkarten-Spiegelung - ruhig, etwas sp&auml;rlich", False),
+        ("back-KE.png", "KE &middot; gro&szlig;er Kessel-Bogen angeschnitten (NEU)", "Der Rand l&auml;uft durch die Ecken, Mulden-Punkte auf der Bahn - dynamisch, kein Rad. St&auml;rkster Neuzugang", True),
+        ("back-KF.png", "KF &middot; Kessel-Silhouette tone-on-tone (NEU)", "Fast schwarz-auf-schwarz (C-Material), nur die Mulden tragen Farbe", False),
+        ("faecher-kessel-KE.png", "KE im Schatten-F&auml;cher", "", False),
+        ("faecher-kessel-KF.png", "KF im Schatten-F&auml;cher", "", False),
         ("faecher-kessel-W2.png", "Referenz: W2 im Schatten-F&auml;cher", "Der Freeze - weiter die Messlatte", True),
     ]
     for fname, title, desc, rec in KESSEL:
