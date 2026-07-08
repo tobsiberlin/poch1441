@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.2] - Kostenbremse: Kontext- & Token-Disziplin (Doku) - 8.7.2026
+
+### Geändert
+- Neue globale CLAUDE.md-Sektion „💸 Kontext- & Token-Disziplin" (earned: ~20 $ in kurzer Zeit verbrannt): große generierte Dateien nie komplett einlesen, Loops mit quiet-stdout, /clear-Schnittpunkte aktiv anbieten, Subagents als Kontext-Schutz.
+- Projekt-CLAUDE.md §10: Cockpit wird bei Commit/Zwischenstand gesammelt regeneriert (nicht pro Teilschritt) und nie per Read in den Kontext geholt; §7: Screenshots vor dem Read auf ~800px verkleinern.
+- Lesson in `tasks/lessons.md` dokumentiert.
+
+
 ## [0.6.1] - Das Eiszeit-Vakuum (§6c c) - 8.7.2026
 
 ### Hinzugefügt

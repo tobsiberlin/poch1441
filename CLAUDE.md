@@ -1,7 +1,7 @@
 # Poch 1441 - Projekt-CLAUDE.md
 
 **Projekt:** Premium-iOS-Kartenspiel (Poch, 1441) | **Repo:** github.com/tobsiberlin/poch1441
-**Letzte Aktualisierung:** 7. Juli 2026
+**Letzte Aktualisierung:** 8. Juli 2026
 
 > Basis-Regeln stehen in `~/.claude/CLAUDE.md` und gelten zusätzlich. Diese Datei enthält nur Poch-1441-spezifische Ergänzungen (destilliert aus den earned Regeln von hot take, kwittung, pawbie, hottake-web). Bei Konflikt gewinnt die spezifischere Regel hier. Spec + Regelwerk: `tasks/poch-spec.md`.
 
@@ -96,7 +96,7 @@ NAME="$(printf '%s' "$SETTINGS" | sed -n 's/^ *FULL_PRODUCT_NAME = //p' | head -
 xcrun simctl install booted "$DIR/$NAME" && xcrun simctl launch booted com.tobc.poch1441
 ```
 - Nur die anchored-sed-Variante nutzen - awk über `-showBuildSettings` griff zweimal die falsche Zeile („YES/Poch1441.app", 5.7.).
-- **Jeder Screenshot** (`xcrun simctl io booted screenshot`) wird unmittelbar per Read verifiziert - nicht stichprobenhaft.
+- **Jeder Screenshot** (`xcrun simctl io booted screenshot`) wird unmittelbar per Read verifiziert - nicht stichprobenhaft. Vor dem Read auf ~800px verkleinern (`sips -Z 800 --out /tmp/…`) und jeden Screenshot nur einmal lesen (Kostenbremse, 💸-Sektion global).
 - **Preview vor Simulator** bei reinen SwiftUI-Änderungen (#Preview, Feedback in <5s).
 - **Tap-/Gesture-Bugs:** zuerst View-Hierarchie nach dekorativen `.overlay`-Layern durchsuchen (schlucken Taps) → `.allowsHitTesting(false)`.
 - Layout-Werte messen (Pillow/DevTools-Prinzip), nicht in 20er-Schritten raten - max. 2 Iterationen pro Wert.
@@ -118,7 +118,7 @@ xcrun simctl install booted "$DIR/$NAME" && xcrun simctl launch booted com.tobc.
 
 ## 10. Tobsi-Kommunikation im Loop (earned 5.7., Tobsi-Feedback)
 
-- `artifacts/poch-1441-cockpit.html` (auch nach iCloud-TEMP gespiegelt, Generator `tools/gen_cockpit.py`) ist das lebende Status-Cockpit: nach jeder Loop-Iteration aktualisieren. Offene Tobsi-Entscheidungen stehen immer als oberster Block - **jede mit kopierbarem Antwort-Prompt** (Copy-Button, vorformulierte Antwort zum Einfügen in den Chat; earned 5.7., Tobsi kam ohne nicht mehr mit). Bei neuem Entscheidungsbedarf die Datei per `open` öffnen. Chat-Zusammenfassungen ersetzen das Cockpit nicht. **Chat-zuerst-Regel (earned 5.7.):** Fragen und Entscheidungen werden IMMER direkt im Chat gestellt - mit fertigen Antwortzeilen zum Kopieren; das Cockpit spiegelt sie nur. **Eine-Frage-Regel (earned 5.7., Tobsi: „alles verwirrend"):** Immer nur EINE aktive Tobsi-Entscheidung, alle weiteren explizit als geparkt führen; wartet der Loop auf Tobsi, endet die Nachricht mit „Ich warte auf: X - solange passiert nichts."
+- `artifacts/poch-1441-cockpit.html` (auch nach iCloud-TEMP gespiegelt, Generator `tools/gen_cockpit.py`) ist das lebende Status-Cockpit: bei jedem Commit/Zwischenstand gesammelt regenerieren (nicht pro Teilschritt innerhalb eines Laufs) - und die HTML nie per Read in den Kontext holen (Base64-Bilder machen sie riesig; Regenerieren per Skript ist billig, Einlesen ist das Teure - siehe 💸-Sektion der globalen CLAUDE.md). Offene Tobsi-Entscheidungen stehen immer als oberster Block - **jede mit kopierbarem Antwort-Prompt** (Copy-Button, vorformulierte Antwort zum Einfügen in den Chat; earned 5.7., Tobsi kam ohne nicht mehr mit). Bei neuem Entscheidungsbedarf die Datei per `open` öffnen. Chat-Zusammenfassungen ersetzen das Cockpit nicht. **Chat-zuerst-Regel (earned 5.7.):** Fragen und Entscheidungen werden IMMER direkt im Chat gestellt - mit fertigen Antwortzeilen zum Kopieren; das Cockpit spiegelt sie nur. **Eine-Frage-Regel (earned 5.7., Tobsi: „alles verwirrend"):** Immer nur EINE aktive Tobsi-Entscheidung, alle weiteren explizit als geparkt führen; wartet der Loop auf Tobsi, endet die Nachricht mit „Ich warte auf: X - solange passiert nichts."
 - Auswahl-Artefakte (Stil-Kandidaten etc.) werden NICHT als ZIP geliefert (Tobsi 7.7.): gelabelte Bilder (Kandidaten-Buchstabe im Bild) direkt ins Cockpit-HTML einbetten (Base64), Cockpit nach `~/Library/Mobile Documents/com~apple~CloudDocs/TEMP/` spiegeln und per `open` öffnen.
 
 ## 11. Commits & Secrets

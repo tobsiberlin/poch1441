@@ -156,3 +156,9 @@
 **Beobachtung:** Vier X-Varianten (Material, Füllung, Linienstärke, Skala variiert) - alle entweder Rad-Read (X1-X3) oder Marken-Verlust (X4, „casino-frei durch Verzicht"). Tobsis Reviewer benannte die Ursache: ein geschlossener Farbkreis um ein Zentrum IST die Rad-Gestalt - das Auge liest Roulette unabhängig vom Material. Drei Runden am selben Motiv gedreht (wörtlich: am Rad).
 
 **Regel:** Besteht ein Motiv-Problem nach 2 Varianten-Runden, zuerst fragen: Material-Problem oder GESTALT-Problem? Gestalt-Probleme (Silhouette, Symmetrie, Anordnung) erfordern Kompositions-Wechsel - Achse kippen, Symmetrie brechen, Element verlagern - nie eine weitere Material-Runde. Dokumentierte Abbruchregel für den Rücken: Sitzt auch die Wappen/Brett-Runde nicht, wandert das Rücken-Signet auf ein anderes Marken-Element (Monogramm, 1441-Relief); der Mulden-Ring bleibt, wo er unschlagbar ist - als spielbares Brett.
+
+## 8.7.2026 - ~20 $ in kurzer Zeit verbrannt: Kontext-Aufblähung ist der Kostentreiber
+
+**Beobachtung:** Tobsi: „habe gerade innerhalb kürzester Zeit 20$ verfeuert." Muster der Sessions davor: Cockpit-HTML mit Base64-Bildern und andere große Artefakte wanderten in den Kontext, Loops liefen mit ausführlichem stdout, Screenshots in voller Auflösung, keine /clear-Schnitte - und alles davon wird bei jedem Folge-Turn erneut als Input bezahlt.
+
+**Regel:** Neue globale Sektion „💸 Kontext- & Token-Disziplin" in `~/.claude/CLAUDE.md`: große generierte Dateien nie komplett per Read (grep/sed-Ausschnitte), Loops mit quiet-stdout + einem Sammel-Summary, Cockpit nur bei Commit/Zwischenstand regenerieren und nie zurücklesen, Bilder vor dem Read auf ~800px verkleinern, nach jeder Task Stand nach `tasks/todo.md` schreiben und den /clear-Schnittpunkt aktiv im Chat anbieten.
