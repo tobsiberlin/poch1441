@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.8] - Kantenphysik: Kartonstärke, Ebenen-Schatten, Kanten-Licht - 8.7.2026
+
+### Geändert
+- `CardWarp.metal`: Kantenphysik im Quell-Raum (SDF der Kartenform, wandert mit
+  der Wölbung mit): dunkler Kartonstärke-Saum an der Schnittkante (Rückseite
+  schimmert minimal durch), hauchfeines 1px-Licht auf lichtzugewandten Oberkanten
+- `CardFace.swift`: zweite, weiche Schattenlage (0.20/8×scale/3.5×scale) unter dem
+  Kontaktschatten - Penumbra folgt der gewölbten Silhouette, an gehobenen Ecken
+  breiter (spürbarer Luftspalt zwischen Kartenebenen)
+- Assets, Indizes und Fächer-Geometrie unverändert (reines Rendering)
+- QA: gemini-vision PASS („physischer Premium-Karton, keine Artefakte")
+
 ## [0.6.7] - Karton-Wölbung im Kartenfächer (CardWarp-Shader) - 8.7.2026
 
 ### Hinzugefügt

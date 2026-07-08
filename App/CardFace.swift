@@ -82,6 +82,12 @@ struct CardFace: View {
         .shadow(
             color: accent?.opacity(0.6) ?? .black.opacity(0.5),
             radius: accent != nil ? 8 : 4, y: accent != nil ? 0 : 2.5)
+        // Zweite, weiche Schattenlage: macht den Luftspalt spürbar - beide
+        // Lagen folgen der gewölbten Silhouette, an den gehobenen Ecken
+        // wird die Penumbra dadurch breiter (physische Kartenebenen)
+        .shadow(
+            color: accent != nil ? .clear : .black.opacity(0.20),
+            radius: 8 * scale, y: 3.5 * scale)
     }
 
     // MARK: - SVG-Asset (Bildkarten + Asse)
