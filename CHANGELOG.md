@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.4] - Klassische Spielkarten (SVG Open-Source Assets) - 8.7.2026
+
+### Hinzugefügt
+- 32 klassische Spielkarten-Assets (htdebeer/SVG-cards, LGPL) - zweiköpfige Bildkarten (König, Dame, Bube) + Asse in traditionellem Casino-Design (Rot/Blau/Gelb/Schwarz), gerendert als @2x PNGs via rsvg-convert
+- `App/Assets.xcassets/Cards/` - 32 imagesets für alle Poch-Karten
+- `CardFace.swift` nutzt echte SVG-Assets für Bildkarten/Asse; Zahlkarten 7-10 bleiben code-gerendert (Pip-Anordnung)
+- Generator-Skripte: `tools/gen_cards_faces.py`, `tools/gen_cards_casino.py`, `tools/gen_cards_altenburg.py` (experimentell, abgelöst durch SVG)
+
+### Geändert
+- `CardFace.swift`: Bildkarten/Asse nutzen `Image("card_{suit}_{rank}")` statt Unicode-Buchstaben
+
+
 ## [0.6.3] - Premium-Kartenvorderseiten (Rang-differenziertes Zentrum) - 8.7.2026
 
 ### Geändert

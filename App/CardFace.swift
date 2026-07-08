@@ -1,9 +1,9 @@
 import PochKit
 import SwiftUI
 
-/// Premium-Kartenvorderseite (konzept §4: klarer Index + Farbe, Lesbarkeit vor Pracht).
-/// Rang-differenziertes Zentrum: Pip-Muster für 7-10, Rang-Letter für Bildkarten, große
-/// Einzelpip für das Ass. Elfenbein-Karton + Hairline-Innenrahmen + Serif-Indizes.
+/// Kartenvorderseite mit klassischen SVG-Assets (htdebeer/SVG-cards, LGPL).
+/// Bildkarten (J/Q/K) und Asse: echtes zweiköpfiges Spielkartendesign aus dem Asset-Katalog.
+/// Zahlkarten (7-10): code-gerendertes Pip-Muster (sauber, konsistent, kein Asset-Overhead).
 /// Geteilt zwischen Phase 1 (Hand), Phase 2 (Kunststück-Glow §6b) und Phase 3 (Stopper §6c).
 struct CardFace: View {
     let card: Card
@@ -24,68 +24,86 @@ struct CardFace: View {
         card.suit.isRed ? Color(hex: 0x9E2436) : Color(hex: 0x201E26)
     }
 
+    /// Asset-Name im Katalog: card_{suit}_{rank}
+    private var assetName: String? {
+        let suitStr: String
+        switch card.suit {
+        case .hearts:   suitStr = "hearts"
+        case .diamonds: suitStr = "diamonds"
+        case .spades:   suitStr = "spades"
+        case .clubs:    suitStr = "clubs"
+        }
+        let rankStr: String
+        switch card.rank {
+        case .ace:   rankStr = "ace"
+        case .king:  rankStr = "king"
+        case .queen: rankStr = "queen"
+        case .jack:  rankStr = "jack"
+        default:     return nil  // Zahlkarten: code-gerendert
+        }
+        return "card_\(suitStr)_\(rankStr)"
+    }
+
     var body: some View {
         ZStack {
-            // Karton: warmes Elfenbein, oben minimal heller (Material-Wölbung)
+            if let name = assetName {
+                // Bildkarte / Ass: klassisches SVG-Asset
+                svgCard(named: name)
+            } else {
+                // Zahlkarte 7-10: code-gerendert
+                numberCard
+            }
+        }
+        .frame(width: 52 * scale, height: 74 * scale)
+        .overlay(RoundedRectangle(cornerRadius: 8 * scale)
+            .strokeBorder(
+                accent?.opacity(0.85) ?? .clear,
+                lineWidth: accent != nil ? 2 : 0))
+        .shadow(
+            color: accent?.opacity(0.6) ?? .black.opacity(0.4),
+            radius: accent != nil ? 8 : 3, y: accent != nil ? 0 : 2)
+    }
+
+    // MARK: - SVG-Asset (Bildkarten + Asse)
+
+    private func svgCard(named name: String) -> some View {
+        Image(name)
+            .resizable()
+            .interpolation(.high)
+            .aspectRatio(contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: 8 * scale))
+    }
+
+    // MARK: - Zahlkarten 7-10 (code-gerendert)
+
+    private var numberCard: some View {
+        ZStack {
+            // Elfenbein-Karton
             RoundedRectangle(cornerRadius: 8 * scale)
                 .fill(LinearGradient(
                     colors: [Color(hex: 0xF8F3E7), Color(hex: 0xEBE3D0)],
                     startPoint: .top, endPoint: .bottom))
-            // Hairline-Innenrahmen (klassische Karten-Sprache)
+            // Hairline-Innenrahmen
             RoundedRectangle(cornerRadius: 5.5 * scale)
                 .strokeBorder(Color(hex: 0xC7BCA3).opacity(0.55), lineWidth: 0.5 * scale)
                 .padding(3 * scale)
-            // Indizes: oben links + punktsymmetrisch unten rechts
+            // Eck-Indizes
             VStack(spacing: 0) {
                 HStack { indexBlock; Spacer() }
                 Spacer()
                 HStack { Spacer(); indexBlock.rotationEffect(.degrees(180)) }
             }
             .padding(4.5 * scale)
-            // Zentrum: rang-spezifisch
-            centerBody
-        }
-        .frame(width: 52 * scale, height: 74 * scale)
-        .overlay(RoundedRectangle(cornerRadius: 8 * scale)
-            .strokeBorder(
-                accent?.opacity(0.85) ?? .black.opacity(0.18),
-                lineWidth: accent != nil ? 1.5 : 0.5))
-        .shadow(
-            color: accent?.opacity(0.55) ?? .black.opacity(0.4),
-            radius: accent != nil ? 7 : 3, y: accent != nil ? 0 : 2)
-    }
-
-    // MARK: - Zentrum
-
-    @ViewBuilder
-    private var centerBody: some View {
-        switch card.rank {
-        case .ace:
-            // Ass: ikonische Einzel-Pip, leicht übergroß und mit Tiefenschatten
-            Text(card.suit.symbol)
-                .font(.system(size: 30 * scale))
-                .foregroundStyle(ink)
-                .shadow(color: ink.opacity(0.22), radius: 1.5 * scale, y: 1 * scale)
-
-        case .jack, .queen, .king:
-            // Bildkarten: großer Rang-Buchstabe allein - Farbe + Eck-Index codieren die Farbe
-            // bereits; ein zusätzliches Pip wäre Redundanz und macht die Karte generisch.
-            Text(card.rank.index)
-                .font(.system(size: 28 * scale, weight: .semibold, design: .serif))
-                .foregroundStyle(ink)
-                .shadow(color: ink.opacity(0.15), radius: 1 * scale, y: 0.8 * scale)
-
-        default:
-            // Zahlkarten 7-10: klassische 2-spaltige Pip-Anordnung
+            // Pip-Muster
             pipGrid
+            // Äußerer Rahmen
+            RoundedRectangle(cornerRadius: 8 * scale)
+                .strokeBorder(.black.opacity(0.18), lineWidth: 0.5 * scale)
         }
     }
 
     // MARK: - Pip-Grid
 
-    // Normalisierte (x, y) Offsets vom Kartenmittelpunkt.
-    // Basis-Zone: 32 × 46 pt (bei scale 1), sicher im Abstand von den Eck-Indizes.
-    // x-Offset: ±0.28 → ±9 pt | y-Offset: ±0.38 → ±17.5 pt
     private static let pipOffsets: [Rank: [(Double, Double)]] = [
         .seven: [
             (-0.28, -0.36), (0.28, -0.36),
@@ -130,7 +148,7 @@ struct CardFace: View {
         }
     }
 
-    // MARK: - Index-Block (oben links, 180° gedreht unten rechts)
+    // MARK: - Index-Block
 
     private var indexBlock: some View {
         VStack(spacing: -1.5 * scale) {
@@ -147,21 +165,18 @@ struct CardFace: View {
     ZStack {
         Color(hex: 0x0B0E14).ignoresSafeArea()
         VStack(spacing: 14) {
-            // Ass + Bildkarten
             HStack(spacing: -10) {
                 CardFace(card: Card(suit: .hearts,   rank: .ace))
                 CardFace(card: Card(suit: .spades,   rank: .king))
                 CardFace(card: Card(suit: .diamonds, rank: .queen), highlighted: true)
                 CardFace(card: Card(suit: .clubs,    rank: .jack))
             }
-            // Zahlkarten 7-10
             HStack(spacing: -10) {
                 CardFace(card: Card(suit: .spades,   rank: .ten), goldenStopper: true)
                 CardFace(card: Card(suit: .hearts,   rank: .nine))
                 CardFace(card: Card(suit: .clubs,    rank: .eight))
                 CardFace(card: Card(suit: .diamonds, rank: .seven))
             }
-            // Kleine Scale (Deal-Größe)
             HStack(spacing: -8) {
                 ForEach([Rank.seven, .nine, .jack, .ace], id: \.self) { r in
                     CardFace(card: Card(suit: .spades, rank: r), scale: 0.62)
