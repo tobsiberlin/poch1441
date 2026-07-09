@@ -344,7 +344,7 @@ struct ContentView: View {
     private var guidedCoachBottomPadding: CGFloat {
         switch akt {
         case .melden: return 106
-        case .pochen: return 18
+        case .pochen: return 430
         case .ausspielen: return 196
         }
     }

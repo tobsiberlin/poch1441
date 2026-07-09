@@ -72,6 +72,10 @@ rendert nach Skip keine Rest-Flugkarten mehr, Zug-Begleiter hat Settings-Schalte
 zustandsbezogene Texte, Phase 3 zeigt ein Rueckseiten-Seitendeck neben dem Medaillon.
 Aktuelle QA-Screens: `artifacts/app-screens/global-polish-v2b-20260709/` und
 `artifacts/app-screens/global-polish-v3b-20260709/phase3-side-deck.png`.
+Spaeterer Stand: Phase-2-Gegnerrollen auf moderne Verhaltenslabels reduziert,
+Statuswerte ausgeschrieben, Phase-3-Medaillon als Centerpot-Objekt umgebaut,
+Zug-Begleiter in Phase 2 so verschoben, dass er Hand und Gegner nicht verdeckt.
+QA-Screens: `artifacts/app-screens/phase23-polish-v1-20260709/`.
 
 ---
 
