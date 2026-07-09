@@ -66,6 +66,13 @@ Das Mockup ist fuer die **Komposition** sehr nah zu treffen:
   verbessern oder emotionale Spannung erhoehen; keine Deko-Effekte, die Poch als
   Casino/Arcade missverstaendlich machen.
 
+**Stand 9.7. Arbeitsloop:** Gates aufgenommen. Erste globale Politur umgesetzt:
+materialigere `TableChip`-Komponente, sichtbarere Gegner-Kartenruecken, DealOverlay
+rendert nach Skip keine Rest-Flugkarten mehr, Zug-Begleiter hat Settings-Schalter und
+zustandsbezogene Texte, Phase 3 zeigt ein Rueckseiten-Seitendeck neben dem Medaillon.
+Aktuelle QA-Screens: `artifacts/app-screens/global-polish-v2b-20260709/` und
+`artifacts/app-screens/global-polish-v3b-20260709/phase3-side-deck.png`.
+
 ---
 
 ## Eingeloggt / Nicht Wieder Aufmachen

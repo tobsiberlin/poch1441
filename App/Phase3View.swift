@@ -173,7 +173,7 @@ struct Phase3View: View {
                 medallion
                     .offset(y: previewMode ? 36 : 42)
                 sideDeck
-                    .offset(x: 92, y: previewMode ? 44 : 50)
+                    .offset(x: 124, y: previewMode ? 38 : 44)
             }
             .allowsHitTesting(false)
         }
@@ -276,14 +276,14 @@ struct Phase3View: View {
         ZStack {
             RoundedRectangle(cornerRadius: 9)
                 .fill(Color.black.opacity(0.42))
-                .frame(width: 39, height: 54)
+                .frame(width: 48, height: 66)
                 .offset(x: 4, y: 5)
-            CardBack(scale: 0.45)
+            CardBack(scale: 0.56)
                 .rotationEffect(.degrees(2))
                 .shadow(color: .black.opacity(0.58), radius: 9, y: 5)
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(Tokens.jewelGold.opacity(0.38), lineWidth: 0.9)
-                .frame(width: 39, height: 54)
+                .frame(width: 48, height: 66)
         }
         .opacity(0.92)
         .accessibilityHidden(true)
