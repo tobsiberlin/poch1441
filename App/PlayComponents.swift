@@ -190,9 +190,9 @@ struct OpponentPanel: View {
 
     private var role: String {
         switch seat % 3 {
-        case 1: return "Gastgeber"
-        case 2: return "Taktik"
-        default: return "Archiv"
+        case 1: return "ruhig"
+        case 2: return "präzise"
+        default: return "wach"
         }
     }
 
@@ -238,8 +238,8 @@ struct OpponentPanel: View {
                     }
 
                     HStack(spacing: 8) {
-                        stat("\(cards)", "K")
-                        stat("\(stack)", "CH")
+                        stat("\(cards)", "Karten")
+                        stat("\(stack)", "Chips")
                     }
                 }
                 .padding(.top, 8)
@@ -257,7 +257,7 @@ struct OpponentPanel: View {
             .frame(width: width, height: 124)
 
             Text(actionText)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 10.5, weight: .bold))
                 .foregroundStyle(actionTint == .clear ? .clear : Tokens.jewelPlatin.opacity(0.95))
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
@@ -292,7 +292,7 @@ struct OpponentPanel: View {
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(Tokens.jewelGold.opacity(0.92))
             Text(label)
-                .font(.system(size: 6.5, weight: .bold))
+                .font(.system(size: label.count > 2 ? 5.7 : 6.5, weight: .bold))
                 .foregroundStyle(Tokens.slate.opacity(0.62))
         }
         .frame(width: 32)

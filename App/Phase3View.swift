@@ -239,35 +239,46 @@ struct Phase3View: View {
         .animation(.easeOut(duration: 0.18), value: game.cascadeIdle)
     }
 
-    /// Poch-Medaillon: Herz-Symbol als Zentrum des Fächers (§0 Signatur).
+    /// Poch-Medaillon: ruhiger Hauptpot-Anker im Kartenstrom.
     private var medallion: some View {
         ZStack {
             Circle()
                 .fill(LinearGradient(colors: [
-                    Color(hex: 0x241B22),
-                    Color(hex: 0x100F15)
+                    Color(hex: 0x252229),
+                    Color(hex: 0x0F0E13)
                 ], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.62), lineWidth: 2.0))
+                .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.70), lineWidth: 2.0))
                 .overlay(Circle().strokeBorder(Color.black.opacity(0.75), lineWidth: 4).padding(5))
                 .overlay(Circle().strokeBorder(Tokens.jewelPlatin.opacity(0.14), lineWidth: 1).padding(9))
                 .frame(width: 92, height: 92)
                 .shadow(color: .black.opacity(0.72), radius: 12, y: 7)
+            Circle()
+                .fill(RadialGradient(colors: [
+                    Tokens.jewelPlatin.opacity(0.14),
+                    Color.clear
+                ], center: .topLeading, startRadius: 2, endRadius: 44))
+                .frame(width: 72, height: 72)
             RoundedRectangle(cornerRadius: 12)
                 .fill(LinearGradient(colors: [
-                    Tokens.smaragdVivid.opacity(theme.isNeon ? 0.9 : 0.64),
-                    Tokens.jewelAmethyst.opacity(theme.isNeon ? 0.9 : 0.58)
+                    Tokens.jewelSmaragd.opacity(theme.isNeon ? 0.92 : 0.58),
+                    Tokens.jewelAmethyst.opacity(theme.isNeon ? 0.92 : 0.52)
                 ], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .frame(width: 46, height: 34)
+                .frame(width: 43, height: 43)
                 .rotationEffect(.degrees(45))
                 .overlay(RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(Tokens.jewelPlatin.opacity(0.35), lineWidth: 1)
+                    .strokeBorder(Tokens.jewelPlatin.opacity(0.30), lineWidth: 1)
                     .rotationEffect(.degrees(45)))
                 .shadow(color: Tokens.smaragdVivid.opacity(theme.isNeon ? 0.34 : 0.10),
                         radius: theme.isNeon ? 14 : 5)
-            Text("♥")
-                .font(.system(size: 28, weight: .heavy))
-                .foregroundStyle(Tokens.jewelPlatin.opacity(0.82))
-                .offset(y: -1)
+            VStack(spacing: -1) {
+                Text("MITTE")
+                    .font(.system(size: 7, weight: .heavy))
+                    .tracking(1.0)
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.66))
+                Text("\(game.chips(in: .center))")
+                    .font(.system(size: 24, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.90))
+            }
         }
         .accessibilityLabel("Poch-Medaillon")
     }
