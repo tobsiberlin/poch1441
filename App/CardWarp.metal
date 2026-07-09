@@ -26,13 +26,15 @@ using namespace metal;
     half4 c = layer.sample(srcp);
     // Gebogener Karton im Licht: gehobene Ecken fangen Licht, die flache
     // Mulde dazwischen liegt tiefer - das Licht erzählt die Krümmung
-    float shade = 1.0 + 0.065 * bow * topness - 0.028 * (1.0 - bow) * topness;
+    float shade = 1.0 + 0.052 * bow * topness - 0.022 * (1.0 - bow) * topness;
     c.rgb *= half3(half(shade));
 
     // Kantenphysik im QUELL-Raum (SDF der ungewölbten Kartenform - die
     // Effekte wandern dadurch exakt mit der Wölbung mit). Geometrie ist an
-    // CardFace gekoppelt: amp = 2.4*scale, pad = 3*scale, Eckradius = 8*scale.
-    float sc = amp / 2.4;
+    // CardFace gekoppelt: size.x = (52 + 2*3)*scale, Eckradius = 8*scale.
+    // Nicht aus amp ableiten: die Kartonstärke bleibt konstant, auch wenn
+    // die Wölbung feinjustiert wird.
+    float sc = size.x / 58.0;
     float rad = 8.0 * sc;
     float2 q = abs(srcp - size * 0.5) - (size * 0.5 - 3.0 * sc - rad);
     float d = length(max(q, float2(0.0))) + min(max(q.x, q.y), 0.0) - rad;

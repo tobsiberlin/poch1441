@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+### Geändert
+- `CardFace.swift` / `CardWarp.metal`: Kartenwölbung feiner abgestimmt
+  (Eckenhub 2.4 → 1.6 × scale, ruhigeres Licht); Kartonrand bleibt unabhängig
+  vom Wölbungswert konstant.
+- `DesignTokens.swift` / `ContentView.swift`: Phase-1-Proportionen stärker am
+  Mockup-Anker ausgerichtet: Ring nahezu full-width, grössere Handkarten mit
+  Bottom-Bleed, Weiter-Aktion ohne eigenen Layout-Block.
+- `tools/gen_pochring_replicate.py`: Replicate-HTML-Sichtung für Poch-Ring-
+  Materialrichtungen (A-H) ergänzt und nach iCloud-TEMP spiegelbar gemacht.
+- `tools/gen_precision_monolith.py`: fokussierte Precision-Monolith-Sichtung
+  (PM1-PM8) plus Vektor-Spec für Premium/Vivid-Mulden erzeugt.
+- `precision-monolith-sichtung.html`: falsche M9-SVG-Ergänzung wieder entfernt;
+  M9 war nicht PM9 und optisch nicht auf Niveau der PM-Serie.
+- PM9-Retakes verworfen: Text-only-Prompt driftet zu Neon/LED bzw. 3x3-Objekt;
+  PM9 aus sichtbarer Sichtung entfernt. Nächster Schritt nur mit PM7/PM5 als
+  Referenzbild oder kontrollierter Code-/Vektor-Geometrie.
+- PM10-PM12 ergänzt: PM1-basierte Varianten mit dezenten Ringen um alle
+  Mulden. PM10 ist stärkster Kandidat; PM11 zu steril/flach, PM12 falscher
+  Count/zu voll.
+- PM13 korrigiert und PM17-PM22 ergänzt: kontrollierte Poch-Geometrie mit
+  exakt 8 Außenmulden + echter Mittelmulde; PM17-PM19 bleiben PM1-materialnah
+  mit dezenten Pigmentringen, PM20-PM22 testen symmetrische PM7-Metallmulden.
+
 ## [0.7.1] - Phase-1-Ring-Skalierung: grösserer Ring, prominente Chip-Werte, diskrete Tokens - 8.7.2026
 
 ### Geändert

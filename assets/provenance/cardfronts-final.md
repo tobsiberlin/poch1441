@@ -1,36 +1,49 @@
 # Provenance - Kartenvorderseiten „Final-Template" (32 Karten)
 
-**Status:** Aktiv (8.7.2026, Tobsi-Auftrag: „genau wie Mockup, 100% Konsistenz")
+**Status:** Eingeloggt / final aktiv (8.7.2026, Tobsi-Freigabe: „perfekt!
+einlocken!")
 **Dateien:** `Assets_Raw/cards/final/*.png` (Master 624x888),
 `App/Assets.xcassets/Cards/*.imageset` (@2x 312x444 + @3x 468x666)
-**Generator:** `tools/gen_cards_final.py` (deterministisch, reproduzierbar, kein Seed nötig)
+**Generator:** `tools/gen_cards_vector_public_domain.py` (deterministisch,
+reproduzierbar, kein KI-/Sheet-Slicing)
+**Quelle:** `Assets_Raw/vector-playing-cards/cards-svg/*.svg`, Public Domain /
+WTFPL laut `Assets_Raw/vector-playing-cards/README.md`, Original: Byron Knoll
 
 ## Konstruktion (deterministisch, keine KI-Generierung)
-- EINE Vorlage für alle 32 Karten: weiße Karte, Eckradius 8/52 der Breite
-  (deckungsgleich mit CardFace-Clip), große fette Eck-Indizes (Helvetica Neue Bold,
-  Cap ~12.5% Kartenhöhe) mit Pip darunter, oben-links + unten-rechts (identisches
-  Tile, 180° gedreht - Verschiebung mathematisch ausgeschlossen).
-- Runde 2 (8.7., Tobsi-Feedback „zu flach/grell vs Mockup"): Recolor auf
-  SVG-Ebene auf tiefe Juwelen-Töne (Weinrot #7E2333, Karmesin #B51D27,
-  Antikgold #B8933A, staubiges Royal #465685 - Gewänder-/Pip-Rot disjunkt
-  verifiziert), Papier-Textur (seeded rng(1441), Korn+Leinen+Sheen ~1-2%,
-  identisch auf allen Karten) und Pip-Tiefengradient (Licht immer von oben).
-- Asse: ein großes zentrales Pip (34% Kartenhöhe, geometrisch zentriert, Beweis
-  Pixel-Messung 443.5/444). Zahlkarten 7-10: klassisches Pip-Raster, untere
-  Hälfte 180° gedreht. Farben: Rot #E6180A (exakt Quell-Rot), Schwarz #000000.
-- Hoffiguren J/Q/K: extrahiert aus htdebeer/SVG-cards (LGPL, bereits im Repo
-  `Assets_Raw/svg-cards/svg-cards.svg`) - Basis, Eck-Indizes und Eck-Pips der
-  Quelle entfernt (SVG-Chirurgie, Strip-Zählung 1/2/2/2 uniform über alle 12
-  verifiziert), Figur inkl. klassischem Rahmen nahezu vollflächig platziert,
-  weißes Knockout hinter den Indizes (wie Quelle, nur größer).
+- Quelle sind 32 einzelne Public-Domain-SVGs, kein KI-Sheet und kein Slicing.
+- Das originale Kartenlayout bleibt erhalten: Werte, Suit-Pips, Zahlkarten,
+  Asse und Hofkarten werden nicht mit einem zweiten Label übermalt.
+- Eigene Poch-Kartenbasis: klares Weiss, App-Eckradius, mehr Rand-Padding als
+  die Quelle. Die originale weisse SVG-Basis wird entfernt, damit kein
+  Karte-in-Karte-Rand entsteht.
+- Ecktypografie wird in der SVG-Stufe verstaerkt: groesser, bold, Helvetica
+  Neue/Arial-Fallback. Kein Overlay.
+- Farbgrading: Gelb -> mattes Gold, Royalblau -> Graphit/Navy, Rot -> Rubinrot
+  `#D93650`, Grau -> kuehleres Off-White.
+- Rote Asse bleiben im originalen Design, aber der zentrale rote As-Verlauf wird
+  gezielt gegen Blässe geboostet.
+- Kartenstock-Finish: reines Weiss mit sehr dezenter Leinen-/Air-Cushion-
+  Mikrostruktur und minimaler Wölbungs-Schattierung. Kein Gelbstich, kein Grunge.
+- Sichtbare Kartenwölbung und Schatten bleiben UI-/Shader-Aufgabe in
+  `CardFace`, nicht hart ins PNG gebacken.
 
 ## KI-Anteil
 - Keiner. Referenz-Mockup (Tobsi, iCloud TEMP 935b2c31) diente nur als
   Layout-Vorgabe für die Vorlagen-Parameter.
 
+## QA
+- `tools/gen_card_fronts_qa.py` erzeugt `artifacts/sichtung-karten-franzoesisch.html`.
+  Die HTML-Datei referenziert speicherarm direkt die App-Assets.
+- `artifacts/card-vector-intermediate-8x4.png` ist die aktuelle Kontrollmontage.
+- `artifacts/card-vector-styled-8x4.png` und `artifacts/card-qa-8x4.png` sind
+  ältere Kontrollmontagen: Zeilen =
+  Pik/Herz/Kreuz/Karo, Spalten = A/K/Q/J/10/9/8/7.
+
 ## Menschliche Entscheidungsschritte
-- Tobsi 8.7.: bisherige Karten „völlig inkonsistent" (Rahmen mal ja/mal nein,
-  Indizes zu randnah) → Neuaufbau aus einer Vorlage nach Mockup-Vorbild.
-- gemini-vision-QA gegen 32er-Montage: 3 Hauptbefunde als Falschmeldungen
-  widerlegt (Pixel-Messung); Font-Empfehlung „Serif" bewusst verworfen -
-  Mockup zeigt Bold-Sans, Mockup gewinnt.
+- Tobsi 8.7.: KI-/Sheet-Ansätze verworfen. Professioneller Weg:
+  freies, sauberes SVG-Kartendeck aus dem Netz als Basis.
+- Tobsi 8.7.: Zwischenstand mit originalem SVG-Layout bevorzugt; übermalte
+  Bold-Indizes verworfen.
+- Tobsi 8.7.: mehr Rand-Padding, saftigeres Rot, rote Asse weniger blass,
+  Ecktypografie groesser/fetter.
+- Tobsi 8.7.: finaler Stand freigegeben: „perfekt! einlocken!"

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poch 1441 · Karten-QA</title>
+  <style>
+    :root { color-scheme: dark; --bg:#08070b; --panel:#151219; --text:#e8edf5; --muted:#9aa3af; --gold:#c5a059; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; }
+    header { max-width:1280px; margin:0 auto; padding:24px 20px 10px; }
+    h1 { margin:0 0 8px; font-size:28px; }
+    p { margin:0; color:var(--muted); line-height:1.45; }
+    main { max-width:1280px; margin:0 auto; padding:10px 20px 28px; overflow-x:auto; }
+    .stage { margin:16px 0 28px; min-height:390px; border:1px solid rgba(197,160,89,.16); border-radius:14px;
+      background:radial-gradient(circle at 50% 35%, #1c2226 0, #101116 48%, #08070b 100%); position:relative; overflow:hidden; }
+    .fan { position:absolute; left:50%; top:52%; width:460px; height:330px; transform:translate(-50%,-50%); }
+    .fan-card { position:absolute; left:165px; top:65px; width:126px; border-radius:14px;
+      transform:translate(var(--x), var(--y)) rotate(var(--r)); transform-origin:50% 92%;
+      box-shadow:0 18px 34px rgba(0,0,0,.46), 0 3px 8px rgba(0,0,0,.34);
+      filter:contrast(1.02); }
+    .fan-card::after { content:""; }
+    .caption { position:absolute; left:0; right:0; bottom:18px; text-align:center; color:var(--muted); font-size:13px; }
+    h2 { margin:22px 0 8px; color:var(--gold); font-size:18px; }
+    table { border-collapse:separate; border-spacing:10px; }
+    td { width:118px; background:linear-gradient(180deg,#18141e,#100d14); border:1px solid rgba(197,160,89,.18); border-radius:9px; padding:8px; text-align:center; }
+    img { display:block; width:100%; border-radius:8px; box-shadow:0 12px 28px rgba(0,0,0,.35); }
+    b { display:block; margin-top:7px; color:var(--gold); font-size:13px; }
+    small { display:block; margin-top:3px; color:var(--muted); font-size:9px; }
+    .missing { color:#ff6b7d; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Französisches Blatt · QA-Matrix</h1>
+    <p>Zeilen sind die technische Suit-Zuordnung, Spalten die internationalen Ränge. Jede Zelle lädt exakt das App-Asset mit demselben Dateinamen.</p>
+  </header>
+  <main>
+    <h2>Mockup-nahe Hand/Fächer</h2>
+    <section class="stage">
+      <div class="fan"><img class='fan-card' style='--r:-28deg;--x:-34px;--y:-18px' src='../App/Assets.xcassets/Cards/card_spades_seven.imageset/card_spades_seven@2x.png' alt='card_spades_seven'><img class='fan-card' style='--r:-18deg;--x:-22px;--y:-10px' src='../App/Assets.xcassets/Cards/card_diamonds_queen.imageset/card_diamonds_queen@2x.png' alt='card_diamonds_queen'><img class='fan-card' style='--r:-8deg;--x:-10px;--y:-4px' src='../App/Assets.xcassets/Cards/card_clubs_king.imageset/card_clubs_king@2x.png' alt='card_clubs_king'><img class='fan-card' style='--r:4deg;--x:0px;--y:3px' src='../App/Assets.xcassets/Cards/card_spades_queen.imageset/card_spades_queen@2x.png' alt='card_spades_queen'><img class='fan-card' style='--r:15deg;--x:-10px;--y:9px' src='../App/Assets.xcassets/Cards/card_spades_jack.imageset/card_spades_jack@2x.png' alt='card_spades_jack'><img class='fan-card' style='--r:26deg;--x:-28px;--y:15px' src='../App/Assets.xcassets/Cards/card_spades_ace.imageset/card_spades_ace@2x.png' alt='card_spades_ace'></div>
+      <div class="caption">Aktuelle App-Assets mit Padding, weißem Stock und CSS-Schatten/Wölbungsanmutung.</div>
+    </section>
+    <h2>Pik ♠</h2><table><tr><td><img src='../App/Assets.xcassets/Cards/card_spades_ace.imageset/card_spades_ace@2x.png' alt='A Pik'><b>A Pik</b><small>card_spades_ace</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_king.imageset/card_spades_king@2x.png' alt='K Pik'><b>K Pik</b><small>card_spades_king</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_queen.imageset/card_spades_queen@2x.png' alt='Q Pik'><b>Q Pik</b><small>card_spades_queen</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_jack.imageset/card_spades_jack@2x.png' alt='J Pik'><b>J Pik</b><small>card_spades_jack</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_ten.imageset/card_spades_ten@2x.png' alt='10 Pik'><b>10 Pik</b><small>card_spades_ten</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_nine.imageset/card_spades_nine@2x.png' alt='9 Pik'><b>9 Pik</b><small>card_spades_nine</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_eight.imageset/card_spades_eight@2x.png' alt='8 Pik'><b>8 Pik</b><small>card_spades_eight</small></td><td><img src='../App/Assets.xcassets/Cards/card_spades_seven.imageset/card_spades_seven@2x.png' alt='7 Pik'><b>7 Pik</b><small>card_spades_seven</small></td></tr></table>
+    <h2>Herz ♥</h2><table><tr><td><img src='../App/Assets.xcassets/Cards/card_hearts_ace.imageset/card_hearts_ace@2x.png' alt='A Herz'><b>A Herz</b><small>card_hearts_ace</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_king.imageset/card_hearts_king@2x.png' alt='K Herz'><b>K Herz</b><small>card_hearts_king</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_queen.imageset/card_hearts_queen@2x.png' alt='Q Herz'><b>Q Herz</b><small>card_hearts_queen</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_jack.imageset/card_hearts_jack@2x.png' alt='J Herz'><b>J Herz</b><small>card_hearts_jack</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_ten.imageset/card_hearts_ten@2x.png' alt='10 Herz'><b>10 Herz</b><small>card_hearts_ten</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_nine.imageset/card_hearts_nine@2x.png' alt='9 Herz'><b>9 Herz</b><small>card_hearts_nine</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_eight.imageset/card_hearts_eight@2x.png' alt='8 Herz'><b>8 Herz</b><small>card_hearts_eight</small></td><td><img src='../App/Assets.xcassets/Cards/card_hearts_seven.imageset/card_hearts_seven@2x.png' alt='7 Herz'><b>7 Herz</b><small>card_hearts_seven</small></td></tr></table>
+    <h2>Kreuz ♣</h2><table><tr><td><img src='../App/Assets.xcassets/Cards/card_clubs_ace.imageset/card_clubs_ace@2x.png' alt='A Kreuz'><b>A Kreuz</b><small>card_clubs_ace</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_king.imageset/card_clubs_king@2x.png' alt='K Kreuz'><b>K Kreuz</b><small>card_clubs_king</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_queen.imageset/card_clubs_queen@2x.png' alt='Q Kreuz'><b>Q Kreuz</b><small>card_clubs_queen</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_jack.imageset/card_clubs_jack@2x.png' alt='J Kreuz'><b>J Kreuz</b><small>card_clubs_jack</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_ten.imageset/card_clubs_ten@2x.png' alt='10 Kreuz'><b>10 Kreuz</b><small>card_clubs_ten</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_nine.imageset/card_clubs_nine@2x.png' alt='9 Kreuz'><b>9 Kreuz</b><small>card_clubs_nine</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_eight.imageset/card_clubs_eight@2x.png' alt='8 Kreuz'><b>8 Kreuz</b><small>card_clubs_eight</small></td><td><img src='../App/Assets.xcassets/Cards/card_clubs_seven.imageset/card_clubs_seven@2x.png' alt='7 Kreuz'><b>7 Kreuz</b><small>card_clubs_seven</small></td></tr></table>
+    <h2>Karo ♦</h2><table><tr><td><img src='../App/Assets.xcassets/Cards/card_diamonds_ace.imageset/card_diamonds_ace@2x.png' alt='A Karo'><b>A Karo</b><small>card_diamonds_ace</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_king.imageset/card_diamonds_king@2x.png' alt='K Karo'><b>K Karo</b><small>card_diamonds_king</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_queen.imageset/card_diamonds_queen@2x.png' alt='Q Karo'><b>Q Karo</b><small>card_diamonds_queen</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_jack.imageset/card_diamonds_jack@2x.png' alt='J Karo'><b>J Karo</b><small>card_diamonds_jack</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_ten.imageset/card_diamonds_ten@2x.png' alt='10 Karo'><b>10 Karo</b><small>card_diamonds_ten</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_nine.imageset/card_diamonds_nine@2x.png' alt='9 Karo'><b>9 Karo</b><small>card_diamonds_nine</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_eight.imageset/card_diamonds_eight@2x.png' alt='8 Karo'><b>8 Karo</b><small>card_diamonds_eight</small></td><td><img src='../App/Assets.xcassets/Cards/card_diamonds_seven.imageset/card_diamonds_seven@2x.png' alt='7 Karo'><b>7 Karo</b><small>card_diamonds_seven</small></td></tr></table>
+  </main>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poch 1441 · Mulden mit Münzen</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07060a;
+      --panel: #121018;
+      --text: #e2e8f0;
+      --muted: #9aa3af;
+      --gold: #c5a059;
+      --teal: #1a5e4e;
+      --amethyst: #4a2e65;
+      --platinum: #d8dee8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 50% 18%, #17131c, var(--bg) 62%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 24px 8px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: .01em; }
+    p { color: var(--muted); line-height: 1.45; }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 16px 24px 36px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    section {
+      background: linear-gradient(180deg, #17131d, #0f0d13);
+      border: 1px solid rgba(197,160,89,.26);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    h2 { margin: 12px 0 5px; color: var(--gold); font-size: 17px; }
+    .caption { margin: 0; font-size: 13px; }
+    svg { width: 100%; height: auto; display: block; border-radius: 8px; background: #09080d; }
+    .ok { color: #b7e5d8; }
+    .bad { color: #f0b8b8; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Münzen in der Mulde · Farblogik-Test</h1>
+    <p>PM8 als Körperreferenz ist stark. Für echte Spielbarkeit muss die Farbe aber an den oberen Innenrand der Mulde, nicht auf den Boden. Sonst verdecken Münzen das funktionale Label.</p>
+  </header>
+
+  <main>
+    <section>
+      <svg viewBox="0 0 360 300" role="img" aria-label="Farbe am Boden, verdeckt durch Münzen">
+        <defs>
+          <radialGradient id="body" cx="42%" cy="32%" r="72%">
+            <stop offset="0" stop-color="#1a1820"/>
+            <stop offset=".78" stop-color="#101016"/>
+            <stop offset="1" stop-color="#050509"/>
+          </radialGradient>
+          <radialGradient id="basin" cx="48%" cy="28%" r="75%">
+            <stop offset="0" stop-color="#19191d"/>
+            <stop offset=".72" stop-color="#050506"/>
+            <stop offset="1" stop-color="#000"/>
+          </radialGradient>
+          <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f6d786"/>
+            <stop offset=".45" stop-color="#b98932"/>
+            <stop offset="1" stop-color="#5c3b11"/>
+          </linearGradient>
+        </defs>
+        <rect width="360" height="300" fill="#09080d"/>
+        <circle cx="180" cy="140" r="108" fill="url(#body)" stroke="#2a2830" stroke-width="3"/>
+        <circle cx="180" cy="140" r="72" fill="url(#basin)" stroke="#34313a" stroke-width="8"/>
+        <circle cx="180" cy="140" r="42" fill="#1a5e4e" opacity=".92"/>
+        <g>
+          <ellipse cx="156" cy="145" rx="25" ry="14" fill="url(#coin)" stroke="#f0ce7a" stroke-width="2" transform="rotate(-20 156 145)"/>
+          <ellipse cx="190" cy="132" rx="25" ry="14" fill="url(#coin)" stroke="#f0ce7a" stroke-width="2" transform="rotate(15 190 132)"/>
+          <ellipse cx="181" cy="158" rx="25" ry="14" fill="url(#coin)" stroke="#f0ce7a" stroke-width="2" transform="rotate(4 181 158)"/>
+          <ellipse cx="210" cy="149" rx="25" ry="14" fill="url(#coin)" stroke="#f0ce7a" stroke-width="2" transform="rotate(-8 210 149)"/>
+          <ellipse cx="169" cy="119" rx="25" ry="14" fill="url(#coin)" stroke="#f0ce7a" stroke-width="2" transform="rotate(24 169 119)"/>
+        </g>
+      </svg>
+      <h2 class="bad">Farbe am Boden: schlecht</h2>
+      <p class="caption">Sobald Münzen drin liegen, ist das Label weg. Das sieht reich aus, aber die Mulde verliert ihre Kategorie.</p>
+    </section>
+
+    <section>
+      <svg viewBox="0 0 360 300" role="img" aria-label="Farbe als Pigment-Rim bleibt sichtbar">
+        <defs>
+          <radialGradient id="body2" cx="42%" cy="32%" r="72%">
+            <stop offset="0" stop-color="#1a1820"/>
+            <stop offset=".78" stop-color="#101016"/>
+            <stop offset="1" stop-color="#050509"/>
+          </radialGradient>
+          <radialGradient id="basin2" cx="48%" cy="28%" r="75%">
+            <stop offset="0" stop-color="#18191d"/>
+            <stop offset=".72" stop-color="#050506"/>
+            <stop offset="1" stop-color="#000"/>
+          </radialGradient>
+          <linearGradient id="coin2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f6d786"/>
+            <stop offset=".45" stop-color="#b98932"/>
+            <stop offset="1" stop-color="#5c3b11"/>
+          </linearGradient>
+        </defs>
+        <rect width="360" height="300" fill="#09080d"/>
+        <circle cx="180" cy="140" r="108" fill="url(#body2)" stroke="#2a2830" stroke-width="3"/>
+        <circle cx="180" cy="140" r="74" fill="url(#basin2)" stroke="#34313a" stroke-width="8"/>
+        <circle cx="180" cy="140" r="66" fill="none" stroke="#1a5e4e" stroke-width="7" opacity=".95"/>
+        <circle cx="180" cy="140" r="57" fill="none" stroke="#2cd4a8" stroke-width="1.5" opacity=".35"/>
+        <g>
+          <ellipse cx="156" cy="145" rx="25" ry="14" fill="url(#coin2)" stroke="#f0ce7a" stroke-width="2" transform="rotate(-20 156 145)"/>
+          <ellipse cx="190" cy="132" rx="25" ry="14" fill="url(#coin2)" stroke="#f0ce7a" stroke-width="2" transform="rotate(15 190 132)"/>
+          <ellipse cx="181" cy="158" rx="25" ry="14" fill="url(#coin2)" stroke="#f0ce7a" stroke-width="2" transform="rotate(4 181 158)"/>
+          <ellipse cx="210" cy="149" rx="25" ry="14" fill="url(#coin2)" stroke="#f0ce7a" stroke-width="2" transform="rotate(-8 210 149)"/>
+          <ellipse cx="169" cy="119" rx="25" ry="14" fill="url(#coin2)" stroke="#f0ce7a" stroke-width="2" transform="rotate(24 169 119)"/>
+        </g>
+      </svg>
+      <h2 class="ok">Farbe als Rim: gut</h2>
+      <p class="caption">Die Münzen dürfen wild liegen, aber der Pigment-Rand bleibt lesbar. Das ist die finale Logik.</p>
+    </section>
+
+    <section>
+      <svg viewBox="0 0 360 300" role="img" aria-label="Ring mit mehreren gefüllten Mulden">
+        <defs>
+          <radialGradient id="body3" cx="44%" cy="35%" r="72%">
+            <stop offset="0" stop-color="#1b1921"/>
+            <stop offset=".78" stop-color="#101016"/>
+            <stop offset="1" stop-color="#050509"/>
+          </radialGradient>
+          <radialGradient id="basin3" cx="48%" cy="28%" r="75%">
+            <stop offset="0" stop-color="#18191d"/>
+            <stop offset=".72" stop-color="#050506"/>
+            <stop offset="1" stop-color="#000"/>
+          </radialGradient>
+          <linearGradient id="coin3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f6d786"/>
+            <stop offset=".45" stop-color="#b98932"/>
+            <stop offset="1" stop-color="#5c3b11"/>
+          </linearGradient>
+        </defs>
+        <rect width="360" height="300" fill="#09080d"/>
+        <circle cx="180" cy="150" r="126" fill="url(#body3)" stroke="#2a2830" stroke-width="3"/>
+        <circle cx="180" cy="150" r="49" fill="url(#basin3)" stroke="#3a3740" stroke-width="7"/>
+        <circle cx="180" cy="150" r="42" fill="none" stroke="#d8dee8" stroke-width="3" opacity=".7"/>
+        <g>
+          <circle cx="180" cy="55" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="180" cy="55" r="23" fill="none" stroke="#c5a059" stroke-width="4"/>
+          <circle cx="247" cy="83" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="247" cy="83" r="23" fill="none" stroke="#c5a059" stroke-width="4"/>
+          <circle cx="275" cy="150" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="275" cy="150" r="23" fill="none" stroke="#4a2e65" stroke-width="4"/>
+          <circle cx="247" cy="217" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="247" cy="217" r="23" fill="none" stroke="#8e2a43" stroke-width="4"/>
+          <circle cx="180" cy="245" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="180" cy="245" r="23" fill="none" stroke="#1a5e4e" stroke-width="4"/>
+          <circle cx="113" cy="217" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="113" cy="217" r="23" fill="none" stroke="#c5a059" stroke-width="4"/>
+          <circle cx="85" cy="150" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="85" cy="150" r="23" fill="none" stroke="#c5a059" stroke-width="4"/>
+          <circle cx="113" cy="83" r="27" fill="url(#basin3)" stroke="#34313a" stroke-width="5"/><circle cx="113" cy="83" r="23" fill="none" stroke="#c5a059" stroke-width="4"/>
+        </g>
+        <g opacity=".98">
+          <ellipse cx="176" cy="54" rx="13" ry="8" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.2" transform="rotate(-18 176 54)"/>
+          <ellipse cx="185" cy="59" rx="13" ry="8" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.2" transform="rotate(18 185 59)"/>
+          <ellipse cx="271" cy="146" rx="13" ry="8" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.2" transform="rotate(18 271 146)"/>
+          <ellipse cx="281" cy="153" rx="13" ry="8" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.2" transform="rotate(-12 281 153)"/>
+          <ellipse cx="174" cy="244" rx="13" ry="8" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.2" transform="rotate(10 174 244)"/>
+          <ellipse cx="185" cy="248" rx="13" ry="8" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.2" transform="rotate(-21 185 248)"/>
+          <ellipse cx="180" cy="150" rx="18" ry="10" fill="url(#coin3)" stroke="#f0ce7a" stroke-width="1.4" transform="rotate(8 180 150)"/>
+        </g>
+      </svg>
+      <h2>Ring-Skizze</h2>
+      <p class="caption">Wild genug für Lebendigkeit, kontrolliert genug für Lesbarkeit: Farbe bleibt Rim, Münzen bleiben Inhalt.</p>
+    </section>
+  </main>
+</body>
+</html>

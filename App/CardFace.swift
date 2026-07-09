@@ -2,8 +2,8 @@ import PochKit
 import SwiftUI
 
 /// Kartenvorderseite: alle 32 Karten aus EINER deterministischen Vorlage
-/// (`tools/gen_cards_final.py`) - weiße Karte, große Eck-Indizes, klassische
-/// Hoffiguren (htdebeer/SVG-cards, LGPL), Provenance: assets/provenance/cardfronts-final.md.
+/// (`tools/gen_cards_vector_public_domain.py`) - weiße Karte, große Eck-Indizes,
+/// Public-Domain-Vektorblatt, Provenance: assets/provenance/cardfronts-final.md.
 /// Geteilt zwischen Phase 1 (Hand), Phase 2 (Kunststück-Glow §6b) und Phase 3 (Stopper §6c).
 struct CardFace: View {
     let card: Card
@@ -63,6 +63,11 @@ struct CardFace: View {
         }
         .frame(width: 52 * scale, height: 74 * scale)
         .overlay(RoundedRectangle(cornerRadius: 8 * scale)
+            .strokeBorder(Color.black.opacity(0.42), lineWidth: max(0.65, 0.75 * scale)))
+        .overlay(RoundedRectangle(cornerRadius: 7.2 * scale)
+            .strokeBorder(Color.white.opacity(0.20), lineWidth: max(0.25, 0.35 * scale))
+            .padding(0.8 * scale))
+        .overlay(RoundedRectangle(cornerRadius: 8 * scale)
             .strokeBorder(
                 accent?.opacity(0.85) ?? .clear,
                 lineWidth: accent != nil ? 2 : 0))
@@ -73,21 +78,21 @@ struct CardFace: View {
         .layerEffect(
             ShaderLibrary.cardWarp(
                 .float2(52 * scale + 2 * bendPad, 74 * scale + 2 * bendPad),
-                .float(2.4 * scale),
+                .float(1.6 * scale),
                 .float(bendPhase)),
-            maxSampleOffset: CGSize(width: 0.84 * scale, height: 2.4 * scale))
+            maxSampleOffset: CGSize(width: 0.56 * scale, height: 1.6 * scale))
         .padding(-bendPad)
         // Kontaktschatten zwischen überlappenden Karten (Fächer-Wette 8.7.:
         // Schatten ist Render-Eigenschaft, nie im Asset)
         .shadow(
             color: accent?.opacity(0.6) ?? .black.opacity(0.5),
-            radius: accent != nil ? 8 : 4, y: accent != nil ? 0 : 2.5)
+            radius: accent != nil ? 8 : 4.8, x: -0.8 * scale, y: accent != nil ? 0 : 2.8)
         // Zweite, weiche Schattenlage: macht den Luftspalt spürbar - beide
         // Lagen folgen der gewölbten Silhouette, an den gehobenen Ecken
         // wird die Penumbra dadurch breiter (physische Kartenebenen)
         .shadow(
             color: accent != nil ? .clear : .black.opacity(0.20),
-            radius: 8 * scale, y: 3.5 * scale)
+            radius: 8 * scale, x: -1.2 * scale, y: 3.8 * scale)
     }
 
     // MARK: - SVG-Asset (Bildkarten + Asse)

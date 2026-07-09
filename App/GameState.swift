@@ -51,7 +51,7 @@ final class GameState {
 
     /// Platzhalter-Namen bis zum Charakter-Roster (§7.1, BotProfiles.json folgt mit
     /// der Meta-Progression). Sitzreihenfolge 1...3.
-    private static let opponentNames = ["Nova", "Blade", "Glitch"]
+    private static let opponentNames = ["Wirt", "Baronesse", "Ratsherr"]
 
     init(source: MatchSource = BotMatchSource()) {
         self.source = source
@@ -75,14 +75,50 @@ final class GameState {
     }
 
     func newRound() {
+        adoptRound(seed: UInt64.random(in: 1...999_999))
+    }
+
+    /// Startet eine bewusst freundliche Lernrunde: eigene Hand hat ein Poch-Kunststück,
+    /// die Meldephase zeigt genug Tischereignisse, aber die Engine bleibt die Wahrheit.
+    func startTutorialRound() {
+        adoptRound(seed: Self.tutorialSeed(playerCount: round.stacks.count))
+    }
+
+    private func adoptRound(seed: UInt64) {
         botTask?.cancel()
         cascadeTask?.cancel()
-        source.newRound(seed: UInt64.random(in: 1...999_999))
+        source.newRound(seed: seed)
         round = source.round
         seatActions = Array(repeating: .none, count: round.stacks.count)
+        dealtCount = 0
+        trumpRevealed = false
+        lightPulse = 0
+        meldShown = 0
+        pulsingPool = nil
         revealedPlays = 0
         kollapsInfo = nil
+        kollapsShock = 0
         endPhase = .none
+    }
+
+    private static func tutorialSeed(playerCount: Int) -> UInt64 {
+        for seed in UInt64(1_441)..<UInt64(20_000) {
+            let candidate = Round(stacks: Array(repeating: 60, count: playerCount),
+                                  board: Board(),
+                                  seed: seed)
+            guard ComboEvaluator.best(in: candidate.deal.hands[0],
+                                      trump: candidate.deal.trump) != nil
+            else { continue }
+
+            let melds = candidate.events.compactMap { event -> Pool? in
+                if case .melded(let player, let pool, _) = event, player == 0 {
+                    return pool
+                }
+                return nil
+            }
+            if melds.count >= 2 { return seed }
+        }
+        return 1_441
     }
 
     // MARK: - Phase 2 (Pochen) - Zustand
@@ -261,6 +297,39 @@ final class GameState {
         return nil
     }
 
+    struct RoundRecap {
+        let chains: Int
+        let longestChain: Int
+        let finalCard: Card?
+        let finalPlayer: Int?
+    }
+
+    var roundRecap: RoundRecap {
+        var chainCount = 0
+        var longest = 0
+        var current = 0
+        var finalCard: Card?
+        var finalPlayer: Int?
+
+        for event in round.events {
+            guard case .cardPlayed(let play) = event else { continue }
+            if play.isLead {
+                if current > 0 { longest = max(longest, current) }
+                chainCount += 1
+                current = 1
+            } else {
+                current += 1
+            }
+            finalCard = play.card
+            finalPlayer = play.player
+        }
+        longest = max(longest, current)
+        return RoundRecap(chains: chainCount,
+                          longestChain: longest,
+                          finalCard: finalCard,
+                          finalPlayer: finalPlayer)
+    }
+
     /// Start der Phase-3-Präsentation (Aufruf beim Aktwechsel): enthüllt bereits
     /// gelaufene Ketten und lässt Bots anspielen, wenn sie führen.
     func beginPlayoutPresentation() {
@@ -334,8 +403,8 @@ final class GameState {
         try? await Task.sleep(for: .seconds(Tokens.p3Vakuum))
         guard !Task.isCancelled else { return }
         endPhase = .punishing
-        let totalPayment = roundResult?.payments.reduce(0, +) ?? 0
-        let ticks = min(totalPayment, Tokens.p3PunishTickCap)
+        let resultValue = (roundResult?.centerPool ?? 0) + (roundResult?.payments.reduce(0, +) ?? 0)
+        let ticks = min(resultValue, Tokens.p3PunishTickCap)
         for _ in 0..<ticks {
             hapticTick += 1
             try? await Task.sleep(for: .seconds(Tokens.hapticCadence))
@@ -353,6 +422,31 @@ final class GameState {
         while stage == .betting {
             do { try round.applyBet(.pass, by: betting.turn) } catch { return }
         }
+    }
+
+    /// QA-Helfer: spielt Phase 3 deterministisch zu Ende und springt direkt auf den
+    /// finalen Banner. Nur fuer Screenshots/Design-Audit, nie Release.
+    func debugFinishPlayout() {
+        debugSkipToPlayout()
+        guard var phase = round.playout else { return }
+        var guardCount = 0
+        while stage == .playout, guardCount < 80 {
+            guardCount += 1
+            phase = round.playout ?? phase
+            let leader = phase.leader
+            guard let card = phase.hands[leader]
+                .min(by: { $0.rank.rawValue < $1.rank.rawValue }) else { break }
+            do { try round.applyLead(card) } catch { break }
+        }
+        revealedPlays = round.playout?.plays.count ?? revealedPlays
+        endPhase = .done
+    }
+
+    /// QA-Helfer: Rundenende vorbereiten und in der sichtbaren Strafstrom-Phase halten,
+    /// damit Centerpot-/Restkarten-Orchestrierung als Screenshot prüfbar ist.
+    func debugShowPunishingEnd() {
+        debugFinishPlayout()
+        endPhase = .punishing
     }
     #endif
 

@@ -16,7 +16,7 @@ struct DealOverlay: View {
             let deck = CGPoint(x: w / 2, y: h * 0.46)
             ZStack {
                 // Flug-Fenster: die letzten ~3 ausgeteilten Karten sind in der Luft
-                if !reduceMotion, game.dealtCount < game.totalDeals + 3 {
+                if !reduceMotion, game.dealtCount < game.totalDeals {
                     let order = game.dealOrder
                     let window = max(0, game.dealtCount - 3)..<min(game.dealtCount, order.count)
                     ForEach(Array(window), id: \.self) { i in
@@ -28,7 +28,7 @@ struct DealOverlay: View {
                 // Radialer Lichtpuls in Trumpffarbe (Belohnungs-Akzent, kein Dauer-Glow)
                 if game.lightPulse > 0 {
                     PulseRing(tint: trumpTint)
-                        .position(x: w / 2, y: 108)
+                        .position(deck)
                         .id("pulse\(game.lightPulse)")
                 }
                 // Melde-Strom (§6a b): Münzen fliegen von der pulsierenden Mulde zum Gewinner
@@ -147,23 +147,87 @@ private struct CoinStream: View {
     let from: CGPoint
     let to: CGPoint
     let tint: Color
-    @State private var flown = false
 
     var body: some View {
         ZStack {
             ForEach(0..<4, id: \.self) { i in
-                Circle()
-                    .fill(LinearGradient(colors: [tint, tint.opacity(0.55)],
-                                         startPoint: .top, endPoint: .bottom))
-                    .overlay(Circle().strokeBorder(.white.opacity(0.35), lineWidth: 1))
-                    .frame(width: 11, height: 11)
-                    .position(flown ? to : from)
-                    .opacity(flown ? 0.1 : 1)
-                    .animation(.easeIn(duration: Tokens.p1CoinFlight)
-                        .delay(Double(i) * 0.06), value: flown)
+                FlyingChip(from: from,
+                           to: to,
+                           tint: tint,
+                           index: i,
+                           duration: Tokens.p1CoinFlight,
+                           delay: Double(i) * 0.06)
+            }
+            ChipLandingRipple(at: to,
+                              tint: tint,
+                              delay: Tokens.p1CoinFlight + 0.18)
+        }
+    }
+}
+
+private struct FlyingChip: View {
+    let from: CGPoint
+    let to: CGPoint
+    let tint: Color
+    let index: Int
+    let duration: Double
+    let delay: Double
+    @State private var progress: CGFloat = 0
+
+    var body: some View {
+        let point = bezier(progress)
+        TableChip(tint: tint, size: 12)
+            .rotation3DEffect(.degrees(Double(progress) * 360 + Double(index) * 18),
+                              axis: (x: 0.4, y: 0.8, z: 0.1))
+            .scaleEffect(1 - progress * 0.15)
+            .position(point)
+            .opacity(progress >= 0.98 ? 0.08 : 1)
+            .onAppear {
+                withAnimation(.easeInOut(duration: duration).delay(delay)) {
+                    progress = 1
+                }
+            }
+    }
+
+    private func bezier(_ t: CGFloat) -> CGPoint {
+        let mid = CGPoint(x: (from.x + to.x) / 2 + CGFloat(index - 1) * 10,
+                          y: min(from.y, to.y) - 58 - CGFloat(index % 2) * 14)
+        let inv = 1 - t
+        return CGPoint(
+            x: inv * inv * from.x + 2 * inv * t * mid.x + t * t * to.x,
+            y: inv * inv * from.y + 2 * inv * t * mid.y + t * t * to.y
+        )
+    }
+}
+
+private struct ChipLandingRipple: View {
+    let at: CGPoint
+    let tint: Color
+    let delay: Double
+    @State private var started = false
+    @State private var fired = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .strokeBorder(tint.opacity(fired ? 0 : 0.42), lineWidth: fired ? 1 : 4)
+                .frame(width: fired ? 54 : 15, height: fired ? 54 : 15)
+            Circle()
+                .fill(Tokens.jewelPlatin.opacity(fired ? 0 : 0.20))
+                .frame(width: fired ? 10 : 18, height: fired ? 10 : 18)
+                .blur(radius: fired ? 4 : 1)
+        }
+        .position(at)
+        .opacity(started && !fired ? 1 : 0)
+        .onAppear {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(delay))
+                started = true
+                withAnimation(.easeOut(duration: 0.34)) {
+                    fired = true
+                }
             }
         }
-        .onAppear { flown = true }
     }
 }
 
@@ -195,11 +259,12 @@ private struct PulseRing: View {
 
     var body: some View {
         Circle()
-            .strokeBorder(tint.opacity(fired ? 0 : 0.9), lineWidth: fired ? 3 : 22)
-            .frame(width: 60, height: 60)
-            .scaleEffect(fired ? 18 : 0.4)
+            .strokeBorder(tint.opacity(fired ? 0 : 0.16), lineWidth: fired ? 0.7 : 4.5)
+            .frame(width: 96, height: 96)
+            .scaleEffect(fired ? 3.15 : 0.82)
+            .blur(radius: fired ? 1.8 : 0.2)
             .onAppear {
-                withAnimation(.easeOut(duration: Tokens.p1Pulse)) { fired = true }
+                withAnimation(.easeOut(duration: min(Tokens.p1Pulse, 0.34))) { fired = true }
             }
     }
 }

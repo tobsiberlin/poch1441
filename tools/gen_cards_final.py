@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Finale, konsistente Spielkarten-Vorderseiten (Mockup-Look, 8.7.2026).
+"""Finale, konsistente Spielkarten-Vorderseiten (franzoesisches Blatt, 8.7.2026).
 
 EINE deterministische Vorlage für alle 32 Karten - keine KI-Generierung:
 - Karte: weiß, runde Ecken (Radius = 8/52 der Breite, deckungsgleich mit CardFace-Clip)
@@ -8,9 +8,10 @@ EINE deterministische Vorlage für alle 32 Karten - keine KI-Generierung:
   deren Basis/Eck-Indizes; Figurenrahmen nahezu vollflächig, Index mit weißem Knockout
 - Asse: ein großes zentrales Pip
 - Zahlkarten (7-10): klassisches Pip-Raster, untere Hälfte 180° gedreht
-- Tiefe Juwelen-Palette statt greller Quell-Farben (Mockup-Look, Runde 2):
-  Gewänder-Rot -> Weinrot, Pips/Indizes -> tiefes Karmesin, Gold -> Antikgold,
-  Blau -> Tinten-Navy. Dazu Papier-Textur + dezenter Pip-Tiefengradient.
+- Franzoesisches Blatt mit internationalen Indizes: A/K/Q/J/10/9/8/7.
+- Klassische, klare Spielkartenfarben wie im Mockup: Rot/Schwarz fuer Indizes
+  und Pips, Hofkarten mit Royal-Blau, Rot und Gold. Nicht deutsch/altdeutsch,
+  nicht KI-illustriert.
 
 Output: Master-PNGs (624x888) nach Assets_Raw/cards/final/,
 Imagesets (@2x/@3x) nach App/Assets.xcassets/Cards/.
@@ -22,7 +23,7 @@ import subprocess
 import tempfile
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "Assets_Raw", "svg-cards", "svg-cards.svg")
@@ -35,34 +36,36 @@ SS = 2  # Supersampling
 CORNER_R = round(8 / 52 * W)  # 96 - deckungsgleich mit clipShape in CardFace
 
 # Index (Ecke)
-IDX_FONT_SIZE = 156          # Cap-Höhe ~111px = 12.5% der Kartenhöhe
-IDX_X = 31                   # linker Rand des Buchstabens (5% Breite)
-IDX_TOP = 40                 # obere Kante des Buchstabens (4.5% Höhe)
-IDX_PIP_H = 55               # Pip unter dem Buchstaben
-IDX_PIP_GAP = 11
-TEN_SQUEEZE = 0.75           # "10" horizontal gestaucht (klassisch)
+IDX_FONT_SIZE = 188          # gross, aber mit sicherer Index-Zone
+TEN_IDX_FONT_SIZE = 150      # zweistellig: getrennt kleiner, keine Pip-Kollision
+IDX_X = 28                   # linker Rand des Buchstabens
+IDX_TOP = 30                 # obere Kante des Buchstabens
+IDX_PIP_H = 60               # selbst gezeichnet, nie aus fremdem Karten-Sheet
+IDX_PIP_GAP = 12
+TEN_SQUEEZE = 0.80           # "10" horizontal gestaucht, aber lesbar
 
 # Zentren
-ACE_PIP_H = 302              # 34% der Höhe
-NUM_PIP_H = 102              # 11.5% der Höhe
-NUM_COL_X = 112              # Pip-Spalten bei Mitte ± 18% Breite
-NUM_ROW_Y = 266              # äußere Reihen bei Mitte ± 30% Höhe
+ACE_PIP_H = 330              # gross und ruhig, wie Mockup-Handkarten
+NUM_PIP_H = 92               # kleiner als Indexzone, kein Eck-Kontakt
+NUM_COL_X = 84               # linke Pips bleiben klar rechts der Indexzone
+NUM_ROW_Y = 238              # Zahlenbild kompakter, oben nie im Index
 COURT_BOX_W = 530            # Figurenrahmen 85% Breite (nahezu vollflächig, wie Quelle)
 KNOCKOUT_PAD = 16
 KNOCKOUT_R = 24
 
-RED = (181, 29, 39, 255)     # #B51D27 - tiefes Karmesin, identisch mit Pip-Remap
+PAPER = (255, 255, 255, 255) # Mockup: klares, modernes Kartenweiss
+RED = (204, 35, 52, 255)     # klares franzoesisches Kartenrot
 BLACK = (0, 0, 0, 255)
 
-# Quell-Palette (htdebeer, grell/flach) -> tiefe Juwelen-Töne (Mockup-Look).
+# Quell-Palette (htdebeer, grell/flach) -> klassisches franzoesisches Blatt.
 # #E61408 lebt NUR in den Figuren-Defs (Gewänder), #e6180a/#E6180A nur in
 # Pips/Akzenten - der Split ist verifiziert (Strip-Skript 8.7.), daher getrennt mappbar.
 REPAINT = {
-    "#E61408": "#7E2333",  # Gewänder-Rot -> tiefes Weinrot
-    "#e6180a": "#B51D27",  # Pip-/Akzent-Rot -> tiefes Karmesin
-    "#E6180A": "#B51D27",
-    "#F8C20F": "#B8933A",  # Neon-Gelb -> gedämpftes Antikgold
-    "#1C1585": "#465685",  # Violett-Blau -> staubiges Royal (Mockup: heller, gedämpft)
+    "#E61408": "#A8293B",  # Gewaender-Rot -> ruhiger, aber klar
+    "#e6180a": "#CC2334",  # Pip-/Akzent-Rot -> Mockup-lesbar
+    "#E6180A": "#CC2334",
+    "#F8C20F": "#B88D34",  # Gelb -> Antikgold, nicht Primärgelb
+    "#1C1585": "#314C78",  # Blau -> staubiges Royal, weniger gesättigt
 }
 
 
@@ -181,6 +184,37 @@ def pip_depth(pip):
     return Image.fromarray(a.astype(np.uint8))
 
 
+def draw_suit_symbol(size, suit, color):
+    """Mathematisch saubere Eckindex-Pips.
+
+    Die grossen Kartenpips kommen aus der SVG-Quelle. Die kleinen Eckpips zeichnen
+    wir bewusst selbst, damit dort nie fremde Sheet-Artefakte, falsche Farben oder
+    deformierte gedrehte Symbole landen.
+    """
+    im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    c = color
+    s = size
+    cx = s / 2
+    if suit == "heart":
+        d.ellipse([0.12*s, 0.08*s, 0.52*s, 0.48*s], fill=c)
+        d.ellipse([0.48*s, 0.08*s, 0.88*s, 0.48*s], fill=c)
+        d.polygon([(0.10*s, 0.32*s), (0.90*s, 0.32*s), (cx, 0.95*s)], fill=c)
+    elif suit == "diamond":
+        d.polygon([(cx, 0.04*s), (0.92*s, cx), (cx, 0.96*s), (0.08*s, cx)], fill=c)
+    elif suit == "spade":
+        d.ellipse([0.12*s, 0.32*s, 0.52*s, 0.72*s], fill=c)
+        d.ellipse([0.48*s, 0.32*s, 0.88*s, 0.72*s], fill=c)
+        d.polygon([(0.10*s, 0.50*s), (0.90*s, 0.50*s), (cx, 0.02*s)], fill=c)
+        d.polygon([(0.39*s, 0.66*s), (0.61*s, 0.66*s), (0.72*s, 0.94*s), (0.28*s, 0.94*s)], fill=c)
+    else:  # club
+        d.ellipse([0.30*s, 0.02*s, 0.70*s, 0.42*s], fill=c)
+        d.ellipse([0.08*s, 0.34*s, 0.48*s, 0.74*s], fill=c)
+        d.ellipse([0.52*s, 0.34*s, 0.92*s, 0.74*s], fill=c)
+        d.polygon([(0.39*s, 0.58*s), (0.61*s, 0.58*s), (0.74*s, 0.95*s), (0.26*s, 0.95*s)], fill=c)
+    return im.filter(ImageFilter.GaussianBlur(0.15))
+
+
 def scaled_pip(pips, suit, target_h, rotated=False):
     pip = pips[suit]
     w = round(pip.width * target_h / pip.height)
@@ -194,9 +228,9 @@ _TEXTURE = None
 
 
 def paper_texture():
-    """Papier-Feel statt steriler Vektor-Fläche: warmes Weiß, feines Korn,
-    Leinen-Anmutung, sanfter Licht-Sheen von oben-links. Seeded und für alle
-    32 Karten identisch (Konsistenz); Amplituden ~1% - Lesbarkeit unberührt."""
+    """Sehr dezenter Papier-Feel: keine Cremefaerbung, kein Pergament.
+    Die Karte bleibt im UI klar weiss; nur minimale Schattierung verhindert
+    flache Clip-Art-Flaechen."""
     global _TEXTURE
     if _TEXTURE is None:
         rng = np.random.default_rng(1441)
@@ -204,25 +238,26 @@ def paper_texture():
         grain = np.asarray(Image.fromarray(small, mode="F").resize((W, H), Image.BILINEAR))
         y = np.arange(H, dtype=np.float32)[:, None]
         x = np.arange(W, dtype=np.float32)[None, :]
-        linen = 0.7 * (np.sin(y * 2 * np.pi / 4.3) + np.sin(x * 2 * np.pi / 5.9))
-        sheen = 1.022 - 0.045 * ((x / W) * 0.45 + (y / H) * 0.55)
-        tex = sheen + (grain * 3.2 + linen) / 255.0
-        warm = np.array([1.0, 0.996, 0.988], dtype=np.float32)
+        linen = 0.22 * (np.sin(y * 2 * np.pi / 4.3) + np.sin(x * 2 * np.pi / 5.9))
+        sheen = 1.012 - 0.022 * ((x / W) * 0.45 + (y / H) * 0.55)
+        tex = sheen + (grain * 1.15 + linen) / 255.0
+        warm = np.array([1.0, 1.0, 1.0], dtype=np.float32)
         _TEXTURE = tex[:, :, None] * warm[None, None, :]
     return _TEXTURE
 
 
-def make_index_tile(font, rank_key, suit, pips):
+def make_index_tile(font, ten_font, rank_key, suit, pips):
     """Index-Block (Buchstabe + Pip darunter) als RGBA-Tile, Ursprung = Buchstaben-Top-Left."""
     label = {"1": "A", "king": "K", "queen": "Q", "jack": "J"}.get(rank_key, rank_key)
     color = RED if suit in ("heart", "diamond") else BLACK
-    bbox = font.getbbox(label)
+    active_font = ten_font if label == "10" else font
+    bbox = active_font.getbbox(label)
     lw, lh = bbox[2] - bbox[0], bbox[3] - bbox[1]
     letter = Image.new("RGBA", (lw, lh), (0, 0, 0, 0))
-    ImageDraw.Draw(letter).text((-bbox[0], -bbox[1]), label, font=font, fill=color)
+    ImageDraw.Draw(letter).text((-bbox[0], -bbox[1]), label, font=active_font, fill=color)
     if label == "10":
         letter = letter.resize((round(lw * TEN_SQUEEZE), lh), Image.LANCZOS)
-    pip = scaled_pip(pips, suit, IDX_PIP_H * SS)
+    pip = draw_suit_symbol(IDX_PIP_H * SS, suit, color)
     tile_w = max(letter.width, pip.width)
     tile_h = letter.height + IDX_PIP_GAP * SS + pip.height
     tile = Image.new("RGBA", (tile_w, tile_h), (0, 0, 0, 0))
@@ -231,14 +266,14 @@ def make_index_tile(font, rank_key, suit, pips):
     return tile
 
 
-def compose_card(suit, rank_key, figures, pips, font):
+def compose_card(suit, rank_key, figures, pips, font, ten_font):
     cw, ch = W * SS, H * SS
     img = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw.rounded_rectangle([0, 0, cw - 1, ch - 1], radius=CORNER_R * SS,
-                           fill=(255, 255, 255, 255))
+                           fill=PAPER)
 
-    tile = make_index_tile(font, rank_key, suit, pips)
+    tile = make_index_tile(font, ten_font, rank_key, suit, pips)
     tl = (IDX_X * SS, IDX_TOP * SS)
     br = (cw - tl[0] - tile.width, ch - tl[1] - tile.height)
 
@@ -247,6 +282,17 @@ def compose_card(suit, rank_key, figures, pips, font):
         box_w = COURT_BOX_W * SS
         box_h = round(box_w * fig.height / fig.width)
         fig = fig.resize((box_w, box_h), Image.LANCZOS)
+        # Mockup-Deck: Hofkarten bleiben klassisch, aber weniger Primärfarben/
+        # Strichrauschen als die rohe Quelle. Das Bild wird nur beruhigt, nicht
+        # semantisch verändert.
+        rgb = fig.convert("RGB")
+        alpha = fig.getchannel("A")
+        rgb = ImageOps.posterize(rgb, 4)
+        fig = rgb.convert("RGBA")
+        fig.putalpha(alpha)
+        fig = ImageEnhance.Color(fig).enhance(0.72)
+        fig = ImageEnhance.Contrast(fig).enhance(0.98)
+        fig = ImageEnhance.Sharpness(fig).enhance(0.74)
         fx, fy = (cw - box_w) // 2, (ch - box_h) // 2
         img.alpha_composite(fig, (fx, fy))
         # Weißes Knockout hinter beiden Indizes (klassisch, wie Quelle - nur größer)
@@ -254,7 +300,7 @@ def compose_card(suit, rank_key, figures, pips, font):
             draw.rounded_rectangle(
                 [x - KNOCKOUT_PAD * SS, y - KNOCKOUT_PAD * SS,
                  x + tile.width + KNOCKOUT_PAD * SS, y + tile.height + KNOCKOUT_PAD * SS],
-                radius=KNOCKOUT_R * SS, fill=(255, 255, 255, 255))
+                radius=KNOCKOUT_R * SS, fill=PAPER)
     elif rank_key == "1":
         pip = scaled_pip(pips, suit, ACE_PIP_H * SS)
         img.alpha_composite(pip, ((cw - pip.width) // 2, (ch - pip.height) // 2))
@@ -294,13 +340,15 @@ def main():
     os.makedirs(OUT_MASTER, exist_ok=True)
     font = ImageFont.truetype("/System/Library/Fonts/HelveticaNeue.ttc",
                               IDX_FONT_SIZE * SS, index=1)  # Helvetica Neue Bold
+    ten_font = ImageFont.truetype("/System/Library/Fonts/HelveticaNeue.ttc",
+                                  TEN_IDX_FONT_SIZE * SS, index=1)
     with tempfile.TemporaryDirectory() as tmpdir:
         figures = render_courts(tmpdir)
         pips = render_pips(tmpdir)
         for suit, suit_name in SUITS.items():
             for rank_key, rank_name in RANKS.items():
                 name = f"card_{suit_name}_{rank_name}"
-                master = compose_card(suit, rank_key, figures, pips, font)
+                master = compose_card(suit, rank_key, figures, pips, font, ten_font)
                 master.save(os.path.join(OUT_MASTER, f"{name}.png"))
                 write_imageset(name, master)
     print(f"32 Karten -> {OUT_MASTER} + {CATALOG}")

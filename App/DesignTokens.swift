@@ -21,15 +21,20 @@ enum Tokens {
     static let smaragdVivid  = Color(hex: 0x2CD4A8)
     static let amethystVivid = Color(hex: 0xA06BE0)
 
-    // Ring-Geometrie (konzept §5): R = 145, Tiles Ø 54, Mitte Ø 76.
-    static let ringRadius: CGFloat = 145
-    static let tileDiameter: CGFloat = 54
-    static let centerDiameter: CGFloat = 76
+    // Ring-Geometrie (konzept §5): nahezu full-width wie der Mockup-Anker,
+    // ohne die Portrait-Safe-Area zu verletzen.
+    static let ringRadius: CGFloat = 158
+    static let tileDiameter: CGFloat = 56
+    static let centerDiameter: CGFloat = 84
     static let tileCorner: CGFloat = 16
 
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
     static let p2PotSpring: Double = 0.35
+    /// Flug der Poch-Chips in die violette Mulde: snappy, aber im Auge verfolgbar.
+    static let p2PochFlight: Double = 0.54
+    /// Einschlag kurz nach den ersten ankommenden Chips.
+    static let p2PochImpactDelay: Double = 0.46
 
     // Phasen-Morph (§5b, Parameter-Lock §4): Ring/Tokens fliegen zwischen den Akten.
     static let aktMorph: Double = 0.55
@@ -76,6 +81,10 @@ enum Tokens {
     static let p3Vakuum: Double = 0.4
     /// Straf-Strom: Haptik-Ticks gedeckelt (viele Restkarten = beschleunigt, nie zäh).
     static let p3PunishTickCap = 12
+    /// Straf-/Centerpot-Flug: parallel genug fuer Tempo, lang genug fuer Richtung.
+    static let p3PunishFlight: Double = 0.62
+    /// Winner-Impact nach den ersten ankommenden Chips.
+    static let p3PunishImpactDelay: Double = 0.48
 }
 
 extension Color {
