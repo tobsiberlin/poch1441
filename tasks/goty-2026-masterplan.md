@@ -623,7 +623,7 @@ braucht Vorher-/Nachher-Video und eine benannte Verbesserung.
 | Token-Gruppe | 720-920 ms | 580-760 ms | erster Kontakt | 260-420 ms |
 | Gegnerentscheidung | 700-1.800 ms | 450-1.450 ms | Aktionsverb erscheint | 260-420 ms |
 | Phasenwechsel | 900-1.300 ms | 680-960 ms | neue Bühne steht | 350-550 ms |
-| Kettenkarte | 460-560 ms | 180 ms Takt | Kartenkontakt | 0-40 ms |
+| Kettenkarte | 460-560 ms | 240-300 ms Einstieg, 180-220 ms geübt | Kartenkontakt | 0-60 ms |
 | Kettenriss | 520-700 ms | 350 ms Freeze | mechanischer Stopp | 350-520 ms |
 | Letzte Karte | 700-900 ms | 520-720 ms | Hand wird leer | 650-950 ms |
 
@@ -756,34 +756,413 @@ Minute:
 Erst wenn dieser Meilenstein im Anfänger-Test besteht, beginnt die breite
 Politur der restlichen Phasen.
 
-## 25. Umsetzungsstand 12. Juli 2026
+## 25. Korrigierter Umsetzungsstand 12. Juli 2026
 
-Technisch und visuell abgeschlossen:
+Vorhandenes Fundament, aber noch kein bestandenes Erlebnisgate:
 
 - `PochKit.Match` treibt zwölf Runden, Geberrotation, stehende Mulden und Partieende.
-- Bots erhalten eine eingeschränkte öffentliche Beobachtung statt fremder Hände.
-- First Run beginnt am Tisch, formuliert das Ziel und startet die geführte Runde.
-- Der erste Lernbeat zeigt nur Mitte und eine relevante Außenmulde; Fortschritt ist
-  tap-gesteuert.
-- Glassteine verwenden deterministische Ablageplätze innerhalb der Mulden. Flüge sind
-  flach, Kontakt und Zustandsmutation zeitlich gekoppelt.
-- Pochen besitzt getrennte Zonen für Range, Brett, Entscheidung, Aktionen, Gegner und
-  Hand. 3 bis 6 Personen sind ohne Überlauf darstellbar.
-- Ausspielen nutzt die Mockup-Hierarchie mit zentraler Kartenkomposition, Kettenstatus,
-  Gegnerrahmen und Hand am unteren Rand.
-- Hilfe, Tutorial-Hub, Einstellungen und Partieabschluss sind als gemeinsame
-  Overlay-Familie umgesetzt.
-- Kritische Karten-, Mulden- und Gegnerinformationen besitzen VoiceOver-Namen.
-- iPhone 16 Pro und iPhone SE wurden per Simulator-Screenshot geprüft; der kompakte
-  First Run besitzt ein eigenes Höhenlayout.
-- Build, 50 XCTest-Fälle, 5 Swift-Testing-Fälle und die sieben Zielsprachen sind grün.
+- Bots erhalten eingeschränkte öffentliche Beobachtungen statt fremder Hände.
+- First Run, geführte Runde, drei Akt-Screens, Hilfe, Einstellungen und Ergebnis sind
+  technisch vorhanden.
+- PM49, Kartensatz, Kartenrücken und Gegnerporträts sind als produktive Assets eingebaut.
+- Build, 50 XCTest-Fälle, 5 Swift-Testing-Fälle und 85 explizite Strings in sieben
+  Zielsprachen sind grün.
+- Simulatorzustände existieren für wesentliche Phasen und Geräteklassen.
 
-Noch nicht seriös als abgeschlossen markierbar:
+Nach Code- und Erlebnisreview ausdrücklich wieder offen:
 
-- Der Anfänger-Blindtest mit mindestens fünf echten, unvorbereiteten Personen.
-- Ein vollständiger VoiceOver- und Dynamic-Type-Durchlauf auf realer Hardware.
-- Instruments-Messungen der vier High-Impact-Sequenzen auf 60- und 120-Hz-Geräten.
-- Audio-Endmischung und Kontakt-Haptik auf einem physischen iPhone.
-- App-Store-Preview und externe Anti-Casino-Assoziationsmessung.
+- Der First Run besitzt noch keine souveräne, selbstverständliche erste Minute.
+- Gestartete und gelandete Karten beziehungsweise Token sind nicht sauber getrennt.
+- Deal-Kadenz, Flugdauer und sichtbarer Kartenstand erzeugen überlappende Doppelbilder.
+- Haptik und Zähler mutieren teilweise beim Start statt beim Materialkontakt.
+- Token sitzen geometrisch besser in den Mulden, besitzen aber noch keine überzeugende
+  Glasmaterialität und Übergabe vom Flugobjekt in den ruhenden Haufen.
+- Kartenmotiv und Kartenrücken sind brauchbar, die Bewegungs- und Kontaktphysik nicht.
+- Curtain, Coach, HUD und Aktinformationen können zeitlich miteinander konkurrieren.
+- Vivid-Farben, Kollaps-Burst, Floating Gain, Flash und Shake verletzen im Premium-Pfad
+  teilweise den Material- und Anti-Casino-Kanon.
+- Phase 2 besitzt noch zu viele gleichzeitig sichtbare Informationen.
+- Anfänger-, VoiceOver-, Hardware-Haptik-, Audio- und Performance-Gates fehlen weiterhin.
 
-Diese Punkte sind Release-Gates. Ein sauberer Simulator-Build ersetzt sie nicht.
+Ab jetzt gilt: Kein Bereich ist wegen vorhandener Views oder grüner Builds fertig. Ein
+Erlebnisgate ist erst bestanden, wenn der zugehörige Nutzerflow per Video, Timeline,
+Frame-Audit und externem Verständnistest belegt ist.
+
+## 26. Recovery-Ziel: der preiswürdige 60-Sekunden-Vertical-Slice
+
+Die Abschnitte 26-35 ersetzen bei Widersprüchen die früheren Sprint- und
+Statusformulierungen dieses Dokuments.
+
+Bis dieses Gate bestanden ist, pausieren neue Meta-Funktionen, weitere Bretter,
+zusätzliche Gegner, neue Kosmetik, Replay, Chronik-Ausbau und breite Vivid-Politur.
+
+Der Slice umfasst ausschließlich:
+
+1. App-Start und ruhiger Tisch-Reveal.
+2. Bewusstes Platznehmen statt automatisch gestarteter Runde.
+3. Erster eigener Glasstein mit Quelle, Fingeraktion, Kontakt und Ruhe.
+4. Langsame erste Austeilrunde mit maximal zwei Karten gleichzeitig in der Luft.
+5. Eigene Hand entsteht ausschließlich durch gelandete Karten.
+6. Trumpf erhält einen eigenständigen Reveal mit anschließender Stille.
+7. Eine garantierte, verständliche Meldung wird selbst erkannt und bestätigt.
+8. Token verlassen die benannte Mulde, landen beim Gewinner und bleiben dort.
+9. Ein Ergebnissatz erklärt Ursache und Wirkung in einem Satz.
+10. Erst danach wird der Übergang zu `Pochen` angeboten.
+
+North-Star-Satz:
+
+> Der Spieler sieht jederzeit genau eine Ursache, verfolgt genau eine Bewegung, spürt
+> genau einen Kontakt und versteht genau eine Wirkung.
+
+## 27. Technische Transaktionsarchitektur
+
+### 27.1 `PresentationDirector`
+
+Eine zentrale `@MainActor`-Instanz besitzt die Präsentations-Timeline. Views rendern
+Zustand und senden Intents, starten aber keine eigenständigen Sequenz-Timer.
+
+Verantwortung:
+
+- exklusiver Ablauf von Reveal, Flug, Impact, Mutation, Ruhe und Freigabe,
+- Cancellation bei Pause, Hintergrundwechsel, Neustart und Aktwechsel,
+- genau ein aktiver High-impact-Beat,
+- Timeline-Logging mit Event-ID, Quelle, Ziel, Start, Impact, Mutation und Ende,
+- Reduce-Motion-Ersatzablauf mit derselben Kausalität.
+
+### 27.2 `ImpactFlight`
+
+Gemeinsames Primitiv für Karten und Token:
+
+- Start- und Zielgeometrie werden vor Start eingefroren,
+- monotone, unterbrechbare Progression,
+- `onImpact` feuert exakt einmal,
+- kein Opacity-Verdunsten kurz vor dem Ziel,
+- Flugobjekt und Zielobjekt wechseln im selben Frame,
+- Audio und Haptik werden vom Impact ausgelöst,
+- Cancellation kann weder doppelte Mutation noch verlorene Spielobjekte erzeugen.
+
+### 27.3 Präsentierter Zustand
+
+Engine-Wahrheit und sichtbare Wahrheit bleiben getrennt:
+
+- `startedDeals` und `landedDeals`,
+- gestartete und gelandete Melde-Token pro Quelle und Ziel,
+- gestartete und gelandete Poch-Einsätze,
+- gestartete und gelandete Kettenkarten,
+- ausstehende und gelandete Straf-Token.
+
+Regel: Engine-Zustand darf sofort korrekt sein. Sichtbare Hand, Haufen, Zähler und
+Haptik ändern sich ausschließlich beim zugehörigen Impact.
+
+### 27.4 Verbotene Muster
+
+- kein neuer `Task.sleep` in SwiftUI-Views,
+- kein lokaler Timer pro Flugobjekt,
+- keine sichtbare Mutation beim Bewegungsstart,
+- kein `opacity = 0` als Ersatz für Landung,
+- keine Zufallsoffsets für Endpositionen,
+- keine parallelen Coach-/Curtain-/Reward-Sequenzen ohne Director-Freigabe.
+
+## 28. Parallele Arbeitsströme
+
+### Strom A - Kausalität und Zustandsübergabe
+
+Kritische Kette, hat Vorrang vor allen anderen Strömen:
+
+1. `ImpactFlight` und Eventmodell.
+2. Presented-Counter für Deal.
+3. FlyingBack-Handoff in Hand und Gegnerstapel.
+4. Presented-Counter und Handoff für Melde-Token.
+5. Poch-Einsätze und Phase-3-Ströme migrieren.
+6. Pause, Cancellation, Background und schneller Mehrfachtap absichern.
+
+### Strom B - First Run und Tutorialregie
+
+Kann parallel zu A mit statischen Zuständen und Mock-Daten arbeiten:
+
+1. Startscreen auf eine Einladung und eine Primäraktion reduzieren.
+2. Tisch zunächst ohne HUD, Hand, Gegnerwerte und Phasenlabel zeigen.
+3. Relevante Elemente erst nach ihrer Erklärung einblenden.
+4. Jeder Lernbeat besitzt Ziel, erlaubte Aktion, Erfolg und Rückholhinweis.
+5. Fehler lassen das Objekt zurückkehren und formulieren denselben Gedanken neu.
+6. Kein Auto-Advance; Weiter nur nach Impact und bewusster Bestätigung.
+7. Skip-Pfad erhält einmalige kontextuelle Hinweise in der ersten freien Partie.
+
+### Strom C - Materialsystem für Karten und Glassteine
+
+Kann parallel zu A experimentieren, integriert aber erst nach eingefrorener Geometrie:
+
+1. `TableChip` mit radialem, mattem Glaskörper statt linearem Candy-Gradient.
+2. Ein kleiner spekularer Reflex, subtile Glaskante, harter Kontaktschatten.
+3. Gedachter Durchmesser 21-22 pt; gleiche Sprache im Flug und im Haufen.
+4. Deterministische Slots für 1-12 Token pro äußerer Mulde und Mitte.
+5. Vorderlippen-Occlusion und Innenmaskierung bleiben an PM49 kalibriert.
+6. Kartenwölbung reduzieren: Steifigkeit, dunkle Kontur, Kontakt statt Flattern.
+7. Kartenfläche auditieren: reines Weiß ohne Grauschleier, sattes Rubinrot, kräftige
+   Eckindizes, sichere Randabstände und lesbare Hofkarten in kleinster Spielgröße.
+8. Kartenrücken groß und ruhig inszenieren; keine zusätzliche Art-Exploration.
+9. PM49-Geometrie und Farbverteilung bleiben eingefroren. Materialtiefe darf über
+   getrennte Boden-, Vorderlippen-, Schatten- und Lichtreaktionsebenen verbessert
+   werden; kein neuer Board-Variantenloop vor bestandenem Slice.
+
+### Strom D - Komposition und progressive Disclosure
+
+1. Zonen pro Gerät definieren: Header, Hauptbühne, Entscheidung, Gegner, Hand.
+2. Phase 1: großes Brett, ruhiger Rand, Hand erst nach Deal sichtbar.
+3. Phase 2: Brett oben rechts, Range links, eine Konsequenz und maximal zwei Aktionen.
+4. Phase 3: zentrale Kartenkomposition, ruhige Gegner, Hand am unteren Rand.
+5. Curtain endet vollständig, bevor Coach oder Entscheidung erscheint.
+6. Geführte Runde ersetzt Curtain durch den Coach-Beat.
+7. Kein Text verdeckt Quelle, Ziel, Hand, Mulde oder aktive Karte.
+8. Buttonsystem auf Mindesthöhe, Textreserve und eindeutige Hierarchie prüfen.
+
+### Strom E - Audio, Haptik und Rhythmus
+
+Beginnt mit temporären, trockenen Sounds parallel; finale Mischung nach A/C:
+
+1. getrennte Klangfamilien für Karte, Glas, Mulde, Tisch und UI,
+2. Audio, Haptik und visueller Kontakt im selben Frame,
+3. `heavy` ausschließlich für Poch-Tischschlag und große Abschlussmomente,
+4. bewusste Stille nach erstem Token, Trumpf, Meldung, Kettenriss und letzter Karte,
+5. Stummtest: jeder Impact bleibt visuell verständlich,
+6. Hardwaretest: kein Haptik-Dauerfeuer bei Deal oder Strafstrom.
+
+### Strom F - Produktqualität und Testsystem
+
+Läuft ab dem ersten integrierten Slice kontinuierlich:
+
+1. DEBUG-Zustände und reproduzierbare Seeds,
+2. Timeline-Assertions für Impact vor Mutation,
+3. Screenshotmatrix ohne generierte Dateien im Git-Archiv,
+4. Frame-Extraktion für Deal, Meldung, Poch und Kette,
+5. Layoutprüfung auf SE, Standard und Pro Max,
+6. 60- und 120-Hz-Profiling,
+7. VoiceOver-, Dynamic-Type-, Kontrast- und Reduce-Motion-Durchlauf,
+8. DE/EN zuerst redaktionell perfektionieren; übrige Sprachen technisch grün halten.
+
+## 29. Verbindliche Umsetzung des Vertical Slice
+
+### Welle 0 - Baseline und Falsifikation
+
+- Aktuellen First Run als 60-FPS-Video sichern.
+- Timeline von App-Start bis erster Meldung protokollieren.
+- Frames mit Doppelkarte, verschwindendem Token und überlagertem Text markieren.
+- Fünf konkrete Verständnisfragen und den bisherigen Ausgangswert erfassen.
+- Die bestehende erste Minute nicht weiter kosmetisch patchen.
+
+### Welle 1 - Deal-Transaktion
+
+- `ImpactFlight` einführen.
+- Deal-Fenster von vier auf maximal zwei Karten reduzieren.
+- Freies Spiel: Startkorridor 320 ms Kadenz, 420 ms Flug.
+- Geführtes Spiel: erste Karten 760-860 ms, danach 560-680 ms.
+- Rotation während Flug unter 12 Grad halten; kein Bounce.
+- Zielkarte erscheint exakt im Impact-Frame.
+- Haptik und sichtbarer Deal-Zähler wandern auf `landedDeals`.
+
+### Welle 2 - Token-Transaktion
+
+- `CoinStream` und alte Flying-Chip-Sonderlogik entfernen.
+- Nächsten freien Zielslot vor Flugbeginn reservieren.
+- Token fliegt flach, ändert maximal 20 Grad Lage und landet in Zielgröße.
+- Erster Kontakt aktualisiert Zahl und Haptik; weitere Kontakte setzen den Haufen.
+- Kompression 70-110 ms, maximal kleiner Seitenschlupf, danach Stillstand.
+- Kein Ripple, kein Floating Gain, kein Partikel-Burst.
+
+### Welle 3 - First-Run-Regie
+
+- App startet nicht mit einer laufenden Runde.
+- Primäraktion: `Am Tisch Platz nehmen` oder gleichwertig kurze Formulierung.
+- Nur Tisch, eine Mulde und ein Token werden zuerst sichtbar.
+- Spieler platziert den Token selbst.
+- Nach Kontakt 420-600 ms Ruhe, dann erscheint der nächste Gedanke.
+- Gegner, Hand, Trumpf und Regeln erscheinen erst nacheinander.
+- Garantierter Tutorial-Seed liefert innerhalb von 45 Sekunden eine Meldung.
+
+### Welle 4 - Markenbereinigung
+
+- `Balatro`, `jackpot`, Kollaps-Burst, Floating Gain und Melde-Shake entfernen.
+- Große Auszahlung nur durch Materialkontakt, Haufen-Setzen, Lichtkante und Ruhe zeigen.
+- Vivid-Farben ausschließlich über die Theme-Auflösung beziehen.
+- Premium nutzt matte Juwelentöne ohne Neon-Glow.
+- Tisch-Shake bleibt exklusiv dem bewussten Poch-Klopfen vorbehalten.
+
+### Welle 5 - Integrierter Slice
+
+- Deal, Trumpf, Meldung und Tokengewinn über den Director verbinden.
+- Kein neuer Text im schnellsten Bewegungsdrittel.
+- Coach bestätigt Erlebtes, erklärt nicht vorab mehrere Regeln.
+- Pause und Resume in jedem Beat testen.
+- Reduce Motion nutzt Quelle-Puls, Ziel-Puls, Crossfade und Kontakt statt Flug.
+
+## 30. Gates des Vertical Slice
+
+### Gate VS1 - Räumliche Eindeutigkeit
+
+- Quelle und Ziel sind vor jeder Bewegung sichtbar.
+- Kein Ziel liegt unter Text oder Overlay.
+- Keine Karte und kein Token existiert gleichzeitig als Flug- und Zielobjekt.
+
+### Gate VS2 - Zeitliche Eindeutigkeit
+
+- Mutation liegt im Impact-Frame plus/minus einen Frame.
+- Maximal zwei Deal-Karten gleichzeitig in der Luft.
+- Nach jedem High-impact-Moment existiert ein messbarer Ruhebeat.
+
+### Gate VS3 - Materialglaubwürdigkeit
+
+- Blindvergleich bewertet neue Karte und neuen Token häufiger als schwerer,
+  physischer und hochwertiger als den Baseline-Stand.
+- Kein Token überschreitet Muldenmaske oder Vorderlippe.
+- Keine Karte flattert, verdunstet oder springt am Ziel.
+
+### Gate VS4 - Verständnis
+
+- 8 von 10 unvorbereiteten Personen erklären Melden, Pochen, Ausspielen und Mitte.
+- 9 von 10 finden die Primäraktion innerhalb von zwei Sekunden.
+- Erste sinnvolle Belohnung liegt innerhalb von 45 Sekunden.
+- Median maximal ein Fehlertap pro Lernbeat.
+
+### Gate VS5 - Zugänglichkeit und Technik
+
+- Reduce Motion besteht denselben Verständnisstest.
+- Slice ist mit VoiceOver vollständig bedienbar.
+- Keine abgeschnittenen Texte auf drei Geräteklassen und sieben Sprachen.
+- p95-Frametime bleibt unter 16,7 ms beziehungsweise 8,3 ms auf ProMotion.
+
+Kein Gate darf durch subjektives `sieht besser aus` ersetzt werden.
+
+## 31. Ausbau nach bestandenem Vertical Slice
+
+### Akt 2 - Pochen
+
+- Eine Entscheidung pro Moment: passen, mitgehen oder erhöhen.
+- Risiko und möglicher Gewinn werden vor der Aktion in einem Satz sichtbar.
+- Diskrete Einsätze gegen Slider im Nutzertest vergleichen.
+- Gegnerantworten folgen räumlich und zeitlich der Tischreihenfolge.
+- Poch-Klopfen als optionale Signaturgeste prototypen und auf Hardware testen.
+- Botentscheidungen werden auf Plausibilität und Informationsleaks geprüft.
+
+### Akt 3 - Ausspielen
+
+- Nur legale Karten bleiben voll präsent.
+- Spielkarte fliegt mit demselben Impact-Handoff wie im Deal.
+- Kettentakt startet lesbar und beschleunigt erst nach sicherem Verständnis.
+- Kettenriss nennt Herkunft des neuen Anspielrechts.
+- Letzte Karte erhält einen eigenen Halt; Abrechnung startet danach.
+
+### Partieabschluss
+
+- Ergebnis erklärt Meldung, Poch, Mitte und Strafe kausal.
+- Eine klare nächste Aktion, keine Kennzahlenwand.
+- Partieökonomie bleibt geschlossen: keine Rebuys, keine persistente Einsatzwährung.
+
+### Gegner
+
+- Feste Sitzpositionen über alle Akte.
+- Zustandswechsel behalten Ausschnitt, Blickrichtung und Kopfgeometrie.
+- Reaktionen nur auf öffentliche Information.
+- Mikroreaktionen selten, lesbar und unterbrechungsfrei.
+- Sprechblasen nur für Signaturmomente, nicht als Dauerkommentar.
+
+### Hilfe, Einstellungen und Tutorial-Hub
+
+- Hilfe erklärt mit interaktiven Zuständen statt Textwänden.
+- Einstellungen priorisieren Sound, Haptik, Assistenz, Motion und Kartenlesbarkeit.
+- Tutoriallektionen sind einzeln wiederholbar.
+- Kein Einstieg in die erste Partie über Einstellungen oder Menüs.
+
+### Langzeitmotivation
+
+- Meisterschaft, Gegnerkenntnis, Tisch-Chronik und Kosmetik statt FOMO.
+- Tagesseed ohne Verluststrafe und zunächst ohne Leaderboard.
+- Keine Streakpflicht, Lootbox, Beinahe-Gewinn-Inszenierung oder künstliche Knappheit.
+- Meta-Ausbau erst nach bestandenem Core-Loop-Retentionstest.
+
+## 32. Release- und Award-Reife
+
+1. Vollständiger Motion-Audit jeder High-impact-Sequenz.
+2. Audio-Endmischung auf Lautsprecher, Kopfhörer und Stummbetrieb.
+3. Haptikabnahme auf mindestens zwei physischen iPhones.
+4. Accessibility-Audit mit VoiceOver, Dynamic Type, Reduce Motion, Contrast und
+   Reduce Transparency.
+5. Lokalisierungsreview aller sieben Sprachen im echten Layout.
+6. 30-Minuten-Soak-Test, Unterbrechung, Hintergrund, Speicherwarnung und Wiederaufnahme.
+7. Externer Anti-Casino-Blindtest: häufiger `Strategiespiel`, `handwerklich`,
+   `hochwertig` als `Casino`, `Slot`, `Poker-App`.
+8. TestFlight-Kohorte mit Tutorialabschluss, Fehlertaps, freiwilliger nächster Runde
+   und Rückkehr ohne manipulative Push- oder Streakmechanik.
+9. App-Store-Video ausschließlich aus echtem Gameplay und bestandenen Gates.
+10. Finales Red-Team-Review gegen Regeln, Architektur, Performance und Produktkanon.
+11. Offline-Start, Save-Migration, Crash-Recovery, Speicher- und Thermiktest.
+12. Privacy Manifest, Export Compliance, Altersfreigabe, StoreKit-Preis, Restore und
+    Store-Metadaten gegen den produktiven Build prüfen.
+13. App-Icon, Launch-Erlebnis und erster Store-Screenshot erzählen dieselbe ruhige
+    Premium-Geschichte wie der Vertical Slice.
+
+## 33. Parallelisierungs- und Merge-Regeln
+
+- A besitzt `PresentationDirector`, Presented-State und Flugprotokoll.
+- B besitzt Tutorialdaten, First-Run-Copy und Fokuszustände.
+- C besitzt Token-/Kartenmaterial und Motionparameter, nicht die Timeline.
+- D besitzt Layout und Komponenten, nicht Spielregeln oder Timer.
+- E besitzt Sound-/Haptikbibliothek, ausgelöst ausschließlich durch A.
+- F besitzt Tests, QA-Skripte und Abnahmebelege.
+- Gemeinsame Dateien werden in kurzen Integrationsfenstern koordiniert geändert.
+- Jeder Strom arbeitet auf einem reproduzierbaren DEBUG-Zustand.
+- Integration erfolgt in der Reihenfolge A -> D -> C/E -> B -> F.
+- Ein grüner Build ohne Gate-Beleg ist kein sinnvoller Merge-Meilenstein.
+
+## 34. Abnahmebelege pro Meilenstein
+
+Jeder sinnvolle Commit-/Push-Punkt enthält mindestens einen passenden Beleg:
+
+- Logik: Test oder Timeline-Assertion,
+- Layout: Screenshot auf SE, Standard und Pro Max,
+- Motion: 60-FPS-Video plus Frame-Stichprobe,
+- Audio/Haptik: Kontaktprotokoll und Hardwarecheck,
+- Tutorial: Beobachtungsprotokoll eines unvorbereiteten Nutzers,
+- Accessibility: dokumentierter Bedienpfad,
+- Performance: Instruments-Messung der betroffenen Sequenz.
+
+Die Umsetzung beginnt mit Welle 0 und endet nicht mit `alle Features vorhanden`,
+sondern mit nachweisbar verständlichem, physischem und emotional geschlossenem Spiel.
+
+## 35. Erste ausführbare Tickets und Parallelstart
+
+Kritische Kette:
+
+1. `A1` Baseline-Video und Timeline vom aktuellen First Run.
+2. `A2` Eventmodell und `PresentationDirector`-Skeleton ohne sichtbare Änderung.
+3. `A3` `ImpactFlight` mit Unit-Test für exakt einen Impact.
+4. `A4` Deal auf started/landed umstellen und maximal zwei Flüge begrenzen.
+5. `A5` Tokenflug und Zielhaufen auf dasselbe Handoff-Modell migrieren.
+6. `A6` Deal, Trumpf und erste Meldung als eine pausierbare Sequenz verbinden.
+7. `A7` Vertical-Slice-Gates VS1-VS5 ausführen.
+
+Parallel ab `A1`:
+
+- `B1` statischer First-Run-Storyboard-Prototyp mit exakt zehn Beats,
+- `C1` drei codebasierte Glas-Token-Materialproben im identischen Muldenzustand,
+- `C2` Kartenlesbarkeitsmatrix in kleinster, normaler und Hero-Größe,
+- `D1` Zonen- und Overlap-Audit für SE, Standard und Pro Max,
+- `E1` trockene Kontaktklänge und Haptik-Mapping ohne Integration,
+- `F1` DEBUG-Seed, Screenshotzustand und Timeline-Assertion für den Slice.
+
+Integration:
+
+- `B1`, `C1`, `C2`, `D1`, `E1` dürfen keinen eigenen Timer einführen.
+- A friert die Transaktionsschnittstelle ein, danach integrieren C und E.
+- D friert Zielgeometrien ein, danach wird die Flugbahn kalibriert.
+- B setzt den Director-Ablauf zusammen, F prüft jeden Übergabepunkt.
+- Nach `A7` entscheidet ein Anfänger-Test über Phase 2, nicht das Teamgefühl.
+
+Stop-the-line-Kriterien:
+
+- eine doppelte Karte oder ein verschwundener Token,
+- sichtbare Mutation vor Kontakt,
+- Text über Quelle, Ziel oder Hand,
+- Premium-Screen mit unbeabsichtigtem Vivid-Glow,
+- ununterbrechbare Sequenz,
+- nicht reproduzierbarer Timingfehler,
+- neuer Scope vor bestandenem Vertical Slice.
