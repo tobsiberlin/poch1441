@@ -12,6 +12,15 @@ struct BotBrainTests {
                                           riskTolerance: 0.85, raiseAggression: 0.8,
                                           thinkSecondsMin: 0.3, thinkSecondsMax: 0.6)
 
+    private func observation(round: Round, player: Int) -> BotObservation {
+        BotObservation(
+            ownHand: round.deal.hands[player],
+            trump: round.deal.trump,
+            currentBet: round.betting.currentBet,
+            ownCommitted: round.betting.seats[player].committed
+        )
+    }
+
     /// Anforderung: Profile wählen ausschließlich legale Aktionen und die Runden-Invariante
     /// (Gesamtchips konstant) bleibt über komplette Profil-Runden erhalten.
     @Test func profileErzeugenNurLegaleAktionenUndErhaltenChips() throws {
@@ -25,8 +34,9 @@ struct BotBrainTests {
                 guardCounter += 1
                 let player = round.betting.turn
                 guard let legal = round.betting.legalActions(for: player) else { break }
-                let action = BotBrain.action(profile: profiles[player], round: round,
-                                             player: player, legal: legal, rng: &rng)
+                let action = BotBrain.action(profile: profiles[player],
+                                             observation: observation(round: round, player: player),
+                                             legal: legal, rng: &rng)
                 try round.applyBet(action, by: player)
                 #expect(round.totalChips == total, "Chip-Erhaltung verletzt (Seed \(seed))")
             }
@@ -46,11 +56,13 @@ struct BotBrainTests {
                   legal.openRange != nil else { continue }
             var rngA = SeededRNG(seed: seed)
             var rngB = SeededRNG(seed: seed)
-            if case .open = BotBrain.action(profile: draufgaenger, round: round, player: player,
+            if case .open = BotBrain.action(profile: draufgaenger,
+                                            observation: observation(round: round, player: player),
                                             legal: legal, rng: &rngA) {
                 opensDraufgaenger += 1
             }
-            if case .open = BotBrain.action(profile: zaghaft, round: round, player: player,
+            if case .open = BotBrain.action(profile: zaghaft,
+                                            observation: observation(round: round, player: player),
                                             legal: legal, rng: &rngB) {
                 opensZaghaft += 1
             }
@@ -82,9 +94,12 @@ struct BotBrainTests {
             situationen += 1
             var rngA = SeededRNG(seed: seed)
             var rngB = SeededRNG(seed: seed)
-            let mutig = BotBrain.action(profile: draufgaenger, round: round, player: player,
+            let currentObservation = observation(round: round, player: player)
+            let mutig = BotBrain.action(profile: draufgaenger,
+                                        observation: currentObservation,
                                         legal: legal, rng: &rngA)
-            let zag = BotBrain.action(profile: zaghaft, round: round, player: player,
+            let zag = BotBrain.action(profile: zaghaft,
+                                      observation: currentObservation,
                                       legal: legal, rng: &rngB)
             if mutig != .pass { mutigTrotzSchwaeche += 1 }
             if zag != .pass { zaghaftTrotzSchwaeche += 1 }
@@ -109,8 +124,9 @@ struct BotBrainTests {
                 guardCounter += 1
                 let player = round.betting.turn
                 guard let legal = round.betting.legalActions(for: player) else { break }
-                let action = BotBrain.action(profile: profiles[player], round: round,
-                                             player: player, legal: legal, rng: &rng)
+                let action = BotBrain.action(profile: profiles[player],
+                                             observation: observation(round: round, player: player),
+                                             legal: legal, rng: &rng)
                 actions.append(action)
                 try round.applyBet(action, by: player)
             }

@@ -110,6 +110,8 @@ xcrun simctl install booted "$DIR/$NAME" && xcrun simctl launch booted com.tobc.
 
 ## 9. Design-Leitplanken für SwiftUI-Overlays (aus kwittung/Views earned)
 
+- **`warm-editorial-mobile-ui` gezielt nutzen:** für Menüs, Onboarding, Tutorial, Ergebnis-, Gegner-, Shop-, Profil- und Einstellungsflächen. Der Skill liefert editoriale Hierarchie, warme Ton-in-Ton-Flächen, klare Fokusführung, native Controls und ruhige Informationsgruppen.
+- **Grenze zum Spieltisch:** Poch-Ring, Karten, Chips und High-Impact-Spielmomente behalten die dunkle Juwelen-/Materialsprache und phasenspezifische Dramaturgie. Kein pauschales Korallen-Orange, kein beiges Light-Theme und keine fremde Mockup-Komposition übernehmen; `DesignTokens.swift` und §0 gewinnen.
 - **4pt-Raster** (mit Halbschritten), keine willkürlichen Werte (13/17/37pt).
 - **High-Impact-Moments animieren, nicht alles.** `accessibilityReduceMotion` immer respektieren - auch am Spieltisch (Juice-Reduktion, nicht Juice-Ausfall).
 - In SwiftUI nur `.offset`/`.opacity`/`.scaleEffect` animieren - kein Layout-Thrashing. Keine Bounce/Elastic-Easings in Menüs (der SpriteKit-Tisch darf mehr, aber nur unter Parameter-Lock, §4).

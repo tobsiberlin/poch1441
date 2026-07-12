@@ -1,0 +1,2 @@
+app_identifier(ENV.fetch("APP_IDENTIFIER", "com.tobc.poch1441"))
+team_id(ENV.fetch("APPLE_TEAM_ID", "GWP236628H"))

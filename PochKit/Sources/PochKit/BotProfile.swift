@@ -33,6 +33,23 @@ public struct BotProfile: Codable, Sendable, Equatable {
                                            thinkSecondsMin: 0.5, thinkSecondsMax: 1.05)
 }
 
+/// Vollständige Informationsgrenze für eine Botentscheidung. Sie enthält bewusst
+/// nur die eigene Hand und öffentlichen Bietzustand. Fremde Hände können einem Bot
+/// damit weder versehentlich noch durch spätere Profiländerungen zugänglich werden.
+public struct BotObservation: Equatable, Sendable {
+    public let ownHand: [Card]
+    public let trump: Suit
+    public let currentBet: Int
+    public let ownCommitted: Int
+
+    public init(ownHand: [Card], trump: Suit, currentBet: Int, ownCommitted: Int) {
+        self.ownHand = ownHand
+        self.trump = trump
+        self.currentBet = currentBet
+        self.ownCommitted = ownCommitted
+    }
+}
+
 public enum BotBrain {
     /// Handstärke 0-1 aus der öffentlichen Kunststück-Bewertung.
     /// Kein Paar → sehr schwach; Paar/Drilling/Vierling steigen deutlich, Rang feint nach.
@@ -48,10 +65,10 @@ public enum BotBrain {
 
     /// Bietentscheidung eines Profils. Wählt ausschließlich aus den übergebenen legalen
     /// Aktionen; deterministisch pro (Profil, Zustand, RNG-Stand).
-    public static func action(profile: BotProfile, round: Round, player: Int,
+    public static func action(profile: BotProfile, observation: BotObservation,
                               legal: BettingPhase.LegalActions,
                               rng: inout SeededRNG) -> BettingPhase.Action {
-        let honest = strength(hand: round.deal.hands[player], trump: round.deal.trump)
+        let honest = strength(hand: observation.ownHand, trump: observation.trump)
         let bluffing = honest < 0.4 && rng.nextDouble01() < profile.bluffFrequency
         let effective = min(1.0, honest + (bluffing ? 0.38 : 0))
 
@@ -69,7 +86,7 @@ public enum BotBrain {
             return .pass
         }
 
-        let cost = round.betting.currentBet - round.betting.seats[player].committed
+        let cost = observation.currentBet - observation.ownCommitted
         if legal.canCall {
             if let raise = legal.raiseRange, effective >= 0.84 - 0.26 * profile.raiseAggression {
                 let headroom = Double(min(raise.upperBound - raise.lowerBound, 5))

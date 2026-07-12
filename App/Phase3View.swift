@@ -12,20 +12,59 @@ struct Phase3View: View {
     let morph: Namespace.ID
     let assistHints: Bool
     let onNewRound: () -> Void
+    @State private var settledPlays = 0
 
     var body: some View {
-        VStack(spacing: 0) {
-            opponentsRow
-            centerpotRow
-            playedCardsFan
-            Spacer(minLength: 10)
-            if game.stage == .playout {
-                statusLine
-                handFan
-            } else if game.endPhase < .done {
-                settlementStatus
-            } else {
-                resultBanner
+        GeometryReader { proxy in
+            let w = proxy.size.width
+            let h = proxy.size.height
+            let awaitingFirstLead = game.stage == .playout
+                && game.revealedPlays == 0
+                && game.cascadeIdle
+            let statusY = awaitingFirstLead ? min(h * 0.46, 338) : min(h * 0.555, 398)
+            let opponentsY = awaitingFirstLead
+                ? min(max(statusY + 112, h - 280), h - 232)
+                : min(max(statusY + 112, h - 220), h - 192)
+            ZStack(alignment: .top) {
+                playedCardsFan
+                    .frame(width: w)
+                    .offset(y: 52)
+
+                if game.stage == .playout, !reduceMotion, let lastPlay = lastRevealedPlay {
+                    Phase3CardArrival(card: lastPlay.card,
+                                      seat: game.uiSeat(forRoundSeat: lastPlay.player),
+                                      trigger: game.revealedPlays,
+                                      canvas: CGSize(width: w, height: h),
+                                      opponentsY: opponentsY)
+                        .id("arrival-\(game.revealedPlays)")
+                        .allowsHitTesting(false)
+                }
+
+                if game.stage == .playout {
+                    statusLine
+                        .frame(width: min(320, w - 24))
+                        .position(x: w / 2, y: statusY)
+                    opponentsRow
+                        .frame(width: w)
+                        .position(x: w / 2, y: opponentsY)
+                    handFan
+                        .frame(width: w, height: 150, alignment: .bottom)
+                        .position(x: w / 2, y: h - 104)
+                } else if game.endPhase <= .frozen {
+                    finalMomentStatus
+                        .frame(width: min(336, w - 24))
+                        .position(x: w / 2, y: statusY)
+                    opponentsRow
+                        .frame(width: w)
+                        .position(x: w / 2, y: opponentsY)
+                } else if game.endPhase < .done {
+                    settlementStatus
+                        .frame(width: w)
+                        .position(x: w / 2, y: min(h * 0.64, 450))
+                } else {
+                    resultBanner
+                        .position(x: w / 2, y: min(h * 0.58, 424))
+                }
             }
         }
         .frame(maxHeight: .infinity, alignment: .top)
@@ -34,6 +73,16 @@ struct Phase3View: View {
             if game.endPhase == .punishing, let result = game.roundResult, !reduceMotion {
                 PunishStreams(result: result)
                     .allowsHitTesting(false)
+            }
+        }
+        .onAppear {
+            settledPlays = min(game.revealedPlays, game.playout?.plays.count ?? 0)
+        }
+        .onChange(of: game.revealedPlays) { _, newValue in
+            Task { @MainActor in
+                let settleDelay = reduceMotion ? 0.08 : Tokens.p3CardSettleDelay
+                try? await Task.sleep(for: .seconds(settleDelay))
+                settledPlays = max(settledPlays, newValue)
             }
         }
         .overlay {
@@ -53,6 +102,15 @@ struct Phase3View: View {
                     .allowsHitTesting(false)
             }
         }
+        #if DEBUG
+        .task {
+            guard ProcessInfo.processInfo.arguments.contains("-phase3ActionQA") else { return }
+            try? await Task.sleep(for: .milliseconds(1_200))
+            guard game.playoutLeader == 0,
+                  let card = game.displayedHand(of: 0).first else { return }
+            game.humanLead(card)
+        }
+        #endif
     }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -60,35 +118,33 @@ struct Phase3View: View {
     // MARK: - Gegner als ruhiger Rahmen (§5c Phase 3: matter Schiefer, Fokus aufs Rennen)
 
     private var opponentsRow: some View {
-        HStack(spacing: 26) {
-            ForEach(1..<(game.playout?.hands.count ?? 4), id: \.self) { seat in
+        HStack(spacing: 42) {
+            ForEach(game.activeUISeats.filter { $0 != 0 }, id: \.self) { seat in
                 slateToken(seat: seat)
             }
         }
-        .padding(.top, 12)
+        .padding(.top, 4)
+        .padding(.bottom, 2)
     }
 
     private func slateToken(seat: Int) -> some View {
-        let isLeader = game.playout?.leader == seat && game.stage == .playout
+        let isLeader = game.playoutLeader == seat && game.stage == .playout
+        let isWinner = game.stage != .playout
+            && game.roundResult?.winner == seat
+            && game.endPhase <= .frozen
+        let focused = isLeader || isWinner
         let restCards = game.displayedHand(of: seat).count
-        return VStack(spacing: 3) {
-            OpponentPortrait(seat: seat,
-                             name: game.name(of: seat),
-                             isActive: true,
-                             isFocus: isLeader,
-                             size: 46,
-                             morph: morph)
-            Text("\(restCards) Karten").font(.system(size: 9))
-                .foregroundStyle(Tokens.slate.opacity(0.8))
-            Text("\(game.displayedEndStack(of: seat))")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(Tokens.jewelGold.opacity(0.9))
-                .contentTransition(.numericText())
-                .animation(.easeOut(duration: 0.6), value: game.endPhase)
-        }
-        .saturation(isLeader ? 1 : 0.2)
-        .opacity(isLeader ? 1 : 0.55)
-        .animation(.easeInOut(duration: 0.25), value: isLeader)
+        return OpponentPortrait(seat: seat,
+                                name: game.name(of: seat),
+                                caption: "\(restCards) Karten",
+                                isActive: true,
+                                isFocus: focused,
+                                mood: isWinner ? .winning : (isLeader ? .pressure : .neutral),
+                                size: focused ? 44 : 39,
+                                morph: morph)
+        .saturation(focused ? 1 : 0.2)
+        .opacity(focused ? 1 : 0.48)
+        .animation(.easeInOut(duration: 0.25), value: focused)
     }
 
     /// Centerpot + Kettenhistorie in einer kompakten Zeile.
@@ -133,110 +189,82 @@ struct Phase3View: View {
     /// Grosser angewinkelter Fächer der aktuellen Kette + Poch-Medaillon.
     /// Muster identisch mit ContentView::handView (.offset + .rotationEffect anchor:.bottom).
     private var playedCardsFan: some View {
-        let chains = game.revealedChains
+        let chains = settledChains
         let currentChain = chains.last ?? []
-        let displayCards = currentChain.isEmpty
-            ? Array(game.displayedHand(of: 0).prefix(8))
+        let finalCards = game.playout.map {
+            Array($0.plays.prefix(settledPlays).suffix(8)).map(\.card)
+        } ?? []
+        let finalTableau = game.stage != .playout && !finalCards.isEmpty
+        let displayCards = finalTableau
+            ? finalCards
             : currentChain.map(\.card)
         let frozen = game.endPhase >= .frozen
         let N = displayCards.count
-        let previewMode = currentChain.isEmpty
-        let cardScale: CGFloat = previewMode ? 1.44 : 1.62
+        let previewMode = currentChain.isEmpty && !finalTableau
+        let cardScale: CGFloat = finalTableau ? 1.34 : (previewMode ? 1.34 : 1.42)
         let spreadDeg = N > 1
-            ? min(Double(N) * (previewMode ? 10.8 : 13.0), previewMode ? 72.0 : 62.0)
+            ? min(Double(N) * (previewMode || finalTableau ? 9.8 : 10.8),
+                  previewMode || finalTableau ? 70.0 : 62.0)
             : 0.0
         let totalW: CGFloat = N > 1
-            ? min(CGFloat(N - 1) * (previewMode ? 42 : 58), previewMode ? 304 : 254)
+            ? min(CGFloat(N - 1) * (previewMode || finalTableau ? 30 : 37),
+                  previewMode || finalTableau ? 218 : 206)
             : 0
 
         return ZStack {
-            ForEach(Array(displayCards.enumerated()), id: \.offset) { i, card in
+            ForEach(Array(displayCards.enumerated()), id: \.element) { i, card in
                 let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
                 let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
                 let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
+                let broadFan = previewMode || finalTableau
+                let crownLift = CGFloat(sin(Double(t) * .pi)) * (broadFan ? 44 : 34)
+                let edgeDrop = abs(t - 0.5) * (broadFan ? 38 : 24)
+                let yOff = edgeDrop - crownLift
 
                 CardFace(card: card,
-                         goldenStopper: !currentChain.isEmpty
+                         goldenStopper: !finalTableau && !currentChain.isEmpty
                              && game.cascadeIdle
                              && i == N - 1
                              && game.stage == .playout,
                          scale: cardScale)
-                    .offset(x: xOff)
+                    .offset(x: xOff, y: yOff)
                     .rotationEffect(.degrees(angle), anchor: .bottom)
                     .zIndex(Double(i + 1))
-                    .transition(.scale(scale: 0.85, anchor: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion
+                                ? .opacity
+                                : .scale(scale: 0.85, anchor: .bottom).combined(with: .opacity))
             }
         }
-        .frame(height: 74 * cardScale * (previewMode ? 1.24 : 1.16))
+        .frame(height: 74 * cardScale * (previewMode || finalTableau ? 1.76 : 1.40))
         .overlay {
             ZStack {
                 medallion
-                    .offset(y: previewMode ? 36 : 42)
+                    .offset(y: previewMode ? 98 : 58)
                 sideDeck
-                    .offset(x: 124, y: previewMode ? 38 : 44)
+                    .offset(x: 136, y: previewMode ? 84 : 44)
             }
             .allowsHitTesting(false)
         }
-        .overlay(alignment: .top) {
-            chainStateBadge
-                .offset(y: -28)
-        }
+        .padding(.bottom, previewMode ? 128 : 112)
         .saturation(frozen ? 0.08 : 1)
         .opacity(frozen ? 0.55 : 1)
         .animation(.easeOut(duration: 0.12), value: frozen)
-        .animation(.easeOut(duration: 0.2), value: N)
+        .animation(reduceMotion
+                   ? .linear(duration: 0.08)
+                   : .easeOut(duration: 0.18), value: settledPlays)
     }
 
-    @ViewBuilder private var chainStateBadge: some View {
-        if game.stage == .playout {
-            let chains = game.revealedChains
-            let current = chains.last ?? []
-            let last = current.last?.card
-            let leader = game.playout?.leader ?? 0
-            if !game.cascadeIdle {
-                phaseBadge(title: "KETTE", value: "läuft", tint: Tokens.jewelSmaragd)
-                    .transition(.scale(scale: 0.92).combined(with: .opacity))
-            } else if let last, !current.isEmpty {
-                let next = leader == 0 ? "DU" : game.name(of: leader).uppercased()
-                phaseBadge(title: "RISS \(last.rank.index)\(last.suit.symbol)",
-                           value: next,
-                           tint: leader == 0 ? Tokens.jewelGold : Tokens.jewelSmaragd)
-                    .transition(.scale(scale: 0.92).combined(with: .opacity))
+    private var settledChains: [[PlayoutPhase.Play]] {
+        guard let phase = game.playout else { return [] }
+        var chains: [[PlayoutPhase.Play]] = []
+        for play in phase.plays.prefix(settledPlays) {
+            if play.isLead || chains.isEmpty {
+                chains.append([play])
+            } else {
+                chains[chains.count - 1].append(play)
             }
         }
-    }
-
-    private func phaseBadge(title: String, value: String, tint: Color) -> some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(tint.opacity(0.88))
-                .frame(width: 7, height: 7)
-                .shadow(color: tint.opacity(0.28), radius: 4)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title)
-                    .font(.system(size: 7.8, weight: .heavy))
-                    .tracking(1.1)
-                    .foregroundStyle(tint.opacity(0.88))
-                Text(value)
-                    .font(.system(size: 10.5, weight: .semibold))
-                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.90))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.74)
-            }
-            .fixedSize(horizontal: true, vertical: false)
-        }
-        .padding(.horizontal, 11)
-        .padding(.vertical, 6)
-        .background(
-            Capsule()
-                .fill(LinearGradient(colors: [
-                    Color(hex: 0x17141D).opacity(0.86),
-                    Color(hex: 0x09080D).opacity(0.86)
-                ], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay(Capsule().strokeBorder(tint.opacity(0.25), lineWidth: 1))
-                .shadow(color: .black.opacity(0.38), radius: 9, y: 5)
-        )
-        .animation(.easeOut(duration: 0.18), value: game.cascadeIdle)
+        return chains
     }
 
     /// Poch-Medaillon: ruhiger Hauptpot-Anker im Kartenstrom.
@@ -250,20 +278,20 @@ struct Phase3View: View {
                 .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.70), lineWidth: 2.0))
                 .overlay(Circle().strokeBorder(Color.black.opacity(0.75), lineWidth: 4).padding(5))
                 .overlay(Circle().strokeBorder(Tokens.jewelPlatin.opacity(0.14), lineWidth: 1).padding(9))
-                .frame(width: 92, height: 92)
+                .frame(width: 116, height: 116)
                 .shadow(color: .black.opacity(0.72), radius: 12, y: 7)
             Circle()
                 .fill(RadialGradient(colors: [
                     Tokens.jewelPlatin.opacity(0.14),
                     Color.clear
                 ], center: .topLeading, startRadius: 2, endRadius: 44))
-                .frame(width: 72, height: 72)
+                .frame(width: 92, height: 92)
             RoundedRectangle(cornerRadius: 12)
                 .fill(LinearGradient(colors: [
                     Tokens.jewelSmaragd.opacity(theme.isNeon ? 0.92 : 0.58),
                     Tokens.jewelAmethyst.opacity(theme.isNeon ? 0.92 : 0.52)
                 ], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .frame(width: 43, height: 43)
+                .frame(width: 54, height: 54)
                 .rotationEffect(.degrees(45))
                 .overlay(RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(Tokens.jewelPlatin.opacity(0.30), lineWidth: 1)
@@ -272,11 +300,11 @@ struct Phase3View: View {
                         radius: theme.isNeon ? 14 : 5)
             VStack(spacing: -1) {
                 Text("MITTE")
-                    .font(.system(size: 7, weight: .heavy))
+                    .font(.system(size: 8, weight: .heavy))
                     .tracking(1.0)
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.66))
                 Text("\(game.chips(in: .center))")
-                    .font(.system(size: 24, weight: .heavy))
+                    .font(.system(size: 28, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.90))
             }
         }
@@ -284,17 +312,19 @@ struct Phase3View: View {
     }
 
     private var sideDeck: some View {
-        ZStack {
+        let deckW: CGFloat = 40
+        let deckH: CGFloat = 56
+        return ZStack {
             RoundedRectangle(cornerRadius: 9)
                 .fill(Color.black.opacity(0.42))
-                .frame(width: 48, height: 66)
-                .offset(x: 4, y: 5)
-            CardBack(scale: 0.56)
+                .frame(width: deckW, height: deckH)
+                .offset(x: 3, y: 4)
+            CardBack(scale: 0.50)
                 .rotationEffect(.degrees(2))
                 .shadow(color: .black.opacity(0.58), radius: 9, y: 5)
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(Tokens.jewelGold.opacity(0.38), lineWidth: 0.9)
-                .frame(width: 48, height: 66)
+                .frame(width: deckW, height: deckH)
         }
         .opacity(0.92)
         .accessibilityHidden(true)
@@ -303,28 +333,110 @@ struct Phase3View: View {
     // MARK: - Status + Hand
 
     private var settlementStatus: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 13) {
             if let result = game.roundResult {
                 let total = result.centerPool + result.payments.reduce(0, +)
-                Text(result.winner == 0 ? "Die Mitte wandert zu dir"
-                                         : "Die Mitte wandert zu \(game.name(of: result.winner))")
-                    .font(.system(size: 15, weight: .heavy))
-                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
+                VStack(spacing: 4) {
+                    Text(String(localized: "phase3.result.eyebrow",
+                                defaultValue: "RUNDENENDE"))
+                        .font(.system(size: 9, weight: .heavy))
+                        .tracking(2.2)
+                        .foregroundStyle(Tokens.smaragdVivid.opacity(0.80))
+                    Text(result.winner == 0 ? "Du nimmst die Mitte"
+                                             : "\(game.name(of: result.winner)) nimmt die Mitte")
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundStyle(Tokens.jewelPlatin.opacity(0.94))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
+                }
+                winnerStrip(result.winner, total: total)
                 HStack(spacing: 8) {
                     settlementPill("MITTE", "\(result.centerPool)", Tokens.jewelPlatin)
                     settlementPill("RESTKARTEN", "+\(total - result.centerPool)", Tokens.jewelGold)
                     settlementPill("TOTAL", "\(total)", Tokens.jewelSmaragd)
                 }
                 .frame(maxWidth: 328)
+                recapStrip(game.roundRecap)
             } else {
                 Text("Abrechnung läuft")
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
             }
         }
-        .padding(.top, 4)
-        .padding(.bottom, 104)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 15)
+        .frame(maxWidth: 352)
+        .background(
+            RoundedRectangle(cornerRadius: 22)
+                .fill(LinearGradient(colors: [
+                    Color(hex: 0x17141D).opacity(0.92),
+                    Color(hex: 0x09080D).opacity(0.94)
+                ], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(RoundedRectangle(cornerRadius: 22)
+                    .strokeBorder(Tokens.jewelGold.opacity(0.22), lineWidth: 1))
+                .overlay(alignment: .top) {
+                    Rectangle()
+                        .fill(LinearGradient(colors: [
+                            Tokens.jewelGold.opacity(0.28),
+                            Tokens.jewelSmaragd.opacity(0.18),
+                            .clear
+                        ], startPoint: .leading, endPoint: .trailing))
+                        .frame(height: 1)
+                        .padding(.horizontal, 18)
+                }
+                .shadow(color: .black.opacity(0.54), radius: 22, y: 14)
+        )
+        .padding(.bottom, 72)
         .transition(.opacity.combined(with: .move(edge: .bottom)))
+    }
+
+    private func winnerStrip(_ winner: Int, total: Int) -> some View {
+        HStack(spacing: 10) {
+            OpponentPortrait(seat: winner,
+                             name: game.name(of: winner),
+                             isActive: true,
+                             isFocus: true,
+                             mood: .winning,
+                             size: 38,
+                             showsText: false,
+                             morph: morph)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(winnerCaption(winner))
+                    .font(.system(size: 12.5, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
+                Text(String(format: String(localized: "phase3.result.total",
+                                           defaultValue: "Mitte und Restkarten ergeben %d Chips."),
+                            total))
+                    .font(.system(size: 9.8, weight: .semibold))
+                    .foregroundStyle(Tokens.slate.opacity(0.82))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.76)
+            }
+            Spacer(minLength: 0)
+            HStack(spacing: -4) {
+                ForEach(0..<3, id: \.self) { i in
+                    TableChip(tint: i == 0 ? Tokens.jewelPlatin : Tokens.jewelGold, size: 15)
+                        .offset(y: CGFloat(i) * -2)
+                }
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.045))
+                .overlay(Capsule().strokeBorder(Tokens.jewelGold.opacity(0.18), lineWidth: 1))
+        )
+    }
+
+    private func winnerCaption(_ winner: Int) -> String {
+        if winner == 0 {
+            return String(localized: "phase3.result.you.finish",
+                          defaultValue: "Dein letzter Zug entscheidet.")
+        }
+        let format = String(localized: "phase3.result.opponent.finish",
+                            defaultValue: "%@ schließt die Runde ab.")
+        return String(format: format, game.name(of: winner))
     }
 
     private func settlementPill(_ title: String, _ value: String, _ tint: Color) -> some View {
@@ -343,35 +455,148 @@ struct Phase3View: View {
             .overlay(Capsule().strokeBorder(tint.opacity(0.24), lineWidth: 1)))
     }
 
-    private var statusLine: some View {
-        let leader = game.playout?.leader ?? 0
-        let text: String = {
-            guard game.cascadeIdle else { return "Die Kette läuft …" }
-            return leader == 0 ? "Du spielst an - wähle eine Karte"
-                               : "\(game.name(of: leader)) spielt an …"
+    private var finalMomentStatus: some View {
+        let recap = game.roundRecap
+        let marker = recap.finalCard.map { "\($0.rank.index)\($0.suit.symbol)" } ?? "·"
+        let title: String = {
+            guard let seat = recap.finalPlayer else { return "" }
+            if seat == 0 {
+                return String(localized: "phase3.final.you",
+                              defaultValue: "Du schließt die Runde.")
+            }
+            let format = String(localized: "phase3.final.opponent",
+                                defaultValue: "%@ schließt die Runde.")
+            return String(format: format, game.name(of: seat))
         }()
-        return Text(text)
-            .font(.system(size: 13, weight: .medium))
-            .foregroundStyle(game.cascadeIdle && leader == 0
-                             ? Tokens.jewelGold : Tokens.slate)
+
+        return VStack(spacing: 8) {
+            HStack(spacing: 7) {
+                Circle()
+                    .fill(Tokens.jewelGold.opacity(0.90))
+                    .frame(width: 7, height: 7)
+                Text(String(localized: "phase3.final.eyebrow",
+                            defaultValue: "LETZTE KARTE"))
+                    .font(.system(size: 8.2, weight: .heavy))
+                    .tracking(1.35)
+                    .foregroundStyle(Tokens.jewelGold.opacity(0.86))
+                Text(marker)
+                    .font(.system(size: 9, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
+            }
+            Text(title)
+                .font(.system(size: 19, weight: .heavy))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.96))
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+            Text(String(localized: "phase3.final.hold",
+                        defaultValue: "Die Mitte hält inne. Gleich folgt die Abrechnung."))
+                .font(.system(size: 10.2, weight: .semibold))
+                .foregroundStyle(Tokens.slate.opacity(0.82))
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+        }
+        .frame(height: 86)
+        .background(
+            LinearGradient(colors: [
+                Color.clear,
+                Color.black.opacity(0.68),
+                Color.clear
+            ], startPoint: .top, endPoint: .bottom)
+            .frame(width: 352, height: 108)
+        )
+        .transition(.opacity)
+    }
+
+    private var statusLine: some View {
+        let leader = game.playoutLeader ?? 0
+        let last = game.revealedChains.last?.last?.card
+        let marker = last.map { "\($0.rank.index)\($0.suit.symbol)" } ?? "·"
+        let firstLead = game.revealedPlays == 0 && game.cascadeIdle
+        let title: String = {
+            guard game.cascadeIdle else {
+                return String(localized: "phase3.chain.running", defaultValue: "KETTE LÄUFT")
+            }
+            if firstLead {
+                if leader == 0 {
+                    return String(localized: "phase3.start.you", defaultValue: "WÄHLE DEIN ANSPIEL")
+                }
+                let format = String(localized: "phase3.start.opponent",
+                                    defaultValue: "%@ SPIELT AN")
+                return String(format: format, game.name(of: leader).uppercased())
+            }
+            return leader == 0 ? "WÄHLE ANSPIEL" : "\(game.name(of: leader).uppercased()) SPIELT AN"
+        }()
+        let detail: String = {
+            guard game.cascadeIdle else {
+                return String(localized: "phase3.chain.detail", defaultValue: "Die nächste passende Karte folgt automatisch.")
+            }
+            if firstLead {
+                return String(localized: "phase3.start.detail",
+                              defaultValue: "Eine Karte eröffnet die erste Kette.")
+            }
+            if leader == 0, assistHints {
+                return String(localized: "phase3.lead.hint",
+                              defaultValue: "Niedrig starten hält mehr Anschlusskarten im Rennen.")
+            }
+            return leader == 0 ? "Eine Karte startet die nächste Kette." : "Der letzte Leger führt die neue Kette."
+        }()
+        return VStack(spacing: 7) {
+            HStack(spacing: 7) {
+                Circle()
+                    .fill((game.cascadeIdle ? Tokens.jewelGold : Tokens.jewelSmaragd).opacity(0.88))
+                    .frame(width: 7, height: 7)
+                Text(firstLead
+                     ? String(localized: "phase3.start.eyebrow", defaultValue: "ERSTER ZUG")
+                     : (game.cascadeIdle ? "RISS \(marker)" : marker))
+                    .font(.system(size: 8.2, weight: .heavy))
+                    .tracking(1.25)
+                    .foregroundStyle((game.cascadeIdle ? Tokens.jewelGold : Tokens.jewelSmaragd).opacity(0.84))
+            }
+            Text(title)
+                .font(.system(size: 16, weight: .heavy))
+                .tracking(0.8)
+                .foregroundStyle(game.cascadeIdle && leader == 0
+                                 ? Tokens.jewelGold : Tokens.smaragdVivid)
+            Text(detail)
+                .font(.system(size: 10.2, weight: .semibold))
+                .foregroundStyle(Tokens.slate.opacity(0.78))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
             .padding(.top, 2)
-            .padding(.bottom, 20)
+            .padding(.bottom, 0)
+            .frame(height: 78)
+            .background(
+                LinearGradient(colors: [
+                    Color.clear,
+                    Color.black.opacity(0.58),
+                    Color.clear
+                ], startPoint: .top, endPoint: .bottom)
+                .frame(width: 340, height: 100)
+            )
             .zIndex(5)
-            .animation(.easeInOut(duration: 0.2), value: game.cascadeIdle)
+    }
+
+    private var lastRevealedPlay: PlayoutPhase.Play? {
+        guard game.revealedPlays > 0,
+              let phase = game.playout,
+              phase.plays.indices.contains(game.revealedPlays - 1)
+        else { return nil }
+        return phase.plays[game.revealedPlays - 1]
     }
 
     /// Angewinkelter Handfächer (Muster von ContentView::handView, §5b Akt 3 Spielerhand).
     private var handFan: some View {
         let cards = game.displayedHand(of: 0)
-        let canLead = game.cascadeIdle && game.playout?.leader == 0
+        let canLead = game.cascadeIdle && game.playoutLeader == 0
             && game.stage == .playout
         let N = cards.count
-        let cardScale: CGFloat = 1.22
-        let spreadDeg = min(Double(N) * 7.0, 36.0)
-        let totalW: CGFloat = min(CGFloat(N) * 30, 220)
+        let cardScale: CGFloat = 1.50
+        let spreadDeg = min(Double(N) * 7.4, 44.0)
+        let totalW: CGFloat = min(CGFloat(N) * 32, 246)
 
         return ZStack {
-            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
+            ForEach(Array(cards.enumerated()), id: \.element) { i, card in
                 let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
                 let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
                 let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
@@ -394,13 +619,15 @@ struct Phase3View: View {
                 .offset(y: canLead ? -4 * (1 - abs(t - 0.5) * 1.2) : 0)
                 .rotationEffect(.degrees(angle), anchor: .bottom)
                 .zIndex(Double(i))
-                .transition(.scale(scale: 0.86, anchor: .bottom).combined(with: .opacity))
+                .transition(reduceMotion
+                            ? .opacity
+                            : .scale(scale: 0.86, anchor: .bottom).combined(with: .opacity))
             }
         }
         .opacity(canLead ? 1 : 0.75)
         .animation(.easeInOut(duration: 0.22), value: canLead)
-        .animation(.easeOut(duration: 0.12), value: N)
-        .frame(height: 74 * cardScale * 0.82, alignment: .bottom)
+        .animation(.easeOut(duration: 0.16), value: N)
+        .frame(height: 74 * cardScale * 0.92, alignment: .bottom)
     }
 
     // MARK: - Rundenende
@@ -410,13 +637,27 @@ struct Phase3View: View {
             if let r = game.roundResult {
                 let payments = r.payments.reduce(0, +)
                 VStack(spacing: 6) {
-                    Text(r.winner == 0 ? "Du gewinnst" : "\(game.name(of: r.winner)) gewinnt")
-                        .font(.system(size: 24, weight: .heavy))
-                        .foregroundStyle(Tokens.jewelPlatin)
-                    Text("Runde abgeschlossen")
-                        .font(.system(size: 10, weight: .bold))
-                        .tracking(1.9)
-                        .foregroundStyle(Tokens.smaragdVivid.opacity(0.82))
+                    HStack(spacing: 10) {
+                        if r.winner != 0 {
+                            OpponentPortrait(seat: r.winner,
+                                             name: game.name(of: r.winner),
+                                             isActive: true,
+                                             isFocus: true,
+                                             mood: .winning,
+                                             size: 42,
+                                             showsText: false,
+                                             morph: nil)
+                        }
+                        VStack(alignment: r.winner == 0 ? .center : .leading, spacing: 4) {
+                            Text(r.winner == 0 ? "Du gewinnst" : "\(game.name(of: r.winner)) gewinnt")
+                                .font(.system(size: 24, weight: .heavy))
+                                .foregroundStyle(Tokens.jewelPlatin)
+                            Text("Runde abgeschlossen")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(1.9)
+                                .foregroundStyle(Tokens.smaragdVivid.opacity(0.82))
+                        }
+                    }
                 }
 
                 HStack(spacing: 10) {
@@ -430,7 +671,7 @@ struct Phase3View: View {
                 VStack(spacing: 7) {
                     ForEach(Array(r.payments.enumerated()), id: \.offset) { seat, payment in
                         if seat != r.winner {
-                            paymentRow(name: game.name(of: seat),
+                            paymentRow(seat: seat,
                                        payment: payment,
                                        stack: game.displayedEndStack(of: seat))
                         }
@@ -442,13 +683,22 @@ struct Phase3View: View {
             Button {
                 onNewRound()
             } label: {
-                Text("Nächste Runde")
+                Label(String(localized: "phase3.result.next",
+                             defaultValue: "Nächste Runde"),
+                      systemImage: "arrow.right")
                     .font(.system(size: 14, weight: .heavy))
-                    .foregroundStyle(Tokens.bgDeep)
+                    .foregroundStyle(Tokens.jewelPlatin)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 11)
-                    .background(Capsule().fill(Tokens.jewelGold)
-                        .overlay(Capsule().strokeBorder(Tokens.jewelPlatin.opacity(0.35), lineWidth: 1)))
+                    .background(
+                        Capsule()
+                            .fill(LinearGradient(colors: [
+                                Color(hex: 0x27221B),
+                                Color(hex: 0x121015)
+                            ], startPoint: .top, endPoint: .bottom))
+                            .overlay(Capsule().strokeBorder(Tokens.jewelGold.opacity(0.72), lineWidth: 1.2))
+                            .shadow(color: Tokens.jewelGold.opacity(0.12), radius: 10, y: 4)
+                    )
             }
             .buttonStyle(.plain)
         }
@@ -513,10 +763,20 @@ struct Phase3View: View {
         .background(Capsule().fill(Color.white.opacity(0.035)))
     }
 
-    private func paymentRow(name: String, payment: Int, stack: Int) -> some View {
+    private func paymentRow(seat: Int, payment: Int, stack: Int) -> some View {
         HStack(spacing: 8) {
-            TableChip(tint: payment > 0 ? Tokens.jewelGold : Tokens.slate, size: 14)
-            Text(name)
+            if seat == 0 {
+                TableChip(tint: payment > 0 ? Tokens.jewelGold : Tokens.slate, size: 14)
+            } else {
+                OpponentPortrait(seat: seat,
+                                 name: game.name(of: seat),
+                                 isActive: true,
+                                 mood: .passed,
+                                 size: 22,
+                                 showsText: false,
+                                 morph: nil)
+            }
+            Text(game.name(of: seat))
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Tokens.jewelPlatin.opacity(0.9))
             Spacer()
@@ -531,6 +791,73 @@ struct Phase3View: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
         .background(Capsule().fill(Color.white.opacity(0.035)))
+    }
+}
+
+/// Jede enthüllte Karte hat eine sichtbare Herkunft. Die Flugkarte liegt kurz
+/// über dem bereits aktualisierten Fächer und blendet beim Einrasten aus.
+private struct Phase3CardArrival: View {
+    let card: Card
+    let seat: Int
+    let trigger: Int
+    let canvas: CGSize
+    let opponentsY: CGFloat
+    @State private var progress: CGFloat = 0
+
+    var body: some View {
+        let point = bezier(progress)
+        CardFace(card: card, scale: 0.94)
+            .rotationEffect(.degrees(startAngle * Double(1 - progress)))
+            .rotation3DEffect(.degrees(18 * Double(1 - progress)),
+                              axis: (x: 0.18, y: 0.72, z: 0.10),
+                              perspective: 0.54)
+            .scaleEffect(1.08 - progress * 0.12)
+            .position(point)
+            .opacity(progress > 0.90 ? Double((1 - progress) / 0.10) : 1)
+            .shadow(color: .black.opacity(0.64), radius: progress > 0.8 ? 5 : 13, y: 7)
+            .onAppear {
+                withAnimation(.timingCurve(0.20, 0.76, 0.18, 1,
+                                           duration: Tokens.p3CardFlight)) {
+                    progress = 1
+                }
+            }
+            .id("phase3-flight-\(trigger)")
+    }
+
+    private var origin: CGPoint {
+        switch seat {
+        case 0:
+            return CGPoint(x: canvas.width / 2, y: canvas.height - 36)
+        case 1:
+            return CGPoint(x: canvas.width * 0.21, y: opponentsY)
+        case 2:
+            return CGPoint(x: canvas.width * 0.50, y: opponentsY)
+        default:
+            return CGPoint(x: canvas.width * 0.79, y: opponentsY)
+        }
+    }
+
+    private var target: CGPoint {
+        CGPoint(x: canvas.width / 2, y: 158)
+    }
+
+    private var startAngle: Double {
+        switch seat {
+        case 1: return -17
+        case 3: return 17
+        default: return seat == 0 ? 8 : -5
+        }
+    }
+
+    private func bezier(_ t: CGFloat) -> CGPoint {
+        let inv = 1 - t
+        let side: CGFloat = seat == 1 ? -46 : (seat == 3 ? 46 : 0)
+        let control = CGPoint(x: (origin.x + target.x) / 2 + side,
+                              y: min(origin.y, target.y) - 54)
+        return CGPoint(
+            x: inv * inv * origin.x + 2 * inv * t * control.x + t * t * target.x,
+            y: inv * inv * origin.y + 2 * inv * t * control.y + t * t * target.y
+        )
     }
 }
 

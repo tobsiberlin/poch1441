@@ -16,6 +16,13 @@ Swift/SpriteKit/SwiftUI-Spiel mit deterministischem PochKit-Kern. Historischer P
 - Balance nie per LLM-Judge. Headless-Simulationsmetriken verwenden.
 - High-impact Momente animieren, nicht alles; `accessibilityReduceMotion` respektieren.
 
+## Warm-editoriale Produkthülle
+
+- Den globalen Skill `warm-editorial-mobile-ui` für Menüs, Onboarding, Tutorial, Ergebnis-, Gegner-, Shop-, Profil- und Einstellungsflächen nutzen.
+- Nicht auf Spieltisch, Poch-Ring, Karten oder High-Impact-Spielmomente als neues Designsystem übertragen; dort gelten die dunkle Juwelen-/Materialsprache und die phasenspezifische Dramaturgie.
+- Aus dem Skill vor allem editoriale Hierarchie, warme Ton-in-Ton-Flächen, klare Fokusführung, native Controls und ruhige Informationsgruppen übernehmen.
+- Poch-Tokens und Produktidentität haben Vorrang: kein pauschales Korallen-Orange, kein beiges Light-Theme und keine fremden Marken oder Mockup-Kompositionen übernehmen.
+
 ## Asset-Pipeline
 
 - Assets Build-Time generieren, nicht zur Laufzeit.
@@ -36,4 +43,3 @@ Swift/SpriteKit/SwiftUI-Spiel mit deterministischem PochKit-Kern. Historischer P
 - Jeder neue sichtbare String braucht DE, EN, FR, IT, ES, NL, PL.
 - Build/Tests/Simulator passend zur Änderung ausführen.
 - Keine Commits oder Pushes ohne explizite Nutzeranweisung.
-

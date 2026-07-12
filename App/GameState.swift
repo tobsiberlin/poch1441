@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 import PochKit
 import os
@@ -7,22 +8,75 @@ import os
 @MainActor
 protocol MatchSource {
     var round: Round { get }
-    mutating func newRound(seed: UInt64)
+    var tablePlayerCount: Int { get }
+    var humanRoundSeat: Int? { get }
+    var matchStacks: [Int] { get }
+    var roundsPlayed: Int { get }
+    var matchResult: Match.MatchResult? { get }
+    func tableSeat(forRoundSeat roundSeat: Int) -> Int?
+    func roundSeat(forTableSeat tableSeat: Int) -> Int?
+    func resetMatch(seed: UInt64)
+    @discardableResult
+    func advanceRound(completedRound: Round, seed: UInt64) -> Bool
 }
 
-/// Lokale Quelle: eine PochKit-Runde gegen Bots (v1-Scope, kein Netzwerk-Code).
+/// Lokale Quelle: eine vollständige PochKit-Partie gegen Bots. Tischsitze bleiben
+/// stabil, Rundensitze rotieren regelkonform mit dem Geber.
 @MainActor
 final class BotMatchSource: MatchSource {
     private(set) var round: Round
     private let playerCount: Int
+    private var match: Match
+    private var tableSeats: [Int]
 
     init(seed: UInt64 = 1441, playerCount: Int = 4) {
         self.playerCount = playerCount
-        round = Round(stacks: Array(repeating: 60, count: playerCount), board: Board(), seed: seed)
+        var match = Match(playerCount: playerCount,
+                          startingStack: 60,
+                          mode: .quick(roundLimit: 12),
+                          firstDealer: playerCount - 1)
+        let started = match.startRound(seed: seed)
+        self.match = match
+        self.round = started?.round
+            ?? Round(stacks: Array(repeating: 60, count: playerCount),
+                     board: Board(), seed: seed)
+        self.tableSeats = started?.tableSeats ?? Array(0..<playerCount)
     }
 
-    func newRound(seed: UInt64) {
-        round = Round(stacks: Array(repeating: 60, count: playerCount), board: Board(), seed: seed)
+    var tablePlayerCount: Int { playerCount }
+    var humanRoundSeat: Int? { roundSeat(forTableSeat: 0) }
+    var matchStacks: [Int] { match.stacks }
+    var roundsPlayed: Int { match.roundsPlayed }
+    var matchResult: Match.MatchResult? { match.result }
+
+    func tableSeat(forRoundSeat roundSeat: Int) -> Int? {
+        guard tableSeats.indices.contains(roundSeat) else { return nil }
+        return tableSeats[roundSeat]
+    }
+
+    func roundSeat(forTableSeat tableSeat: Int) -> Int? {
+        tableSeats.firstIndex(of: tableSeat)
+    }
+
+    func resetMatch(seed: UInt64) {
+        var fresh = Match(playerCount: playerCount,
+                          startingStack: 60,
+                          mode: .quick(roundLimit: 12),
+                          firstDealer: playerCount - 1)
+        guard let started = fresh.startRound(seed: seed) else { return }
+        match = fresh
+        round = started.round
+        tableSeats = started.tableSeats
+    }
+
+    @discardableResult
+    func advanceRound(completedRound: Round, seed: UInt64) -> Bool {
+        guard completedRound.stage == .finished else { return false }
+        match.finishRound(completedRound, tableSeats: tableSeats)
+        guard let started = match.startRound(seed: seed) else { return false }
+        round = started.round
+        tableSeats = started.tableSeats
+        return true
     }
 }
 
@@ -32,10 +86,95 @@ enum SeatAction: Equatable {
     case none, thinking, passed, opened(Int), called, raised(Int)
 }
 
+enum BetTransferKind: Equatable {
+    case call, open, raise
+
+    var isPoch: Bool { self != .call }
+}
+
+enum TutorialLesson: String, CaseIterable, Codable, Identifiable {
+    case meld
+    case bidding
+    case playout
+
+    var id: String { rawValue }
+}
+
+private struct TutorialScenarioCatalog: Decodable {
+    struct Lesson: Decodable {
+        let id: TutorialLesson
+        let seeds: [String: UInt64]
+    }
+
+    let version: Int
+    let lessons: [Lesson]
+}
+
+private struct BotProfileCatalog: Decodable {
+    struct Entry: Decodable {
+        let name: String
+        let profile: BotProfile
+    }
+
+    let version: Int
+    let profiles: [Entry]
+}
+
+private enum OpponentGender {
+    case woman
+    case man
+}
+
+private struct OpponentIdentity {
+    let name: String
+    let gender: OpponentGender
+}
+
+private enum OpponentRoster {
+    static let standard = [
+        OpponentIdentity(name: "Liv", gender: .woman),
+        OpponentIdentity(name: "Mara", gender: .woman),
+        OpponentIdentity(name: "Nina", gender: .woman),
+        OpponentIdentity(name: "Thomas", gender: .man),
+        OpponentIdentity(name: "Jonas", gender: .man),
+        OpponentIdentity(name: "Leon", gender: .man),
+        OpponentIdentity(name: "Noah", gender: .man),
+        OpponentIdentity(name: "Finn", gender: .man),
+    ]
+
+    static let diversity = [
+        OpponentIdentity(name: "Hana", gender: .woman),
+        OpponentIdentity(name: "Darius", gender: .man),
+        OpponentIdentity(name: "Samir", gender: .man),
+    ]
+
+    static func draw(opponentCount: Int, excluding previous: [String]) -> [String] {
+        guard opponentCount > 0 else { return [] }
+        var fallback: [String] = []
+        for _ in 0..<12 {
+            guard let featured = diversity.randomElement() else { return [] }
+            let targetMen = opponentCount.isMultiple(of: 2)
+                ? opponentCount / 2
+                : (opponentCount + 1) / 2
+            let featuredMen = featured.gender == .man ? 1 : 0
+            let menNeeded = max(0, targetMen - featuredMen)
+            let womenNeeded = max(0, opponentCount - 1 - menNeeded)
+            let men = standard.filter { $0.gender == .man }.shuffled().prefix(menNeeded)
+            let women = standard.filter { $0.gender == .woman }.shuffled().prefix(womenNeeded)
+            let roster = ([featured] + Array(men) + Array(women)).map(\.name).shuffled()
+            fallback = roster
+            if Set(roster) != Set(previous) { return roster }
+        }
+        return fallback
+    }
+}
+
 /// View-zugewandter Zustand: rendert nur, was aus der Runde kommt. Fokus jetzt:
 /// Melde-Tableau (Phase 1) + Bietrunde (Phase 2) mit Bot-Denkpausen.
 @Observable @MainActor
 final class GameState {
+    private static let profileLog = Logger(subsystem: "com.tobc.poch1441",
+                                           category: "BotProfiles")
     private var source: MatchSource
     /// Beobachtbare Spiegelung der aktuellen Runde - die Runde ist ein Wert, GameState
     /// führt die lebende Kopie (Aktionen mutieren hier, source liefert nur frische Runden).
@@ -49,14 +188,19 @@ final class GameState {
     private var botTask: Task<Void, Never>?
     private let log = Logger(subsystem: "com.tobc.poch1441", category: "GameState")
 
-    /// Platzhalter-Namen bis zum Charakter-Roster (§7.1, BotProfiles.json folgt mit
-    /// der Meta-Progression). Sitzreihenfolge 1...3.
-    private static let opponentNames = ["Wirt", "Baronesse", "Ratsherr"]
+    private(set) var opponentNames: [String]
+    private let botProfiles: [String: BotProfile]
 
     init(source: MatchSource = BotMatchSource()) {
         self.source = source
         self.round = source.round
-        self.seatActions = Array(repeating: .none, count: source.round.stacks.count)
+        self.seatActions = Array(repeating: .none, count: source.tablePlayerCount)
+        self.completedMatchResult = nil
+        self.botProfiles = Self.loadBotProfiles()
+        self.opponentNames = OpponentRoster.draw(
+            opponentCount: max(0, source.tablePlayerCount - 1),
+            excluding: []
+        )
     }
 
     // MARK: - Gemeinsame Werte
@@ -64,32 +208,126 @@ final class GameState {
     func chips(in pool: Pool) -> Int { round.board[pool] }
     var trump: Suit { round.deal.trump }
     var upcard: Card { round.deal.upcard }
-    /// Menschen-Hand (Sitz 0 = links vom Geber).
-    var humanHand: [Card] { round.deal.hands.first ?? [] }
-    /// Chip-Konten der Gegner (Sitze 1...).
-    var opponentStacks: [Int] { Array(round.stacks.dropFirst()) }
+    /// Menschen-Hand. UI-Sitz 0 bleibt der Mensch; sein Rundensitz rotiert mit dem Geber.
+    var humanHand: [Card] {
+        guard let seat = humanRoundSeat, round.deal.hands.indices.contains(seat) else { return [] }
+        return round.deal.hands[seat]
+    }
+    /// Chip-Konten der Gegner in stabiler UI-Sitzreihenfolge.
+    var opponentStacks: [Int] { (1..<playerCount).map(displayedStack) }
     var stage: Round.Stage { round.stage }
+    var playerCount: Int { source.tablePlayerCount }
+    var activeUISeats: [Int] {
+        round.deal.hands.indices.compactMap(source.tableSeat(forRoundSeat:))
+    }
+    var humanRoundSeat: Int? { source.humanRoundSeat }
+    var roundsPlayed: Int { source.roundsPlayed }
+    var matchStacks: [Int] { source.matchStacks }
+    private(set) var completedMatchResult: Match.MatchResult?
+    var matchResult: Match.MatchResult? { completedMatchResult ?? source.matchResult }
+
+    func uiSeat(forRoundSeat roundSeat: Int) -> Int {
+        source.tableSeat(forRoundSeat: roundSeat) ?? roundSeat
+    }
+
+    func roundSeat(forUISeat uiSeat: Int) -> Int? {
+        source.roundSeat(forTableSeat: uiSeat)
+    }
 
     func name(of seat: Int) -> String {
-        seat == 0 ? "Du" : Self.opponentNames[(seat - 1) % Self.opponentNames.count]
+        guard seat > 0, !opponentNames.isEmpty else { return "Du" }
+        return opponentNames[(seat - 1) % opponentNames.count]
     }
 
-    func newRound() {
-        adoptRound(seed: UInt64.random(in: 1...999_999))
+    private func botProfile(for uiSeat: Int) -> BotProfile {
+        botProfiles[name(of: uiSeat)] ?? .neutral
     }
 
-    /// Startet eine bewusst freundliche Lernrunde: eigene Hand hat ein Poch-Kunststück,
-    /// die Meldephase zeigt genug Tischereignisse, aber die Engine bleibt die Wahrheit.
-    func startTutorialRound() {
-        adoptRound(seed: Self.tutorialSeed(playerCount: round.stacks.count))
+    private static func loadBotProfiles() -> [String: BotProfile] {
+        guard let url = Bundle.main.url(forResource: "BotProfiles", withExtension: "json") else {
+            profileLog.error("BotProfiles.json fehlt im App-Bundle")
+            return [:]
+        }
+        do {
+            let data = try Data(contentsOf: url)
+            let catalog = try JSONDecoder().decode(BotProfileCatalog.self, from: data)
+            guard catalog.version == 1 else {
+                profileLog.error("Nicht unterstützte BotProfiles-Version: \(catalog.version)")
+                return [:]
+            }
+            return Dictionary(uniqueKeysWithValues: catalog.profiles.map { ($0.name, $0.profile) })
+        } catch {
+            profileLog.error("BotProfiles unlesbar: \(String(describing: error), privacy: .public)")
+            return [:]
+        }
+    }
+
+    @discardableResult
+    func newRound() -> Bool {
+        botTask?.cancel()
+        cascadeTask?.cancel()
+        dealTask?.cancel()
+        guard source.advanceRound(completedRound: round,
+                                  seed: UInt64.random(in: 1...999_999)) else {
+            completedMatchResult = source.matchResult
+            return false
+        }
+        round = source.round
+        resetPresentationState()
+        return true
+    }
+
+    func restartMatch() {
+        botTask?.cancel()
+        cascadeTask?.cancel()
+        dealTask?.cancel()
+        source = BotMatchSource(seed: UInt64.random(in: 1...999_999), playerCount: playerCount)
+        round = source.round
+        opponentNames = OpponentRoster.draw(
+            opponentCount: max(0, playerCount - 1),
+            excluding: opponentNames
+        )
+        completedMatchResult = nil
+        resetPresentationState()
+    }
+
+    func configurePlayerCount(_ count: Int) {
+        let safeCount = min(max(count, 3), 6)
+        guard safeCount != playerCount else { return }
+        botTask?.cancel()
+        cascadeTask?.cancel()
+        dealTask?.cancel()
+        source = BotMatchSource(seed: UInt64.random(in: 1...999_999), playerCount: safeCount)
+        round = source.round
+        opponentNames = OpponentRoster.draw(
+            opponentCount: max(0, safeCount - 1),
+            excluding: opponentNames
+        )
+        completedMatchResult = nil
+        resetPresentationState()
+    }
+
+    /// Startet eine reproduzierbare, regelkonforme Lernszene. Die Seeds liegen als
+    /// Build-Time-Daten vor; die Engine bleibt für alle Karten und Ergebnisse die Wahrheit.
+    func startTutorialRound(_ lesson: TutorialLesson = .meld) {
+        adoptRound(seed: tutorialSeed(for: lesson))
+        if lesson == .playout {
+            advanceTutorialToPlayout()
+        }
     }
 
     private func adoptRound(seed: UInt64) {
         botTask?.cancel()
         cascadeTask?.cancel()
-        source.newRound(seed: seed)
+        dealTask?.cancel()
+        source.resetMatch(seed: seed)
         round = source.round
-        seatActions = Array(repeating: .none, count: round.stacks.count)
+        completedMatchResult = nil
+        resetPresentationState()
+    }
+
+    private func resetPresentationState() {
+        seatActions = Array(repeating: .none, count: playerCount)
         dealtCount = 0
         trumpRevealed = false
         lightPulse = 0
@@ -98,27 +336,49 @@ final class GameState {
         revealedPlays = 0
         kollapsInfo = nil
         kollapsShock = 0
+        betTransfer = 0
+        lastBetActor = nil
+        lastBetAmount = 0
+        lastBetKind = .call
         endPhase = .none
     }
 
-    private static func tutorialSeed(playerCount: Int) -> UInt64 {
-        for seed in UInt64(1_441)..<UInt64(20_000) {
-            let candidate = Round(stacks: Array(repeating: 60, count: playerCount),
-                                  board: Board(),
-                                  seed: seed)
-            guard ComboEvaluator.best(in: candidate.deal.hands[0],
-                                      trump: candidate.deal.trump) != nil
-            else { continue }
-
-            let melds = candidate.events.compactMap { event -> Pool? in
-                if case .melded(let player, let pool, _) = event, player == 0 {
-                    return pool
-                }
-                return nil
-            }
-            if melds.count >= 2 { return seed }
+    private func tutorialSeed(for lesson: TutorialLesson) -> UInt64 {
+        let fallback: [TutorialLesson: UInt64] = [
+            .meld: playerCount == 3 ? 1_444 : 1_442,
+            .bidding: playerCount == 3 ? 1_441 : 1_442,
+            .playout: 1_441
+        ]
+        guard let url = Bundle.main.url(forResource: "TutorialScenarios", withExtension: "json") else {
+            log.error("TutorialScenarios.json fehlt im App-Bundle")
+            return fallback[lesson] ?? 1_441
         }
-        return 1_441
+        do {
+            let data = try Data(contentsOf: url)
+            let catalog = try JSONDecoder().decode(TutorialScenarioCatalog.self, from: data)
+            guard catalog.version == 1,
+                  let config = catalog.lessons.first(where: { $0.id == lesson }),
+                  let seed = config.seeds[String(playerCount)]
+            else {
+                log.error("Keine Tutorial-Konfiguration für \(lesson.rawValue, privacy: .public) mit \(self.playerCount) Spielern")
+                return fallback[lesson] ?? 1_441
+            }
+            return seed
+        } catch {
+            log.error("Tutorial-Konfiguration unlesbar: \(String(describing: error), privacy: .public)")
+            return fallback[lesson] ?? 1_441
+        }
+    }
+
+    private func advanceTutorialToPlayout() {
+        while stage == .betting {
+            do {
+                try round.applyBet(.pass, by: betting.turn)
+            } catch {
+                log.error("Tutorial-Ausspielen konnte Pochen nicht regelkonform überspringen: \(String(describing: error), privacy: .public)")
+                return
+            }
+        }
     }
 
     // MARK: - Phase 2 (Pochen) - Zustand
@@ -128,8 +388,22 @@ final class GameState {
     var pot: Int { betting.seats.map(\.committed).reduce(0, +) }
     /// Stehende Poch-Mulde - geht zusätzlich an den Sieger.
     var pochPool: Int { round.board[.poch] }
-    var turnIndex: Int { betting.turn }
-    var humanLegal: BettingPhase.LegalActions? { betting.legalActions(for: 0) }
+    var turnIndex: Int { uiSeat(forRoundSeat: betting.turn) }
+    var humanLegal: BettingPhase.LegalActions? {
+        guard let seat = humanRoundSeat else { return nil }
+        return betting.legalActions(for: seat)
+    }
+    var humanCommitted: Int {
+        guard let seat = humanRoundSeat, betting.seats.indices.contains(seat) else { return 0 }
+        return betting.seats[seat].committed
+    }
+
+    func bettingSeat(of uiSeat: Int) -> BettingPhase.Seat? {
+        guard let seat = roundSeat(forUISeat: uiSeat), betting.seats.indices.contains(seat) else {
+            return nil
+        }
+        return betting.seats[seat]
+    }
 
     /// Wand-Besitzer (§6b): der knappste noch bietberechtigte Spieler deckelt jedes Gebot.
     /// Bietberechtigt = aktiv + Paar + Chips im Spiel (Spiegel der Engine-Regel).
@@ -138,17 +412,18 @@ final class GameState {
             let s = betting.seats[$0]
             return s.isActive && s.mayBid && s.stack + s.committed > 0
         }
-        return eligible.min { a, b in
+        let roundSeat = eligible.min { a, b in
             betting.seats[a].stack + betting.seats[a].committed
                 < betting.seats[b].stack + betting.seats[b].committed
         }
+        return roundSeat.map(uiSeat(forRoundSeat:))
     }
 
     /// Ausgang der Bietrunde für das Ergebnis-Banner (nil solange offen).
     var pochResult: (winner: Int, pot: Int, pochPool: Int, byShowdown: Bool)? {
         for event in round.events {
             if case .pochWon(let player, let pot, let pool, let showdown) = event {
-                return (player, pot, pool, showdown)
+                return (uiSeat(forRoundSeat: player), pot, pool, showdown)
             }
         }
         return nil
@@ -171,15 +446,27 @@ final class GameState {
     /// "Der Poch" (§6b): jeder Tischschlag (Eröffnen/Erhöhen, Mensch wie Bot)
     /// triggert Zittern der Tisch-Welt + .heavy-Haptik.
     private(set) var pochShock = 0
+    private(set) var lastPochActor: Int?
+    /// Jeder reale Chiptransfer bekommt einen eigenen Präsentationsimpuls. Calls
+    /// bleiben ruhig, Eröffnen/Erhöhen tragen zusätzlich den schweren Poch-Schlag.
+    private(set) var betTransfer = 0
+    private(set) var lastBetActor: Int?
+    private(set) var lastBetAmount = 0
+    private(set) var lastBetKind: BetTransferKind = .call
 
     private func applyHuman(_ action: BettingPhase.Action) {
-        guard stage == .betting, betting.turn == 0 else { return }
+        guard stage == .betting, let humanRoundSeat, betting.turn == humanRoundSeat else { return }
         do {
-            try round.applyBet(action, by: 0)
+            let committedBefore = betting.seats[humanRoundSeat].committed
+            try round.applyBet(action, by: humanRoundSeat)
             seatActions[0] = Self.display(action)
-            if case .open = action { pochShock += 1 }
-            if case .raise = action { pochShock += 1 }
-            runBotsIfNeeded()
+            registerTransfer(actor: 0,
+                             amount: betting.seats[humanRoundSeat].committed - committedBefore,
+                             action: action)
+            let transferDelay = max(0, betting.seats[humanRoundSeat].committed - committedBefore) > 0
+                ? Tokens.p2PochImpactDelay + 0.24
+                : 0.18
+            runBotsIfNeeded(after: transferDelay)
         } catch {
             // UI bezieht Grenzen aus legalActions - hier zu landen ist ein Programmierfehler.
             log.error("Illegale Spieler-Aktion: \(String(describing: error))")
@@ -188,31 +475,80 @@ final class GameState {
 
     /// Bot-Schleife: variable Denkpausen aus Profil + Rauschen (§6b - Tells zeigen den
     /// Charakter, nie die Hand; BotBrain sieht nur die öffentliche State-API).
-    private func runBotsIfNeeded() {
+    private func runBotsIfNeeded(after delay: Double = 0) {
         botTask?.cancel()
-        guard stage == .betting, betting.outcome == nil, betting.turn != 0 else { return }
-        botTask = Task { await botLoop() }
+        guard stage == .betting, betting.outcome == nil,
+              betting.turn != humanRoundSeat else { return }
+        botTask = Task {
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+            }
+            guard !Task.isCancelled, stage == .betting,
+                  betting.outcome == nil, betting.turn != humanRoundSeat else { return }
+            await botLoop()
+        }
     }
 
     private func botLoop() async {
-        while !Task.isCancelled, stage == .betting, betting.outcome == nil, betting.turn != 0 {
+        while !Task.isCancelled, stage == .betting, betting.outcome == nil,
+              betting.turn != humanRoundSeat {
             let seat = betting.turn
-            seatActions[seat] = .thinking
-            let pause = BotBrain.thinkSeconds(profile: .neutral, rng: &botRNG)
+            let uiSeat = uiSeat(forRoundSeat: seat)
+            seatActions[uiSeat] = .thinking
+            let profile = botProfile(for: uiSeat)
+            let pause = BotBrain.thinkSeconds(profile: profile, rng: &botRNG)
             try? await Task.sleep(for: .seconds(pause))
             guard !Task.isCancelled, stage == .betting, betting.turn == seat,
                   let legal = betting.legalActions(for: seat) else { return }
-            let action = BotBrain.action(profile: .neutral, round: round, player: seat,
-                                         legal: legal, rng: &botRNG)
+            let observation = BotObservation(
+                ownHand: round.deal.hands[seat],
+                trump: round.deal.trump,
+                currentBet: round.betting.currentBet,
+                ownCommitted: round.betting.seats[seat].committed
+            )
+            let action = BotBrain.action(profile: profile,
+                                         observation: observation,
+                                         legal: legal,
+                                         rng: &botRNG)
             do {
+                let committedBefore = betting.seats[seat].committed
                 try round.applyBet(action, by: seat)
-                seatActions[seat] = Self.display(action)
-                if case .open = action { pochShock += 1 }
-                if case .raise = action { pochShock += 1 }
+                seatActions[uiSeat] = Self.display(action)
+                registerTransfer(actor: uiSeat,
+                                 amount: betting.seats[seat].committed - committedBefore,
+                                 action: action)
+                // Der öffentliche Auftritt muss lesbar landen, bevor der nächste
+                // Sitz übernimmt. Das verändert keine Regel, nur die Tischdramaturgie.
+                try? await Task.sleep(for: .seconds(Tokens.p2ReactionHold))
             } catch {
                 log.error("Illegale Bot-Aktion Sitz \(seat): \(String(describing: error))")
                 return
             }
+        }
+    }
+
+    private func registerTransfer(actor: Int, amount: Int, action: BettingPhase.Action) {
+        guard amount > 0 else { return }
+        let kind: BetTransferKind
+        switch action {
+        case .call:
+            kind = .call
+        case .open:
+            kind = .open
+        case .raise:
+            kind = .raise
+        case .pass:
+            return
+        }
+
+        lastBetActor = actor
+        lastBetAmount = amount
+        lastBetKind = kind
+        betTransfer += 1
+
+        if kind.isPoch {
+            lastPochActor = actor
+            pochShock += 1
         }
     }
 
@@ -240,6 +576,9 @@ final class GameState {
     private var cascadeTask: Task<Void, Never>?
 
     var playout: PlayoutPhase? { round.playout }
+    var playoutLeader: Int? {
+        round.playout.map { uiSeat(forRoundSeat: $0.leader) }
+    }
 
     /// Enthüllte Plays, in Ketten gruppiert (jede Kette beginnt mit einem Anspiel).
     var revealedChains: [[PlayoutPhase.Play]] {
@@ -261,37 +600,51 @@ final class GameState {
     }
 
     /// Rundenende-Inszenierung (§6c c): Eiszeit-Vakuum -> Straf-Strom -> Banner.
-    enum EndPhase: Comparable { case none, frozen, punishing, done }
+    enum EndPhase: Comparable { case none, finalCard, frozen, punishing, done }
     private(set) var endPhase: EndPhase = .none
 
     /// Anzeige-Konto am Rundenende: im Freeze noch VOR den Strafzahlungen, ab dem
     /// Straf-Strom rollen die Zähler auf den Endstand.
     func displayedEndStack(of seat: Int) -> Int {
-        guard let result = roundResult, endPhase == .frozen || endPhase == .none else {
-            return round.stacks[seat]
+        guard let roundSeat = roundSeat(forUISeat: seat),
+              round.stacks.indices.contains(roundSeat) else {
+            return source.matchStacks.indices.contains(seat) ? source.matchStacks[seat] : 0
+        }
+        guard let result = roundResult,
+              endPhase == .finalCard || endPhase == .frozen || endPhase == .none else {
+            return round.stacks[roundSeat]
         }
         if seat == result.winner {
-            return round.stacks[seat] - result.centerPool - result.payments.reduce(0, +)
+            return round.stacks[roundSeat] - result.centerPool - result.payments.reduce(0, +)
         }
-        return round.stacks[seat] + result.payments[seat]
+        return round.stacks[roundSeat] + result.payments[seat]
     }
 
     /// Sichtbare Hand eines Sitzes: Deal minus enthüllte Plays (nicht Engine-Stand,
     /// der der Präsentation vorausläuft).
     func displayedHand(of seat: Int) -> [Card] {
+        guard let roundSeat = roundSeat(forUISeat: seat),
+              round.deal.hands.indices.contains(roundSeat) else { return [] }
         guard let phase = round.playout else {
-            return seat == 0 ? humanHand : round.deal.hands[seat]
+            return round.deal.hands[roundSeat]
         }
         let played = Set(phase.plays.prefix(revealedPlays)
-            .filter { $0.player == seat }.map(\.card))
-        return round.deal.hands[seat].filter { !played.contains($0) }
+            .filter { $0.player == roundSeat }.map(\.card))
+        return round.deal.hands[roundSeat].filter { !played.contains($0) }
     }
 
     /// Rundenergebnis fürs Banner (nil solange offen).
     var roundResult: (winner: Int, centerPool: Int, payments: [Int])? {
         for event in round.events {
             if case .roundEnded(let winner, let pool, let payments) = event {
-                return (winner, pool, payments)
+                var tablePayments = Array(repeating: 0, count: playerCount)
+                for (roundSeat, payment) in payments.enumerated() {
+                    let tableSeat = uiSeat(forRoundSeat: roundSeat)
+                    if tablePayments.indices.contains(tableSeat) {
+                        tablePayments[tableSeat] = payment
+                    }
+                }
+                return (uiSeat(forRoundSeat: winner), pool, tablePayments)
             }
         }
         return nil
@@ -321,7 +674,7 @@ final class GameState {
                 current += 1
             }
             finalCard = play.card
-            finalPlayer = play.player
+            finalPlayer = uiSeat(forRoundSeat: play.player)
         }
         longest = max(longest, current)
         return RoundRecap(chains: chainCount,
@@ -338,8 +691,8 @@ final class GameState {
 
     /// Anspiel des Menschen - nur wenn er führt und die Kaskade eingeholt ist.
     func humanLead(_ card: Card) {
-        guard stage == .playout, let phase = round.playout,
-              phase.leader == 0, cascadeIdle else { return }
+        guard stage == .playout, let phase = round.playout, let humanRoundSeat,
+              phase.leader == humanRoundSeat, cascadeIdle else { return }
         do {
             try round.applyLead(card)
             revealedPlays += 1  // das eigene Anspiel erscheint sofort
@@ -371,13 +724,15 @@ final class GameState {
             } else if stage != .playout {
                 await runEndSequence()
                 return
-            } else if phase.leader != 0 {
+            } else if phase.leader != humanRoundSeat {
                 // Bot spielt an: kurze Denkpause, dann niedrigste Karte
                 // (Platzhalter-Heuristik; echte Anspiel-Taktik kommt mit den Bot-Profilen)
-                let pause = BotBrain.thinkSeconds(profile: .neutral, rng: &botRNG)
+                let leaderUISeat = uiSeat(forRoundSeat: phase.leader)
+                let pause = BotBrain.thinkSeconds(profile: botProfile(for: leaderUISeat),
+                                                  rng: &botRNG)
                 try? await Task.sleep(for: .seconds(pause))
                 guard !Task.isCancelled, stage == .playout, cascadeIdle,
-                      let current = round.playout, current.leader != 0,
+                      let current = round.playout, current.leader != humanRoundSeat,
                       let card = current.hands[current.leader]
                           .min(by: { $0.rank.rawValue < $1.rank.rawValue })
                 else { continue }
@@ -394,10 +749,14 @@ final class GameState {
         }
     }
 
-    /// Eiszeit-Vakuum (§6c c): sofortiger Freeze -> 400-ms-Zäsur (Centerpot glüht) ->
-    /// paralleler Straf-Strom mit gedeckelter 90-ms-Tick-Kadenz -> Banner.
+    /// Finale (§6c c): letzte Karte lesbar halten -> Eiszeit-Vakuum -> paralleler
+    /// Straf-Strom mit gedeckelter 90-ms-Tick-Kadenz -> Ergebnis.
     private func runEndSequence() async {
         guard endPhase == .none else { return }
+        endPhase = .finalCard
+        hapticTick += 1
+        try? await Task.sleep(for: .seconds(Tokens.p3FinalCardHold))
+        guard !Task.isCancelled else { return }
         endPhase = .frozen
         hapticTick += 1
         try? await Task.sleep(for: .seconds(Tokens.p3Vakuum))
@@ -448,6 +807,27 @@ final class GameState {
         debugFinishPlayout()
         endPhase = .punishing
     }
+
+    /// QA-Helfer: spielt die Partie zu Ende und lässt den echten finalen
+    /// Präsentationsablauf ab der letzten Karte laufen.
+    func debugShowFinalAct() {
+        debugFinishPlayout()
+        endPhase = .none
+        cascadeTask?.cancel()
+        cascadeTask = Task { await runEndSequence() }
+    }
+
+    /// QA-Helfer: spielt eine komplette Quick-Partie deterministisch bis zur
+    /// Matchwertung. Prüft Rundenübertrag, Geberrotation und den Abschluss-Screen,
+    /// ohne Release-Code oder Regeln zu umgehen.
+    func debugFinishMatch() {
+        var roundGuard = 0
+        while matchResult == nil, roundGuard < 20 {
+            roundGuard += 1
+            debugFinishPlayout()
+            guard newRound() else { break }
+        }
+    }
     #endif
 
     // MARK: - Phase 1: Deal-Präsentation / Trumpf-Beat (§6a)
@@ -473,7 +853,7 @@ final class GameState {
         var seat = 0
         while order.count < counts.reduce(0, +) {
             if slots[seat] < counts[seat] {
-                order.append((seat, slots[seat]))
+                order.append((uiSeat(forRoundSeat: seat), slots[seat]))
                 slots[seat] += 1
             }
             seat = (seat + 1) % counts.count
@@ -484,8 +864,8 @@ final class GameState {
     /// Sichtbare Handkarten des Menschen - hinkt dem Austeil-Zeiger um die Flugdauer
     /// (~2 Takte) hinterher, damit Karte erst "ankommt", dann erscheint.
     var humanDealtVisible: Int {
-        if dealtCount >= totalDeals { return round.deal.hands[0].count }
-        return dealOrder.prefix(max(0, dealtCount - 2)).filter { $0.seat == 0 }.count
+        if dealtCount >= totalDeals { return humanHand.count }
+        return 0
     }
 
     // MARK: - Melde-Strom (§6a b) - Anzeige läuft der Engine hinterher
@@ -494,7 +874,7 @@ final class GameState {
     var meldEvents: [(player: Int, pool: Pool, chips: Int)] {
         round.events.compactMap {
             if case .melded(let player, let pool, let chips) = $0 {
-                return (player, pool, chips)
+                return (uiSeat(forRoundSeat: player), pool, chips)
             }
             return nil
         }
@@ -529,9 +909,13 @@ final class GameState {
 
     /// Anzeige-Konto eines Sitzes: Engine-Stand MINUS noch nicht präsentierte Melde-Gewinne.
     func displayedStack(of seat: Int) -> Int {
+        guard let roundSeat = roundSeat(forUISeat: seat),
+              round.stacks.indices.contains(roundSeat) else {
+            return source.matchStacks.indices.contains(seat) ? source.matchStacks[seat] : 0
+        }
         let stack = stage == .betting
-            ? betting.seats[seat].stack + betting.seats[seat].committed
-            : round.stacks[seat]
+            ? betting.seats[roundSeat].stack + betting.seats[roundSeat].committed
+            : round.stacks[roundSeat]
         return stack - meldEvents.dropFirst(meldShown)
             .filter { $0.player == seat }
             .reduce(0) { $0 + $1.chips }
@@ -555,6 +939,61 @@ final class GameState {
         dealTask = Task { await dealLoop() }
     }
 
+    /// Geführte Runde: Präsentation pausiert zwischen den Erkenntnissen. Die
+    /// Regelrunde ist bereits deterministisch gegeben; nur ihre Sichtbarkeit wächst.
+    func prepareGuidedDeal() {
+        dealTask?.cancel()
+        dealtCount = 0
+        trumpRevealed = false
+        meldShown = 0
+        pulsingPool = nil
+    }
+
+    func revealGuidedDealRound(reduceMotion: Bool) async {
+        dealTask?.cancel()
+        let target = min(totalDeals, dealtCount + playerCount)
+        while dealtCount < target, !Task.isCancelled {
+            if !reduceMotion {
+                try? await Task.sleep(for: .seconds(Tokens.p1GuidedDealStep))
+            }
+            guard !Task.isCancelled else { return }
+            dealtCount += 1
+            hapticTick += 1
+        }
+    }
+
+    func finishGuidedDeal(reduceMotion: Bool) async {
+        dealTask?.cancel()
+        while dealtCount < totalDeals, !Task.isCancelled {
+            if !reduceMotion {
+                try? await Task.sleep(for: .seconds(Tokens.p1GuidedDealFinishStep))
+            }
+            guard !Task.isCancelled else { return }
+            dealtCount += 1
+            hapticTick += 1
+        }
+    }
+
+    func revealGuidedTrumpf() {
+        guard !trumpRevealed else { return }
+        trumpRevealed = true
+        lightPulse += 1
+        hapticTick += 1
+    }
+
+    func revealNextGuidedMeld(reduceMotion: Bool) async {
+        guard meldShown < meldEvents.count else { return }
+        let meld = meldEvents[meldShown]
+        pulsingPool = meld.pool
+        hapticTick += 1
+        if !reduceMotion {
+            try? await Task.sleep(for: .seconds(Tokens.p1MeldStep))
+        }
+        guard !Task.isCancelled else { return }
+        meldShown += 1
+        pulsingPool = nil
+    }
+
     /// Tap überspringt sofort (§6a b): Kaskade bricht ab, Meldungen saugen sich
     /// in Lichtgeschwindigkeit zu den Gewinnern.
     func skipDeal() {
@@ -573,18 +1012,12 @@ final class GameState {
 
     private func dealLoop() async {
         let total = totalDeals
-        let haptics = Task { [weak self] in
-            while let self, !Task.isCancelled, self.dealtCount < total {
-                self.hapticTick += 1
-                try? await Task.sleep(for: .seconds(Tokens.hapticCadence))
-            }
-        }
         while dealtCount < total, !Task.isCancelled {
             try? await Task.sleep(for: .seconds(Tokens.p1DealStep))
             guard !Task.isCancelled else { break }
             dealtCount += 1
+            hapticTick += 1
         }
-        haptics.cancel()
         guard !Task.isCancelled else { return }
         // Der Beat: Spiel friert ein, dann Trumpf-Flip + radialer Puls (§6a)
         try? await Task.sleep(for: .seconds(Tokens.p1TrumpFreeze))

@@ -1,5 +1,45 @@
 import SwiftUI
 
+/// Gemeinsame, deterministische Tischphysik. Die Funktionen liefern nur
+/// Präsentationswerte; Regeln und Spielzustand bleiben vollständig in PochKit.
+enum PhysicalMotion {
+    static func travel(duration: Double) -> Animation {
+        .timingCurve(0.22, 0.72, 0.18, 1.0, duration: duration)
+    }
+
+    static func duration(from: CGPoint,
+                         to: CGPoint,
+                         pointsPerSecond: CGFloat,
+                         minimum: Double,
+                         maximum: Double) -> Double {
+        let distance = hypot(to.x - from.x, to.y - from.y)
+        return min(maximum, max(minimum, Double(distance / pointsPerSecond)))
+    }
+
+    static func shallowArcHeight(from: CGPoint,
+                                 to: CGPoint,
+                                 minimum: CGFloat,
+                                 maximum: CGFloat) -> CGFloat {
+        let distance = hypot(to.x - from.x, to.y - from.y)
+        return min(maximum, max(minimum, distance * 0.075))
+    }
+
+    static func quadraticPoint(progress: CGFloat,
+                               from: CGPoint,
+                               to: CGPoint,
+                               arcHeight: CGFloat,
+                               lateralBias: CGFloat = 0) -> CGPoint {
+        let t = min(max(progress, 0), 1)
+        let inverse = 1 - t
+        let control = CGPoint(x: (from.x + to.x) / 2 + lateralBias,
+                              y: (from.y + to.y) / 2 - arcHeight)
+        return CGPoint(
+            x: inverse * inverse * from.x + 2 * inverse * t * control.x + t * t * to.x,
+            y: inverse * inverse * from.y + 2 * inverse * t * control.y + t * t * to.y
+        )
+    }
+}
+
 /// Tisch-Zittern (Poch-Schlag §6b, Kollaps §6a e): N volle Oszillationen pro Trigger,
 /// endet exakt bei 0 (Integer-Zustände sind Ruhelage) - nur Offset, kein
 /// Layout-Thrashing (§9). Geteilt zwischen Phase 1 und 2.

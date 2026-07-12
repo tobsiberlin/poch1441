@@ -21,37 +21,57 @@ enum Tokens {
     static let smaragdVivid  = Color(hex: 0x2CD4A8)
     static let amethystVivid = Color(hex: 0xA06BE0)
 
+    // Geführte Runde: Kontext bleibt sichtbar, konkurriert aber nicht mit dem Lernschritt.
+    static let guidedFocusBlur: CGFloat = 0.8
+    static let guidedFocusOpacity: Double = 0.58
+    static let guidedFocusTransition: Double = 0.32
+
     // Ring-Geometrie (konzept §5): nahezu full-width wie der Mockup-Anker,
     // ohne die Portrait-Safe-Area zu verletzen.
     static let ringRadius: CGFloat = 158
     static let tileDiameter: CGFloat = 56
     static let centerDiameter: CGFloat = 84
     static let tileCorner: CGFloat = 16
+    static let phase2BoardScale: CGFloat = 0.60
+    static let phase2StageHeight: CGFloat = 246
+
+    // Gefuehrte Melde-Runde: eigene Komposition statt der tieferen Position des
+    // regulaeren Austeilrituals. Brett, Spotlight und Coach verwenden dieselbe Geometrie.
+    static let guidedMeldBoardScale: CGFloat = 0.92
+    static let guidedMeldBoardOffsetY: CGFloat = 8
+    static let guidedMeldFocusTop: CGFloat = 184
+    static let guidedMeldCoachGap: CGFloat = 82
 
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
-    static let p2PotSpring: Double = 0.35
-    /// Flug der Poch-Chips in die violette Mulde: snappy, aber im Auge verfolgbar.
-    static let p2PochFlight: Double = 0.54
-    /// Einschlag kurz nach den ersten ankommenden Chips.
-    static let p2PochImpactDelay: Double = 0.46
+    static let p2PotSpring: Double = 0.48
+    /// Flug der Poch-Chips in die violette Mulde: klarer Vorschub mit ruhigem Einrasten.
+    static let p2PochFlight: Double = 0.72
+    /// Materialkontakt liegt exakt nach der ersten vollständig angekommenen Münze.
+    static let p2PochImpactDelay: Double = 0.72
+    /// Reaktion bleibt bis nach Materialkontakt und Mimikausschlag lesbar stehen.
+    static let p2ReactionHold: Double = 0.92
 
     // Phasen-Morph (§5b, Parameter-Lock §4): Ring/Tokens fliegen zwischen den Akten.
-    static let aktMorph: Double = 0.55
+    static let aktMorph: Double = 0.68
 
     // Phase-1-Deal / Trumpf-Beat (§6a, Parameter-Lock - Tobsi-Entscheide).
-    /// Kaskaden-Takt des Austeilens: 40 ms/Karte.
-    static let p1DealStep: Double = 0.04
+    /// Kaskaden-Takt des Austeilens: bewusst sichtbar, damit Kartenruecken als
+    /// Deal-Ritual wirken statt als technischer Zaehlersprung.
+    static let p1DealStep: Double = 0.18
+    static let p1GuidedDealStep: Double = 0.62
+    static let p1GuidedDealFinishStep: Double = 0.24
     /// Flugdauer einer einzelnen Karte vom Stapel in die Hand.
-    static let p1Flight: Double = 0.14
+    static let p1Flight: Double = 0.56
     /// Freeze vor dem Trumpf-Flip: 150 ms.
-    static let p1TrumpFreeze: Double = 0.15
+    static let p1TrumpFreeze: Double = 0.68
     /// Radialer Lichtpuls übers Brett nach dem Trumpf-Flip.
     static let p1Pulse: Double = 0.6
-    /// Haptik-Kadenz, von der Karten-Anzahl ENTKOPPELT (§6 Auflage 4): exakt 90 ms.
-    static let hapticCadence: Double = 0.09
+    /// Minimale Haptik-Kadenz für schnelle Abrechnungsserien. Beim Austeilen
+    /// wird Haptik direkt an die tatsächlich gelandete Karte gekoppelt.
+    static let hapticCadence: Double = 0.11
     /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
-    static let p1MeldStep: Double = 0.55
+    static let p1MeldStep: Double = 1.08
 
     // Balatro-Kollaps Stufe 2 (§6a e, Parameter-Lock).
     /// Zünd-Schwelle: per Headless-Sim kalibriert (pochsim kollaps, 11.557 Runden,
@@ -70,21 +90,29 @@ enum Tokens {
     /// Amplitude des Zitterns in Punkten (reduceMotion: 0).
     static let pochShakeAmp: Double = 4
     /// Flugdauer der Münzen von der Mulde zum Spieler.
-    static let p1CoinFlight: Double = 0.4
+    static let p1CoinFlight: Double = 0.70
 
     // Phase-3-Timing (Parameter-Lock §4, konzept §6c - Tobsi-Entscheide).
-    /// Kaskaden-Takt der Zwangskarten: konstant 180 ms/Karte (Zähl-Lesbarkeit vor Whoosh).
-    static let p3CascadeStep: Double = 0.18
+    /// Kaskaden-Takt der Zwangskarten: jede Karte landet sichtbar, bevor die
+    /// naechste startet. Das verhindert ueberlagerte Fluege und Geisterkarten.
+    static let p3CascadeStep: Double = 0.64
+    /// Sichtbarer Flug einer Karte vom Sitz in den zentralen Kettenfächer.
+    static let p3CardFlight: Double = 0.54
+    /// Der Faecher uebernimmt die Karte kurz vor dem vollstaendigen Ausblenden
+    /// der Flugkarte. So gibt es weder Doppelbild noch sichtbare Luecke.
+    static let p3CardSettleDelay: Double = 0.49
     /// Beat-Drop am Kettenriss: 350 ms Stille, Stopper glüht golden, Anspielrecht wandert.
-    static let p3BeatDrop: Double = 0.35
+    static let p3BeatDrop: Double = 0.52
+    /// Die letzte Karte bleibt als Abschlussbild stehen, bevor die Abrechnung beginnt.
+    static let p3FinalCardHold: Double = 0.92
     /// Eiszeit-Vakuum (§6c c, Tobsi-Entscheid): bewusste Zäsur nach dem Freeze.
-    static let p3Vakuum: Double = 0.4
+    static let p3Vakuum: Double = 0.66
     /// Straf-Strom: Haptik-Ticks gedeckelt (viele Restkarten = beschleunigt, nie zäh).
     static let p3PunishTickCap = 12
     /// Straf-/Centerpot-Flug: parallel genug fuer Tempo, lang genug fuer Richtung.
-    static let p3PunishFlight: Double = 0.62
+    static let p3PunishFlight: Double = 0.78
     /// Winner-Impact nach den ersten ankommenden Chips.
-    static let p3PunishImpactDelay: Double = 0.48
+    static let p3PunishImpactDelay: Double = 0.76
 }
 
 extension Color {

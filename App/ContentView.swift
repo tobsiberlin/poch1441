@@ -27,17 +27,40 @@ struct ContentView: View {
     @AppStorage("haptics") private var haptics = true
     @AppStorage("assistHints") private var assistHints = true
     @AppStorage("tableEffects") private var tableEffects = true
-    @AppStorage("moveCoach") private var moveCoach = false
+    @AppStorage("moveCoach") private var moveCoach = true
+    @AppStorage("playerCount") private var playerCount = 4
+    @AppStorage("didStartFirstTable") private var didStartFirstTable = false
+    @AppStorage("tutorialProgressMask") private var tutorialProgressMask = 0
     private var theme: Theme { neon ? .neon : .premium }
     @State private var activeOverlay: AppOverlay?
     @State private var phaseCurtain: Akt?
     @State private var guidedRoundActive = false
+    @State private var selectedTutorialLesson: TutorialLesson = .meld
+    @State private var activeTutorialLesson: TutorialLesson?
+    @State private var completedTutorialLesson: TutorialLesson?
+    @State private var tutorialMilestoneLesson: TutorialLesson?
+    @State private var guidedMeldBeat = 0
+    @State private var guidedMeldBusy = false
+    @State private var showFirstRunIntro = false
+    @State private var matchEndResult: Match.MatchResult?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Phasen-Morph (§5b): ein Namespace über alle drei Akte - Tokens, Poch-Tile und
     /// Mulden fliegen via matchedGeometryEffect an ihre neuen Positionen.
     @Namespace private var morph
 
     var body: some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-boardConcept") {
+            BoardConceptView()
+        } else {
+            mainGameView
+        }
+        #else
+        mainGameView
+        #endif
+    }
+
+    private var mainGameView: some View {
         ZStack {
             // Material-Tiefe: warmes Bühnenlicht hinter dem Ring, Vignette zum Rand (kein Flat-Void).
             RadialGradient(gradient: Gradient(colors: [Tokens.bgLift, Tokens.bgDeep]),
@@ -52,6 +75,7 @@ struct ContentView: View {
                 case .pochen:
                     Phase2View(game: game, theme: theme, morph: morph,
                                assistHints: assistHints,
+                               isGuidedRound: guidedRoundActive,
                                onContinue: {
                                    transition(to: .ausspielen)
                                    game.beginPlayoutPresentation()
@@ -69,7 +93,12 @@ struct ContentView: View {
             .padding(.bottom, akt == .melden ? 0 : 18)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             // Trumpf-Beat-Inszenierung liegt als hitTest-freie Schicht über Akt 1
-            .overlay { if akt == .melden && tableEffects { DealOverlay(game: game) } }
+            .overlay {
+                if akt == .melden, tableEffects,
+                   !guidedRoundActive || guidedMeldBeat > 0 {
+                    DealOverlay(game: game, showsSeatTargets: !guidedRoundActive)
+                }
+            }
             .overlay(alignment: .topTrailing) { utilityButtons }
             // Kollaps-Vignette: farbgetönter Wimpernschlag (§6a e);
             // reduceMotion: 50-ms-Dissolve statt Flash (§6 Auflage 2)
@@ -82,12 +111,11 @@ struct ContentView: View {
                 }
             }
             .overlay { overlayPanel }
-            .overlay(alignment: .bottom) {
+            .overlay { tutorialCompletionOverlay }
+            .overlay(alignment: .top) { tutorialMilestoneOverlay }
+            .overlay {
                 if (guidedRoundActive || (assistHints && moveCoach)), activeOverlay == nil {
-                    guidedCoachRail
-                        .padding(.horizontal, 22)
-                        .padding(.bottom, guidedCoachBottomPadding)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    guidedCoachPlacement
                 }
             }
             .overlay {
@@ -96,16 +124,54 @@ struct ContentView: View {
                         .transition(.scale(scale: 0.96).combined(with: .opacity))
                 }
             }
+            .overlay {
+                if showFirstRunIntro {
+                    firstRunIntro
+                        .transition(.opacity)
+                        .zIndex(100)
+                }
+            }
+            .overlay {
+                if let matchEndResult {
+                    matchEndOverlay(matchEndResult)
+                        .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                        .zIndex(110)
+                }
+            }
             .animation(.easeOut(duration: 0.18), value: phaseCurtain)
         }
         .onAppear {
-            if akt == .melden { game.runDealPresentation(reduceMotion: reduceMotion) }
+            #if DEBUG
+            let args = ProcessInfo.processInfo.arguments
+            if args.contains("-firstRun") {
+                showFirstRunIntro = true
+            } else if args.dropFirst().isEmpty, !didStartFirstTable {
+                showFirstRunIntro = true
+            } else if akt == .melden {
+                game.runDealPresentation(reduceMotion: reduceMotion)
+            }
+            #else
+            if !didStartFirstTable {
+                showFirstRunIntro = true
+            } else if akt == .melden {
+                game.runDealPresentation(reduceMotion: reduceMotion)
+            }
+            #endif
         }
         .sensoryFeedback(.impact(weight: .light), trigger: haptics ? game.hapticTick : 0)
         .sensoryFeedback(.impact(weight: .heavy), trigger: haptics ? game.kollapsShock : 0)
+        .onChange(of: game.endPhase) { _, phase in
+            guard phase == .done, guidedRoundActive else { return }
+            completeTutorialRound()
+        }
         #if DEBUG
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
+            if let playerArgument = args.first(where: { $0.hasPrefix("-players=") }),
+               let count = Int(playerArgument.split(separator: "=").last ?? "4") {
+                playerCount = min(max(count, 3), 6)
+                game.configurePlayerCount(playerCount)
+            }
             if args.contains("-pochenStart") {
                 transition(to: .pochen)
             }
@@ -116,8 +182,13 @@ struct ContentView: View {
                     game.debugFinishPlayout()
                 } else if args.contains("-roundPunishing") {
                     game.debugShowPunishingEnd()
+                } else if args.contains("-finalAct") {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(Tokens.aktMorph + 0.18))
+                        game.debugShowFinalAct()
+                    }
                 }
-                if !args.contains("-holdPlayout") {
+                if !args.contains("-holdPlayout") && !args.contains("-finalAct") {
                     game.beginPlayoutPresentation()
                 }
                 // -autoLead: niedrigste Karte anspielen (Kaskaden-QA ohne UI-Tap)
@@ -161,21 +232,55 @@ struct ContentView: View {
                 game.debugShowPunishingEnd()
                 transition(to: .ausspielen)
             }
+            if args.contains("-finalAct"), !args.contains("-ausspielStart") {
+                transition(to: .ausspielen)
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(Tokens.aktMorph + 0.18))
+                    game.debugShowFinalAct()
+                }
+            }
             if args.contains("-neon") || args.contains("-vivid") {
                 neon = true
             }
             if args.contains("-premium") {
                 neon = false
             }
-            if args.contains("-tutorialSeed") {
+            if let stepArgument = args.first(where: { $0.hasPrefix("-tutorialMeldStep=") }),
+               let step = Int(stepArgument.split(separator: "=").last ?? "0") {
+                prepareGuidedMeldDebugStep(min(max(step, 0), 5))
+            } else if args.contains("-tutorialSeed") {
                 startGuidedRound()
+            }
+            if args.contains("-tutorialBidding") {
+                selectedTutorialLesson = .bidding
+                startGuidedRound(.bidding)
+            }
+            if args.contains("-tutorialPlayout") {
+                selectedTutorialLesson = .playout
+                startGuidedRound(.playout)
+            }
+            if args.contains("-tutorialComplete") {
+                tutorialProgressMask = 0b111
+                completedTutorialLesson = .playout
+            }
+            if args.contains("-tutorialMilestone") {
+                guidedRoundActive = true
+                showTutorialMilestone(.meld)
             }
             if args.contains("-guided") {
                 guidedRoundActive = true
                 moveCoach = true
             }
+            if args.contains("-coachOff") {
+                guidedRoundActive = false
+                moveCoach = false
+            }
             if args.contains("-dealDone") || args.contains("-skipDeal") {
                 game.skipDeal()
+            }
+            if args.contains("-matchEnd") {
+                game.debugFinishMatch()
+                matchEndResult = game.matchResult
             }
             if args.contains("-tutorial") {
                 activeOverlay = .tutorial
@@ -232,23 +337,406 @@ struct ContentView: View {
 
     private func startNewRound() {
         guidedRoundActive = false
-        game.newRound()
+        activeTutorialLesson = nil
+        completedTutorialLesson = nil
+        game.configurePlayerCount(playerCount)
+        guard game.newRound() else {
+            matchEndResult = game.matchResult
+            return
+        }
         transition(to: .melden)
         game.runDealPresentation(reduceMotion: reduceMotion)
     }
 
-    private func startGuidedRound() {
-        guidedRoundActive = true
-        moveCoach = true
-        activeOverlay = nil
-        game.startTutorialRound()
+    private func startNewMatch() {
+        game.restartMatch()
+        matchEndResult = nil
         transition(to: .melden)
         game.runDealPresentation(reduceMotion: reduceMotion)
+    }
+
+    private func matchEndOverlay(_ result: Match.MatchResult) -> some View {
+        let ranking = result.finalStacks.indices.sorted {
+            if result.finalStacks[$0] == result.finalStacks[$1] { return $0 < $1 }
+            return result.finalStacks[$0] > result.finalStacks[$1]
+        }
+        let humanWon = result.winners.contains(0)
+        return ZStack {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .environment(\.colorScheme, .dark)
+                .ignoresSafeArea()
+            Color.black.opacity(0.58).ignoresSafeArea()
+
+            VStack(spacing: 18) {
+                VStack(spacing: 6) {
+                    Text(String(localized: "match.result.eyebrow", defaultValue: "PARTIE BEENDET"))
+                        .font(.system(size: 9, weight: .heavy))
+                        .tracking(2.2)
+                        .foregroundStyle(Tokens.jewelGold)
+                    Text(humanWon
+                         ? String(localized: "match.result.youWin", defaultValue: "Du gewinnst")
+                         : String(localized: "match.result.complete", defaultValue: "Die Partie ist entschieden"))
+                        .font(.system(size: 25, weight: .heavy))
+                        .foregroundStyle(Tokens.jewelPlatin)
+                        .multilineTextAlignment(.center)
+                    Text(String(format: String(localized: "match.result.rounds",
+                                               defaultValue: "%d Runden gespielt"),
+                                result.roundsPlayed))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Tokens.slate)
+                }
+
+                VStack(spacing: 8) {
+                    ForEach(Array(ranking.enumerated()), id: \.element) { place, seat in
+                        HStack(spacing: 10) {
+                            Text("\(place + 1)")
+                                .font(.system(size: 11, weight: .heavy))
+                                .foregroundStyle(result.winners.contains(seat)
+                                                 ? Tokens.jewelGold : Tokens.slate)
+                                .frame(width: 20)
+                            if seat != 0 {
+                                OpponentPortrait(seat: seat,
+                                                 name: game.name(of: seat),
+                                                 isActive: true,
+                                                 isFocus: result.winners.contains(seat),
+                                                 mood: result.winners.contains(seat) ? .winning : .neutral,
+                                                 size: 28,
+                                                 showsText: false,
+                                                 morph: nil)
+                            } else {
+                                Image(systemName: "person.crop.circle.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundStyle(Tokens.jewelPlatin)
+                            }
+                            Text(game.name(of: seat))
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(Tokens.jewelPlatin)
+                            Spacer()
+                            Text("\(result.finalStacks[seat])")
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                .foregroundStyle(result.winners.contains(seat)
+                                                 ? Tokens.jewelGold : Tokens.jewelPlatin.opacity(0.78))
+                        }
+                        .padding(.horizontal, 12)
+                        .frame(height: 44)
+                        .background(Capsule().fill(Color.white.opacity(0.045)))
+                    }
+                }
+
+                Button(action: startNewMatch) {
+                    Label(String(localized: "match.result.new", defaultValue: "Neue Partie"),
+                          systemImage: "arrow.clockwise")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Tokens.bgDeep)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(Capsule().fill(Tokens.jewelGold))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(22)
+            .frame(maxWidth: 360)
+            .background(
+                RoundedRectangle(cornerRadius: 26)
+                    .fill(Color(hex: 0x111017).opacity(0.97))
+                    .overlay(RoundedRectangle(cornerRadius: 26)
+                        .strokeBorder(Tokens.jewelGold.opacity(0.34), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.58), radius: 30, y: 18)
+            )
+            .padding(.horizontal, 22)
+        }
+    }
+
+    private func enterFirstTable(guided: Bool) {
+        didStartFirstTable = true
+        withAnimation(.easeOut(duration: reduceMotion ? 0.08 : 0.28)) {
+            showFirstRunIntro = false
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 90 : 420))
+            guard !showFirstRunIntro else { return }
+            if guided {
+                startGuidedRound()
+            } else {
+                guidedRoundActive = false
+                activeTutorialLesson = nil
+                game.configurePlayerCount(playerCount)
+                game.newRound()
+                transition(to: .melden)
+                game.runDealPresentation(reduceMotion: reduceMotion)
+            }
+        }
+    }
+
+    private var firstRunIntro: some View {
+        GeometryReader { proxy in
+            let compactHeight = proxy.size.height < 760
+            let boardSize = min(proxy.size.width * (compactHeight ? 0.76 : 0.86),
+                                compactHeight ? 286 : 390)
+            ZStack {
+                LinearGradient(colors: [
+                    Color(hex: 0x111018),
+                    Tokens.bgDeep
+                ], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+                RadialGradient(colors: [
+                    Tokens.jewelGold.opacity(0.14),
+                    Color.clear
+                ], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 10, endRadius: 280)
+                .ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    Spacer(minLength: compactHeight ? 10 : 42)
+
+                    HStack(spacing: 6) {
+                        Text("POCH")
+                            .font(.system(size: compactHeight ? 25 : 31, weight: .bold))
+                            .foregroundStyle(Tokens.jewelPlatin)
+                        Text("1441")
+                            .font(.system(size: compactHeight ? 25 : 31, weight: .light))
+                            .foregroundStyle(Tokens.jewelGold)
+                    }
+                    .accessibilityElement(children: .combine)
+
+                    Text(String(localized: "tutorial.firstTable.title",
+                                defaultValue: "Dein erster Tisch"))
+                        .font(.system(size: compactHeight ? 23 : 28, weight: .heavy))
+                        .foregroundStyle(Tokens.jewelPlatin)
+                        .padding(.top, compactHeight ? 9 : 18)
+
+                    Text(String(localized: "firstRun.intro.body",
+                                defaultValue: "Mira zeigt dir immer nur den nächsten Zug. Du spielst sofort selbst."))
+                        .font(.system(size: compactHeight ? 13.5 : 15.5, weight: .medium))
+                        .foregroundStyle(Tokens.jewelPlatin.opacity(0.72))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                        .frame(maxWidth: 330)
+                        .padding(.horizontal, 24)
+                        .padding(.top, compactHeight ? 4 : 8)
+
+                    ZStack {
+                        Image("PochRingPM49")
+                            .resizable()
+                            .interpolation(.high)
+                            .scaledToFit()
+                            .frame(width: boardSize, height: boardSize)
+                            .saturation(theme.isNeon ? 1.08 : 0.88)
+                            .shadow(color: .black.opacity(0.65), radius: 28, y: 18)
+
+                        TableTokenPile(count: playerCount,
+                                       tint: Tokens.jewelGold,
+                                       diameter: boardSize * 0.23,
+                                       showCount: false)
+                            .offset(y: -boardSize * 0.015)
+
+                        firstRunOpponent(name: "Mira", seat: 1)
+                            .offset(x: -boardSize * 0.36, y: boardSize * 0.30)
+                        firstRunOpponent(name: "Kian", seat: 2)
+                            .offset(x: boardSize * 0.36, y: boardSize * 0.30)
+                    }
+                    .frame(height: min(boardSize * (compactHeight ? 0.92 : 0.84),
+                                       proxy.size.height * (compactHeight ? 0.42 : 0.39)))
+                    .padding(.top, compactHeight ? 7 : 16)
+
+                    HStack(spacing: 9) {
+                        Image(systemName: "hand.raised.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(Tokens.jewelGold)
+                        Text(String(localized: "firstRun.goal",
+                                    defaultValue: "Werde zuerst deine Karten los und gewinne die Mitte."))
+                            .font(.system(size: 13.5, weight: .bold))
+                            .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(2)
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(maxWidth: 340, minHeight: 48)
+                    .background(Capsule().fill(Color.white.opacity(0.045))
+                        .overlay(Capsule().strokeBorder(Tokens.jewelGold.opacity(0.24), lineWidth: 1)))
+                    .padding(.horizontal, 28)
+                    .padding(.top, compactHeight ? 5 : 10)
+
+                    Spacer(minLength: compactHeight ? 8 : 18)
+
+                    Button {
+                        enterFirstTable(guided: true)
+                    } label: {
+                        HStack(spacing: 9) {
+                            Image(systemName: "chair.lounge.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text(String(localized: "firstRun.intro.primary",
+                                        defaultValue: "Am Tisch Platz nehmen"))
+                                .font(.system(size: 17, weight: .bold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                        }
+                        .foregroundStyle(Tokens.bgDeep)
+                        .frame(maxWidth: .infinity, minHeight: compactHeight ? 50 : 54)
+                        .background(Capsule().fill(Tokens.jewelGold))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 28)
+
+                    Button {
+                        enterFirstTable(guided: false)
+                    } label: {
+                        Text(String(localized: "firstRun.intro.secondary",
+                                    defaultValue: "Ohne Einführung spielen"))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Tokens.jewelPlatin.opacity(0.68))
+                            .frame(maxWidth: .infinity, minHeight: compactHeight ? 40 : 44)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, max(compactHeight ? 8 : 18,
+                                         proxy.safeAreaInsets.bottom + 8))
+                }
+            }
+        }
+    }
+
+    private func firstRunOpponent(name: String, seat: Int) -> some View {
+        OpponentPortrait(seat: seat,
+                         name: name,
+                         isActive: true,
+                         isFocus: false,
+                         mood: .neutral,
+                         size: 54,
+                         showsText: false,
+                         morph: nil)
+            .overlay(alignment: .bottom) {
+                Text(name)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Color.black.opacity(0.72)))
+                    .offset(y: 10)
+            }
+    }
+
+    private var firstRunActStrip: some View {
+        HStack(spacing: 8) {
+            firstRunAct("1", String(localized: "firstRun.act.meld", defaultValue: "Melden"), Tokens.jewelGold)
+            firstRunActConnector
+            firstRunAct("2", String(localized: "firstRun.act.bidding", defaultValue: "Pochen"), Tokens.amethystVivid)
+            firstRunActConnector
+            firstRunAct("3", String(localized: "firstRun.act.playout", defaultValue: "Ausspielen"), Tokens.smaragdVivid)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func firstRunAct(_ number: String, _ title: String, _ tint: Color) -> some View {
+        VStack(spacing: 5) {
+            Text(number)
+                .font(.system(size: 10, weight: .heavy))
+                .foregroundStyle(Tokens.bgDeep)
+                .frame(width: 25, height: 25)
+                .background(Circle().fill(tint))
+            Text(title)
+                .font(.system(size: 10.5, weight: .bold))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.84))
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+        }
+        .frame(width: 72)
+    }
+
+    private var firstRunActConnector: some View {
+        Capsule()
+            .fill(Tokens.jewelPlatin.opacity(0.14))
+            .frame(maxWidth: .infinity, minHeight: 1, maxHeight: 1)
+            .offset(y: -9)
+    }
+
+    private func startGuidedRound(_ lesson: TutorialLesson = .meld) {
+        guidedRoundActive = true
+        activeTutorialLesson = lesson
+        completedTutorialLesson = nil
+        moveCoach = true
+        activeOverlay = nil
+        game.configurePlayerCount(playerCount)
+        game.startTutorialRound(lesson)
+        switch lesson {
+        case .meld:
+            guidedMeldBeat = 0
+            guidedMeldBusy = false
+            transition(to: .melden)
+            game.prepareGuidedDeal()
+        case .bidding:
+            transition(to: .pochen)
+        case .playout:
+            transition(to: .ausspielen)
+            game.beginPlayoutPresentation()
+        }
     }
 
     private func transition(to next: Akt) {
+        recordTutorialTransition(from: akt, to: next)
         withAnimation(.spring(duration: Tokens.aktMorph)) { akt = next }
         showPhaseCurtain(next)
+    }
+
+    private func recordTutorialTransition(from current: Akt, to next: Akt) {
+        guard guidedRoundActive else { return }
+        switch (current, next) {
+        case (.melden, .pochen):
+            markTutorialComplete(.meld)
+            showTutorialMilestone(.meld)
+            activeTutorialLesson = .bidding
+        case (.pochen, .ausspielen):
+            markTutorialComplete(.bidding)
+            showTutorialMilestone(.bidding)
+            activeTutorialLesson = .playout
+        default:
+            break
+        }
+    }
+
+    private func completeTutorialRound() {
+        let lesson = activeTutorialLesson ?? .playout
+        markTutorialComplete(lesson)
+        activeTutorialLesson = nil
+        guidedRoundActive = false
+        withAnimation(.spring(response: 0.46, dampingFraction: 0.88)) {
+            completedTutorialLesson = lesson
+        }
+    }
+
+    private func markTutorialComplete(_ lesson: TutorialLesson) {
+        tutorialProgressMask |= tutorialBit(for: lesson)
+    }
+
+    private func showTutorialMilestone(_ lesson: TutorialLesson) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 120 : 1_100))
+            guard guidedRoundActive else { return }
+            withAnimation(.easeOut(duration: 0.18)) {
+                tutorialMilestoneLesson = lesson
+            }
+            try? await Task.sleep(for: .milliseconds(1_350))
+            guard tutorialMilestoneLesson == lesson else { return }
+            withAnimation(.easeOut(duration: 0.16)) {
+                tutorialMilestoneLesson = nil
+            }
+        }
+    }
+
+    private func tutorialBit(for lesson: TutorialLesson) -> Int {
+        switch lesson {
+        case .meld: return 1 << 0
+        case .bidding: return 1 << 1
+        case .playout: return 1 << 2
+        }
+    }
+
+    private func tutorialIsComplete(_ lesson: TutorialLesson) -> Bool {
+        tutorialProgressMask & tutorialBit(for: lesson) != 0
+    }
+
+    private var completedTutorialCount: Int {
+        TutorialLesson.allCases.filter(tutorialIsComplete).count
     }
 
     private func showPhaseCurtain(_ next: Akt) {
@@ -315,8 +803,10 @@ struct ContentView: View {
                     .shadow(color: label.tint.opacity(theme.isNeon ? 0.28 : 0.10),
                             radius: theme.isNeon ? 9 : 4, y: 2)
             }
-            trumpChip
-            if guidedRoundActive {
+            if akt != .ausspielen {
+                trumpChip
+            }
+            if guidedRoundActive && akt != .pochen {
                 guidedPill
             }
         }
@@ -341,30 +831,107 @@ struct ContentView: View {
         }
     }
 
-    private var guidedCoachBottomPadding: CGFloat {
-        switch akt {
-        case .melden: return 106
-        case .pochen: return 430
-        case .ausspielen: return 196
+    @ViewBuilder private var guidedCoachPlacement: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let frame = guidedFocusFrame(in: size)
+            ZStack {
+                if akt == .melden {
+                    guidedSpotlight(frame: frame)
+                        .allowsHitTesting(false)
+                }
+
+                if akt == .melden {
+                    guidedCoachRail
+                        .frame(width: min(size.width - 42, guidedCoachWidth))
+                        .position(x: size.width / 2, y: guidedCoachY(in: size, focus: frame))
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
         }
+    }
+
+    private var guidedCoachWidth: CGFloat {
+        switch akt {
+        case .melden: return 334
+        case .pochen: return 292
+        case .ausspielen: return 328
+        }
+    }
+
+    private func guidedFocusFrame(in size: CGSize) -> CGRect {
+        switch akt {
+        case .melden:
+            let ringDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
+            let d = min(size.width * Tokens.guidedMeldBoardScale,
+                        ringDiameter * Tokens.guidedMeldBoardScale)
+            return CGRect(x: (size.width - d) / 2,
+                          y: Tokens.guidedMeldFocusTop,
+                          width: d,
+                          height: d)
+        case .pochen:
+            return CGRect(x: 44,
+                          y: max(344, size.height * 0.40),
+                          width: size.width - 88,
+                          height: 178)
+        case .ausspielen:
+            return CGRect(x: 18,
+                          y: max(292, size.height * 0.30),
+                          width: size.width - 36,
+                          height: min(260, size.height * 0.30))
+        }
+    }
+
+    private func guidedCoachY(in size: CGSize, focus: CGRect) -> CGFloat {
+        switch akt {
+        case .melden:
+            return min(size.height - 142,
+                       focus.maxY + Tokens.guidedMeldCoachGap)
+        case .pochen:
+            return max(368, min(394, size.height * 0.43))
+        case .ausspielen:
+            return min(size.height - 242, focus.maxY + 34)
+        }
+    }
+
+    private func guidedSpotlight(frame: CGRect) -> some View {
+        ZStack {
+            ForEach(0..<4, id: \.self) { i in
+                let vertical = i % 2 == 0
+                let x = vertical ? frame.midX : (i == 1 ? frame.maxX : frame.minX)
+                let y = vertical ? (i == 0 ? frame.minY : frame.maxY) : frame.midY
+                Capsule()
+                    .fill(LinearGradient(colors: [
+                        guidedTint.opacity(0.82),
+                        Tokens.jewelPlatin.opacity(0.32),
+                        guidedTint.opacity(0.82)
+                    ], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: 30, height: 2)
+                    .rotationEffect(.degrees(vertical ? 0 : 90))
+                    .position(x: x, y: y)
+                    .shadow(color: guidedTint.opacity(theme.isNeon ? 0.26 : 0.10), radius: 5)
+            }
+        }
+        .accessibilityHidden(true)
     }
 
     private var guidedCoachRail: some View {
         let copy = guidedCopy
-        return HStack(spacing: 10) {
-            Text(copy.step)
-                .font(.system(size: 10, weight: .heavy))
+        return VStack(alignment: .leading, spacing: 9) {
+            HStack(spacing: 10) {
+            Image(systemName: copy.step)
+                .font(.system(size: 12, weight: .heavy))
                 .foregroundStyle(Tokens.bgDeep)
                 .frame(width: 30, height: 30)
                 .background(Circle().fill(guidedTint))
             VStack(alignment: .leading, spacing: 3) {
                 Text(copy.title)
-                    .font(.system(size: 12, weight: .heavy))
+                    .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin)
                 Text(copy.text)
-                    .font(.system(size: 10.7, weight: .semibold))
+                    .font(.system(size: 11.8, weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.76))
-                    .lineLimit(2)
+                    .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -381,20 +948,156 @@ struct ContentView: View {
                     .background(Circle().fill(.white.opacity(0.06)))
             }
             .buttonStyle(.plain)
+            }
+
+            if guidedRoundActive, akt == .melden, guidedMeldBeat < 5 {
+                Button(action: advanceGuidedMeld) {
+                    HStack(spacing: 8) {
+                        if guidedMeldBusy {
+                            ProgressView()
+                                .tint(Tokens.bgDeep)
+                        } else {
+                            Text(guidedMeldActionTitle)
+                            Image(systemName: "arrow.right")
+                        }
+                    }
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Tokens.bgDeep)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .background(Capsule().fill(guidedTint))
+                }
+                .buttonStyle(.plain)
+                .disabled(guidedMeldBusy)
+            }
         }
-        .padding(.horizontal, 11)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 13)
+        .padding(.vertical, 12)
         .background(
-            Capsule()
-                .fill(Color(hex: 0x111018).opacity(0.94))
-                .overlay(Capsule().strokeBorder(guidedTint.opacity(0.28), lineWidth: 1))
-                .shadow(color: .black.opacity(0.44), radius: 18, y: 9)
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(hex: 0x111018).opacity(0.96))
+                .overlay(RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(guidedTint.opacity(0.32), lineWidth: 1))
+                .shadow(color: .black.opacity(0.48), radius: 20, y: 10)
         )
+    }
+
+    private func advanceGuidedMeld() {
+        guard !guidedMeldBusy else { return }
+        guidedMeldBusy = true
+        Task { @MainActor in
+            switch guidedMeldBeat {
+            case 0:
+                if reduceMotion {
+                    guidedMeldBeat = 1
+                } else {
+                    withAnimation(.spring(response: 0.48, dampingFraction: 0.86)) {
+                        guidedMeldBeat = 1
+                    }
+                    try? await Task.sleep(for: .milliseconds(420))
+                }
+            case 1:
+                await game.revealGuidedDealRound(reduceMotion: reduceMotion)
+                guidedMeldBeat = 2
+            case 2:
+                await game.finishGuidedDeal(reduceMotion: reduceMotion)
+                guidedMeldBeat = 3
+            case 3:
+                game.revealGuidedTrumpf()
+                guidedMeldBeat = 4
+            case 4:
+                await game.revealNextGuidedMeld(reduceMotion: reduceMotion)
+                guidedMeldBeat = 5
+            default:
+                break
+            }
+            guidedMeldBusy = false
+        }
+    }
+
+    #if DEBUG
+    private func prepareGuidedMeldDebugStep(_ step: Int) {
+        startGuidedRound()
+        Task { @MainActor in
+            if step >= 1 { guidedMeldBeat = 1 }
+            if step >= 2 {
+                await game.revealGuidedDealRound(reduceMotion: true)
+                guidedMeldBeat = 2
+            }
+            if step >= 3 {
+                await game.finishGuidedDeal(reduceMotion: true)
+                guidedMeldBeat = 3
+            }
+            if step >= 4 {
+                game.revealGuidedTrumpf()
+                guidedMeldBeat = 4
+            }
+            if step >= 5 {
+                await game.revealNextGuidedMeld(reduceMotion: true)
+                guidedMeldBeat = 5
+            }
+        }
+    }
+    #endif
+
+    private var guidedMeldActionTitle: String {
+        switch guidedMeldBeat {
+        case 0:
+            return String(localized: "tutorial.meld.action.openTable",
+                          defaultValue: "Stein in die Mitte legen")
+        case 1:
+            return String(localized: "tutorial.meld.action.firstDeal",
+                          defaultValue: "Erste Runde geben")
+        case 2:
+            return String(localized: "tutorial.meld.action.finishDeal",
+                          defaultValue: "Hand fertig geben")
+        case 3:
+            return String(localized: "tutorial.meld.action.revealTrump",
+                          defaultValue: "Trumpf aufdecken")
+        default:
+            return String(localized: "tutorial.meld.action.showClaim",
+                          defaultValue: "Meldung zeigen")
+        }
     }
 
     private var guidedCopy: (step: String, title: String, text: String) {
         switch akt {
         case .melden:
+            if guidedRoundActive {
+                switch guidedMeldBeat {
+                case 0:
+                    return ("circle.fill",
+                            String(localized: "tutorial.meld.table.title", defaultValue: "Dein erster Stein"),
+                            String(localized: "tutorial.meld.table.body", defaultValue: "Lege ihn in die Mitte. Sie wird am Ende der Runde gewonnen."))
+                case 1:
+                    return ("rectangle.stack.fill",
+                            String(localized: "tutorial.meld.firstDeal.title", defaultValue: "Die erste Runde"),
+                            String(localized: "tutorial.meld.firstDeal.body", defaultValue: "Gib einmal reihum. Jede Karte hat eine sichtbare Quelle und ein klares Ziel."))
+                case 2:
+                    return ("hand.raised.fill",
+                            String(localized: "tutorial.meld.hand.title", defaultValue: "Deine Hand"),
+                            String(localized: "tutorial.meld.hand.body", defaultValue: "Jetzt wird fertig gegeben. Danach siehst du deine vollständige Hand."))
+                case 3:
+                    return ("suit.diamond.fill",
+                            String(localized: "tutorial.guide.trump.title", defaultValue: "Trumpf aufdecken"),
+                            String(localized: "tutorial.guide.trump.body", defaultValue: "Die letzte offene Karte bestimmt die Trumpffarbe dieser Runde."))
+                default:
+                    return ("checkmark.seal.fill",
+                            String(localized: "tutorial.meld.claim.title", defaultValue: "Meldung erkennen"),
+                            String(localized: "tutorial.meld.claim.body", defaultValue: "Passende Trumpfkarten holen die benannte äußere Mulde."))
+                }
+            }
+            if game.dealtCount < game.totalDeals {
+                let format = String(localized: "tutorial.guide.deal.body",
+                                    defaultValue: "Rücken wandern reihum: %d von %d. Verfolge nur deinen Platz.")
+                return ("rectangle.stack.fill",
+                        String(localized: "tutorial.guide.deal.title", defaultValue: "Karten kommen"),
+                        String(format: format, game.dealtCount, game.totalDeals))
+            }
+            if !game.trumpRevealed {
+                return ("suit.diamond.fill",
+                        String(localized: "tutorial.guide.trump.title", defaultValue: "Trumpf fällt"),
+                        String(localized: "tutorial.guide.trump.body", defaultValue: "Die offene Karte bestimmt den Trumpf. Danach werden passende Meldungen ausgezahlt."))
+            }
             let openPools = PochRing.anchors
                 .map(\.pool)
                 .filter { game.displayedChips(in: $0) > 0 }
@@ -402,35 +1105,40 @@ struct ContentView: View {
                 .map(\.indexLabel)
                 .joined(separator: " · ")
             let focus = openPools.isEmpty ? "Suche Wertungen in Hand und Tisch." : "Jetzt zahlen: \(openPools)."
-            return ("1/3", "Melden lesen", "\(focus) Die Mitte bleibt fürs Finale.")
+            return ("sparkles", "Melden lesen", "\(focus) Die Mitte bleibt fürs Finale.")
         case .pochen:
             guard game.turnIndex == 0, let legal = game.humanLegal else {
-                return ("2/3", "Druck lesen", "\(game.name(of: game.turnIndex)) entscheidet. Achte auf Einsatz, Wand und Reaktion.")
+                return ("eye.fill", "Antwort lesen", "\(game.name(of: game.turnIndex)) entscheidet. Schau, ob Chips in die Poch-Mitte wandern oder jemand aussteigt.")
             }
             let current = game.betting.currentBet
-            let callCost = max(0, current - game.betting.seats[0].committed)
+            let callCost = max(0, current - game.humanCommitted)
             if let range = legal.openRange {
-                return ("2/3", "Pochen eröffnen", "Du hast ein Paar. \(range.lowerBound)-\(range.upperBound) Chips setzen; klein testet, hoch erzwingt Antwort.")
+                return ("hand.tap.fill", "Pochen eröffnen", "Dein Paar darf bieten: \(range.lowerBound)-\(range.upperBound). Klein testet, hoch baut Druck.")
             }
             if let range = legal.raiseRange {
-                return ("2/3", "Antwort erzwingen", "Mitgehen kostet \(callCost). Erhöhen bis \(range.upperBound) baut Druck, Passen spart Chips.")
+                return ("arrow.up.circle.fill", "Antwort erzwingen", "Mitgehen kostet \(callCost). Erhöhen bis \(range.upperBound) vergrößert Einsatz und Risiko.")
             }
             if legal.canCall {
-                return ("2/3", "Mitgehen oder raus", "Mitgehen kostet \(callCost) und hält dich im Pott. Passen beendet dein Risiko.")
+                return ("arrow.left.arrow.right.circle.fill", "Mitgehen oder raus", "Mitgehen kostet \(callCost). Passen rettet Chips, gibt die Mulde aber auf.")
             }
-            return ("2/3", "Keine Poch-Hand", "Ohne Paar bleibt nur Passen. Lies die Gegner, bevor die Kartenkette startet.")
+            return ("forward.fill", "Kein Paar", "Du kannst hier nicht pochen. Passen bringt dich sauber ins Ausspielen.")
         case .ausspielen:
-            guard let playout = game.playout else {
-                return ("3/3", "Kartenstrom", "Die Mitte wartet. Wer zuerst leer ist, nimmt den Hauptpott.")
+            if game.stage != .playout {
+                return ("flag.checkered",
+                        String(localized: "tutorial.guide.finish.title", defaultValue: "Runde lesen"),
+                        String(localized: "tutorial.guide.finish.body", defaultValue: "Mitte und Restkarten fließen zum Sieger. Danach beginnt eine freie Runde."))
             }
-            if playout.leader == 0, game.cascadeIdle {
-                let first = game.displayedHand(of: 0).first.map { "\($0.rank.index)\($0.suit.symbol)" } ?? "eine Karte"
-                return ("3/3", "Kette starten", "Du führst. \(first) ist bereit; niedrig starten hält Anschlusskarten offen.")
+            guard let playout = game.playout else {
+                return ("rectangle.on.rectangle.angled", "Ausspielen", "Die Mitte wartet. Wer zuerst leer ist, nimmt den Hauptpott.")
+            }
+            if game.playoutLeader == 0, game.cascadeIdle {
+                return ("play.fill", "Kette starten", "Du führst. Niedrig starten hält mehr Anschlusskarten im Rennen.")
             }
             if game.cascadeIdle {
-                return ("3/3", "Neues Anspiel", "\(game.name(of: playout.leader)) führt. Der letzte Leger bestimmt die nächste Kette.")
+                let leader = game.playoutLeader ?? 0
+                return ("arrow.turn.down.right", "Neues Anspiel", "\(game.name(of: leader)) führt die nächste Kette.")
             }
-            return ("3/3", "Kette läuft", "Folgekarten springen automatisch. Beim Riss friert der Moment, dann führt der letzte Leger.")
+            return ("link", "Kette läuft", "Folgekarten springen automatisch. Beim Riss wechselt das Anspiel.")
         }
     }
 
@@ -535,6 +1243,151 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder private var tutorialCompletionOverlay: some View {
+        if let lesson = completedTutorialLesson {
+            let allComplete = completedTutorialCount == TutorialLesson.allCases.count
+            ZStack {
+                Color.black.opacity(0.72)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 18) {
+                    ZStack {
+                        Circle()
+                            .fill(tutorialLessonTint(lesson).opacity(0.13))
+                            .frame(width: 88, height: 88)
+                        Circle()
+                            .strokeBorder(tutorialLessonTint(lesson).opacity(0.48), lineWidth: 1)
+                            .frame(width: 72, height: 72)
+                        Image(systemName: allComplete ? "checkmark.seal.fill" : tutorialLessonIcon(lesson))
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundStyle(tutorialLessonTint(lesson))
+                    }
+
+                    VStack(spacing: 7) {
+                        Text(String(localized: "tutorial.completion.eyebrow",
+                                    defaultValue: "LEKTION ABGESCHLOSSEN"))
+                            .font(.system(size: 9, weight: .heavy))
+                            .tracking(2.0)
+                            .foregroundStyle(tutorialLessonTint(lesson).opacity(0.86))
+                        Text(tutorialCompletionTitle(lesson, allComplete: allComplete))
+                            .font(.system(size: 24, weight: .heavy))
+                            .foregroundStyle(Tokens.jewelPlatin)
+                            .multilineTextAlignment(.center)
+                        Text(tutorialCompletionBody(allComplete: allComplete))
+                            .font(.system(size: 12.5, weight: .medium))
+                            .foregroundStyle(Tokens.slate)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    tutorialCompletionProgress
+
+                    VStack(spacing: 9) {
+                        overlayPrimaryButton(
+                            String(localized: "tutorial.completion.free",
+                                   defaultValue: "Freie Partie starten"),
+                            tint: Tokens.jewelGold
+                        ) {
+                            startNewRound()
+                        }
+                        overlayInlineButton(
+                            String(localized: "tutorial.completion.lessons",
+                                   defaultValue: "Lektionen ansehen"),
+                            tint: tutorialLessonTint(lesson)
+                        ) {
+                            completedTutorialLesson = nil
+                            activeOverlay = .tutorial
+                        }
+                    }
+                }
+                .padding(22)
+                .frame(maxWidth: 354)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(LinearGradient(colors: [Color(hex: 0x17141D), Color(hex: 0x09080D)],
+                                             startPoint: .top, endPoint: .bottom))
+                        .overlay(RoundedRectangle(cornerRadius: 20)
+                            .strokeBorder(tutorialLessonTint(lesson).opacity(0.34), lineWidth: 1))
+                        .shadow(color: .black.opacity(0.70), radius: 30, y: 18)
+                )
+                .padding(.horizontal, 18)
+                .transition(.scale(scale: 0.94).combined(with: .opacity))
+            }
+            .zIndex(20)
+        }
+    }
+
+    @ViewBuilder private var tutorialMilestoneOverlay: some View {
+        if let lesson = tutorialMilestoneLesson, completedTutorialLesson == nil {
+            HStack(spacing: 9) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 9, weight: .heavy))
+                    .foregroundStyle(Tokens.bgDeep)
+                    .frame(width: 24, height: 24)
+                    .background(Circle().fill(tutorialLessonTint(lesson)))
+                Text(tutorialCompletionTitle(lesson, allComplete: false))
+                    .font(.system(size: 11.5, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.94))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(Color(hex: 0x111018).opacity(0.96))
+                    .overlay(Capsule().strokeBorder(
+                        tutorialLessonTint(lesson).opacity(0.34), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.48), radius: 14, y: 8)
+            )
+            .padding(.top, 118)
+            .transition(reduceMotion
+                        ? .opacity
+                        : .move(edge: .top).combined(with: .opacity))
+            .allowsHitTesting(false)
+            .zIndex(19)
+        }
+    }
+
+    private func tutorialCompletionTitle(_ lesson: TutorialLesson, allComplete: Bool) -> String {
+        if allComplete {
+            return String(localized: "tutorial.completion.all.title",
+                          defaultValue: "Bereit für den freien Tisch")
+        }
+        let format = String(localized: "tutorial.completion.lesson.title",
+                            defaultValue: "%@ geschafft")
+        return String(format: format, tutorialLessonTitle(lesson))
+    }
+
+    private func tutorialCompletionBody(allComplete: Bool) -> String {
+        if allComplete {
+            return String(localized: "tutorial.completion.all.body",
+                          defaultValue: "Du kennst den Rhythmus aus Melden, Pochen und Ausspielen. Im freien Spiel bleiben Hinweise auf Wunsch aktiv.")
+        }
+        return String(localized: "tutorial.completion.lesson.body",
+                      defaultValue: "Der Schritt sitzt. Du kannst direkt frei spielen oder die nächste Lektion gezielt beginnen.")
+    }
+
+    private var tutorialCompletionProgress: some View {
+        HStack(spacing: 9) {
+            ForEach(TutorialLesson.allCases) { lesson in
+                let complete = tutorialIsComplete(lesson)
+                Image(systemName: complete ? "checkmark" : tutorialLessonIcon(lesson))
+                    .font(.system(size: 10, weight: .heavy))
+                    .foregroundStyle(complete ? Tokens.bgDeep : Tokens.slate)
+                    .frame(width: 30, height: 30)
+                    .background(Circle().fill(complete
+                                              ? tutorialLessonTint(lesson)
+                                              : Color.white.opacity(0.05)))
+                    .overlay(Circle().strokeBorder(tutorialLessonTint(lesson)
+                        .opacity(complete ? 0 : 0.28), lineWidth: 1))
+            }
+            Text(String(format: String(localized: "tutorial.completion.progress",
+                                       defaultValue: "%d von 3 Lektionen"),
+                        completedTutorialCount))
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(Tokens.slate)
+        }
+    }
+
     private func overlayTitle(_ overlay: AppOverlay) -> String {
         switch overlay {
         case .menu: return "Pause"
@@ -597,16 +1450,166 @@ struct ContentView: View {
 
     private var tutorialContent: some View {
         VStack(alignment: .leading, spacing: 14) {
-            coachBubble("Wirt", "Merke dir nur den Rhythmus: erst Mulden lesen, dann Druck machen, dann Karten leer spielen.")
+            overlayHero(String(localized: "tutorial.firstTable.title", defaultValue: "Dein erster Tisch"),
+                        String(localized: "tutorial.firstTable.body", defaultValue: "Du spielst sofort. Mira erklärt immer nur die eine Entscheidung, die jetzt zählt."),
+                        tint: Tokens.jewelGold)
+            tutorialLessonPicker
+            coachBubble("Mira", String(localized: "tutorial.coach.body", defaultValue: "Drei Akte, drei klare Ziele. Ich bleibe am Tisch, bis du den Rhythmus selbst fühlst."))
+            tutorialDecisionRail
             tutorialProgressStrip
-            phaseGuide("1", "Melden", "Außenmulden zahlen sofort. Die Mitte bleibt liegen.",
-                       tint: Tokens.jewelGold, visual: .ring)
-            phaseGuide("2", "Pochen", "Paar? Dann bietest du um die Poch-Mulde.",
-                       tint: Tokens.jewelAmethyst, visual: .bid)
-            phaseGuide("3", "Ausspielen", "Ketten laufen. Wer zuerst leer ist, nimmt die Mitte.",
-                       tint: Tokens.jewelSmaragd, visual: .fan)
-            overlayStep("✓", "Intuitiver Tisch", "Gold zeigt Werte, Violett den Poch, Grün die Sequenz, Platin die Mitte.")
+            overlayStep("1",
+                        String(localized: "tutorial.inline.title", defaultValue: "Direkt im Spiel lernen"),
+                        String(localized: "tutorial.inline.body", defaultValue: "Hinweise erscheinen nur am aktuellen Zug. Regeln und Beispiele bleiben jederzeit im Reiter Regeln verfügbar."))
         }
+    }
+
+    private var tutorialLessonPicker: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            HStack {
+                Text(String(localized: "tutorial.lesson.picker.title",
+                            defaultValue: "Einstieg wählen"))
+                    .font(.system(size: 13.5, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.94))
+                Spacer()
+                Text("\(completedTutorialCount)/3")
+                    .font(.system(size: 10, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelGold.opacity(0.86))
+                    .monospacedDigit()
+            }
+            HStack(spacing: 8) {
+                ForEach(TutorialLesson.allCases) { lesson in
+                    tutorialLessonButton(lesson)
+                }
+            }
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 14)
+            .fill(Color.white.opacity(0.034))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(tutorialLessonTint(selectedTutorialLesson).opacity(0.18), lineWidth: 1)))
+    }
+
+    private func tutorialLessonButton(_ lesson: TutorialLesson) -> some View {
+        let selected = selectedTutorialLesson == lesson
+        let tint = tutorialLessonTint(lesson)
+        return Button {
+            selectedTutorialLesson = lesson
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 5) {
+                    Image(systemName: tutorialLessonIcon(lesson))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(selected ? tint : Tokens.slate)
+                    Text(tutorialLessonTitle(lesson))
+                        .font(.system(size: 9.2, weight: .heavy))
+                        .foregroundStyle(selected ? Tokens.jewelPlatin : Tokens.slate)
+                        .lineLimit(1)
+                    Text(tutorialLessonBody(lesson))
+                        .font(.system(size: 7.8, weight: .semibold))
+                        .foregroundStyle(Tokens.slate.opacity(0.80))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.72)
+                }
+                .frame(maxWidth: .infinity)
+
+                if tutorialIsComplete(lesson) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 7, weight: .heavy))
+                        .foregroundStyle(Tokens.bgDeep)
+                        .frame(width: 15, height: 15)
+                        .background(Circle().fill(tint))
+                        .padding(5)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 66)
+            .padding(.horizontal, 4)
+            .background(RoundedRectangle(cornerRadius: 11)
+                .fill(selected ? tint.opacity(0.12) : Color.black.opacity(0.16))
+                .overlay(RoundedRectangle(cornerRadius: 11)
+                    .strokeBorder(tint.opacity(selected ? 0.55 : 0.12), lineWidth: 1)))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func tutorialLessonTitle(_ lesson: TutorialLesson) -> String {
+        switch lesson {
+        case .meld:
+            return String(localized: "tutorial.lesson.meld.title", defaultValue: "Melden")
+        case .bidding:
+            return String(localized: "tutorial.lesson.bidding.title", defaultValue: "Pochen")
+        case .playout:
+            return String(localized: "tutorial.lesson.playout.title", defaultValue: "Ausspielen")
+        }
+    }
+
+    private func tutorialLessonBody(_ lesson: TutorialLesson) -> String {
+        switch lesson {
+        case .meld:
+            return String(localized: "tutorial.lesson.meld.body", defaultValue: "von Anfang an")
+        case .bidding:
+            return String(localized: "tutorial.lesson.bidding.body", defaultValue: "Paar und Druck")
+        case .playout:
+            return String(localized: "tutorial.lesson.playout.body", defaultValue: "Kette und Riss")
+        }
+    }
+
+    private func tutorialLessonTint(_ lesson: TutorialLesson) -> Color {
+        switch lesson {
+        case .meld: return Tokens.jewelGold
+        case .bidding: return Tokens.jewelAmethyst
+        case .playout: return Tokens.jewelSmaragd
+        }
+    }
+
+    private func tutorialLessonIcon(_ lesson: TutorialLesson) -> String {
+        switch lesson {
+        case .meld: return "circle.grid.3x3.fill"
+        case .bidding: return "hand.raised.fill"
+        case .playout: return "rectangle.stack.fill"
+        }
+    }
+
+    private var tutorialDecisionRail: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("So begleitet dich die erste Runde")
+                .font(.system(size: 13.5, weight: .heavy))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.94))
+            HStack(spacing: 8) {
+                tutorialDecisionChip("sehen", "welche Mulde zahlt", Tokens.jewelGold)
+                tutorialDecisionChip("wägen", "ob Pochen lohnt", Tokens.jewelAmethyst)
+                tutorialDecisionChip("spielen", "welche Karte führt", Tokens.jewelSmaragd)
+            }
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 14)
+            .fill(Color.white.opacity(0.034))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Tokens.jewelGold.opacity(0.15), lineWidth: 1)))
+    }
+
+    private func tutorialDecisionChip(_ title: String, _ text: String, _ tint: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(title.uppercased())
+                .font(.system(size: 8, weight: .heavy))
+                .tracking(0.8)
+                .foregroundStyle(tint.opacity(0.92))
+                .lineLimit(1)
+            Text(text)
+                .font(.system(size: 8.6, weight: .semibold))
+                .foregroundStyle(Tokens.slate.opacity(0.88))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.72)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 50)
+        .padding(.horizontal, 5)
+        .background(RoundedRectangle(cornerRadius: 11)
+            .fill(Color.black.opacity(0.18))
+            .overlay(RoundedRectangle(cornerRadius: 11)
+                .strokeBorder(tint.opacity(0.22), lineWidth: 1)))
     }
 
     private var menuPhaseStrip: some View {
@@ -747,11 +1750,47 @@ struct ContentView: View {
             rulesGrid
             visualRuleExamples
             glossaryStrip
+            tableReadingStrip
             overlayStep("A", "9 Mulden", "A, K, Q, J, 10, Mariage, Sequenz, Poch und Mitte. Außen wird gemeldet, innen wird am Ende gewonnen.")
             overlayStep("K", "Mariage", "König und Dame einer Farbe. In Trumpf zählt sie stärker.")
             overlayStep("Q", "Sequenz", "Zusammenhängende Karten einer Farbe. Trumpf entscheidet, wenn nötig.")
             overlayStep("J", "Poch", "Bieten nur mit Paar. Passen gibt Information, Mitgehen hält Druck, Erhöhen setzt die Wand.")
             overlayStep("10", "Ketten", "Ausspielen läuft aufsteigend weiter. Fehlt die nächste Karte, wechselt das Anspiel.")
+        }
+    }
+
+    private var tableReadingStrip: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Am Tisch lesen")
+                .font(.system(size: 13.5, weight: .heavy))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
+            tableReadRow("Farbiger Muldenrand", "zeigt Kategorie und Ziel der Chips", Tokens.jewelGold)
+            tableReadRow("Violette Mitte", "Poch-Mulde: nur Paare kämpfen darum", Tokens.jewelAmethyst)
+            tableReadRow("Großer Kartenfächer", "Kettenphase: jetzt zählt Reihenfolge", Tokens.jewelSmaragd)
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 14)
+            .fill(Color.white.opacity(0.032))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Tokens.jewelSmaragd.opacity(0.16), lineWidth: 1)))
+    }
+
+    private func tableReadRow(_ title: String, _ text: String, _ tint: Color) -> some View {
+        HStack(spacing: 9) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(tint.opacity(0.82))
+                .frame(width: 5, height: 24)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: 11.7, weight: .heavy))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
+                Text(text)
+                    .font(.system(size: 9.4, weight: .semibold))
+                    .foregroundStyle(Tokens.slate.opacity(0.86))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            Spacer(minLength: 0)
         }
     }
 
@@ -807,7 +1846,7 @@ struct ContentView: View {
                               tint: Tokens.jewelGold,
                               visual: .meld)
             visualRuleExample("Pochen",
-                              "Ein Paar öffnet den Pott. Die Wand begrenzt Druck.",
+                              "Ein Paar eröffnet das Pochen. Das Limit begrenzt den Einsatz.",
                               tint: Tokens.jewelAmethyst,
                               visual: .poch)
             visualRuleExample("Ausspielen",
@@ -925,6 +1964,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 14) {
             overlayHero("Tischgefühl", "Form bleibt gleich. Du steuerst nur Intensität, Hilfe und Feedback.")
             themePreview
+            playerCountPicker
             settingToggle("Vivid Theme", "Sattere Juwelenfarben, gleiche Premium-Geometrie.", isOn: $neon, tint: Tokens.smaragdVivid)
             settingToggle("Sound", "Vorbereitet für Münzen, Tischschlag und Kartenstrom.", isOn: $sound, tint: Tokens.jewelGold)
             settingToggle("Haptik", "Münzflüge, Poch-Schlag und Kettenstopps fühlbar machen.", isOn: $haptics, tint: Tokens.jewelGold)
@@ -965,6 +2005,50 @@ struct ContentView: View {
                 withAnimation(.easeOut(duration: 0.18)) { neon = true }
             }
         }
+    }
+
+    private var playerCountPicker: some View {
+        HStack(spacing: 12) {
+            Circle().fill(Tokens.jewelGold.opacity(0.78)).frame(width: 9, height: 9)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Spieler")
+                    .font(.system(size: 14.5, weight: .semibold))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.94))
+                Text(String(localized: "settings.players.body",
+                            defaultValue: "3 bis 6 Personen. Der Tisch ordnet alle Plätze neu."))
+                    .font(.system(size: 11.5, weight: .medium))
+                    .foregroundStyle(Tokens.slate)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 10)
+            HStack(spacing: 5) {
+                ForEach(3...6, id: \.self) { count in
+                    playerCountButton(count)
+                }
+            }
+            .padding(4)
+            .background(Capsule().fill(Color.white.opacity(0.045))
+                .overlay(Capsule().strokeBorder(Tokens.jewelGold.opacity(0.22), lineWidth: 1)))
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func playerCountButton(_ count: Int) -> some View {
+        let selected = playerCount == count
+        return Button {
+            playerCount = count
+            game.configurePlayerCount(count)
+            transition(to: .melden)
+            game.runDealPresentation(reduceMotion: reduceMotion)
+        } label: {
+            Text("\(count)")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(selected ? Tokens.bgDeep : Tokens.slate)
+                .frame(width: 34, height: 28)
+                .background(Capsule().fill(selected ? Tokens.jewelGold : Color.clear))
+                .overlay(Capsule().strokeBorder(selected ? Tokens.jewelPlatin.opacity(0.20) : Color.white.opacity(0.05), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     private func themeSwatch(title: String, subtitle: String, selected: Bool,
@@ -1019,18 +2103,20 @@ struct ContentView: View {
 
     private var tutorialProgressStrip: some View {
         HStack(spacing: 8) {
-            tutorialBeat("1", "Melden", Tokens.jewelGold)
+            tutorialBeat("1", "Melden", .meld, Tokens.jewelGold)
             Capsule().fill(Tokens.slate.opacity(0.25)).frame(height: 1)
-            tutorialBeat("2", "Pochen", Tokens.jewelAmethyst)
+            tutorialBeat("2", "Pochen", .bidding, Tokens.jewelAmethyst)
             Capsule().fill(Tokens.slate.opacity(0.25)).frame(height: 1)
-            tutorialBeat("3", "Ausspielen", Tokens.jewelSmaragd)
+            tutorialBeat("3", "Ausspielen", .playout, Tokens.jewelSmaragd)
         }
         .padding(.horizontal, 4)
     }
 
-    private func tutorialBeat(_ mark: String, _ title: String, _ tint: Color) -> some View {
-        VStack(spacing: 4) {
-            Text(mark)
+    private func tutorialBeat(_ mark: String, _ title: String,
+                              _ lesson: TutorialLesson, _ tint: Color) -> some View {
+        let complete = tutorialIsComplete(lesson)
+        return VStack(spacing: 4) {
+            Text(complete ? "✓" : mark)
                 .font(.system(size: 10, weight: .heavy))
                 .foregroundStyle(Tokens.bgDeep)
                 .frame(width: 24, height: 24)
@@ -1050,8 +2136,10 @@ struct ContentView: View {
                 activeOverlay = nil
             }
         case .tutorial:
-            overlayPrimaryButton("Geführte Runde starten", tint: Tokens.jewelGold) {
-                startGuidedRound()
+            overlayPrimaryButton(String(localized: "tutorial.lesson.start",
+                                        defaultValue: "Lektion starten"),
+                                 tint: tutorialLessonTint(selectedTutorialLesson)) {
+                startGuidedRound(selectedTutorialLesson)
             }
         case .help:
             HStack(spacing: 8) {
@@ -1219,7 +2307,7 @@ struct ContentView: View {
                         .strokeBorder(Tokens.jewelGold.opacity(0.26), lineWidth: 1))
                     .frame(width: 24, height: 52)
                 VStack(spacing: 3) {
-                    Text("POTT")
+                    Text("EINSATZ")
                         .font(.system(size: 6, weight: .heavy))
                         .tracking(0.8)
                         .foregroundStyle(Tokens.slate)
@@ -1349,7 +2437,7 @@ struct ContentView: View {
                                  ? (up.suit.isRed ? Color(hex: 0xD07A85) : Tokens.jewelPlatin)
                                  : Tokens.slate)
                 .contentTransition(.opacity)
-                .animation(.easeIn(duration: 0.2), value: revealed)
+                .animation(.easeOut(duration: 0.2), value: revealed)
         }
         .padding(.horizontal, 12).padding(.vertical, 5)
         .background(Capsule().fill(.white.opacity(0.05))
@@ -1361,7 +2449,7 @@ struct ContentView: View {
 
     private var opponentTopBar: some View {
         HStack(spacing: 20) {
-            ForEach(1..<4, id: \.self) { seat in
+            ForEach(1..<game.playerCount, id: \.self) { seat in
                 OpponentPortrait(seat: seat,
                                  name: game.name(of: seat),
                                  stack: game.displayedStack(of: seat),
@@ -1381,8 +2469,17 @@ struct ContentView: View {
     /// Phase 1 folgt dem Mockup: Brett als Hauptdarsteller, keine Gegnerleiste im
     /// ersten Blick, Kartenfächer als unterer Bleed.
     private var phase1Stage: some View {
-        VStack(spacing: 0) {
+        let dealActive = game.dealtCount < game.totalDeals && !game.trumpRevealed
+        let boardScale = guidedRoundActive
+            ? Tokens.guidedMeldBoardScale
+            : (dealActive ? 0.86 : 1)
+        let boardOffset = guidedRoundActive
+            ? Tokens.guidedMeldBoardOffsetY
+            : (dealActive ? 72 : 0)
+        return VStack(spacing: 0) {
             ringView
+                .scaleEffect(boardScale)
+                .offset(y: boardOffset)
                 .contentShape(Circle())
                 .onTapGesture {
                     if game.humanDealtVisible < game.humanHand.count {
@@ -1396,15 +2493,18 @@ struct ContentView: View {
                     animatableData: CGFloat(game.kollapsShock)))
                 .animation(.linear(duration: Tokens.kollapsShake),
                            value: game.kollapsShock)
+                .animation(.spring(response: 0.62, dampingFraction: 0.86),
+                           value: boardScale)
                 .padding(.top, 4)
             Spacer(minLength: 0)
             handView
+                .offset(y: -178)
+                .padding(.bottom, -178)
         }
     }
 
     private var ringView: some View {
         let d = Tokens.ringRadius * 2 + Tokens.tileDiameter
-        let overlayRadius = Tokens.ringRadius * 0.78
         // .position statt .offset: echte Layout-Frames, damit matchedGeometryEffect
         // beim Morph die korrekten Flugbahnen misst (§5b).
         return ZStack {
@@ -1422,19 +2522,71 @@ struct ContentView: View {
                             .strokeBorder(Tokens.smaragdVivid.opacity(0.12), lineWidth: 10)
                             .blur(radius: 6)
                     }
-                }
-            centerTile
-                .position(x: d / 2, y: d / 2)
+            }
+            if guidedRoundActive && guidedMeldBeat == 0 {
+                guidedBoardVeil(size: d)
+                    .position(x: d / 2, y: d / 2)
+                    .allowsHitTesting(false)
+            }
+            if !guidedRoundActive || guidedMeldBeat > 0 {
+                centerTile
+                    .position(PM49Geometry.wellCenter(for: .center, in: d))
+            }
             ForEach(PochRing.anchors) { anchor in
-                pm49PoolOverlay(anchor.pool)
-                    .matchedGeometryEffect(
-                        id: anchor.pool == .poch ? "pochPot" : "tile-\(anchor.pool.rawValue)",
-                        in: morph)
-                    .position(x: d / 2 + pm49Offset(anchor.angle, radius: overlayRadius).width,
-                              y: d / 2 + pm49Offset(anchor.angle, radius: overlayRadius).height)
+                if !guidedRoundActive || guidedMeldBeat > 0 {
+                    pm49PoolOverlay(anchor.pool)
+                        .matchedGeometryEffect(
+                            id: anchor.pool == .poch ? "pochPot" : "tile-\(anchor.pool.rawValue)",
+                            in: morph)
+                        .position(PM49Geometry.wellCenter(for: anchor.pool, in: d))
+                }
+            }
+            if !guidedRoundActive || guidedMeldBeat > 0 {
+                PM49FrontLipOverlay(size: d, includesCenter: true)
+                    .position(x: d / 2, y: d / 2)
+            }
+            ForEach(PochRing.anchors) { anchor in
+                if !guidedRoundActive || guidedMeldBeat > 0 || anchor.pool == guidedIntroPool {
+                    PocketValueMarker(pool: anchor.pool,
+                                      chips: guidedRoundActive && guidedMeldBeat == 0
+                                        ? 0 : game.displayedChips(in: anchor.pool),
+                                      tint: theme.tint(anchor.pool),
+                                      showChipCount: false)
+                        .position(PM49Geometry.notationCenter(for: anchor.pool, in: d))
+                }
+            }
+            if guidedRoundActive && guidedMeldBeat == 0 {
+                Text(String(localized: "board.center", defaultValue: "MITTE"))
+                    .font(.system(size: 8.4, weight: .heavy, design: .rounded))
+                    .tracking(1.1)
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
+                    .position(PM49Geometry.wellCenter(for: .center, in: d))
             }
         }
         .frame(width: d, height: d)
+    }
+
+    private var guidedIntroPool: Pool {
+        game.meldEvents.first?.pool ?? .ace
+    }
+
+    private func guidedBoardVeil(size: CGFloat) -> some View {
+        let center = PM49Geometry.wellCenter(for: .center, in: size)
+        let outer = PM49Geometry.wellCenter(for: guidedIntroPool, in: size)
+        return Path { path in
+            path.addRect(CGRect(origin: .zero, size: CGSize(width: size, height: size)))
+            path.addEllipse(in: CGRect(x: center.x - size * 0.15,
+                                       y: center.y - size * 0.15,
+                                       width: size * 0.30,
+                                       height: size * 0.30))
+            path.addEllipse(in: CGRect(x: outer.x - size * 0.105,
+                                       y: outer.y - size * 0.105,
+                                       width: size * 0.21,
+                                       height: size * 0.21))
+        }
+        .fill(Color.black.opacity(0.72), style: FillStyle(eoFill: true))
+        .frame(width: size, height: size)
+        .compositingGroup()
     }
 
     private func pm49Offset(_ angle: Double, radius: CGFloat) -> CGSize {
@@ -1452,31 +2604,15 @@ struct ContentView: View {
                     .transition(.scale(scale: 0.82).combined(with: .opacity))
             }
             if chips > 0 {
-                ZStack {
-                    ForEach(0..<min(chips, 7), id: \.self) { i in
-                        let angle = Double(i) * 137.5 * .pi / 180
-                        let radius = CGFloat(i % 3) * 3.6
-                        TableChip(tint: tint, size: 10.5)
-                            .offset(x: cos(angle) * radius,
-                                    y: sin(angle) * radius - CGFloat(i) * 0.5)
-                            .zIndex(Double(i))
-                    }
-                    Text("+\(chips)")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Tokens.jewelPlatin)
-                        .shadow(color: .black.opacity(0.9), radius: 2, y: 1)
-                        .offset(y: 21)
-                        .contentTransition(.numericText())
-                }
+                RecessedTokenPile(count: chips,
+                                  tint: tint,
+                                  diameter: 58,
+                                  showCount: false)
+                    .contentTransition(.numericText())
             } else {
-                VStack(spacing: 3) {
-                    Text(pool.indexLabel)
-                        .font(.system(size: pool.indexLabel.count > 2 ? 8 : 14, weight: .heavy))
-                    Text("·")
-                        .font(.system(size: 12, weight: .bold))
-                }
-                .foregroundStyle(tint.opacity(theme.isNeon ? 0.95 : 0.74))
-                .shadow(color: .black.opacity(0.85), radius: 2, y: 1)
+                Circle()
+                    .fill(tint.opacity(theme.isNeon ? 0.72 : 0.38))
+                    .frame(width: 3.5, height: 3.5)
             }
         }
         .frame(width: 58, height: 58)
@@ -1540,28 +2676,29 @@ struct ContentView: View {
         let chips = game.displayedChips(in: .center)
         return ZStack {
             if chips > 0 {
-                ZStack {
-                    ForEach(0..<min(chips, 10), id: \.self) { i in
-                        let angle = Double(i) * 137.5 * .pi / 180
-                        let radius = CGFloat(i % 4) * 4.2
-                        TableChip(tint: Tokens.jewelPlatin.opacity(0.9), size: 13)
-                            .offset(x: cos(angle) * radius,
-                                    y: sin(angle) * radius - CGFloat(i) * 0.6)
-                    }
-                    Text("\(chips)")
-                        .font(.system(size: 20, weight: .heavy))
-                        .foregroundStyle(Tokens.jewelPlatin)
-                        .shadow(color: .black.opacity(0.8), radius: 2, y: 1)
-                        .offset(y: 28)
-                        .contentTransition(.numericText())
-                }
+                RecessedTokenPile(count: chips,
+                                  tint: Tokens.jewelGold,
+                                  diameter: 88,
+                                  showCount: false)
             } else {
-                VStack(spacing: 2) {
-                    Text("MITTE").font(.system(size: 8, weight: .semibold)).tracking(1)
-                    Text("·").font(.system(size: 22, weight: .bold))
-                }
-                .foregroundStyle(Tokens.jewelPlatin.opacity(0.82))
-                .shadow(color: .black.opacity(0.9), radius: 2, y: 1)
+                Circle()
+                    .fill(Tokens.jewelPlatin.opacity(0.30))
+                    .frame(width: 4, height: 4)
+            }
+
+            Text("MITTE")
+                .font(.system(size: 7.2, weight: .bold, design: .rounded))
+                .tracking(1.1)
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.62))
+                .offset(y: -38)
+
+            if chips > 0 {
+                Text("\(chips)")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Tokens.jewelGold)
+                    .contentTransition(.numericText())
+                    .shadow(color: .black.opacity(0.92), radius: 2, y: 1)
+                    .offset(y: 39)
             }
         }
         .frame(width: Tokens.centerDiameter, height: Tokens.centerDiameter)

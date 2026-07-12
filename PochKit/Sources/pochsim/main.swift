@@ -13,6 +13,13 @@ if CommandLine.arguments.contains("kollaps") {
     exit(0)
 }
 
+// Subkommando "dead-hands": misst das UX-Risiko von Händen, die weder eine
+// Meldeauszahlung noch eine Poch-Berechtigung besitzen.
+if CommandLine.arguments.contains("dead-hands") {
+    runDeadHandAnalysis(dealsPerPlayerCount: 100_000)
+    exit(0)
+}
+
 // Monte-Carlo-Sweep für die Economy-Kalibrierung (Spec Abschnitt 14, Phase-1-Exit).
 // Zufalls-Baseline: alle Entscheidungen gleichverteilt legal - Bot-Profile ersetzen das in
 // Phase 4, dann wird nachkalibriert (nur Parameter, nie Regeln).

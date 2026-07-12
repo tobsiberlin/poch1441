@@ -4,6 +4,17 @@ import SwiftUI
 /// Shared table pieces. These are deliberately code-rendered so the app keeps
 /// moving while final raster/3D assets are still being refined.
 
+enum OpponentMood: Equatable {
+    case neutral
+    case thinking
+    case passed
+    case called
+    case pressure
+    case winning
+    case tense
+    case surprised
+}
+
 struct OpponentPortrait: View {
     let seat: Int
     let name: String
@@ -11,18 +22,25 @@ struct OpponentPortrait: View {
     var caption: String? = nil
     var isActive: Bool = true
     var isFocus: Bool = false
+    var mood: OpponentMood = .neutral
     var size: CGFloat = 62
     var showsText: Bool = true
     let morph: Namespace.ID?
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var currentPortraitAsset = ""
+    @State private var previousPortraitAsset: String?
+    @State private var portraitReveal = true
+    @State private var portraitTransitionTask: Task<Void, Never>?
+
     private var palette: (skin: Color, coat: Color, accent: Color) {
         switch seat % 3 {
         case 1:
-            return (Color(hex: 0xC98E62), Color(hex: 0x253D3A), Tokens.jewelSmaragd)
+            return (Color(hex: 0xCFA884), Color(hex: 0x1E3432), Tokens.jewelSmaragd)
         case 2:
-            return (Color(hex: 0xD6A37A), Color(hex: 0x3A2639), Tokens.jewelAmethyst)
+            return (Color(hex: 0xD9B18D), Color(hex: 0x332135), Tokens.jewelAmethyst)
         default:
-            return (Color(hex: 0xB97858), Color(hex: 0x3C3024), Tokens.jewelGold)
+            return (Color(hex: 0xB98A68), Color(hex: 0x33271C), Tokens.jewelGold)
         }
     }
 
@@ -32,7 +50,6 @@ struct OpponentPortrait: View {
                 .frame(width: size, height: size)
                 .opacity(isActive ? 1 : 0.46)
                 .saturation(isActive ? 1 : 0.22)
-                .scaleEffect(isFocus ? 1.06 : 1)
                 .animation(.easeInOut(duration: 0.24), value: isFocus)
                 .ifLet(morph) { view, namespace in
                     view.matchedGeometryEffect(id: "token\(seat)", in: namespace)
@@ -57,6 +74,15 @@ struct OpponentPortrait: View {
                 }
             }
         }
+        .onAppear {
+            currentPortraitAsset = portraitAssetName
+        }
+        .onChange(of: portraitAssetName) { _, nextAsset in
+            beginPortraitTransition(to: nextAsset)
+        }
+        .onDisappear {
+            portraitTransitionTask?.cancel()
+        }
     }
 
     private var portrait: some View {
@@ -76,103 +102,172 @@ struct OpponentPortrait: View {
                 .shadow(color: isFocus ? p.accent.opacity(0.22) : .black.opacity(0.35),
                         radius: isFocus ? 10 : 4, y: 3)
 
-            // Warm painterly placeholder: face, hair, coat and small gesture.
-            // Final portraits can replace this without changing layout contracts.
-            VStack(spacing: 0) {
-                ZStack {
-                    if seat == 2 {
-                        Path { path in
-                            path.move(to: CGPoint(x: size * 0.37, y: size * 0.32))
-                            path.addLine(to: CGPoint(x: size * 0.63, y: size * 0.32))
-                            path.addLine(to: CGPoint(x: size * 0.56, y: size * 0.20))
-                            path.addLine(to: CGPoint(x: size * 0.44, y: size * 0.20))
-                            path.closeSubpath()
-                        }
-                        .fill(Tokens.jewelGold.opacity(0.72))
-                        .offset(y: -size * 0.08)
-                    }
-                    Circle()
-                        .fill(LinearGradient(colors: [p.skin.opacity(0.98), p.skin.opacity(0.62)],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: size * 0.36, height: size * 0.36)
-                    Capsule()
-                        .fill(Color(hex: 0x17100D).opacity(seat == 2 ? 0.25 : 0.55))
-                        .frame(width: size * 0.33, height: size * 0.13)
-                        .offset(y: -size * 0.12)
-                    if seat == 2 {
-                        HStack(spacing: size * 0.25) {
-                            Capsule()
-                                .fill(Color(hex: 0xE1B98A).opacity(0.46))
-                            Capsule()
-                                .fill(Color(hex: 0xE1B98A).opacity(0.46))
-                        }
-                        .frame(width: size * 0.46, height: size * 0.22)
-                        .offset(y: size * 0.03)
-                    }
-                    if seat == 1 {
-                        Capsule()
-                            .fill(Color(hex: 0x24150F).opacity(0.65))
-                            .frame(width: size * 0.18, height: size * 0.08)
-                            .offset(y: size * 0.07)
-                    }
-                    if seat == 0 || seat == 3 {
-                        HStack(spacing: size * 0.015) {
-                            Circle().stroke(Color(hex: 0x141017).opacity(0.74), lineWidth: max(0.7, size * 0.018))
-                            Rectangle()
-                                .fill(Color(hex: 0x141017).opacity(0.62))
-                                .frame(width: size * 0.05, height: max(0.6, size * 0.012))
-                            Circle().stroke(Color(hex: 0x141017).opacity(0.74), lineWidth: max(0.7, size * 0.018))
-                        }
-                        .frame(width: size * 0.24, height: size * 0.07)
-                        .offset(y: -size * 0.01)
-                    } else {
-                        HStack(spacing: size * 0.07) {
-                            Circle().fill(Color(hex: 0x141017).opacity(0.75))
-                            Circle().fill(Color(hex: 0x141017).opacity(0.75))
-                        }
-                        .frame(width: size * 0.17, height: size * 0.026)
-                        .offset(y: -size * 0.01)
-                    }
-                    Path { path in
-                        path.move(to: CGPoint(x: size * 0.49, y: size * 0.51))
-                        path.addQuadCurve(to: CGPoint(x: size * 0.54, y: size * 0.51),
-                                          control: CGPoint(x: size * 0.515, y: size * 0.55))
-                    }
-                    .stroke(Color(hex: 0x3A241E).opacity(0.38), lineWidth: max(0.6, size * 0.01))
-                }
-                .offset(y: size * 0.03)
-
-                Path { path in
-                    path.move(to: CGPoint(x: size * 0.25, y: size * 0.70))
-                    path.addQuadCurve(to: CGPoint(x: size * 0.75, y: size * 0.70),
-                                      control: CGPoint(x: size * 0.50, y: size * 0.49))
-                    path.addLine(to: CGPoint(x: size * 0.82, y: size * 0.92))
-                    path.addLine(to: CGPoint(x: size * 0.18, y: size * 0.92))
-                    path.closeSubpath()
-                }
-                .fill(LinearGradient(colors: [p.coat.opacity(0.98), p.coat.opacity(0.54)],
-                                     startPoint: .top, endPoint: .bottom))
-                .overlay(
-                    ZStack {
-                        Path { path in
-                            path.move(to: CGPoint(x: size * 0.5, y: size * 0.57))
-                            path.addLine(to: CGPoint(x: size * 0.5, y: size * 0.90))
-                        }
-                        .stroke(p.accent.opacity(0.45), lineWidth: max(0.8, size * 0.018))
-
-                        if seat == 1 {
-                            RoundedRectangle(cornerRadius: size * 0.025)
-                                .stroke(Tokens.jewelGold.opacity(0.34), lineWidth: max(0.6, size * 0.012))
-                                .frame(width: size * 0.28, height: size * 0.16)
-                                .offset(y: size * 0.18)
-                        }
-                    }
-                )
-                .frame(width: size, height: size * 0.42)
-                .offset(y: -size * 0.02)
-            }
-            .clipShape(Circle())
+            portraitLayers
+                .frame(width: size - 5, height: size - 5)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Tokens.jewelPlatin.opacity(0.12), lineWidth: 0.7))
         }
+    }
+
+    private var portraitLayers: some View {
+        ZStack {
+            if let previousPortraitAsset {
+                portraitImage(previousPortraitAsset)
+                    .opacity(portraitReveal ? 0 : 1)
+                    .blur(radius: reduceMotion ? 0 : (portraitReveal ? 0.55 : 0))
+            }
+
+            portraitImage(currentPortraitAsset.isEmpty ? portraitAssetName : currentPortraitAsset)
+                .opacity(previousPortraitAsset == nil || portraitReveal ? 1 : 0)
+                .blur(radius: reduceMotion ? 0 : (portraitReveal ? 0 : 0.45))
+
+            RadialGradient(colors: [
+                palette.accent.opacity(portraitReveal ? 0 : 0.09),
+                .clear
+            ], center: .topLeading, startRadius: 2, endRadius: size * 0.72)
+            .allowsHitTesting(false)
+        }
+    }
+
+    private func portraitImage(_ asset: String) -> some View {
+        Image(asset)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFill()
+    }
+
+    private func beginPortraitTransition(to nextAsset: String) {
+        portraitTransitionTask?.cancel()
+        let outgoing = currentPortraitAsset.isEmpty ? portraitAssetName : currentPortraitAsset
+        guard outgoing != nextAsset else { return }
+        previousPortraitAsset = outgoing
+        currentPortraitAsset = nextAsset
+        portraitReveal = false
+        let duration = reduceMotion ? 0.16 : 0.42
+        withAnimation(reduceMotion
+                      ? .linear(duration: duration)
+                      : .timingCurve(0.22, 0.72, 0.20, 1, duration: duration)) {
+            portraitReveal = true
+        }
+        portraitTransitionTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(duration + 0.03))
+            guard !Task.isCancelled else { return }
+            previousPortraitAsset = nil
+        }
+    }
+
+    private var portraitAssetName: String {
+        let expression: String
+        switch mood {
+        case .thinking, .tense:
+            expression = "Thinking"
+        case .pressure:
+            expression = "Pressure"
+        case .winning:
+            expression = "Winning"
+        case .passed:
+            expression = "Defeated"
+        case .surprised:
+            expression = "Surprised"
+        case .neutral, .called:
+            expression = "Neutral"
+        }
+        return "Opponent\(name)\(expression)"
+    }
+
+    private var expressionLayer: some View {
+        ZStack {
+            browLayer
+            eyeLayer
+            mouthLayer
+            if mood == .thinking || mood == .pressure || mood == .winning {
+                moodGesture
+            }
+        }
+    }
+
+    @ViewBuilder private var eyeLayer: some View {
+        HStack(spacing: size * 0.075) {
+            eyeShape
+            eyeShape
+        }
+        .frame(width: size * 0.21, height: size * 0.035)
+        .offset(y: -size * 0.012)
+    }
+
+    private var eyeShape: some View {
+        Group {
+            switch mood {
+            case .passed:
+                Capsule()
+                    .fill(Color(hex: 0x141017).opacity(0.62))
+                    .frame(width: size * 0.052, height: max(0.8, size * 0.011))
+            case .pressure, .tense:
+                RoundedRectangle(cornerRadius: size * 0.006)
+                    .fill(Color(hex: 0x141017).opacity(0.82))
+                    .frame(width: size * 0.044, height: size * 0.020)
+            default:
+                Capsule()
+                    .fill(Color(hex: 0x141017).opacity(0.75))
+                    .frame(width: size * 0.044, height: size * 0.014)
+            }
+        }
+    }
+
+    @ViewBuilder private var browLayer: some View {
+        if mood == .thinking || mood == .pressure || mood == .tense {
+            HStack(spacing: size * 0.075) {
+                Capsule()
+                    .fill(Color(hex: 0x141017).opacity(0.52))
+                    .frame(width: size * 0.06, height: max(0.7, size * 0.012))
+                    .rotationEffect(.degrees(mood == .pressure ? 18 : -10))
+                Capsule()
+                    .fill(Color(hex: 0x141017).opacity(0.52))
+                    .frame(width: size * 0.06, height: max(0.7, size * 0.012))
+                    .rotationEffect(.degrees(mood == .pressure ? -18 : 10))
+            }
+            .offset(y: -size * 0.07)
+        }
+    }
+
+    private var mouthLayer: some View {
+        Path { path in
+            switch mood {
+            case .passed:
+                path.move(to: CGPoint(x: size * 0.48, y: size * 0.525))
+                path.addLine(to: CGPoint(x: size * 0.55, y: size * 0.525))
+            case .pressure, .called, .winning:
+                path.move(to: CGPoint(x: size * 0.48, y: size * 0.51))
+                path.addQuadCurve(to: CGPoint(x: size * 0.55, y: size * 0.51),
+                                  control: CGPoint(x: size * 0.515, y: mood == .winning ? size * 0.565 : size * 0.545))
+            case .tense:
+                path.move(to: CGPoint(x: size * 0.49, y: size * 0.535))
+                path.addQuadCurve(to: CGPoint(x: size * 0.55, y: size * 0.535),
+                                  control: CGPoint(x: size * 0.52, y: size * 0.505))
+            default:
+                path.move(to: CGPoint(x: size * 0.49, y: size * 0.51))
+                path.addQuadCurve(to: CGPoint(x: size * 0.54, y: size * 0.51),
+                                  control: CGPoint(x: size * 0.515, y: size * 0.535))
+            }
+        }
+        .stroke(Color(hex: 0x3A241E).opacity(0.40), lineWidth: max(0.65, size * 0.010))
+    }
+
+    private var moodGesture: some View {
+        let p = palette
+        return Circle()
+            .fill(p.accent.opacity(mood == .thinking ? 0.22 : 0.34))
+            .overlay(Circle().strokeBorder(p.accent.opacity(0.48), lineWidth: max(0.6, size * 0.012)))
+            .overlay {
+                if mood == .pressure || mood == .winning {
+                    Circle()
+                        .fill(Tokens.jewelPlatin.opacity(0.42))
+                        .frame(width: size * 0.035, height: size * 0.035)
+                }
+            }
+            .frame(width: size * 0.16, height: size * 0.16)
+            .offset(x: size * 0.20, y: mood == .thinking ? -size * 0.19 : -size * 0.14)
+            .shadow(color: p.accent.opacity(0.26), radius: 5)
     }
 }
 
@@ -185,117 +280,264 @@ struct OpponentPanel: View {
     let actionTint: Color
     let isActive: Bool
     let isFocus: Bool
+    var mood: OpponentMood = .neutral
     var width: CGFloat = 110
     let morph: Namespace.ID?
 
     private var role: String {
         switch seat % 3 {
         case 1: return "ruhig"
-        case 2: return "präzise"
+        case 2: return "taktisch"
         default: return "wach"
         }
     }
 
     var body: some View {
-        VStack(spacing: 6) {
-            ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(LinearGradient(colors: [
-                        Color(hex: 0x17141C).opacity(isActive ? 0.96 : 0.56),
-                        Color(hex: 0x0C0B10).opacity(isActive ? 0.98 : 0.62)
-                    ], startPoint: .top, endPoint: .bottom))
-                    .overlay(RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder((isFocus ? actionTint : Tokens.jewelGold).opacity(isFocus ? 0.72 : 0.24),
-                                      lineWidth: isFocus ? 1.5 : 1))
-                    .shadow(color: isFocus ? actionTint.opacity(0.18) : .black.opacity(0.28),
-                            radius: isFocus ? 12 : 5, y: 4)
+        let compact = width < 100
+        VStack(spacing: 3) {
+            ZStack {
+                opponentCardBacks
+                    .offset(y: -14)
+                    .opacity(isActive ? 0.78 : 0.18)
 
-                VStack(spacing: 5) {
-                    ZStack(alignment: .top) {
-                        miniBacks
-                            .offset(y: -5)
-                        OpponentPortrait(seat: seat,
-                                         name: name,
-                                         isActive: isActive,
-                                         isFocus: isFocus,
-                                         size: 52,
-                                         showsText: false,
-                                         morph: morph)
-                            .offset(y: 2)
-                    }
-                    .frame(height: 62)
+                Circle()
+                    .fill(RadialGradient(colors: [
+                        Color(hex: 0x19151F).opacity(isActive ? 0.96 : 0.42),
+                        Color(hex: 0x08070B).opacity(isActive ? 0.92 : 0.58)
+                    ], center: .topLeading, startRadius: 4, endRadius: 58))
+                    .overlay(Circle().strokeBorder(
+                        LinearGradient(colors: [
+                            (isFocus ? actionTint : Tokens.jewelGold).opacity(isFocus ? 0.84 : 0.32),
+                            Tokens.jewelPlatin.opacity(isFocus ? 0.20 : 0.06)
+                        ], startPoint: .top, endPoint: .bottom),
+                        lineWidth: isFocus ? 1.4 : 0.9))
+                    .frame(width: compact ? 58 : 66, height: compact ? 58 : 66)
+                    .shadow(color: isFocus ? actionTint.opacity(0.16) : .black.opacity(0.30),
+                            radius: isFocus ? 12 : 7, y: 4)
 
-                    VStack(spacing: 1) {
-                        Text(name)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(isActive ? Tokens.jewelPlatin.opacity(0.92) : Tokens.slate.opacity(0.55))
-                            .lineLimit(1)
-                        Text(role.uppercased())
-                            .font(.system(size: 7.5, weight: .semibold))
-                            .tracking(1.1)
-                            .foregroundStyle(Tokens.slate.opacity(0.64))
-                            .lineLimit(1)
-                    }
+                OpponentPortrait(seat: seat,
+                                 name: name,
+                                 isActive: isActive,
+                                 isFocus: isFocus,
+                                 mood: mood,
+                                 size: compact ? 54 : 62,
+                                 showsText: false,
+                                 morph: morph)
 
-                    HStack(spacing: 8) {
-                        stat("\(cards)", "Karten")
-                        stat("\(stack)", "Chips")
-                    }
-                }
-                .padding(.top, 8)
-                .padding(.horizontal, 7)
-                .padding(.bottom, 8)
-
-                if isFocus {
-                    Circle()
-                        .fill(actionTint)
-                        .frame(width: 8, height: 8)
-                        .shadow(color: actionTint.opacity(0.45), radius: 5)
-                        .padding(8)
+                if !reactionIsQuiet {
+                    reactionSpeechBubble
+                        .offset(y: -43)
+                        .transition(.scale(scale: 0.82, anchor: .bottom).combined(with: .opacity))
                 }
             }
-            .frame(width: width, height: 124)
+            .frame(width: width, height: compact ? 62 : 68)
 
-            Text(actionText)
-                .font(.system(size: 10.5, weight: .bold))
-                .foregroundStyle(actionTint == .clear ? .clear : Tokens.jewelPlatin.opacity(0.95))
-                .lineLimit(1)
-                .minimumScaleFactor(0.72)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .frame(width: width)
-                .background(Capsule().fill(actionTint.opacity(actionTint == .clear ? 0 : 0.26)))
-                .overlay(Capsule().strokeBorder(actionTint.opacity(actionTint == .clear ? 0 : 0.36), lineWidth: 0.8))
+            VStack(spacing: 1) {
+                Text(name)
+                    .font(.system(size: compact ? 12.2 : 13.2, weight: .heavy))
+                    .foregroundStyle(isActive ? Tokens.jewelPlatin.opacity(0.95) : Tokens.slate.opacity(0.42))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+
+                Text(role.uppercased())
+                    .font(.system(size: 6.7, weight: .heavy))
+                    .tracking(1.18)
+                    .foregroundStyle((isFocus ? actionTint : Tokens.slate).opacity(isActive ? 0.70 : 0.25))
+                    .lineLimit(1)
+            }
+
+            if reactionIsQuiet {
+                reactionBar
+                    .frame(width: width)
+            } else {
+                Color.clear.frame(height: 18)
+            }
         }
-        .opacity(isActive ? 1 : 0.46)
-        .saturation(isActive ? 1 : 0.18)
+        .frame(width: width, height: compact ? 96 : 104)
+        .opacity(isActive ? 1 : 0.64)
+        .saturation(isActive ? 1 : 0.34)
         .animation(.easeInOut(duration: 0.28), value: isFocus)
         .animation(.easeInOut(duration: 0.28), value: isActive)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            String(format: String(localized: "opponent.a11y.summary",
+                                  defaultValue: "%@, %d Karten, %d Chips, %@"),
+                   name, cards, stack, actionText)
+        )
     }
 
-    private var miniBacks: some View {
-        HStack(spacing: -15) {
+    private var seatBase: some View {
+        RoundedRectangle(cornerRadius: 22)
+            .fill(LinearGradient(colors: [
+                Color(hex: 0x17141B).opacity(isActive ? 0.54 : 0.22),
+                Color(hex: 0x08070B).opacity(isActive ? 0.82 : 0.42)
+            ], startPoint: .topLeading, endPoint: .bottomTrailing))
+            .overlay(RoundedRectangle(cornerRadius: 22)
+                .strokeBorder((isFocus ? actionTint : Tokens.jewelGold).opacity(isFocus ? 0.68 : 0.14),
+                              lineWidth: isFocus ? 1.25 : 0.8))
+            .shadow(color: isFocus ? actionTint.opacity(0.12) : .black.opacity(0.16),
+                    radius: isFocus ? 12 : 5, y: 4)
+            .frame(width: width, height: 46)
+            .offset(y: 8)
+    }
+
+    private var opponentCardBacks: some View {
+        HStack(spacing: -18) {
             ForEach(0..<3, id: \.self) { i in
-                CardBack(scale: 0.56)
-                    .opacity(isActive ? 0.82 : 0.56)
-                    .rotationEffect(.degrees(Double(i - 1) * 10), anchor: .bottom)
-                    .offset(y: CGFloat(abs(i - 1)) * 3)
-                    .shadow(color: .black.opacity(0.42), radius: 8, y: 5)
+                CardBack(scale: 0.205)
+                    .rotationEffect(.degrees(Double(i - 1) * 8))
+                    .offset(y: i == 1 ? -6 : -1)
+                    .shadow(color: .black.opacity(0.38), radius: 5, y: 3)
+                    .zIndex(Double(i))
             }
         }
-        .padding(.top, 4)
+        .frame(width: width, height: 42)
+    }
+
+    private var roleIcon: String {
+        switch seat % 3 {
+        case 1: return "cup.and.saucer.fill"
+        case 2: return "crown.fill"
+        default: return "eyeglasses"
+        }
+    }
+
+    private var reactionPill: some View {
+        reactionBar
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .frame(width: width)
+            .background(
+                Capsule()
+                    .fill(LinearGradient(colors: [
+                        reactionIsQuiet ? Color.white.opacity(0.045) : actionTint.opacity(0.24),
+                        reactionIsQuiet ? Color.white.opacity(0.025) : Color(hex: 0x111018).opacity(0.82)
+                    ], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .overlay(Capsule().strokeBorder(
+                        reactionIsQuiet ? Tokens.slate.opacity(0.18) : actionTint.opacity(0.40),
+                        lineWidth: 0.9))
+                    .shadow(color: reactionIsQuiet ? .clear : actionTint.opacity(0.14), radius: 7, y: 3)
+            )
+    }
+
+    private var reactionIsQuiet: Bool {
+        actionTint == .clear || actionText == "bereit"
+    }
+
+    private var reactionBadge: some View {
+        let quiet = reactionIsQuiet
+        let tint = quiet ? Tokens.slate : actionTint
+        return ZStack {
+            Circle()
+                .fill(RadialGradient(colors: [
+                    tint.opacity(quiet ? 0.20 : 0.54),
+                    Color(hex: 0x0B0910).opacity(0.94)
+                ], center: .topLeading, startRadius: 2, endRadius: 24))
+                .overlay(Circle().strokeBorder(tint.opacity(quiet ? 0.30 : 0.72), lineWidth: 1))
+                .shadow(color: tint.opacity(quiet ? 0.08 : 0.24), radius: quiet ? 4 : 9, y: 3)
+
+            Image(systemName: reactionIcon)
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(quiet ? Tokens.slate.opacity(0.82) : Tokens.jewelPlatin.opacity(0.96))
+                .symbolEffect(.pulse, options: .speed(0.75), value: isFocus)
+        }
+        .frame(width: 25, height: 25)
+        .accessibilityHidden(true)
+    }
+
+    private var reactionSpeechBubble: some View {
+        VStack(spacing: -1) {
+            HStack(spacing: 5) {
+                Image(systemName: reactionIcon)
+                    .font(.system(size: 8.5, weight: .heavy))
+                Text(actionText)
+                    .font(.system(size: 9.5, weight: .heavy))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+            }
+            .foregroundStyle(Tokens.jewelPlatin.opacity(0.96))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .frame(maxWidth: 94)
+            .background(
+                Capsule()
+                    .fill(Color(hex: 0x121017).opacity(0.96))
+                    .overlay(Capsule().strokeBorder(actionTint.opacity(0.60), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.46), radius: 8, y: 4)
+            )
+
+            Image(systemName: "triangle.fill")
+                .font(.system(size: 7, weight: .bold))
+                .foregroundStyle(Color(hex: 0x121017).opacity(0.96))
+                .rotationEffect(.degrees(180))
+        }
+        .accessibilityHidden(true)
+    }
+
+    private var reactionIcon: String {
+        if actionText.contains("überlegt") { return "ellipsis" }
+        if actionText.contains("passt") { return "xmark" }
+        if actionText.contains("geht") { return "checkmark" }
+        if actionText.contains("erhöht") { return "chevron.up" }
+        if actionText.contains("pocht") || actionText.contains("setzt") { return "hand.tap.fill" }
+        return isFocus ? "eye.fill" : "circle.fill"
+    }
+
+    private var reactionBar: some View {
+        let quiet = actionTint == .clear || actionText == "bereit"
+        return HStack(spacing: 5) {
+            Circle()
+                .fill(quiet ? Tokens.slate.opacity(0.42) : actionTint.opacity(0.92))
+                .frame(width: 5.5, height: 5.5)
+                .shadow(color: quiet ? .clear : actionTint.opacity(0.36), radius: 4)
+            Text(actionText)
+                .font(.system(size: 8.4, weight: quiet ? .semibold : .heavy))
+                .tracking(quiet ? 0.1 : 0.25)
+                .foregroundStyle(quiet ? Tokens.slate.opacity(0.78) : Tokens.jewelPlatin.opacity(0.96))
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 2.8)
+        .frame(maxWidth: .infinity)
+        .background(
+            Capsule()
+                .fill(LinearGradient(colors: [
+                    quiet ? Color.white.opacity(0.045) : actionTint.opacity(0.24),
+                    quiet ? Color.white.opacity(0.025) : Color(hex: 0x111018).opacity(0.82)
+                ], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(Capsule().strokeBorder(
+                    quiet ? Tokens.slate.opacity(0.18) : actionTint.opacity(0.40),
+                    lineWidth: 0.9))
+                .shadow(color: quiet ? .clear : actionTint.opacity(0.14), radius: 7, y: 3)
+        )
+    }
+
+    private func microStat(value: Int, suffix: String) -> some View {
+        HStack(spacing: 2) {
+            Text("\(value)")
+                .font(.system(size: 11.8, weight: .heavy))
+                .foregroundStyle(Tokens.jewelGold.opacity(0.92))
+                .contentTransition(.numericText())
+            Text(suffix)
+                .font(.system(size: 6.5, weight: .heavy))
+                .tracking(0.6)
+                .foregroundStyle(Tokens.slate.opacity(0.64))
+        }
+        .lineLimit(1)
     }
 
     private func stat(_ value: String, _ label: String) -> some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 1) {
             Text(value)
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: 10.4, weight: .heavy))
                 .foregroundStyle(Tokens.jewelGold.opacity(0.92))
             Text(label)
-                .font(.system(size: label.count > 2 ? 5.7 : 6.5, weight: .bold))
+                .font(.system(size: 5.2, weight: .heavy))
+                .tracking(0.25)
                 .foregroundStyle(Tokens.slate.opacity(0.62))
         }
-        .frame(width: 32)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -349,51 +591,177 @@ struct TableChip: View {
 
     var body: some View {
         ZStack {
-            Circle()
-                .fill(LinearGradient(colors: [
-                    tint.opacity(0.92),
-                    tint.opacity(0.72),
-                    Color(hex: 0x171018).opacity(0.62)
-                ], startPoint: .topLeading, endPoint: .bottomTrailing))
+            // Eine schmale dunkle Unterkante verankert den flachen Glasstein in der Mulde.
+            Ellipse()
+                .fill(Color.black.opacity(0.92))
+                .frame(width: size * 0.92, height: size * 0.76)
+                .offset(y: size * 0.10)
 
-            Circle()
-                .strokeBorder(Color.black.opacity(0.52), lineWidth: max(0.7, size * 0.055))
-                .padding(size * 0.03)
-
-            Circle()
-                .strokeBorder(Tokens.jewelPlatin.opacity(0.26), lineWidth: max(0.45, size * 0.035))
-                .padding(size * 0.12)
-
-            Circle()
-                .strokeBorder(Color.black.opacity(0.34), lineWidth: max(0.4, size * 0.025))
-                .padding(size * 0.30)
-
-            ForEach(0..<8, id: \.self) { i in
-                let angle = Double(i) * 45 * .pi / 180
-                Capsule()
-                    .fill(i % 2 == 0 ? Tokens.jewelPlatin.opacity(0.18) : Color.black.opacity(0.18))
-                    .frame(width: max(0.7, size * 0.055), height: max(1.8, size * 0.18))
-                    .rotationEffect(.radians(angle))
-                    .offset(x: cos(angle) * size * 0.31,
-                            y: sin(angle) * size * 0.31)
-            }
-
-            Circle()
-                .fill(RadialGradient(colors: [
-                    Tokens.jewelPlatin.opacity(0.18),
-                    tint.opacity(0.18),
-                    Color.clear
-                ], center: .topLeading, startRadius: 0, endRadius: size * 0.42))
-                .padding(size * 0.16)
+            Ellipse()
+                .fill(
+                    LinearGradient(colors: [
+                        Color.white.opacity(0.07),
+                        tint.opacity(0.52),
+                        tint.opacity(0.36),
+                        Color.black.opacity(0.74)
+                    ], startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
+                .frame(width: size, height: size * 0.82)
+                .overlay {
+                    Ellipse()
+                        .strokeBorder(
+                            LinearGradient(colors: [
+                                Color.white.opacity(0.30),
+                                tint.opacity(0.78),
+                                Color.black.opacity(0.88)
+                            ], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: max(0.75, size * 0.055)
+                        )
+                }
+                .overlay(alignment: .topLeading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.22))
+                        .frame(width: size * 0.28, height: max(1, size * 0.055))
+                        .blur(radius: size * 0.015)
+                        .offset(x: size * 0.19, y: size * 0.23)
+                }
         }
         .frame(width: size, height: size)
-        .overlay(alignment: .bottom) {
-            Capsule()
-                .fill(Color.black.opacity(0.22))
-                .frame(width: size * 0.78, height: max(1.2, size * 0.10))
-                .offset(y: size * 0.13)
+        .shadow(color: tint.opacity(0.08), radius: size * 0.035)
+        .shadow(color: .black.opacity(0.86), radius: size * 0.075, y: size * 0.065)
+        .accessibilityHidden(true)
+    }
+}
+
+/// PM68-Regel: schwere Tokens liegen als natürlich geschichtete Gruppe in der
+/// Mulde. Der Kontakt-Schatten bleibt hart, der Höhenschatten weich.
+struct TableTokenPile: View {
+    let count: Int
+    let tint: Color
+    var diameter: CGFloat
+    var showCount = true
+
+    // Handgesetzte, deterministische PM68-Ablage. Die ersten Token bilden sofort
+    // eine ausgewogene Gruppe; weitere Scheiben verdichten den Stapel nach innen.
+    private let offsets: [CGSize] = [
+        .init(width: -0.135, height: 0.105),
+        .init(width: 0.135, height: 0.105),
+        .init(width: -0.085, height: -0.115),
+        .init(width: 0.135, height: -0.125),
+        .init(width: -0.145, height: -0.045),
+        .init(width: 0.145, height: -0.070),
+        .init(width: -0.165, height: 0.025),
+        .init(width: 0.165, height: 0.025),
+        .init(width: -0.055, height: 0.155),
+        .init(width: 0.060, height: -0.165),
+        .init(width: -0.125, height: 0.135),
+        .init(width: 0.125, height: 0.135)
+    ]
+
+    var body: some View {
+        let shown = min(max(count, 1), offsets.count)
+        ZStack {
+            Ellipse()
+                .fill(Color.black.opacity(0.38))
+                .frame(width: diameter * 0.58, height: diameter * 0.22)
+                .blur(radius: diameter * 0.045)
+                .offset(y: diameter * 0.10)
+
+            ForEach(0..<shown, id: \.self) { index in
+                let offset = offsets[index]
+                TableChip(tint: tint, size: diameter * 0.43)
+                    .offset(x: offset.width * diameter,
+                            y: offset.height * diameter - CGFloat(index) * diameter * 0.006)
+                    .rotationEffect(.degrees(Double((index * 7) % 19) - 9))
+                    .zIndex(Double(index))
+            }
+
+            if showCount {
+                Text("\(count)")
+                    .font(.system(size: diameter * 0.17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Tokens.jewelPlatin)
+                    .shadow(color: .black.opacity(0.92), radius: 2, y: 1)
+                    .padding(.horizontal, diameter * 0.10)
+                    .padding(.vertical, diameter * 0.025)
+                    .background(Capsule().fill(Color.black.opacity(0.68)))
+                    .offset(y: diameter * 0.30)
+            }
         }
-        .shadow(color: .black.opacity(0.48), radius: size * 0.20, y: size * 0.13)
+        .frame(width: diameter, height: diameter)
+    }
+}
+
+/// Places a token group on the visible floor of a recessed board well. The
+/// lower wall is redrawn in front of the tokens so they read as contained.
+struct RecessedTokenPile: View {
+    let count: Int
+    let tint: Color
+    var diameter: CGFloat
+    var showCount = false
+
+    var body: some View {
+        ZStack {
+            Ellipse()
+                .fill(Color.black.opacity(0.72))
+                .frame(width: diameter * 0.62, height: diameter * 0.25)
+                .blur(radius: diameter * 0.035)
+                .offset(y: diameter * 0.12)
+
+            TableTokenPile(count: count,
+                           tint: tint,
+                           diameter: diameter * 1.08,
+                           showCount: showCount)
+                .offset(y: diameter * 0.065)
+                .frame(width: diameter * 0.84, height: diameter * 0.84)
+                .clipShape(Circle())
+
+            Circle()
+                .fill(
+                    LinearGradient(colors: [
+                        .clear,
+                        Color.black.opacity(0.06),
+                        Color.black.opacity(0.34)
+                    ], startPoint: .top, endPoint: .bottom)
+                )
+                .frame(width: diameter * 0.79, height: diameter * 0.79)
+                .offset(y: diameter * 0.025)
+                .allowsHitTesting(false)
+
+        }
+        .frame(width: diameter, height: diameter)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Engraved board notation placed on the inner guide ring, never on the coin floor.
+/// The mark remains readable when a well fills and keeps the physical bowl unobstructed.
+struct PocketValueMarker: View {
+    let pool: Pool
+    let chips: Int
+    let tint: Color
+    var compact = false
+    var showChipCount = true
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: compact ? 1.5 : 3) {
+            Text(pool.indexLabel)
+                .foregroundStyle(pool.indexLabel.count > 2
+                    ? Tokens.jewelPlatin.opacity(compact ? 0.84 : 0.96)
+                    : tint.opacity(compact ? 0.90 : 1))
+            if showChipCount, chips > 0 {
+                Text("·")
+                    .foregroundStyle(Tokens.jewelGold.opacity(0.68))
+                Text("\(chips)")
+                    .foregroundStyle(Tokens.jewelGold.opacity(compact ? 0.88 : 1))
+                    .contentTransition(.numericText())
+            }
+        }
+        .font(.system(size: compact ? 6.2 : 9.6,
+                      weight: .heavy,
+                      design: .rounded))
+        .tracking(pool.indexLabel.count > 2 ? (compact ? 0 : 0.25) : (compact ? 0.25 : 0.55))
+        .shadow(color: .black.opacity(0.95), radius: compact ? 1.5 : 2.5, y: 1)
+        .accessibilityLabel("\(pool.indexLabel), \(chips)")
     }
 }
 
@@ -433,14 +801,9 @@ struct PocketTile: View {
             if chips > 0 {
                 chipCluster(count: chips, tint: tint)
             } else if showLabel {
-                VStack(spacing: 1) {
-                    Text(pool.indexLabel)
-                        .font(.system(size: pool.indexLabel.count > 2 ? diameter * 0.14 : diameter * 0.22,
-                                      weight: .bold))
-                    Text("·")
-                        .font(.system(size: diameter * 0.18, weight: .bold))
-                }
-                .foregroundStyle(tint.opacity(theme.isNeon ? 0.95 : 0.78))
+                Circle()
+                    .fill(tint.opacity(theme.isNeon ? 0.72 : 0.42))
+                    .frame(width: diameter * 0.08, height: diameter * 0.08)
             }
         }
         .frame(width: diameter, height: diameter)
@@ -448,22 +811,7 @@ struct PocketTile: View {
     }
 
     private func chipCluster(count: Int, tint: Color) -> some View {
-        let shown = min(max(count, 1), 7)
-        return ZStack {
-            ForEach(0..<shown, id: \.self) { i in
-                let angle = Double(i) * 137.5 * .pi / 180
-                let radius = CGFloat(i == 0 ? 0 : 1 + (i % 3)) * diameter * 0.055
-                TableChip(tint: tint, size: diameter * 0.20)
-                    .offset(x: cos(angle) * radius,
-                            y: sin(angle) * radius - CGFloat(i) * diameter * 0.018)
-                    .zIndex(Double(i))
-            }
-            Text("+\(count)")
-                .font(.system(size: diameter * 0.17, weight: .heavy))
-                .foregroundStyle(Tokens.jewelPlatin)
-                .shadow(color: .black.opacity(0.8), radius: 2, y: 1)
-                .offset(y: diameter * 0.28)
-        }
+        TableTokenPile(count: count, tint: tint, diameter: diameter * 0.72, showCount: false)
     }
 }
 

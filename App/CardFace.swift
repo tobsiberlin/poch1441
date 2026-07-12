@@ -93,6 +93,8 @@ struct CardFace: View {
         .shadow(
             color: accent != nil ? .clear : .black.opacity(0.20),
             radius: 8 * scale, x: -1.2 * scale, y: 3.8 * scale)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(card.rank.index) \(card.suit.symbol)")
     }
 
     // MARK: - SVG-Asset (Bildkarten + Asse)

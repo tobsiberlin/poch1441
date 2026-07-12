@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "profiles": [
+    { "name": "Liv", "profile": { "openAggression": 0.38, "bluffFrequency": 0.08, "riskTolerance": 0.43, "raiseAggression": 0.40, "thinkSecondsMin": 0.58, "thinkSecondsMax": 1.08 } },
+    { "name": "Mara", "profile": { "openAggression": 0.54, "bluffFrequency": 0.16, "riskTolerance": 0.56, "raiseAggression": 0.58, "thinkSecondsMin": 0.48, "thinkSecondsMax": 0.94 } },
+    { "name": "Nina", "profile": { "openAggression": 0.29, "bluffFrequency": 0.04, "riskTolerance": 0.36, "raiseAggression": 0.34, "thinkSecondsMin": 0.72, "thinkSecondsMax": 1.20 } },
+    { "name": "Thomas", "profile": { "openAggression": 0.33, "bluffFrequency": 0.05, "riskTolerance": 0.48, "raiseAggression": 0.42, "thinkSecondsMin": 0.62, "thinkSecondsMax": 1.14 } },
+    { "name": "Jonas", "profile": { "openAggression": 0.70, "bluffFrequency": 0.22, "riskTolerance": 0.66, "raiseAggression": 0.72, "thinkSecondsMin": 0.34, "thinkSecondsMax": 0.78 } },
+    { "name": "Leon", "profile": { "openAggression": 0.59, "bluffFrequency": 0.12, "riskTolerance": 0.58, "raiseAggression": 0.64, "thinkSecondsMin": 0.44, "thinkSecondsMax": 0.88 } },
+    { "name": "Noah", "profile": { "openAggression": 0.47, "bluffFrequency": 0.18, "riskTolerance": 0.50, "raiseAggression": 0.48, "thinkSecondsMin": 0.52, "thinkSecondsMax": 1.02 } },
+    { "name": "Finn", "profile": { "openAggression": 0.76, "bluffFrequency": 0.28, "riskTolerance": 0.72, "raiseAggression": 0.78, "thinkSecondsMin": 0.30, "thinkSecondsMax": 0.70 } },
+    { "name": "Hana", "profile": { "openAggression": 0.42, "bluffFrequency": 0.07, "riskTolerance": 0.54, "raiseAggression": 0.52, "thinkSecondsMin": 0.64, "thinkSecondsMax": 1.16 } },
+    { "name": "Darius", "profile": { "openAggression": 0.63, "bluffFrequency": 0.20, "riskTolerance": 0.61, "raiseAggression": 0.68, "thinkSecondsMin": 0.40, "thinkSecondsMax": 0.84 } },
+    { "name": "Samir", "profile": { "openAggression": 0.36, "bluffFrequency": 0.10, "riskTolerance": 0.46, "raiseAggression": 0.38, "thinkSecondsMin": 0.70, "thinkSecondsMax": 1.22 } }
+  ]
+}

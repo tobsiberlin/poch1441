@@ -69,6 +69,80 @@ enum PochRing {
     ]
 }
 
+/// Calibrated overlay geometry for the rendered PM49 board asset.
+/// The photographed board is slightly foreshortened, so a mathematical circle
+/// does not line up with the visible well floors.
+enum PM49Geometry {
+    static func wellCenter(for pool: Pool, in size: CGFloat) -> CGPoint {
+        let normalized: CGPoint
+        switch pool {
+        case .king:     normalized = CGPoint(x: 0.512, y: 0.140)
+        case .queen:    normalized = CGPoint(x: 0.735, y: 0.224)
+        case .mariage:  normalized = CGPoint(x: 0.842, y: 0.435)
+        case .jack:     normalized = CGPoint(x: 0.744, y: 0.674)
+        case .ten:      normalized = CGPoint(x: 0.513, y: 0.797)
+        case .sequence: normalized = CGPoint(x: 0.251, y: 0.671)
+        case .poch:     normalized = CGPoint(x: 0.167, y: 0.433)
+        case .ace:      normalized = CGPoint(x: 0.293, y: 0.222)
+        case .center:   normalized = CGPoint(x: 0.510, y: 0.474)
+        }
+        return CGPoint(x: normalized.x * size, y: normalized.y * size)
+    }
+
+    static func notationCenter(for pool: Pool, in size: CGFloat) -> CGPoint {
+        let center = wellCenter(for: .center, in: size)
+        let well = wellCenter(for: pool, in: size)
+        let progress: CGFloat = 0.61
+        return CGPoint(x: center.x + (well.x - center.x) * progress,
+                       y: center.y + (well.y - center.y) * progress)
+    }
+}
+
+/// Reuses the photographed PM49 material as the foreground wall of every well.
+/// Tokens therefore disappear behind the real graphite and inlay edge instead
+/// of receiving a synthetic UI border.
+struct PM49FrontLipOverlay: View {
+    let size: CGFloat
+    var includesCenter = false
+
+    var body: some View {
+        Image("PochRingPM49")
+            .resizable()
+            .interpolation(.high)
+            .scaledToFill()
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+            .mask {
+                Canvas { context, _ in
+                    var path = Path()
+                    for pool in Pool.allCases where pool != .center {
+                        addLip(for: pool, radius: size * 0.083, to: &path)
+                    }
+                    if includesCenter {
+                        addLip(for: .center, radius: size * 0.125, to: &path)
+                    }
+                    context.stroke(path,
+                                   with: .color(.white),
+                                   style: StrokeStyle(lineWidth: size * 0.018,
+                                                      lineCap: .round))
+                }
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    private func addLip(for pool: Pool, radius: CGFloat, to path: inout Path) {
+        let center = PM49Geometry.wellCenter(for: pool, in: size)
+        path.move(to: CGPoint(x: center.x - radius * 0.96,
+                              y: center.y + radius * 0.14))
+        path.addQuadCurve(
+            to: CGPoint(x: center.x + radius * 0.96,
+                        y: center.y + radius * 0.14),
+            control: CGPoint(x: center.x, y: center.y + radius * 1.92)
+        )
+    }
+}
+
 extension Suit {
     var symbol: String {
         switch self {

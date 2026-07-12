@@ -6,9 +6,29 @@ xcuserdata/
 Assets_Raw/
 *.p8
 *.key
+fastlane/.env.local
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/README.md
+build/
+*.xcarchive
+*.ipa
 # Wegwerf-QA (Screenshots/Videos) - nicht ins Repo, Cockpit hat Downscale-Embeds
 artifacts/qa/
 *.mp4
 *.wav
+.poch-simulator-udid
 # Sichtungs-Kacheln sind Wegwerf - das Cockpit traegt die Embeds, Skripte+Seeds reproduzieren
 artifacts/sichtung1/
+# Reproduzierbare visuelle QA- und Generierungsresultate bleiben lokal.
+artifacts/app-screens/
+artifacts/board-direction-*/
+artifacts/board-exploration-*/
+artifacts/opponent-casting/
+artifacts/opponent-expression-*/
+artifacts/opponent-motion/
+artifacts/opponent-roster/
+artifacts/opponents/
+artifacts/physical-board/
