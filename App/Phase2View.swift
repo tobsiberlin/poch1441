@@ -317,7 +317,7 @@ struct Phase2View: View {
                 }
 
                 HStack(spacing: 8) {
-                    pressureMetric("EINSATZ", "\(presentedPot)", pochAccent)
+                    pressureMetric("EINSATZ", "\(Int(bid))", pochAccent)
                     pressureMetric("MULDE", "+\(game.pochPool)", Tokens.jewelGold)
                     pressureMetric("LIMIT", cap, Tokens.slate, muted: true)
                     pressureMetric("DU", "\(committed)", theme.isNeon ? Tokens.smaragdVivid : Tokens.smaragdText)
@@ -1177,8 +1177,9 @@ private struct GuidedFocusModifier: ViewModifier {
     func body(content: Content) -> some View {
         let isDeemphasized = isActive && !isRelevant
         content
-            .blur(radius: isDeemphasized && !reduceMotion ? Tokens.guidedFocusBlur : 0)
-            .opacity(isDeemphasized ? Tokens.guidedFocusOpacity : 1)
+            // Fokus bleibt scharf. Blur lässt Kartenindizes und feine
+            // Brettkanten wie fehlerhafte Doppelbilder wirken.
+            .opacity(isDeemphasized ? 0.42 : 1)
             .scaleEffect(isActive && isRelevant && !reduceMotion ? 1.012 : 1)
             .animation(
                 reduceMotion

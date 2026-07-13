@@ -132,9 +132,9 @@ struct ContentView: View {
             .overlay { tutorialCompletionOverlay }
             .overlay(alignment: .top) { tutorialMilestoneOverlay }
             .overlay {
-                if akt == .melden,
-                   (guidedRoundActive || (assistHints && moveCoach)),
-                   activeOverlay == nil {
+                if akt == .melden, activeOverlay == nil,
+                   (isGuidedOpeningBeat ||
+                    (!guidedRoundActive && assistHints && moveCoach)) {
                     guidedCoachPlacement
                 }
             }
@@ -701,8 +701,15 @@ struct ContentView: View {
 
     private func transition(to next: Akt) {
         recordTutorialTransition(from: akt, to: next)
-        withAnimation(.spring(duration: Tokens.aktMorph)) { akt = next }
-        if !guidedRoundActive {
+        if guidedRoundActive {
+            // Im Tutorial ist der Aktwechsel eine klare Übergabe. Ein animierter
+            // Switch hält sonst alten und neuen Screen kurz gleichzeitig im
+            // View-Tree und erzeugt doppelte Header, Bretter und Kartenfächer.
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) { akt = next }
+        } else {
+            withAnimation(.spring(duration: Tokens.aktMorph)) { akt = next }
             showPhaseCurtain(next)
         }
     }
@@ -1157,6 +1164,9 @@ struct ContentView: View {
                 await game.revealNextGuidedMeld(reduceMotion: reduceMotion)
                 guidedMeldBeat = 6
             case 6:
+                try? await Task.sleep(for: .seconds(
+                    reduceMotion ? 0.06 : Tokens.guidedPhaseHandoffRest
+                ))
                 transition(to: .pochen)
             default:
                 break
@@ -2691,7 +2701,15 @@ struct ContentView: View {
 
     /// Phase 1 folgt dem Mockup: Brett als Hauptdarsteller, keine Gegnerleiste im
     /// ersten Blick, Kartenfächer als unterer Bleed.
-    private var phase1Stage: some View {
+    @ViewBuilder private var phase1Stage: some View {
+        if guidedRoundActive && guidedMeldBeat > 0 {
+            guidedMeldLearningStage
+        } else {
+            regularPhase1Stage
+        }
+    }
+
+    private var regularPhase1Stage: some View {
         let dealActive = game.dealtCount < game.totalDeals && !game.trumpRevealed
         let boardScale = guidedRoundActive
             ? Tokens.guidedMeldBoardScale
@@ -2718,6 +2736,56 @@ struct ContentView: View {
             handView
                 .offset(y: -178)
                 .padding(.bottom, -178)
+        }
+    }
+
+    /// Geführtes Melden besitzt eine eigene, kollisionsfreie Lernbühne. Das
+    /// freie Spiel bleibt groß und mockup-nah; im Tutorial werden Brett,
+    /// Erklärung und Hand dagegen als drei feste vertikale Zonen komponiert.
+    private var guidedMeldLearningStage: some View {
+        GeometryReader { proxy in
+            let compact = proxy.size.height < Tokens.phase2CompactHeight
+            let handHeight = compact
+                ? Tokens.guidedMeldLearningHandCompact
+                : Tokens.guidedMeldLearningHandRegular
+            let reserved = Tokens.guidedMeldLearningCoachHeight
+                + handHeight
+                + Tokens.guidedMeldLearningGap * 2
+            let boardDiameter = min(
+                Tokens.guidedMeldLearningBoardMax,
+                max(Tokens.guidedMeldLearningBoardMin,
+                    proxy.size.height - reserved)
+            )
+            let ringDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
+            let boardScale = boardDiameter / ringDiameter
+            let coachTop = boardDiameter + Tokens.guidedMeldLearningGap
+
+            ZStack(alignment: .top) {
+                ringView
+                    .scaleEffect(boardScale, anchor: .top)
+                    .frame(width: ringDiameter, height: boardDiameter,
+                           alignment: .top)
+                    .position(x: proxy.size.width / 2,
+                              y: boardDiameter / 2)
+                    .contentShape(Circle())
+                    .allowsHitTesting(false)
+
+                guidedCoachRail
+                    .frame(width: min(proxy.size.width - 24, guidedCoachWidth),
+                           height: Tokens.guidedMeldLearningCoachHeight,
+                           alignment: .top)
+                    .offset(y: coachTop)
+                    .opacity(guidedMeldBusy ? 0 : 1)
+                    .allowsHitTesting(!guidedMeldBusy)
+
+                handView
+                    .frame(width: proxy.size.width,
+                           height: handHeight,
+                           alignment: .bottom)
+                    .clipped()
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+            }
+            .animation(.easeOut(duration: 0.18), value: guidedMeldBusy)
         }
     }
 

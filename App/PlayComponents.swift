@@ -641,7 +641,7 @@ struct TableTokenPile: View {
 
     var body: some View {
         let offsets = Self.layout(for: count)
-        let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.29)
+        let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.34)
         ZStack {
             Ellipse()
                 .fill(Color.black.opacity(0.38))
@@ -688,10 +688,13 @@ struct TableTokenPile: View {
                     .init(width: 0.43, height: 0.34),
                     .init(width: 0, height: -0.42)]
         case 4:
-            return [.init(width: -0.46, height: 0.32),
-                    .init(width: 0.38, height: 0.42),
-                    .init(width: -0.30, height: -0.39),
-                    .init(width: 0.43, height: -0.29)]
+            // Dicht geschichtete PM68-Ablage statt eines technischen 2x2-Rasters.
+            // Die Mitte bleibt exakt zentriert, die Silhouette wirkt aber wie
+            // vier physisch abgelegte Glassteine.
+            return [.init(width: -0.34, height: 0.23),
+                    .init(width: 0.29, height: 0.31),
+                    .init(width: -0.22, height: -0.27),
+                    .init(width: 0.31, height: -0.20)]
         default:
             let ring: [CGSize] = [
                 .init(width: 0, height: -0.58),

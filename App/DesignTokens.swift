@@ -51,6 +51,12 @@ enum Tokens {
     static let guidedMeldBoardOffsetY: CGFloat = 8
     static let guidedMeldFocusTop: CGFloat = 184
     static let guidedMeldCoachGap: CGFloat = 34
+    static let guidedMeldLearningBoardMin: CGFloat = 236
+    static let guidedMeldLearningBoardMax: CGFloat = 306
+    static let guidedMeldLearningCoachHeight: CGFloat = 138
+    static let guidedMeldLearningHandCompact: CGFloat = 112
+    static let guidedMeldLearningHandRegular: CGFloat = 146
+    static let guidedMeldLearningGap: CGFloat = 7
     static let guidedOpeningTokenSize: CGFloat = 38
     static let guidedOpeningSourceGap: CGFloat = 66
     static let guidedOpeningSnapRadius: CGFloat = 58
@@ -64,6 +70,9 @@ enum Tokens {
     /// in simulator recordings without affecting the interactive tutorial.
     static let guidedQAStateHold: Double = 0.86
     static let guidedQAOutcomeHold: Double = 1.10
+    /// Der letzte Melde-Hinweis verlässt zuerst die Bühne. Erst danach zieht
+    /// sich das Brett in die Poch-Komposition zusammen.
+    static let guidedPhaseHandoffRest: Double = 0.24
 
     // Physische Spielsteine. Außenmulden und Mitte verwenden denselben
     // gedachten Durchmesser; nur der verfügbare Ablageraum unterscheidet sich.
