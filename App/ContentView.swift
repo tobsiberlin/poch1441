@@ -9,6 +9,10 @@ struct ContentView: View {
     /// bereits in .betting. Der echte Morph ersetzt später die harten Schnitte.
     private enum Akt: Equatable { case melden, pochen, ausspielen }
     private enum AppOverlay { case menu, tutorial, help, settings }
+    private struct GuidedAnteWaveState: Equatable {
+        let contributor: Int
+        let pools: [Pool]
+    }
 
     @State private var game = GameState()
     /// DEBUG-Launch-Args "-pochenStart"/"-ausspielStart" öffnen Akt 2/3 direkt
@@ -29,7 +33,9 @@ struct ContentView: View {
     @AppStorage("tableEffects") private var tableEffects = true
     @AppStorage("moveCoach") private var moveCoach = true
     @AppStorage("playerCount") private var playerCount = 4
-    @AppStorage("didStartFirstTable") private var didStartFirstTable = false
+    // Versionierter First-Run-Key: Bestehende TestFlight-Installationen sollen
+    // den grundlegend neuen, ruhigen Einstieg genau einmal erneut erleben.
+    @AppStorage("didStartFirstTableV2") private var didStartFirstTable = false
     @AppStorage("tutorialProgressMask") private var tutorialProgressMask = 0
     private var theme: Theme { neon ? .neon : .premium }
     @State private var activeOverlay: AppOverlay?
@@ -43,7 +49,9 @@ struct ContentView: View {
     @State private var guidedMeldBusy = false
     @State private var guidedOpeningDrag: CGSize = .zero
     @State private var guidedOpeningSettled = false
-    @State private var guidedAntePlayers = 0
+    @State private var guidedAntePoolCounts: [Pool: Int] = [:]
+    @State private var guidedAnteLandedEvents: Set<Int> = []
+    @State private var guidedAnteWave: GuidedAnteWaveState?
     @State private var showFirstRunIntro = false
     @State private var matchEndResult: Match.MatchResult?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -101,16 +109,24 @@ struct ContentView: View {
             .padding(.bottom, akt == .melden ? 0 : 18)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             // Trumpf-Beat-Inszenierung liegt als hitTest-freie Schicht über Akt 1
-            .overlay {
-                if akt == .melden, tableEffects,
-                   !guidedRoundActive || guidedMeldBeat > 1 {
-                    DealOverlay(game: game,
-                                theme: theme,
-                                showsSeatTargets: !guidedRoundActive)
+            .overlayPreferenceValue(TablePoolAnchorPreferenceKey.self) { anchors in
+                GeometryReader { proxy in
+                    if akt == .melden, tableEffects,
+                       !guidedRoundActive || guidedMeldBeat > 1 {
+                        DealOverlay(
+                            game: game,
+                            theme: theme,
+                            poolPositions: anchors.mapValues { proxy[$0] },
+                            showsSeatTargets: !guidedRoundActive
+                        )
+                    }
                 }
             }
             .overlay(alignment: .topTrailing) {
-                if !isGuidedOpeningBeat { utilityButtons }
+                if !isGuidedOpeningBeat {
+                    utilityButtons
+                        .offset(x: -12)
+                }
             }
             .overlay { overlayPanel }
             .overlay { tutorialCompletionOverlay }
@@ -147,13 +163,18 @@ struct ContentView: View {
         .onAppear {
             #if DEBUG
             let args = ProcessInfo.processInfo.arguments
+            let startsGuidedQA = args.contains("-tutorialSeed")
+                || args.contains("-tutorialMotionQA")
+                || args.contains("-tutorialBidding")
+                || args.contains("-tutorialPlayout")
+                || args.contains(where: { $0.hasPrefix("-tutorialMeldStep=") })
             if args.contains("-firstRun") {
                 showFirstRunIntro = true
             } else if args.dropFirst().isEmpty, !didStartFirstTable {
                 showFirstRunIntro = true
             } else if args.dropFirst().isEmpty {
                 activeOverlay = .menu
-            } else if akt == .melden {
+            } else if akt == .melden, !startsGuidedQA {
                 game.runDealPresentation(reduceMotion: reduceMotion)
             }
             #else
@@ -246,7 +267,9 @@ struct ContentView: View {
             if args.contains("-premium") {
                 neon = false
             }
-            if let stepArgument = args.first(where: { $0.hasPrefix("-tutorialMeldStep=") }),
+            if args.contains("-tutorialMotionQA") {
+                runGuidedMeldMotionQA()
+            } else if let stepArgument = args.first(where: { $0.hasPrefix("-tutorialMeldStep=") }),
                let step = Int(stepArgument.split(separator: "=").last ?? "0") {
                 prepareGuidedMeldDebugStep(min(max(step, 0), 6))
             } else if args.contains("-tutorialSeed") {
@@ -663,7 +686,9 @@ struct ContentView: View {
         case .meld:
             guidedMeldBeat = 0
             guidedMeldBusy = false
-            guidedAntePlayers = 0
+            guidedAntePoolCounts.removeAll(keepingCapacity: true)
+            guidedAnteLandedEvents.removeAll(keepingCapacity: true)
+            guidedAnteWave = nil
             transition(to: .melden)
             game.prepareGuidedDeal()
         case .bidding:
@@ -854,21 +879,25 @@ struct ContentView: View {
         GeometryReader { proxy in
             let size = proxy.size
             let frame = guidedFocusFrame(in: size)
+            let spotlightFrame = guidedSpotlightFrame(in: size, boardFrame: frame)
             ZStack {
                 if akt == .melden {
-                    guidedSpotlight(frame: frame)
+                    guidedSpotlight(frame: spotlightFrame)
                         .allowsHitTesting(false)
                 }
 
                 if isGuidedOpeningBeat {
                     guidedOpeningInteraction(in: size, focus: frame)
                 } else if akt == .melden {
-                    guidedCoachRail
-                        .frame(width: min(size.width - 42, guidedCoachWidth))
-                        .position(x: size.width / 2, y: guidedCoachY(in: size, focus: frame))
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    if !guidedMeldBusy {
+                        guidedCoachRail
+                            .frame(width: min(size.width - 42, guidedCoachWidth))
+                            .position(x: size.width / 2, y: guidedCoachY(in: size, focus: frame))
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
             }
+            .animation(.easeOut(duration: 0.18), value: guidedMeldBusy)
         }
     }
 
@@ -950,7 +979,7 @@ struct ContentView: View {
             try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 420))
             guidedOpeningDrag = .zero
             guidedOpeningSettled = false
-            guidedAntePlayers = 1
+            guidedAntePoolCounts[.center] = 1
             advanceGuidedMeld()
         }
     }
@@ -986,9 +1015,22 @@ struct ContentView: View {
         }
     }
 
+    private func guidedSpotlightFrame(in size: CGSize, boardFrame: CGRect) -> CGRect {
+        guard akt == .melden, guidedMeldBeat >= 3 else { return boardFrame }
+        return CGRect(x: 18,
+                      y: max(boardFrame.maxY + 20, size.height - 154),
+                      width: size.width - 36,
+                      height: 132)
+    }
+
     private func guidedCoachY(in size: CGSize, focus: CGRect) -> CGFloat {
         switch akt {
         case .melden:
+            if guidedMeldBeat >= 3 {
+                // Sobald Karten sichtbar sind, bleibt der Coach oberhalb der Hand.
+                // So kann der Spieler Text und Kartenindizes gleichzeitig lesen.
+                return max(focus.minY + 84, size.height - 264)
+            }
             return min(size.height - 142,
                        focus.maxY + Tokens.guidedMeldCoachGap)
         case .pochen:
@@ -1100,15 +1142,7 @@ struct ContentView: View {
                     try? await Task.sleep(for: .milliseconds(420))
                 }
             case 1:
-                for contributor in max(1, guidedAntePlayers)..<game.playerCount {
-                    guard !Task.isCancelled else { break }
-                    if contributor > 0, !reduceMotion {
-                        try? await Task.sleep(for: .milliseconds(460))
-                    }
-                    withAnimation(.spring(response: 0.34, dampingFraction: 0.92)) {
-                        guidedAntePlayers = contributor + 1
-                    }
-                }
+                await runGuidedAnteSequence()
                 guidedMeldBeat = 2
             case 2:
                 await game.revealGuidedDealRound(reduceMotion: reduceMotion)
@@ -1132,15 +1166,52 @@ struct ContentView: View {
     }
 
     #if DEBUG
+    private func runGuidedMeldMotionQA() {
+        startGuidedRound()
+        guidedAntePoolCounts[.center] = 1
+        guidedMeldBeat = 1
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
+            guidedMeldBusy = true
+            await runGuidedAnteSequence()
+            guidedMeldBeat = 2
+            guidedMeldBusy = false
+            try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
+            guidedMeldBusy = true
+            await game.revealGuidedDealRound(reduceMotion: reduceMotion)
+            guidedMeldBeat = 3
+            guidedMeldBusy = false
+            try? await Task.sleep(for: .seconds(Tokens.guidedQAOutcomeHold))
+            guidedMeldBusy = true
+            await game.finishGuidedDeal(reduceMotion: reduceMotion)
+            guidedMeldBeat = 4
+            guidedMeldBusy = false
+            try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
+            guidedMeldBusy = true
+            game.revealGuidedTrumpf()
+            guidedMeldBeat = 5
+            guidedMeldBusy = false
+            try? await Task.sleep(for: .seconds(Tokens.guidedQAOutcomeHold))
+            guidedMeldBusy = true
+            await game.revealNextGuidedMeld(reduceMotion: reduceMotion)
+            guidedMeldBeat = 6
+            guidedMeldBusy = false
+        }
+    }
+
     private func prepareGuidedMeldDebugStep(_ step: Int) {
         startGuidedRound()
         Task { @MainActor in
             if step >= 1 {
-                guidedAntePlayers = 1
+                guidedAntePoolCounts = Dictionary(
+                    uniqueKeysWithValues: Pool.allCases.map { ($0, 1) }
+                )
                 guidedMeldBeat = 1
             }
             if step >= 2 {
-                guidedAntePlayers = game.playerCount
+                guidedAntePoolCounts = Dictionary(
+                    uniqueKeysWithValues: Pool.allCases.map { ($0, game.playerCount) }
+                )
                 guidedMeldBeat = 2
             }
             if step >= 3 {
@@ -1187,6 +1258,42 @@ struct ContentView: View {
             return String(localized: "tutorial.meld.action.showClaim",
                           defaultValue: "Meldung zeigen")
         }
+    }
+
+    private var guidedAntePoolOrder: [Pool] {
+        PochRing.anchors.map(\.pool) + [.center]
+    }
+
+    private func runGuidedAnteSequence() async {
+        let allPools = guidedAntePoolOrder
+        for contributor in 0..<game.playerCount {
+            guard !Task.isCancelled else { return }
+            let pools = contributor == 0
+                ? allPools.filter { $0 != .center }
+                : allPools
+            guidedAnteWave = GuidedAnteWaveState(contributor: contributor, pools: pools)
+            if reduceMotion {
+                for pool in pools {
+                    landGuidedAnte(contributor: contributor, pool: pool)
+                }
+            } else {
+                let duration = Tokens.guidedAnteFlight
+                    + Double(max(0, pools.count - 1)) * Tokens.guidedAnteStagger
+                    + Tokens.guidedAnteWaveRest
+                try? await Task.sleep(for: .seconds(duration))
+                for pool in pools {
+                    landGuidedAnte(contributor: contributor, pool: pool)
+                }
+            }
+        }
+        guidedAnteWave = nil
+    }
+
+    private func landGuidedAnte(contributor: Int, pool: Pool) {
+        guard let poolIndex = guidedAntePoolOrder.firstIndex(of: pool) else { return }
+        let eventID = contributor * Pool.allCases.count + poolIndex
+        guard guidedAnteLandedEvents.insert(eventID).inserted else { return }
+        guidedAntePoolCounts[pool, default: 0] += 1
     }
 
     private var guidedCopy: (step: String, title: String, text: String) {
@@ -1262,7 +1369,7 @@ struct ContentView: View {
                         String(localized: "tutorial.guide.finish.title", defaultValue: "Runde lesen"),
                         String(localized: "tutorial.guide.finish.body", defaultValue: "Mitte und Restkarten fließen zum Sieger. Danach beginnt eine freie Runde."))
             }
-            guard let playout = game.playout else {
+            guard game.playout != nil else {
                 return ("rectangle.on.rectangle.angled", "Ausspielen", "Die Mitte wartet. Wer zuerst leer ist, nimmt den Hauptpott.")
             }
             if game.playoutLeader == 0, game.cascadeIdle {
@@ -1277,33 +1384,18 @@ struct ContentView: View {
     }
 
     private var utilityButtons: some View {
-        HStack(spacing: 8) {
-            Button { activeOverlay = .menu } label: {
-                Image(systemName: "pause.fill")
-                    .font(.system(size: 13, weight: .semibold))
-            }
-            Button { activeOverlay = .tutorial } label: {
-                Image(systemName: "graduationcap")
-                    .font(.system(size: 14, weight: .semibold))
-            }
-            Button { activeOverlay = .help } label: {
-                Image(systemName: "questionmark")
-                    .font(.system(size: 14, weight: .semibold))
-            }
-            Button { activeOverlay = .settings } label: {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 14, weight: .semibold))
-            }
+        Button { activeOverlay = .menu } label: {
+            Image(systemName: "pause.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.86))
+                .frame(width: 38, height: 38)
+                .background(Circle().fill(.black.opacity(0.24))
+                    .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.22), lineWidth: 1)))
         }
         .buttonStyle(.plain)
-        .foregroundStyle(Tokens.jewelPlatin.opacity(0.86))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(Capsule().fill(.black.opacity(0.24))
-            .overlay(Capsule().strokeBorder(Tokens.jewelGold.opacity(0.18), lineWidth: 1)))
         .padding(.top, 6)
         .padding(.trailing, 2)
-        .scaleEffect(0.82, anchor: .topTrailing)
+        .accessibilityLabel(String(localized: "menu.pause", defaultValue: "Pause"))
     }
 
     @ViewBuilder private var overlayPanel: some View {
@@ -2654,9 +2746,25 @@ struct ContentView: View {
                     .position(x: d / 2, y: d / 2)
                     .allowsHitTesting(false)
             }
+            if guidedRoundActive, guidedMeldBeat == 1,
+               let guidedAnteWave, !reduceMotion {
+                GuidedAnteWave(
+                    contributor: guidedAnteWave.contributor,
+                    pools: guidedAnteWave.pools,
+                    size: d,
+                    onImpact: { pool in
+                        landGuidedAnte(contributor: guidedAnteWave.contributor,
+                                       pool: pool)
+                    }
+                )
+                .id("ante-wave-\(guidedAnteWave.contributor)")
+                .position(x: d / 2, y: d / 2)
+            }
             if !guidedRoundActive || guidedMeldBeat > 0 {
                 centerTile
                     .position(PM49Geometry.wellCenter(for: .center, in: d))
+                    .anchorPreference(key: TablePoolAnchorPreferenceKey.self,
+                                      value: .center) { [.center: $0] }
             }
             ForEach(PochRing.anchors) { anchor in
                 if !guidedRoundActive || guidedMeldBeat > 0 {
@@ -2665,6 +2773,8 @@ struct ContentView: View {
                             id: anchor.pool == .poch ? "pochPot" : "tile-\(anchor.pool.rawValue)",
                             in: morph)
                         .position(PM49Geometry.wellCenter(for: anchor.pool, in: d))
+                        .anchorPreference(key: TablePoolAnchorPreferenceKey.self,
+                                          value: .center) { [anchor.pool: $0] }
                 }
             }
             if !guidedRoundActive || guidedMeldBeat > 0 {
@@ -2722,7 +2832,7 @@ struct ContentView: View {
         let tint = theme.tint(pool)
         return ZStack {
             if pulsing {
-                PoolWinAccent(tint: tint, chips: chips)
+                PoolMaterialResponse(tint: tint)
                     .transition(.scale(scale: 0.82).combined(with: .opacity))
             }
             if chips > 0 {
@@ -2743,53 +2853,38 @@ struct ContentView: View {
         .animation(.easeOut(duration: 0.3), value: game.meldShown)
     }
 
-    /// Kurzer Melde-/Gewinnakzent direkt in der PM49-Mulde: Materialkanten und
-    /// kleine Messing-Splitter statt Glow. Dadurch ist klar, welche Schatulle zahlt.
-    private struct PoolWinAccent: View {
+    /// A meld payout is acknowledged by the physical lip catching light once.
+    /// No particles or floating score compete with the token transfer.
+    private struct PoolMaterialResponse: View {
         let tint: Color
-        let chips: Int
         @State private var fired = false
 
         var body: some View {
             ZStack {
                 Circle()
-                    .strokeBorder(
+                    .trim(from: 0.06, to: 0.44)
+                    .stroke(
                         LinearGradient(colors: [
-                            tint.opacity(fired ? 0.10 : 0.78),
-                            Tokens.jewelPlatin.opacity(fired ? 0.04 : 0.42)
+                            tint.opacity(fired ? 0.08 : 0.72),
+                            Tokens.jewelPlatin.opacity(fired ? 0.03 : 0.34),
+                            tint.opacity(fired ? 0.04 : 0.42)
                         ], startPoint: .topLeading, endPoint: .bottomTrailing),
-                        lineWidth: fired ? 1.2 : 3.4)
-                    .frame(width: fired ? 53 : 42, height: fired ? 53 : 42)
+                        style: StrokeStyle(lineWidth: fired ? 0.8 : 2.2,
+                                           lineCap: .round))
+                    .frame(width: 50, height: 50)
+                    .rotationEffect(.degrees(12))
+                    .scaleEffect(fired ? 1.04 : 0.94)
                     .opacity(fired ? 0 : 1)
 
-                ForEach(0..<8, id: \.self) { i in
-                    let angle = Double(i) * 45 * .pi / 180
-                    Capsule()
-                        .fill(i % 2 == 0 ? tint.opacity(0.88) : Tokens.jewelGold.opacity(0.72))
-                        .frame(width: 2.1, height: 7.5)
-                        .rotationEffect(.radians(angle + .pi / 2))
-                        .offset(x: (fired ? 28 : 17) * cos(angle),
-                                y: (fired ? 28 : 17) * sin(angle))
-                        .opacity(fired ? 0 : 0.92)
-                        .animation(.easeOut(duration: 0.42).delay(Double(i) * 0.012), value: fired)
-                }
-
-                Text("+\(chips)")
-                    .font(.system(size: 11.5, weight: .heavy))
-                    .foregroundStyle(Tokens.jewelPlatin)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(Capsule().fill(Color.black.opacity(0.58))
-                        .overlay(Capsule().strokeBorder(tint.opacity(0.38), lineWidth: 0.8)))
-                    .offset(y: fired ? -15 : -2)
-                    .opacity(fired ? 0 : 1)
-                    .shadow(color: .black.opacity(0.7), radius: 3, y: 1)
-                    .animation(.easeOut(duration: 0.48), value: fired)
+                Circle()
+                    .fill(tint.opacity(fired ? 0 : 0.075))
+                    .frame(width: 42, height: 42)
+                    .scaleEffect(fired ? 1.03 : 0.97)
             }
             .frame(width: 58, height: 58)
             .onAppear {
                 fired = false
-                withAnimation(.easeOut(duration: 0.52)) { fired = true }
+                withAnimation(PhysicalMotion.materialSettle) { fired = true }
             }
         }
     }
@@ -2831,8 +2926,56 @@ struct ContentView: View {
             return game.displayedChips(in: pool)
         }
         if guidedMeldBeat == 0 { return 0 }
-        if guidedMeldBeat == 1 { return guidedAntePlayers }
+        if guidedMeldBeat == 1 { return guidedAntePoolCounts[pool, default: 0] }
         return game.displayedChips(in: pool)
+    }
+
+    private struct GuidedAnteWave: View {
+        let contributor: Int
+        let pools: [Pool]
+        let size: CGFloat
+        let onImpact: (Pool) -> Void
+
+        var body: some View {
+            ZStack {
+                ForEach(Array(pools.enumerated()), id: \.element) { index, pool in
+                    let source = sourcePoint
+                    let target = PM49Geometry.wellCenter(for: pool, in: size)
+                    ImpactFlight(
+                        from: source,
+                        to: target,
+                        duration: Tokens.guidedAnteFlight,
+                        delay: Double(index) * Tokens.guidedAnteStagger,
+                        arcHeight: PhysicalMotion.shallowArcHeight(
+                            from: source,
+                            to: target,
+                            minimum: 8,
+                            maximum: 16
+                        ),
+                        lateralBias: CGFloat(index - pools.count / 2) * 0.7,
+                        onImpact: { onImpact(pool) }
+                    ) { progress in
+                        TableChip(tint: pool == .center ? Tokens.jewelGold : pool.jewel,
+                                  size: 20)
+                            .rotationEffect(.degrees(Double(index - 4) * 1.2
+                                                     + Double(progress) * 7))
+                            .scaleEffect(1 + sin(progress * .pi) * 0.018)
+                    }
+                }
+            }
+            .frame(width: size, height: size)
+            .allowsHitTesting(false)
+        }
+
+        private var sourcePoint: CGPoint {
+            let inset = size * 0.08
+            switch contributor % 4 {
+            case 0: return CGPoint(x: size / 2, y: size + inset)
+            case 1: return CGPoint(x: -inset, y: size * 0.42)
+            case 2: return CGPoint(x: size / 2, y: -inset)
+            default: return CGPoint(x: size + inset, y: size * 0.42)
+            }
+        }
     }
 
     // MARK: - Hand (Mockup-Fächer: groß, angewinkelt, Bleed am unteren Bildschirmrand)

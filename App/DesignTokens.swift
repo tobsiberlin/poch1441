@@ -45,10 +45,26 @@ enum Tokens {
     static let guidedMeldBoardScale: CGFloat = 0.92
     static let guidedMeldBoardOffsetY: CGFloat = 8
     static let guidedMeldFocusTop: CGFloat = 184
-    static let guidedMeldCoachGap: CGFloat = 82
+    static let guidedMeldCoachGap: CGFloat = 34
     static let guidedOpeningTokenSize: CGFloat = 38
     static let guidedOpeningSourceGap: CGFloat = 66
     static let guidedOpeningSnapRadius: CGFloat = 58
+    /// One player's nine antes arrive as a compact radial wave. The short
+    /// stagger preserves source-to-target causality without turning 36 tokens
+    /// into a long unskippable cutscene.
+    static let guidedAnteFlight: Double = 0.34
+    static let guidedAnteStagger: Double = 0.045
+    static let guidedAnteWaveRest: Double = 0.18
+    /// DEBUG motion-review pauses. They keep each cause/effect state readable
+    /// in simulator recordings without affecting the interactive tutorial.
+    static let guidedQAStateHold: Double = 0.86
+    static let guidedQAOutcomeHold: Double = 1.10
+
+    // Physische Spielsteine. Außenmulden und Mitte verwenden denselben
+    // gedachten Durchmesser; nur der verfügbare Ablageraum unterscheidet sich.
+    static let tableTokenDiameter: CGFloat = 20
+    static let tableTokenOverlap: CGFloat = 0.40
+    static let outerWellFloorRatio: CGFloat = 0.68
 
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.

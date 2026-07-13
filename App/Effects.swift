@@ -3,6 +3,9 @@ import SwiftUI
 /// Gemeinsame, deterministische Tischphysik. Die Funktionen liefern nur
 /// Präsentationswerte; Regeln und Spielzustand bleiben vollständig in PochKit.
 enum PhysicalMotion {
+    static let materialSettle = Animation.timingCurve(0.22, 0.72, 0.18, 1,
+                                                      duration: 0.34)
+
     static func travel(duration: Double) -> Animation {
         .timingCurve(0.22, 0.72, 0.18, 1.0, duration: duration)
     }

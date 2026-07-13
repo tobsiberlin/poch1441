@@ -39,7 +39,8 @@ struct Phase2View: View {
             let w = proxy.size.width
             let topH = min(Tokens.phase2StageHeight, h * 0.35)
             let decisionTop = topH + 8
-            let decisionH: CGFloat = isGuidedRound ? 116 : 104
+            let guidedPreludeActive = isGuidedRound && guidedPreludeStep < 2
+            let decisionH: CGFloat = guidedPreludeActive ? 166 : (isGuidedRound ? 116 : 104)
             let actionGap: CGFloat = h < 760 ? 0 : 12
             let actionsTop = decisionTop + decisionH + actionGap
             let actionsH: CGFloat = 48
@@ -70,8 +71,8 @@ struct Phase2View: View {
                         isRelevant: guidedFocus == .actions,
                         reduceMotion: reduceMotion
                     ))
-                    .allowsHitTesting(!isGuidedRound || guidedPreludeStep >= 2)
-                    .opacity(isGuidedRound && guidedPreludeStep < 2 ? 0 : 1)
+                    .allowsHitTesting(!isGuidedRound || guidedFocus == .actions)
+                    .opacity(isGuidedRound && guidedFocus != .actions ? 0 : 1)
 
                 portraitsRow(maxPanelWidth: h < 760 ? 96 : 106)
                     .frame(width: w)
@@ -81,15 +82,15 @@ struct Phase2View: View {
                         isRelevant: guidedFocus == .opponents,
                         reduceMotion: reduceMotion
                     ))
+                    .opacity(isGuidedRound && guidedFocus != .opponents ? 0 : 1)
+                    .allowsHitTesting(!isGuidedRound || guidedFocus == .opponents)
 
                 handFan
                     .frame(width: w, height: 150, alignment: .bottom)
                     .position(x: w / 2, y: h - 58)
-                    .modifier(GuidedFocusModifier(
-                        isActive: isGuidedRound,
-                        isRelevant: guidedFocus == .hand,
-                        reduceMotion: reduceMotion
-                    ))
+                    // Die eigene Hand bleibt immer vollständig deckend. Opacity
+                    // auf dem gesamten Fächer lässt sonst Karten darunter durch-
+                    // scheinen und liest sich wie ein unscharfes Doppelbild.
             }
         }
         .onAppear {

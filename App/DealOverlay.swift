@@ -8,6 +8,7 @@ import SwiftUI
 struct DealOverlay: View {
     let game: GameState
     let theme: Theme
+    let poolPositions: [Pool: CGPoint]
     var showsSeatTargets = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -17,13 +18,17 @@ struct DealOverlay: View {
             let h = geo.size.height
             let boardCenter = CGPoint(x: w / 2, y: h * 0.46)
             // Eigener Kartenanker: Die zentrale Gewinnmulde bleibt jederzeit lesbar.
-            let deck = CGPoint(x: w * 0.84, y: h * 0.43)
+            // The PM49 board nearly fills the width. Keep the dealing stack in
+            // the quiet band below it instead of covering the right-hand well.
+            let deck = CGPoint(x: w * 0.78, y: h * 0.66)
             ZStack {
                 if game.landedDeals < game.totalDeals && !game.trumpRevealed {
                     if showsSeatTargets {
                         DealSeatTargets(game: game, w: w, h: h)
                     }
-                    DealDeckAnchor(at: deck)
+                    if game.startedDeals > game.landedDeals {
+                        DealDeckAnchor(at: deck)
+                    }
                 }
 
                 // Flug-Fenster: mehrere Karten bleiben gleichzeitig lesbar, ohne dass
@@ -94,6 +99,9 @@ struct DealOverlay: View {
     }
 
     private func poolPosition(_ pool: Pool, deck: CGPoint) -> CGPoint {
+        if let resolved = poolPositions[pool] {
+            return resolved
+        }
         if let anchor = PochRing.anchors.first(where: { $0.pool == pool }) {
             return CGPoint(x: deck.x + anchor.offset.width,
                            y: deck.y + anchor.offset.height)

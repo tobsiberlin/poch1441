@@ -591,61 +591,42 @@ struct TableChip: View {
 
     var body: some View {
         ZStack {
-            // Enger Kontaktschatten plus eine dunkle Unterkante geben dem flachen
-            // Glasstein Gewicht, ohne ihn als Kugel oder Pokerchip zu lesen.
+            // Enger Kontaktschatten: Das Asset bleibt flach auf der Mulde liegen
+            // und liest sich nicht als Kugel oder schwebender UI-Punkt.
             Ellipse()
-                .fill(Color.black.opacity(0.88))
-                .frame(width: size * 0.86, height: size * 0.20)
+                .fill(Color.black.opacity(0.82))
+                .frame(width: size * 0.78, height: size * 0.17)
                 .blur(radius: size * 0.022)
-                .offset(y: size * 0.39)
+                .offset(y: size * 0.38)
 
-            Circle()
-                .fill(Color.black.opacity(0.78))
+            Image("GameTokenGlass")
+                .resizable()
+                .interpolation(.high)
                 .frame(width: size, height: size)
-                .offset(y: size * 0.035)
-
-            Circle()
-                .fill(
-                    RadialGradient(colors: [
-                        Tokens.jewelPlatin.opacity(0.16),
-                        tint.opacity(0.74),
-                        tint.opacity(0.50),
-                        Color.black.opacity(0.72)
-                    ], center: UnitPoint(x: 0.34, y: 0.26),
-                    startRadius: 0, endRadius: size * 0.62)
-                )
-                .overlay(Circle().fill(Color.black.opacity(0.16)))
-                .overlay(
-                    Circle().strokeBorder(
-                        LinearGradient(colors: [
-                            Tokens.jewelPlatin.opacity(0.40),
-                            tint.opacity(0.52),
-                            Color.black.opacity(0.82)
-                        ], startPoint: .topLeading, endPoint: .bottomTrailing),
-                        lineWidth: max(0.75, size * 0.046)))
-                .overlay(
-                    Circle()
-                        .strokeBorder(tint.opacity(0.28), lineWidth: max(0.45, size * 0.018))
-                        .padding(size * 0.13)
-                )
-                .frame(width: size * 0.94, height: size * 0.94)
-                .offset(y: -size * 0.015)
-
-            Circle()
-                .trim(from: 0.57, to: 0.78)
-                .stroke(Tokens.jewelPlatin.opacity(0.24),
-                        style: StrokeStyle(lineWidth: max(0.65, size * 0.034), lineCap: .round))
-                .frame(width: size * 0.72, height: size * 0.72)
-                .rotationEffect(.degrees(8))
-
-            Ellipse()
-                .fill(Color.white.opacity(0.20))
-                .frame(width: size * 0.22, height: size * 0.075)
-                .blur(radius: size * 0.012)
-                .offset(x: -size * 0.20, y: -size * 0.22)
+                .overlay {
+                    // Nur der Glaskern übernimmt die Kategorie. Metallfassung
+                    // und Studio-Reflex bleiben für alle Steine physisch gleich.
+                    ZStack {
+                        Circle()
+                            .fill(tint.opacity(0.72))
+                            .blendMode(.color)
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [tint.opacity(0.52), tint.opacity(0.16), .clear],
+                                    center: .topLeading,
+                                    startRadius: 0,
+                                    endRadius: size * 0.38
+                                )
+                            )
+                            .blendMode(.screen)
+                    }
+                    .padding(size * 0.17)
+                }
+                .compositingGroup()
         }
         .frame(width: size, height: size)
-        .shadow(color: .black.opacity(0.68), radius: size * 0.065, y: size * 0.045)
+        .shadow(color: .black.opacity(0.72), radius: size * 0.07, y: size * 0.055)
         .accessibilityHidden(true)
     }
 }
@@ -660,6 +641,7 @@ struct TableTokenPile: View {
 
     var body: some View {
         let offsets = Self.layout(for: count)
+        let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.29)
         ZStack {
             Ellipse()
                 .fill(Color.black.opacity(0.38))
@@ -669,10 +651,10 @@ struct TableTokenPile: View {
 
             ForEach(offsets.indices, id: \.self) { index in
                 let offset = offsets[index]
-                TableChip(tint: tint, size: diameter * 0.37)
-                    .offset(x: offset.width * diameter,
-                            y: offset.height * diameter - CGFloat(index) * diameter * 0.006)
-                    .rotationEffect(.degrees(Double((index * 5) % 13) - 6))
+                TableChip(tint: tint, size: tokenDiameter)
+                    .offset(x: offset.width * tokenDiameter,
+                            y: offset.height * tokenDiameter - CGFloat(index) * tokenDiameter * 0.015)
+                    .rotationEffect(.degrees(Double((index * 3) % 7) - 3))
                     .zIndex(Double(index))
             }
 
@@ -699,31 +681,31 @@ struct TableTokenPile: View {
         case 1:
             return [.zero]
         case 2:
-            return [.init(width: -0.12, height: 0.02),
-                    .init(width: 0.12, height: -0.02)]
+            return [.init(width: -Tokens.tableTokenOverlap, height: 0.03),
+                    .init(width: Tokens.tableTokenOverlap, height: -0.03)]
         case 3:
-            return [.init(width: -0.14, height: 0.11),
-                    .init(width: 0.14, height: 0.11),
-                    .init(width: 0, height: -0.14)]
+            return [.init(width: -0.43, height: 0.34),
+                    .init(width: 0.43, height: 0.34),
+                    .init(width: 0, height: -0.42)]
         case 4:
-            return [.init(width: -0.14, height: 0.12),
-                    .init(width: 0.14, height: 0.12),
-                    .init(width: -0.11, height: -0.12),
-                    .init(width: 0.12, height: -0.11)]
+            return [.init(width: -0.46, height: 0.32),
+                    .init(width: 0.38, height: 0.42),
+                    .init(width: -0.30, height: -0.39),
+                    .init(width: 0.43, height: -0.29)]
         default:
             let ring: [CGSize] = [
-                .init(width: 0, height: -0.17),
-                .init(width: 0.16, height: -0.08),
-                .init(width: 0.16, height: 0.10),
-                .init(width: 0, height: 0.18),
-                .init(width: -0.16, height: 0.10),
-                .init(width: -0.16, height: -0.08),
+                .init(width: 0, height: -0.58),
+                .init(width: 0.52, height: -0.28),
+                .init(width: 0.52, height: 0.30),
+                .init(width: 0, height: 0.60),
+                .init(width: -0.52, height: 0.30),
+                .init(width: -0.52, height: -0.28),
                 .zero,
-                .init(width: 0.08, height: 0.02),
-                .init(width: -0.08, height: 0.02),
-                .init(width: 0.08, height: -0.09),
-                .init(width: -0.08, height: -0.09),
-                .init(width: 0, height: 0.10)
+                .init(width: 0.26, height: 0.08),
+                .init(width: -0.26, height: 0.08),
+                .init(width: 0.25, height: -0.25),
+                .init(width: -0.25, height: -0.25),
+                .init(width: 0, height: 0.28)
             ]
             return Array(ring.prefix(shown))
         }
@@ -748,10 +730,11 @@ struct RecessedTokenPile: View {
 
             TableTokenPile(count: count,
                            tint: tint,
-                           diameter: diameter * 1.08,
+                           diameter: diameter * 0.92,
                            showCount: showCount)
-                .offset(y: diameter * 0.065)
-                .frame(width: diameter * 0.84, height: diameter * 0.84)
+                .offset(y: diameter * 0.025)
+                .frame(width: diameter * Tokens.outerWellFloorRatio,
+                       height: diameter * Tokens.outerWellFloorRatio)
                 .clipShape(Circle())
 
             Circle()

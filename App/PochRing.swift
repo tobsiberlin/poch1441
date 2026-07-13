@@ -55,6 +55,18 @@ struct RingAnchor: Identifiable {
     }
 }
 
+/// Resolves the visible centers of the rendered PM49 wells in the coordinate
+/// space of the presentation overlay. Flights must originate from these anchors
+/// instead of reconstructing the photographed board with idealized geometry.
+struct TablePoolAnchorPreferenceKey: PreferenceKey {
+    static let defaultValue: [Pool: Anchor<CGPoint>] = [:]
+
+    static func reduce(value: inout [Pool: Anchor<CGPoint>],
+                       nextValue: () -> [Pool: Anchor<CGPoint>]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, latest in latest })
+    }
+}
+
 enum PochRing {
     /// Die 8 äußeren Mulden im Uhrzeigersinn ab 12 Uhr (konzept §5).
     static let anchors: [RingAnchor] = [
