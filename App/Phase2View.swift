@@ -41,13 +41,16 @@ struct Phase2View: View {
             let decisionTop = topH + 8
             let guidedPreludeActive = isGuidedRound && guidedPreludeStep < 2
             let decisionH: CGFloat = guidedPreludeActive ? 166 : (isGuidedRound ? 116 : 104)
-            let actionGap: CGFloat = h < 760 ? 0 : 12
+            let compactHeight = h < Tokens.phase2CompactHeight
+            let actionGap: CGFloat = compactHeight ? 0 : 12
             let actionsTop = decisionTop + decisionH + actionGap
             let actionsH: CGFloat = 48
-            let seatsY = min(
-                max(actionsTop + actionsH + 32, h - 216),
-                h - 180
-            )
+            let opponentGap = compactHeight
+                ? Tokens.phase2OpponentGapCompact
+                : Tokens.phase2OpponentGapRegular
+            let naturalSeatsTop = actionsTop + actionsH + opponentGap
+            let latestSeatsTop = h - Tokens.phase2HandReservedHeight
+            let seatsY = min(naturalSeatsTop, latestSeatsTop)
 
             ZStack(alignment: .top) {
                 topArea
@@ -74,8 +77,9 @@ struct Phase2View: View {
                     .allowsHitTesting(!isGuidedRound || guidedFocus == .actions)
                     .opacity(isGuidedRound && guidedFocus != .actions ? 0 : 1)
 
-                portraitsRow(maxPanelWidth: h < 760 ? 96 : 106)
-                    .frame(width: w)
+                portraitsRow(maxPanelWidth: compactHeight ? 96 : 106)
+                    .frame(width: w, height: Tokens.phase2OpponentRowHeight,
+                           alignment: .top)
                     .offset(y: seatsY)
                     .modifier(GuidedFocusModifier(
                         isActive: isGuidedRound,
@@ -300,9 +304,9 @@ struct Phase2View: View {
                 }
 
                 Text(isGuidedRound ? guidedDecisionCopy.body : pochenHint)
-                    .font(.system(size: isGuidedRound ? 11.4 : 10.6, weight: .semibold))
+                    .font(.system(size: isGuidedRound ? 11.4 : 11.2, weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(isGuidedRound ? 0.92 : 0.76))
-                    .lineSpacing(isGuidedRound ? 1.8 : 0)
+                    .lineSpacing(isGuidedRound ? 1.8 : 1.2)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 

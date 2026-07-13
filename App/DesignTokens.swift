@@ -39,6 +39,11 @@ enum Tokens {
     static let tileCorner: CGFloat = 16
     static let phase2BoardScale: CGFloat = 0.60
     static let phase2StageHeight: CGFloat = 246
+    static let phase2CompactHeight: CGFloat = 760
+    static let phase2OpponentRowHeight: CGFloat = 116
+    static let phase2OpponentGapCompact: CGFloat = 8
+    static let phase2OpponentGapRegular: CGFloat = 18
+    static let phase2HandReservedHeight: CGFloat = 176
 
     // Gefuehrte Melde-Runde: eigene Komposition statt der tieferen Position des
     // regulaeren Austeilrituals. Brett, Spotlight und Coach verwenden dieselbe Geometrie.
