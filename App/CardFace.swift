@@ -15,8 +15,8 @@ struct CardFace: View {
     var scale: CGFloat = 1
 
     private var accent: Color? {
-        if goldenStopper { return Tokens.goldVivid }
-        if highlighted { return Tokens.amethystVivid }
+        if goldenStopper { return Tokens.jewelGold }
+        if highlighted { return Tokens.amethystText }
         return nil
     }
 

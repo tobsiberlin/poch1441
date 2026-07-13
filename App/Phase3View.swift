@@ -11,6 +11,7 @@ struct Phase3View: View {
     /// Phasen-Morph-Namespace (§5b) - geteilt mit ContentView/Phase2View.
     let morph: Namespace.ID
     let assistHints: Bool
+    let isGuidedRound: Bool
     let onNewRound: () -> Void
     @State private var settledPlays = 0
 
@@ -18,12 +19,15 @@ struct Phase3View: View {
         GeometryReader { proxy in
             let w = proxy.size.width
             let h = proxy.size.height
+            let playSequence = game.revealedPlays
             let awaitingFirstLead = game.stage == .playout
                 && game.revealedPlays == 0
                 && game.cascadeIdle
-            let statusY = awaitingFirstLead ? min(h * 0.46, 338) : min(h * 0.555, 398)
+            // Beim ersten Anspiel braucht die Erklärung eine eigene Bühne oberhalb
+            // der Mitte. Danach rückt der Status näher an die laufende Kette.
+            let statusY = awaitingFirstLead ? min(h * 0.29, 205) : min(h * 0.555, 398)
             let opponentsY = awaitingFirstLead
-                ? min(max(statusY + 112, h - 280), h - 232)
+                ? min(max(statusY + 190, h * 0.71), h - 170)
                 : min(max(statusY + 112, h - 220), h - 192)
             ZStack(alignment: .top) {
                 playedCardsFan
@@ -33,9 +37,13 @@ struct Phase3View: View {
                 if game.stage == .playout, !reduceMotion, let lastPlay = lastRevealedPlay {
                     Phase3CardArrival(card: lastPlay.card,
                                       seat: game.uiSeat(forRoundSeat: lastPlay.player),
-                                      trigger: game.revealedPlays,
+                                      trigger: playSequence,
                                       canvas: CGSize(width: w, height: h),
-                                      opponentsY: opponentsY)
+                                      opponentsY: opponentsY,
+                                      onImpact: {
+                                          game.markPlayLanded(sequence: playSequence)
+                                          settledPlays = max(settledPlays, playSequence)
+                                      })
                         .id("arrival-\(game.revealedPlays)")
                         .allowsHitTesting(false)
                 }
@@ -79,26 +87,14 @@ struct Phase3View: View {
             settledPlays = min(game.revealedPlays, game.playout?.plays.count ?? 0)
         }
         .onChange(of: game.revealedPlays) { _, newValue in
-            Task { @MainActor in
-                let settleDelay = reduceMotion ? 0.08 : Tokens.p3CardSettleDelay
-                try? await Task.sleep(for: .seconds(settleDelay))
+            if reduceMotion {
+                game.markPlayLanded(sequence: newValue)
                 settledPlays = max(settledPlays, newValue)
             }
         }
         .overlay {
             if game.endPhase == .punishing, let result = game.roundResult, !reduceMotion {
                 CenterPotRelease(result: result)
-                    .allowsHitTesting(false)
-            }
-        }
-        // Rundenende-Juice skaliert mit dem Pott (§6c Auflage 1): Platin-Vignette
-        // nur beim genuin fetten Centerpot, nie als Dauer-Ritual
-        .overlay {
-            if game.endPhase == .punishing, let result = game.roundResult,
-               result.centerPool + result.payments.reduce(0, +)
-                   >= Tokens.jackpotKollapsThreshold {
-                KollapsVignette(tint: Tokens.jewelPlatin,
-                                duration: reduceMotion ? 0.05 : Tokens.kollapsFlash)
                     .allowsHitTesting(false)
             }
         }
@@ -296,7 +292,7 @@ struct Phase3View: View {
                 .overlay(RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(Tokens.jewelPlatin.opacity(0.30), lineWidth: 1)
                     .rotationEffect(.degrees(45)))
-                .shadow(color: Tokens.smaragdVivid.opacity(theme.isNeon ? 0.34 : 0.10),
+                .shadow(color: theme.smaragdFocus.opacity(theme.isNeon ? 0.34 : 0.10),
                         radius: theme.isNeon ? 14 : 5)
             VStack(spacing: -1) {
                 Text("MITTE")
@@ -341,7 +337,7 @@ struct Phase3View: View {
                                 defaultValue: "RUNDENENDE"))
                         .font(.system(size: 9, weight: .heavy))
                         .tracking(2.2)
-                        .foregroundStyle(Tokens.smaragdVivid.opacity(0.80))
+                        .foregroundStyle(theme.smaragdFocus.opacity(0.80))
                     Text(result.winner == 0 ? "Du nimmst die Mitte"
                                              : "\(game.name(of: result.winner)) nimmt die Mitte")
                         .font(.system(size: 20, weight: .heavy))
@@ -532,7 +528,7 @@ struct Phase3View: View {
             }
             if firstLead {
                 return String(localized: "phase3.start.detail",
-                              defaultValue: "Eine Karte eröffnet die erste Kette.")
+                              defaultValue: "Tippe eine Karte in deiner Hand. Niedrig starten lässt mehr Folgekarten zu.")
             }
             if leader == 0, assistHints {
                 return String(localized: "phase3.lead.hint",
@@ -556,10 +552,12 @@ struct Phase3View: View {
                 .font(.system(size: 16, weight: .heavy))
                 .tracking(0.8)
                 .foregroundStyle(game.cascadeIdle && leader == 0
-                                 ? Tokens.jewelGold : Tokens.smaragdVivid)
+                                 ? Tokens.jewelGold : theme.smaragdFocus)
             Text(detail)
-                .font(.system(size: 10.2, weight: .semibold))
-                .foregroundStyle(Tokens.slate.opacity(0.78))
+                .font(.system(size: isGuidedRound ? 11.2 : 10.2, weight: .semibold))
+                .foregroundStyle(isGuidedRound
+                                 ? Tokens.jewelPlatin.opacity(0.82)
+                                 : Tokens.slate.opacity(0.78))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
@@ -655,7 +653,7 @@ struct Phase3View: View {
                             Text("Runde abgeschlossen")
                                 .font(.system(size: 10, weight: .bold))
                                 .tracking(1.9)
-                                .foregroundStyle(Tokens.smaragdVivid.opacity(0.82))
+                                .foregroundStyle(theme.smaragdFocus.opacity(0.82))
                         }
                     }
                 }
@@ -663,7 +661,7 @@ struct Phase3View: View {
                 HStack(spacing: 10) {
                     resultMetric("MITTE", "\(r.centerPool)", Tokens.jewelPlatin)
                     resultMetric("STRAFE", "+\(payments)", Tokens.jewelGold)
-                    resultMetric("TOTAL", "\(r.centerPool + payments)", Tokens.smaragdVivid)
+                    resultMetric("TOTAL", "\(r.centerPool + payments)", theme.smaragdFocus)
                 }
 
                 recapStrip(game.roundRecap)
@@ -802,25 +800,30 @@ private struct Phase3CardArrival: View {
     let trigger: Int
     let canvas: CGSize
     let opponentsY: CGFloat
-    @State private var progress: CGFloat = 0
+    let onImpact: () -> Void
+    @State private var landed = false
 
     var body: some View {
-        let point = bezier(progress)
-        CardFace(card: card, scale: 0.94)
-            .rotationEffect(.degrees(startAngle * Double(1 - progress)))
-            .rotation3DEffect(.degrees(18 * Double(1 - progress)),
-                              axis: (x: 0.18, y: 0.72, z: 0.10),
-                              perspective: 0.54)
-            .scaleEffect(1.08 - progress * 0.12)
-            .position(point)
-            .opacity(progress > 0.90 ? Double((1 - progress) / 0.10) : 1)
-            .shadow(color: .black.opacity(0.64), radius: progress > 0.8 ? 5 : 13, y: 7)
-            .onAppear {
-                withAnimation(.timingCurve(0.20, 0.76, 0.18, 1,
-                                           duration: Tokens.p3CardFlight)) {
-                    progress = 1
-                }
+        ImpactFlight(from: origin,
+                     to: target,
+                     duration: Tokens.p3CardFlight,
+                     arcHeight: 54,
+                     lateralBias: lateralBias,
+                     onImpact: {
+                         landed = true
+                         onImpact()
+                     }) { progress in
+            CardFace(card: card, scale: 0.94)
+                .rotationEffect(.degrees(startAngle * Double(1 - progress)))
+                .rotation3DEffect(.degrees(12 * Double(1 - progress)),
+                                  axis: (x: 0.18, y: 0.72, z: 0.10),
+                                  perspective: 0.42)
+                .scaleEffect(1.04 - progress * 0.04)
+                .shadow(color: .black.opacity(0.64),
+                        radius: progress > 0.8 ? 5 : 12,
+                        y: progress > 0.8 ? 3 : 7)
             }
+            .opacity(landed ? 0 : 1)
             .id("phase3-flight-\(trigger)")
     }
 
@@ -849,15 +852,8 @@ private struct Phase3CardArrival: View {
         }
     }
 
-    private func bezier(_ t: CGFloat) -> CGPoint {
-        let inv = 1 - t
-        let side: CGFloat = seat == 1 ? -46 : (seat == 3 ? 46 : 0)
-        let control = CGPoint(x: (origin.x + target.x) / 2 + side,
-                              y: min(origin.y, target.y) - 54)
-        return CGPoint(
-            x: inv * inv * origin.x + 2 * inv * t * control.x + t * t * target.x,
-            y: inv * inv * origin.y + 2 * inv * t * control.y + t * t * target.y
-        )
+    private var lateralBias: CGFloat {
+        seat == 1 ? -24 : (seat == 3 ? 24 : 0)
     }
 }
 
@@ -894,9 +890,6 @@ private struct PunishStreams: View {
                         }
                     }
                 }
-                ChipArrivalImpact(at: winnerPos,
-                                  tint: result.winner == 0 ? Tokens.jewelGold : Tokens.jewelSmaragd,
-                                  trigger: flown)
             }
             .onAppear { flown = true }
         }
@@ -919,13 +912,12 @@ private struct EndChip: View {
     var body: some View {
         let t: CGFloat = trigger ? 1 : 0
         let p = point(t)
-        TableChip(tint: tint, size: 10)
-            .rotation3DEffect(.degrees(Double(t) * 340 + Double(index) * 22),
-                              axis: (x: 0.5, y: 0.7, z: 0.1))
+        TableChip(tint: tint, size: 12)
+            .rotationEffect(.degrees((Double(index % 3) - 1) * 6 + Double(t) * 12))
             .position(p)
-            .opacity(trigger ? 0.22 : 1)
-            .shadow(color: tint.opacity(trigger ? 0.16 : 0), radius: trigger ? 8 : 0)
-            .animation(.easeInOut(duration: Tokens.p3PunishFlight)
+            .opacity(trigger ? 0.10 : 1)
+            .shadow(color: .black.opacity(0.48), radius: trigger ? 2 : 5, y: trigger ? 1 : 3)
+            .animation(.easeOut(duration: Tokens.p3PunishFlight)
                 .delay(Double(index) * 0.045 + laneDelay),
                        value: trigger)
     }
@@ -969,18 +961,6 @@ private struct CenterPotRelease: View {
                     .position(center)
                     .opacity(released ? 0 : 1)
 
-                ForEach(0..<10, id: \.self) { i in
-                    let angle = Double(i) * 137.5 * .pi / 180
-                    Capsule()
-                        .fill(i % 3 == 0 ? Tokens.jewelPlatin.opacity(0.82) : Tokens.jewelGold.opacity(0.58))
-                        .frame(width: 2.2, height: 9)
-                        .rotationEffect(.radians(angle))
-                        .position(x: center.x + (released ? 58 : 24) * cos(angle),
-                                  y: center.y + (released ? 58 : 24) * sin(angle))
-                        .opacity(released ? 0 : 0.92)
-                        .animation(.easeOut(duration: 0.52).delay(Double(i) * 0.014), value: released)
-                }
-
                 Text("+\(result.centerPool)")
                     .font(.system(size: 18, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin)
@@ -995,33 +975,6 @@ private struct CenterPotRelease: View {
             .onAppear {
                 released = false
                 withAnimation(.easeOut(duration: 0.62)) { released = true }
-            }
-        }
-    }
-}
-
-private struct ChipArrivalImpact: View {
-    let at: CGPoint
-    let tint: Color
-    let trigger: Bool
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .strokeBorder(tint.opacity(trigger ? 0 : 0.42), lineWidth: trigger ? 1 : 3)
-                .frame(width: trigger ? 52 : 22, height: trigger ? 52 : 22)
-                .position(at)
-                .opacity(trigger ? 0 : 1)
-                .animation(.easeOut(duration: 0.46).delay(Tokens.p3PunishImpactDelay), value: trigger)
-            ForEach(0..<6, id: \.self) { i in
-                let angle = Double(i) * 60 * .pi / 180
-                TableChip(tint: tint, size: 5.5)
-                    .position(x: at.x + (trigger ? 22 : 7) * cos(angle),
-                              y: at.y + (trigger ? 22 : 7) * sin(angle))
-                    .opacity(trigger ? 0 : 0.74)
-                    .animation(.easeOut(duration: 0.52)
-                        .delay(Tokens.p3PunishImpactDelay - 0.04 + Double(i) * 0.025),
-                        value: trigger)
             }
         }
     }

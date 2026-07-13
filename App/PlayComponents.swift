@@ -591,44 +591,61 @@ struct TableChip: View {
 
     var body: some View {
         ZStack {
-            // Eine schmale dunkle Unterkante verankert den flachen Glasstein in der Mulde.
+            // Enger Kontaktschatten plus eine dunkle Unterkante geben dem flachen
+            // Glasstein Gewicht, ohne ihn als Kugel oder Pokerchip zu lesen.
             Ellipse()
-                .fill(Color.black.opacity(0.92))
-                .frame(width: size * 0.92, height: size * 0.76)
-                .offset(y: size * 0.10)
+                .fill(Color.black.opacity(0.88))
+                .frame(width: size * 0.86, height: size * 0.20)
+                .blur(radius: size * 0.022)
+                .offset(y: size * 0.39)
+
+            Circle()
+                .fill(Color.black.opacity(0.78))
+                .frame(width: size, height: size)
+                .offset(y: size * 0.035)
+
+            Circle()
+                .fill(
+                    RadialGradient(colors: [
+                        Tokens.jewelPlatin.opacity(0.16),
+                        tint.opacity(0.74),
+                        tint.opacity(0.50),
+                        Color.black.opacity(0.72)
+                    ], center: UnitPoint(x: 0.34, y: 0.26),
+                    startRadius: 0, endRadius: size * 0.62)
+                )
+                .overlay(Circle().fill(Color.black.opacity(0.16)))
+                .overlay(
+                    Circle().strokeBorder(
+                        LinearGradient(colors: [
+                            Tokens.jewelPlatin.opacity(0.40),
+                            tint.opacity(0.52),
+                            Color.black.opacity(0.82)
+                        ], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: max(0.75, size * 0.046)))
+                .overlay(
+                    Circle()
+                        .strokeBorder(tint.opacity(0.28), lineWidth: max(0.45, size * 0.018))
+                        .padding(size * 0.13)
+                )
+                .frame(width: size * 0.94, height: size * 0.94)
+                .offset(y: -size * 0.015)
+
+            Circle()
+                .trim(from: 0.57, to: 0.78)
+                .stroke(Tokens.jewelPlatin.opacity(0.24),
+                        style: StrokeStyle(lineWidth: max(0.65, size * 0.034), lineCap: .round))
+                .frame(width: size * 0.72, height: size * 0.72)
+                .rotationEffect(.degrees(8))
 
             Ellipse()
-                .fill(
-                    LinearGradient(colors: [
-                        Color.white.opacity(0.07),
-                        tint.opacity(0.52),
-                        tint.opacity(0.36),
-                        Color.black.opacity(0.74)
-                    ], startPoint: .topLeading, endPoint: .bottomTrailing)
-                )
-                .frame(width: size, height: size * 0.82)
-                .overlay {
-                    Ellipse()
-                        .strokeBorder(
-                            LinearGradient(colors: [
-                                Color.white.opacity(0.30),
-                                tint.opacity(0.78),
-                                Color.black.opacity(0.88)
-                            ], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            lineWidth: max(0.75, size * 0.055)
-                        )
-                }
-                .overlay(alignment: .topLeading) {
-                    Capsule()
-                        .fill(Color.white.opacity(0.22))
-                        .frame(width: size * 0.28, height: max(1, size * 0.055))
-                        .blur(radius: size * 0.015)
-                        .offset(x: size * 0.19, y: size * 0.23)
-                }
+                .fill(Color.white.opacity(0.20))
+                .frame(width: size * 0.22, height: size * 0.075)
+                .blur(radius: size * 0.012)
+                .offset(x: -size * 0.20, y: -size * 0.22)
         }
         .frame(width: size, height: size)
-        .shadow(color: tint.opacity(0.08), radius: size * 0.035)
-        .shadow(color: .black.opacity(0.86), radius: size * 0.075, y: size * 0.065)
+        .shadow(color: .black.opacity(0.68), radius: size * 0.065, y: size * 0.045)
         .accessibilityHidden(true)
     }
 }
@@ -641,25 +658,8 @@ struct TableTokenPile: View {
     var diameter: CGFloat
     var showCount = true
 
-    // Handgesetzte, deterministische PM68-Ablage. Die ersten Token bilden sofort
-    // eine ausgewogene Gruppe; weitere Scheiben verdichten den Stapel nach innen.
-    private let offsets: [CGSize] = [
-        .init(width: -0.135, height: 0.105),
-        .init(width: 0.135, height: 0.105),
-        .init(width: -0.085, height: -0.115),
-        .init(width: 0.135, height: -0.125),
-        .init(width: -0.145, height: -0.045),
-        .init(width: 0.145, height: -0.070),
-        .init(width: -0.165, height: 0.025),
-        .init(width: 0.165, height: 0.025),
-        .init(width: -0.055, height: 0.155),
-        .init(width: 0.060, height: -0.165),
-        .init(width: -0.125, height: 0.135),
-        .init(width: 0.125, height: 0.135)
-    ]
-
     var body: some View {
-        let shown = min(max(count, 1), offsets.count)
+        let offsets = Self.layout(for: count)
         ZStack {
             Ellipse()
                 .fill(Color.black.opacity(0.38))
@@ -667,12 +667,12 @@ struct TableTokenPile: View {
                 .blur(radius: diameter * 0.045)
                 .offset(y: diameter * 0.10)
 
-            ForEach(0..<shown, id: \.self) { index in
+            ForEach(offsets.indices, id: \.self) { index in
                 let offset = offsets[index]
-                TableChip(tint: tint, size: diameter * 0.43)
+                TableChip(tint: tint, size: diameter * 0.37)
                     .offset(x: offset.width * diameter,
                             y: offset.height * diameter - CGFloat(index) * diameter * 0.006)
-                    .rotationEffect(.degrees(Double((index * 7) % 19) - 9))
+                    .rotationEffect(.degrees(Double((index * 5) % 13) - 6))
                     .zIndex(Double(index))
             }
 
@@ -688,6 +688,45 @@ struct TableTokenPile: View {
             }
         }
         .frame(width: diameter, height: diameter)
+    }
+
+    /// Jede sichtbare Anzahl besitzt eine eigene, zentrierte Ablage. So sitzt ein
+    /// einzelner Stein exakt in der Mulde und kleine Gruppen wirken nicht zufällig
+    /// an eine Wand geschoben.
+    private static func layout(for count: Int) -> [CGSize] {
+        let shown = min(max(count, 1), 12)
+        switch shown {
+        case 1:
+            return [.zero]
+        case 2:
+            return [.init(width: -0.12, height: 0.02),
+                    .init(width: 0.12, height: -0.02)]
+        case 3:
+            return [.init(width: -0.14, height: 0.11),
+                    .init(width: 0.14, height: 0.11),
+                    .init(width: 0, height: -0.14)]
+        case 4:
+            return [.init(width: -0.14, height: 0.12),
+                    .init(width: 0.14, height: 0.12),
+                    .init(width: -0.11, height: -0.12),
+                    .init(width: 0.12, height: -0.11)]
+        default:
+            let ring: [CGSize] = [
+                .init(width: 0, height: -0.17),
+                .init(width: 0.16, height: -0.08),
+                .init(width: 0.16, height: 0.10),
+                .init(width: 0, height: 0.18),
+                .init(width: -0.16, height: 0.10),
+                .init(width: -0.16, height: -0.08),
+                .zero,
+                .init(width: 0.08, height: 0.02),
+                .init(width: -0.08, height: 0.02),
+                .init(width: 0.08, height: -0.09),
+                .init(width: -0.08, height: -0.09),
+                .init(width: 0, height: 0.10)
+            ]
+            return Array(ring.prefix(shown))
+        }
     }
 }
 

@@ -1016,43 +1016,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deine zwei %@ erlauben dir, den Poch zu eröffnen."
+            "value" : "Dein %@-Paar erlaubt dir, den Poch zu eröffnen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your two %@ let you open the Poch."
+            "value" : "Your pair of %@ lets you open the Poch."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus dos %@ te permiten abrir el Poch."
+            "value" : "Tu pareja de %@ te permite abrir el Poch."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos deux %@ vous permettent d'ouvrir le Poch."
+            "value" : "Votre paire de %@ vous permet d'ouvrir le Poch."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le tue due %@ ti permettono di aprire il Poch."
+            "value" : "La tua coppia di %@ ti permette di aprire il Poch."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je twee %@ geven je het recht om de Poch te openen."
+            "value" : "Je paar van %@ laat je de Poch openen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dwie karty %@ pozwalają ci otworzyć Poch."
+            "value" : "Para %@ pozwala ci otworzyć Poch."
           }
         }
       }
@@ -1726,6 +1726,39 @@
         "pl" : { "stringUnit" : { "state" : "translated", "value" : "Połóż żeton na środku" } }
       }
     },
+    "tutorial.meld.action.ante" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einsätze reihum legen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Place the antes in turn" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Colocar las apuestas por turnos" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Placer les mises à tour de rôle" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Metti le puntate a turno" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Leg de inzetten om de beurt" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Wyłóż stawki po kolei" } }
+      }
+    },
+    "tutorial.meld.drag.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Ziehe den Stein in die Mitte" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Drag the token into the center" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Arrastra la ficha al centro" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fais glisser le jeton au centre" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Trascina il gettone al centro" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Sleep de steen naar het midden" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Przeciągnij żeton na środek" } }
+      }
+    },
+    "tutorial.meld.drag.body" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dort wartet der Gewinn der letzten Phase." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That is where the final phase's prize waits." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Allí espera el premio de la última fase." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "C'est là qu'attend le gain de la dernière phase." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Lì attende il premio dell'ultima fase." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Daar wacht de winst van de laatste fase." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Tam czeka wygrana z ostatniej fazy." } }
+      }
+    },
     "tutorial.meld.action.firstDeal" : {
       "localizations" : {
         "de" : { "stringUnit" : { "state" : "translated", "value" : "Erste Runde geben" } },
@@ -1759,6 +1792,17 @@
         "pl" : { "stringUnit" : { "state" : "translated", "value" : "Odkryj atut" } }
       }
     },
+    "tutorial.meld.action.continueBidding" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Weiter zum Pochen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Continue to bidding" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Continuar a Pochen" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Continuer vers Pochen" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Continua a Pochen" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Verder naar Pochen" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Przejdź do Pochen" } }
+      }
+    },
     "tutorial.meld.action.showClaim" : {
       "localizations" : {
         "de" : { "stringUnit" : { "state" : "translated", "value" : "Meldung zeigen" } },
@@ -1790,6 +1834,28 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Mettilo al centro. Il centro si vince alla fine della mano." } },
         "nl" : { "stringUnit" : { "state" : "translated", "value" : "Leg hem in het midden. Het midden wordt aan het einde van de ronde gewonnen." } },
         "pl" : { "stringUnit" : { "state" : "translated", "value" : "Połóż go na środku. Środek wygrywa się na końcu rundy." } }
+      }
+    },
+    "tutorial.meld.ante.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Alle legen gemeinsam ein" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Everyone contributes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Todos contribuyen" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Tout le monde contribue" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tutti contribuiscono" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Iedereen legt in" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Każdy dokłada stawkę" } }
+      }
+    },
+    "tutorial.meld.ante.body" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Jeder legt einen Stein in jede Mulde. Nicht gewonnene Steine bleiben für die nächste Runde liegen." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Everyone places one token in every well. Unclaimed tokens carry into the next round." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada jugador pone una ficha en cada hueco. Las fichas no ganadas pasan a la siguiente ronda." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chacun met un jeton dans chaque coupelle. Les jetons non gagnés restent pour la manche suivante." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ognuno mette un gettone in ogni vaschetta. I gettoni non vinti restano per il turno successivo." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Iedereen legt één steen in elk kuiltje. Niet gewonnen stenen blijven liggen voor de volgende ronde." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Każdy kładzie po jednym żetonie w każdym zagłębieniu. Niewygrane żetony zostają na następną rundę." } }
       }
     },
     "tutorial.meld.firstDeal.title" : {
@@ -2283,13 +2349,13 @@
     },
     "phase3.start.detail" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Eine Karte eröffnet die erste Kette." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "One card opens the first chain." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Una carta abre la primera cadena." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Une carte ouvre la première chaîne." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Una carta apre la prima catena." } },
-        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Eén kaart opent de eerste keten." } },
-        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Jedna karta otwiera pierwszy łańcuch." } }
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Tippe eine Karte in deiner Hand. Niedrig starten lässt mehr Folgekarten zu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap a card in your hand. Starting low leaves more follow-up cards available." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca una carta de tu mano. Empezar bajo deja más cartas de continuación." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Touchez une carte de votre main. Commencer bas laisse davantage de cartes à suivre." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tocca una carta nella tua mano. Partire basso lascia più carte successive." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Tik op een kaart in je hand. Laag beginnen laat meer vervolgkaarten over." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Dotknij karty w ręce. Niski start pozostawia więcej kart do kontynuacji." } }
       }
     },
     "phase3.start.eyebrow" : {
@@ -2459,13 +2525,13 @@
     },
     "firstRun.intro.body" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mira zeigt dir immer nur den nächsten Zug. Du spielst sofort selbst." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mira shows you only the next move. You play for yourself from the start." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mira te muestra solo el siguiente movimiento. Tú juegas desde el principio." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Mira vous montre uniquement le prochain coup. Vous jouez vous-même dès le début." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Mira ti mostra solo la prossima mossa. Giochi tu fin dall'inizio." } },
-        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Mira toont alleen de volgende zet. Je speelt vanaf het begin zelf." } },
-        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Mira pokazuje tylko następny ruch. Od początku grasz samodzielnie." } }
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "In der Mitte wartet dein erster Gewinn. Mira zeigt dir immer nur den nächsten Zug." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your first prize is waiting in the centre. Mira shows you only the next move." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu primer premio te espera en el centro. Mira solo te muestra el siguiente movimiento." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre premier gain vous attend au centre. Mira vous montre uniquement le prochain coup." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La tua prima vincita ti aspetta al centro. Mira ti mostra solo la prossima mossa." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Je eerste winst wacht in het midden. Mira toont alleen de volgende zet." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pierwsza wygrana czeka na środku. Mira pokazuje tylko następny ruch." } }
       }
     },
     "firstRun.goal" : {

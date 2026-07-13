@@ -7,6 +7,7 @@ import SwiftUI
 /// hitTest-frei, damit keine Taps geschluckt werden.
 struct DealOverlay: View {
     let game: GameState
+    let theme: Theme
     var showsSeatTargets = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -14,9 +15,11 @@ struct DealOverlay: View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
-            let deck = CGPoint(x: w / 2, y: h * 0.46)
+            let boardCenter = CGPoint(x: w / 2, y: h * 0.46)
+            // Eigener Kartenanker: Die zentrale Gewinnmulde bleibt jederzeit lesbar.
+            let deck = CGPoint(x: w * 0.84, y: h * 0.43)
             ZStack {
-                if game.dealtCount < game.totalDeals && !game.trumpRevealed {
+                if game.landedDeals < game.totalDeals && !game.trumpRevealed {
                     if showsSeatTargets {
                         DealSeatTargets(game: game, w: w, h: h)
                     }
@@ -25,44 +28,37 @@ struct DealOverlay: View {
 
                 // Flug-Fenster: mehrere Karten bleiben gleichzeitig lesbar, ohne dass
                 // die Runde als schneller Zaehlerwechsel wirkt.
-                if !reduceMotion, game.dealtCount < game.totalDeals {
+                if !reduceMotion, game.landedDeals < game.totalDeals {
                     let order = game.dealOrder
-                    let window = max(0, game.dealtCount - 4)..<min(game.dealtCount, order.count)
+                    let window = game.landedDeals..<min(game.startedDeals, order.count)
                     ForEach(Array(window), id: \.self) { i in
                         FlyingBack(from: deck,
                                    to: target(order[i], w: w, h: h),
                                    seat: order[i].seat,
                                    slot: order[i].slot,
-                                   sequence: i)
+                                   sequence: i,
+                                   onImpact: { game.markDealLanded(i) })
                             .id("fly\(i)-\(game.round.deal.upcard.rank.rawValue)")
                     }
                 }
                 // Radialer Lichtpuls in Trumpffarbe (Belohnungs-Akzent, kein Dauer-Glow)
                 if game.lightPulse > 0 {
                     PulseRing(tint: trumpTint)
-                        .position(deck)
+                        .position(boardCenter)
                         .id("pulse\(game.lightPulse)")
                 }
                 // Melde-Strom (§6a b): Münzen fliegen von der pulsierenden Mulde zum Gewinner
                 if !reduceMotion, let pool = game.pulsingPool,
+                   game.meldShown < game.startedMelds,
                    game.meldShown < game.meldEvents.count {
                     let meld = game.meldEvents[game.meldShown]
-                    let from = poolPosition(pool, deck: deck)
+                    let from = poolPosition(pool, deck: boardCenter)
                     let to = playerTarget(meld.player, w: w, h: h)
-                    CoinStream(from: from, to: to, tint: pool.jewelVivid)
+                    CoinStream(from: from,
+                               to: to,
+                               tint: theme.tint(pool),
+                               onImpact: { game.markMeldLanded(game.meldShown) })
                         .id("meld\(game.meldShown)")
-                }
-                // Stufe 2 - der Balatro-Kollaps (§6a e): Tile birst in Kategorie-Farbe,
-                // schwebendes +N beim Gewinner. Rar per Sim-Threshold (Rarity-Lock).
-                if game.kollapsShock > 0, let info = game.kollapsInfo {
-                    KollapsBurst(at: poolPosition(info.pool, deck: deck),
-                                 tint: info.pool.jewelVivid,
-                                 reduceMotion: reduceMotion)
-                        .id("kollaps\(game.kollapsShock)")
-                    FloatingGain(text: "+\(info.chips)",
-                                 at: playerTarget(info.player, w: w, h: h),
-                                 tint: info.pool.jewelVivid)
-                        .id("gain\(game.kollapsShock)")
                 }
             }
         }
@@ -182,7 +178,7 @@ private struct DealSeatTargets: View {
     }
 
     private func dealtCount(for seat: Int) -> Int {
-        game.dealOrder.prefix(game.dealtCount).filter { $0.seat == seat }.count
+        game.dealOrder.prefix(game.landedDeals).filter { $0.seat == seat }.count
     }
 
     private func opponentPoint(_ seat: Int) -> CGPoint {
@@ -223,66 +219,13 @@ private struct DealDeckAnchor: View {
     }
 }
 
-/// Kollaps-Partikel: ~30 Splitter bersten radial in Kategorie-Farbe (goldener Winkel
-/// statt RNG - deterministisch reproduzierbar). reduceMotion: nur kurzer Farb-Blink.
-private struct KollapsBurst: View {
-    let at: CGPoint
-    let tint: Color
-    let reduceMotion: Bool
-    @State private var fired = false
-
-    var body: some View {
-        ZStack {
-            if reduceMotion {
-                Circle().fill(tint.opacity(fired ? 0 : 0.5))
-                    .frame(width: 54, height: 54)
-                    .position(at)
-                    .animation(.easeOut(duration: 0.05), value: fired)
-            } else {
-                ForEach(0..<30, id: \.self) { i in
-                    let angle = Double(i) * 137.5 * .pi / 180
-                    let dist: CGFloat = 44 + CGFloat(i % 3) * 22
-                    Circle()
-                        .fill(tint)
-                        .frame(width: CGFloat(3 + i % 3), height: CGFloat(3 + i % 3))
-                        .position(x: at.x + (fired ? dist * cos(angle) : 0),
-                                  y: at.y + (fired ? dist * sin(angle) : 0))
-                        .opacity(fired ? 0 : 1)
-                        .animation(.easeOut(duration: 0.55)
-                            .delay(Double(i % 5) * 0.02), value: fired)
-                }
-            }
-        }
-        .onAppear { fired = true }
-        .allowsHitTesting(false)
-    }
-}
-
-/// Schwebendes "+N": steigt beim Gewinner auf und verblasst (§6a e).
-private struct FloatingGain: View {
-    let text: String
-    let at: CGPoint
-    let tint: Color
-    @State private var risen = false
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 22, weight: .heavy))
-            .foregroundStyle(tint)
-            .shadow(color: .black.opacity(0.6), radius: 2, y: 1)
-            .position(x: at.x, y: at.y + (risen ? 6 : 40))
-            .opacity(risen ? 0 : 1)
-            .animation(.easeOut(duration: 0.9), value: risen)
-            .onAppear { risen = true }
-    }
-}
-
 /// Münz-Strom einer Meldung: gestaffelte Chips in Kategorie-Farbe fliegen zur
 /// Gewinner-Position (Bogen-Flugbahn = Hand-Gate, v1 gerade + gestaffelt).
 private struct CoinStream: View {
     let from: CGPoint
     let to: CGPoint
     let tint: Color
+    let onImpact: () -> Void
 
     var body: some View {
         ZStack {
@@ -292,11 +235,9 @@ private struct CoinStream: View {
                            tint: tint,
                            index: i,
                            duration: Tokens.p1CoinFlight,
-                           delay: Double(i) * 0.06)
+                           delay: Double(i) * 0.06,
+                           onImpact: i == 3 ? onImpact : {})
             }
-            ChipLandingRipple(at: to,
-                              tint: tint,
-                              delay: Tokens.p1CoinFlight + 0.17)
         }
     }
 }
@@ -308,31 +249,25 @@ private struct FlyingChip: View {
     let index: Int
     let duration: Double
     let delay: Double
-    @State private var progress: CGFloat = 0
+    let onImpact: () -> Void
 
     var body: some View {
-        let point = PhysicalMotion.quadraticPoint(
-            progress: progress,
-            from: from,
-            to: landingPoint,
-            arcHeight: PhysicalMotion.shallowArcHeight(from: from,
-                                                       to: landingPoint,
-                                                       minimum: 7,
-                                                       maximum: 12),
-            lateralBias: CGFloat(index - 1) * 2.2
-        )
-        TableChip(tint: tint, size: 17)
-            .rotationEffect(.degrees(Double(index - 1) * 2 + Double(progress) * 4))
-            .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 3),
-                              axis: (x: 0.82, y: 0.18, z: 0),
-                              perspective: 0.28)
-            .scaleEffect(1 + sin(progress * .pi) * 0.025)
-            .position(point)
-            .opacity(progress >= 0.985 ? 0 : 1)
-            .onAppear {
-                withAnimation(PhysicalMotion.travel(duration: duration).delay(delay)) {
-                    progress = 1
-                }
+        ImpactFlight(from: from,
+                     to: landingPoint,
+                     duration: duration,
+                     delay: delay,
+                     arcHeight: PhysicalMotion.shallowArcHeight(from: from,
+                                                                to: landingPoint,
+                                                                minimum: 7,
+                                                                maximum: 12),
+                     lateralBias: CGFloat(index - 1) * 2.2,
+                     onImpact: onImpact) { progress in
+            TableChip(tint: tint, size: 22)
+                .rotationEffect(.degrees(Double(index - 1) * 2 + Double(progress) * 12))
+                .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 3),
+                                  axis: (x: 0.82, y: 0.18, z: 0),
+                                  perspective: 0.28)
+                .scaleEffect(1 + sin(progress * .pi) * 0.025)
             }
     }
 
@@ -348,47 +283,15 @@ private struct FlyingChip: View {
     }
 }
 
-private struct ChipLandingRipple: View {
-    let at: CGPoint
-    let tint: Color
-    let delay: Double
-    @State private var started = false
-    @State private var fired = false
-
-    var body: some View {
-        ZStack {
-            Ellipse()
-                .fill(Color.black.opacity(fired ? 0 : 0.48))
-                .frame(width: fired ? 30 : 15, height: fired ? 9 : 5)
-                .blur(radius: fired ? 3 : 1)
-                .offset(y: 5)
-            TableChip(tint: tint, size: 17)
-                .scaleEffect(fired ? 0.92 : 1.06, anchor: .bottom)
-                .opacity(fired ? 0 : 0.94)
-        }
-        .position(at)
-        .opacity(started && !fired ? 1 : 0)
-        .onAppear {
-            Task { @MainActor in
-                try? await Task.sleep(for: .seconds(delay))
-                started = true
-                withAnimation(.easeOut(duration: 0.18)) {
-                    fired = true
-                }
-            }
-        }
-    }
-}
-
-/// Ein einzelner fliegender Rücken: animiert sich beim Erscheinen zum Ziel und
-/// schrumpft dort weg (Ankunft "saugt" die Karte in Hand/Token).
+/// Ein einzelner fliegender Rücken. Der sichtbare Zielstapel wächst erst im
+/// Kontakt-Frame, sodass die Karte nie gleichzeitig fliegt und gelandet ist.
 private struct FlyingBack: View {
     let from: CGPoint
     let to: CGPoint
     let seat: Int
     let slot: Int
     let sequence: Int
-    @State private var progress: CGFloat = 0
+    let onImpact: () -> Void
 
     var body: some View {
         let duration = PhysicalMotion.duration(from: from,
@@ -396,27 +299,23 @@ private struct FlyingBack: View {
                                                pointsPerSecond: 640,
                                                minimum: Tokens.p1Flight,
                                                maximum: Tokens.p1Flight + 0.16)
-        CardBack(scale: seat == 0 ? 1.24 : 1.14)
-            .shadow(color: .black.opacity(0.56),
-                    radius: progress > 0.82 ? 4 : 12,
-                    y: progress > 0.82 ? 3 : 8)
-            .rotationEffect(.degrees(launchAngle + (landingAngle - launchAngle) * Double(progress)))
-            .scaleEffect(1.02 + ((seat == 0 ? 0.90 : 0.82) - 1.02) * progress)
-            .opacity(progress >= 0.985 ? 0 : 1)
-            .position(PhysicalMotion.quadraticPoint(
-                progress: progress,
-                from: from,
-                to: to,
-                arcHeight: PhysicalMotion.shallowArcHeight(from: from,
-                                                           to: to,
-                                                           minimum: 18,
-                                                           maximum: 34),
-                lateralBias: CGFloat((sequence % 3) - 1) * 6
-            ))
-            .onAppear {
-                withAnimation(PhysicalMotion.travel(duration: duration)) {
-                    progress = 1
-                }
+        ImpactFlight(from: from,
+                     to: to,
+                     duration: duration,
+                     arcHeight: PhysicalMotion.shallowArcHeight(from: from,
+                                                                to: to,
+                                                                minimum: 18,
+                                                                maximum: 34),
+                     lateralBias: CGFloat((sequence % 3) - 1) * 6,
+                     onImpact: onImpact) { progress in
+            CardBack(scale: seat == 0 ? 1.24 : 1.14)
+                .shadow(color: .black.opacity(0.56),
+                        radius: progress > 0.82 ? 4 : 12,
+                        y: progress > 0.82 ? 3 : 8)
+                .rotationEffect(.degrees(
+                    launchAngle + (landingAngle - launchAngle) * Double(progress)
+                ))
+                .scaleEffect(1.02 + ((seat == 0 ? 0.90 : 0.82) - 1.02) * progress)
             }
     }
 

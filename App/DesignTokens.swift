@@ -14,6 +14,11 @@ enum Tokens {
     static let jewelPlatin   = Color(hex: 0xE2E8F0)  // Mitte / Held
     static let slate         = Color(hex: 0x6B7280)  // inaktiv / entsättigt
 
+    // Lesefarben für Text und Fokus auf dunklem Grund. Die Materialfarben bleiben
+    // bewusst tief; UI-Typografie braucht dagegen verlässlichen Kontrast.
+    static let amethystText  = Color(hex: 0xA98BD0)
+    static let smaragdText   = Color(hex: 0x58A58C)
+
     // Vivid-Varianten (Neon/Vivid-Electronic §7): dieselben Hue-Familien, aber
     // gesättigt-leuchtend statt matt - für das strahlende Theme.
     static let goldVivid     = Color(hex: 0xF0CE7A)
@@ -41,6 +46,9 @@ enum Tokens {
     static let guidedMeldBoardOffsetY: CGFloat = 8
     static let guidedMeldFocusTop: CGFloat = 184
     static let guidedMeldCoachGap: CGFloat = 82
+    static let guidedOpeningTokenSize: CGFloat = 38
+    static let guidedOpeningSourceGap: CGFloat = 66
+    static let guidedOpeningSnapRadius: CGFloat = 58
 
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
@@ -58,11 +66,11 @@ enum Tokens {
     // Phase-1-Deal / Trumpf-Beat (§6a, Parameter-Lock - Tobsi-Entscheide).
     /// Kaskaden-Takt des Austeilens: bewusst sichtbar, damit Kartenruecken als
     /// Deal-Ritual wirken statt als technischer Zaehlersprung.
-    static let p1DealStep: Double = 0.18
+    static let p1DealStep: Double = 0.32
     static let p1GuidedDealStep: Double = 0.62
     static let p1GuidedDealFinishStep: Double = 0.24
     /// Flugdauer einer einzelnen Karte vom Stapel in die Hand.
-    static let p1Flight: Double = 0.56
+    static let p1Flight: Double = 0.42
     /// Freeze vor dem Trumpf-Flip: 150 ms.
     static let p1TrumpFreeze: Double = 0.68
     /// Radialer Lichtpuls übers Brett nach dem Trumpf-Flip.
@@ -73,16 +81,9 @@ enum Tokens {
     /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
     static let p1MeldStep: Double = 1.08
 
-    // Balatro-Kollaps Stufe 2 (§6a e, Parameter-Lock).
-    /// Zünd-Schwelle: per Headless-Sim kalibriert (pochsim kollaps, 11.557 Runden,
-    /// 8.7.2026): T=12 -> 16,2% Zünd-Rate (Zielband 15-20%, rares Ende - konzept §6
-    /// Auflage 3). Bei Ante-Eskalation später dynamisch Richtung 15+.
-    static let jackpotKollapsThreshold = 12
-    /// Screen-Shake des Kollaps: 150 ms, 3 pt (konzept: 2-3 px) - reduceMotion: 0.
-    static let kollapsShake: Double = 0.15
-    static let kollapsShakeAmp: Double = 3
-    /// Farbgetönter Vignetten-Flash ("Wimpernschlag"); reduceMotion: 50-ms-Dissolve.
-    static let kollapsFlash: Double = 0.28
+    /// Große Auszahlungen bleiben selten, werden aber ausschließlich über Gewicht,
+    /// Kontakt und Materialkante betont - nie über Partikel, Shake oder Screen-Flash.
+    static let grandPayoutThreshold = 12
 
     // "Der Poch" (§6b Signaturgeste, Parameter-Lock): Tischschlag.
     /// Dauer des Tisch-Zitterns (nur Tisch-Welt, HUD ruhig).
@@ -98,9 +99,6 @@ enum Tokens {
     static let p3CascadeStep: Double = 0.64
     /// Sichtbarer Flug einer Karte vom Sitz in den zentralen Kettenfächer.
     static let p3CardFlight: Double = 0.54
-    /// Der Faecher uebernimmt die Karte kurz vor dem vollstaendigen Ausblenden
-    /// der Flugkarte. So gibt es weder Doppelbild noch sichtbare Luecke.
-    static let p3CardSettleDelay: Double = 0.49
     /// Beat-Drop am Kettenriss: 350 ms Stille, Stopper glüht golden, Anspielrecht wandert.
     static let p3BeatDrop: Double = 0.52
     /// Die letzte Karte bleibt als Abschlussbild stehen, bevor die Abrechnung beginnt.
@@ -112,7 +110,6 @@ enum Tokens {
     /// Straf-/Centerpot-Flug: parallel genug fuer Tempo, lang genug fuer Richtung.
     static let p3PunishFlight: Double = 0.78
     /// Winner-Impact nach den ersten ankommenden Chips.
-    static let p3PunishImpactDelay: Double = 0.76
 }
 
 extension Color {

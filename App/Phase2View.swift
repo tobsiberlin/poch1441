@@ -26,9 +26,8 @@ struct Phase2View: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var bid = 1.0
     @State private var presentedPot = 0
-    @State private var potPresentationTask: Task<Void, Never>?
+    @State private var pendingPot: Int?
     @State private var transferPresentationActive = false
-    @State private var transferPresentationTask: Task<Void, Never>?
     @State private var guidedPreludeStep = 0
     #if DEBUG
     @State private var qaPochFlight = 0
@@ -43,7 +42,7 @@ struct Phase2View: View {
             let decisionH: CGFloat = isGuidedRound ? 116 : 104
             let actionGap: CGFloat = h < 760 ? 0 : 12
             let actionsTop = decisionTop + decisionH + actionGap
-            let actionsH: CGFloat = usesTwoActionRows ? 96 : 48
+            let actionsH: CGFloat = 48
             let seatsY = min(
                 max(actionsTop + actionsH + 32, h - 216),
                 h - 180
@@ -72,7 +71,7 @@ struct Phase2View: View {
                         reduceMotion: reduceMotion
                     ))
                     .allowsHitTesting(!isGuidedRound || guidedPreludeStep >= 2)
-                    .opacity(isGuidedRound && guidedPreludeStep < 2 ? 0.10 : 1)
+                    .opacity(isGuidedRound && guidedPreludeStep < 2 ? 0 : 1)
 
                 portraitsRow(maxPanelWidth: h < 760 ? 96 : 106)
                     .frame(width: w)
@@ -97,17 +96,23 @@ struct Phase2View: View {
             resetBid()
             presentedPot = game.pot
             scheduleGuidedPrelude()
+            #if DEBUG
+            if let argument = ProcessInfo.processInfo.arguments.first(where: {
+                $0.hasPrefix("-tutorialBiddingStep=")
+            }), let step = Int(argument.split(separator: "=").last ?? "0") {
+                guidedPreludeStep = min(max(step, 0), 2)
+            }
+            #endif
         }
         .onChange(of: game.turnIndex) { resetBid() }
         .onChange(of: game.pot) { _, newValue in
             schedulePotPresentation(newValue)
         }
         .onChange(of: game.betTransfer) { _, _ in
-            scheduleTransferPresentation()
+            transferPresentationActive = game.betTransfer > 0
         }
         .onDisappear {
-            potPresentationTask?.cancel()
-            transferPresentationTask?.cancel()
+            pendingPot = nil
         }
         .sensoryFeedback(.impact(weight: .heavy), trigger: game.pochShock)
         .overlay {
@@ -116,7 +121,8 @@ struct Phase2View: View {
                               amount: game.lastBetAmount,
                               kind: game.lastBetKind,
                               trigger: game.betTransfer,
-                              tint: Tokens.jewelAmethyst)
+                              tint: theme.tint(.poch),
+                              onImpact: commitBetImpact)
                     .allowsHitTesting(false)
             }
             #if DEBUG
@@ -125,7 +131,8 @@ struct Phase2View: View {
                               amount: 4,
                               kind: .raise,
                               trigger: qaPochFlight,
-                              tint: Tokens.jewelAmethyst)
+                              tint: theme.tint(.poch),
+                              onImpact: {})
                     .allowsHitTesting(false)
             }
             #endif
@@ -149,14 +156,6 @@ struct Phase2View: View {
         #endif
     }
 
-    private var usesTwoActionRows: Bool {
-        guard game.stage == .betting,
-              game.turnIndex == 0,
-              let legal = game.humanLegal
-        else { return false }
-        return legal.raiseRange != nil || (legal.openRange != nil && legal.canCall)
-    }
-
     private var guidedFocus: GuidedFocus {
         guard isGuidedRound else { return .none }
         if transferPresentationActive || game.turnIndex != 0 { return .opponents }
@@ -169,30 +168,24 @@ struct Phase2View: View {
     }
 
     private func schedulePotPresentation(_ value: Int) {
-        potPresentationTask?.cancel()
         guard value > presentedPot, !reduceMotion else {
             presentedPot = value
+            pendingPot = nil
             return
         }
-        potPresentationTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(Tokens.p2PochImpactDelay))
-            guard !Task.isCancelled else { return }
-            withAnimation(.spring(duration: Tokens.p2PotSpring)) {
-                presentedPot = value
-            }
+        pendingPot = value
+    }
+
+    private func commitBetImpact() {
+        withAnimation(.spring(duration: Tokens.p2PotSpring)) {
+            presentedPot = pendingPot ?? game.pot
+            pendingPot = nil
+            transferPresentationActive = false
         }
     }
 
-    private func scheduleTransferPresentation() {
-        transferPresentationTask?.cancel()
-        transferPresentationActive = true
-        transferPresentationTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(Tokens.p2PochImpactDelay + 0.22))
-            guard !Task.isCancelled else { return }
-            withAnimation(.easeOut(duration: 0.18)) {
-                transferPresentationActive = false
-            }
-        }
+    private var pochAccent: Color {
+        theme.isNeon ? Tokens.amethystVivid : Tokens.amethystText
     }
 
     private func scheduleGuidedPrelude() {
@@ -270,7 +263,7 @@ struct Phase2View: View {
         if game.turnIndex == 0 {
             return game.humanComboRank == nil
                 ? ("PASSEN", "KEIN PAAR", Tokens.slate)
-                : ("DEIN ZUG", "\(game.humanComboRank?.index ?? "")-PAAR", Tokens.amethystVivid)
+                : ("DEIN ZUG", "\(game.humanComboRank?.index ?? "")-PAAR", pochAccent)
         }
         let action = actionPresentation(for: game.turnIndex)
         return (action.text.uppercased(), game.name(of: game.turnIndex).uppercased(), action.tone)
@@ -319,10 +312,10 @@ struct Phase2View: View {
                 }
 
                 HStack(spacing: 8) {
-                    pressureMetric("EINSATZ", "\(presentedPot)", Tokens.amethystVivid)
+                    pressureMetric("EINSATZ", "\(presentedPot)", pochAccent)
                     pressureMetric("MULDE", "+\(game.pochPool)", Tokens.jewelGold)
                     pressureMetric("LIMIT", cap, Tokens.slate, muted: true)
-                    pressureMetric("DU", "\(committed)", Tokens.jewelSmaragd)
+                    pressureMetric("DU", "\(committed)", theme.isNeon ? Tokens.smaragdVivid : Tokens.smaragdText)
                 }
 
                 if isGuidedRound, guidedPreludeStep < 2,
@@ -405,7 +398,7 @@ struct Phase2View: View {
                 "arrow.left.arrow.right.circle.fill",
                 String(localized: "tutorial.bidding.reply.title", defaultValue: "Kosten vergleichen"),
                 String(format: format, callCost),
-                Tokens.amethystVivid
+                pochAccent
             )
         }
         if game.humanComboRank == nil {
@@ -419,12 +412,12 @@ struct Phase2View: View {
         switch guidedPreludeStep {
         case 0:
             let format = String(localized: "tutorial.bidding.pair.body",
-                                defaultValue: "Deine zwei %@ erlauben dir, den Poch zu eröffnen.")
+                                defaultValue: "Dein %@-Paar erlaubt dir, den Poch zu eröffnen.")
             return (
                 "rectangle.on.rectangle.angled",
                 String(localized: "tutorial.bidding.pair.title", defaultValue: "Paar erkannt"),
                 String(format: format, game.humanComboRank?.index ?? ""),
-                Tokens.amethystVivid
+                pochAccent
             )
         case 1:
             return (
@@ -440,7 +433,7 @@ struct Phase2View: View {
                 "hand.tap.fill",
                 String(localized: "tutorial.bidding.commit.title", defaultValue: "Pochen"),
                 String(format: format, Int(bid)),
-                Tokens.amethystVivid
+                pochAccent
             )
         }
     }
@@ -552,7 +545,7 @@ struct Phase2View: View {
 
             Text("\(Int(bid))")
                 .font(.system(size: 28, weight: .bold))
-                .foregroundStyle(isActive ? Tokens.amethystVivid : Tokens.slate.opacity(0.3))
+                .foregroundStyle(isActive ? pochAccent : Tokens.slate.opacity(0.3))
                 .contentTransition(.numericText())
                 .frame(minWidth: 48)
         }
@@ -582,12 +575,12 @@ struct Phase2View: View {
 
                 RoundedRectangle(cornerRadius: 9)
                     .fill(LinearGradient(colors: [
-                        Tokens.amethystVivid.opacity(isActive ? 0.92 : 0.38),
+                        pochAccent.opacity(isActive ? 0.82 : 0.32),
                         Tokens.jewelAmethyst.opacity(isActive ? 0.76 : 0.28)
                     ], startPoint: .top, endPoint: .bottom))
                     .frame(width: 20, height: max(6, CGFloat(progress) * h - 9))
                     .padding(.bottom, 5)
-                    .shadow(color: Tokens.amethystVivid.opacity(isActive ? 0.24 : 0), radius: 7)
+                    .shadow(color: pochAccent.opacity(isActive ? 0.16 : 0), radius: 7)
 
                 Capsule()
                     .fill(LinearGradient(colors: [
@@ -678,7 +671,7 @@ struct Phase2View: View {
             Text("POCH")
                 .font(.system(size: 5.8, weight: .heavy, design: .rounded))
                 .tracking(0.8)
-                .foregroundStyle(Tokens.amethystVivid.opacity(0.76))
+                .foregroundStyle(pochAccent.opacity(0.76))
                 .offset(y: -15)
 
             Text("\(presentedPot)")
@@ -696,11 +689,11 @@ struct Phase2View: View {
                     startPoint: .top, endPoint: .bottom))
                 .overlay(Circle().strokeBorder(
                     LinearGradient(
-                        colors: [Tokens.amethystVivid.opacity(theme.isNeon ? 1 : 0.72),
-                                 Tokens.amethystVivid.opacity(0.3)],
+                        colors: [pochAccent.opacity(theme.isNeon ? 1 : 0.68),
+                                 pochAccent.opacity(0.26)],
                         startPoint: .top, endPoint: .bottom),
                     lineWidth: 0.75))
-                .shadow(color: Tokens.amethystVivid.opacity(theme.isNeon ? 0.5 : 0.12), radius: 5)
+                .shadow(color: pochAccent.opacity(theme.isNeon ? 0.5 : 0.08), radius: 5)
         )
         .matchedGeometryEffect(id: "pochPot", in: morph)
         .scaleEffect(reduceMotion ? 1 : growth)
@@ -750,9 +743,9 @@ struct Phase2View: View {
         switch game.seatActions[seat] {
         case .thinking: return ("überlegt …", Tokens.slate)
         case .passed: return ("passt", Tokens.slate)
-        case .opened(let n): return ("pocht \(n)!", Tokens.amethystVivid)
+        case .opened(let n): return ("pocht \(n)!", pochAccent)
         case .called: return ("geht mit", Tokens.jewelGold)
-        case .raised(let n): return ("erhöht \(n)", Tokens.amethystVivid)
+        case .raised(let n): return ("erhöht \(n)", pochAccent)
         case .none:
             let committed = s?.committed ?? 0
             return committed > 0 ? ("setzt \(committed)", Tokens.jewelGold) : ("bereit", Tokens.slate.opacity(0.62))
@@ -843,7 +836,7 @@ struct Phase2View: View {
         let cap = game.capHolder.map { game.name(of: $0) } ?? "offen"
         let committed = game.humanCommitted
         return HStack(spacing: 8) {
-            wagerMetric("EINSATZ", "\(presentedPot)", Tokens.amethystVivid)
+            wagerMetric("EINSATZ", "\(presentedPot)", pochAccent)
             wagerMetric("MULDE", "+\(game.pochPool)", Tokens.jewelGold)
             wagerMetric("LIMIT", cap, Tokens.slate, muted: true)
             wagerMetric("DU", "\(committed)", Tokens.jewelSmaragd)
@@ -913,58 +906,29 @@ struct Phase2View: View {
         let callCost = max(0, game.betting.currentBet - game.humanCommitted)
         let canOpen = legal.openRange != nil
         let canRaise = legal.raiseRange != nil
-        if canOpen && !legal.canCall && !canRaise {
-            HStack(spacing: 8) {
-                actionButton("Passen",
-                             style: .quiet,
-                             isEnabled: legal.canPass) { game.humanPass() }
-                actionButton("Pochen \(Int(bid))",
-                             style: .amethyst,
-                             isEnabled: canOpen) {
+        HStack(spacing: 7) {
+            if legal.canPass {
+                actionButton("Passen", style: .quiet) { game.humanPass() }
+            }
+            if legal.canCall {
+                actionButton(callCost > 0 ? "Mitgehen \(callCost)" : "Mitgehen",
+                             style: .gold) { game.humanCall() }
+            }
+            if canRaise {
+                actionButton("Erhöhen \(Int(bid))", style: .amethyst) {
+                    if let raise = legal.raiseRange {
+                        game.humanRaise(to: Int(bid).clamped(to: raise))
+                    }
+                }
+            } else if canOpen {
+                actionButton("Pochen \(Int(bid))", style: .amethyst) {
                     if let open = legal.openRange {
                         game.humanOpen(Int(bid).clamped(to: open))
                     }
                 }
             }
-            .padding(.horizontal, 2)
-        } else {
-            VStack(spacing: 7) {
-                HStack(spacing: 8) {
-                    if legal.canPass {
-                        actionButton("Passen",
-                                     style: .quiet) { game.humanPass() }
-                    }
-                    if legal.canCall {
-                        actionButton(callCost > 0 ? "Mitgehen \(callCost)" : "Mitgehen",
-                                     style: .gold) { game.humanCall() }
-                    }
-                    if canOpen && !canRaise {
-                        actionButton("Pochen \(Int(bid))",
-                                     style: .amethyst) {
-                            if let open = legal.openRange {
-                                game.humanOpen(Int(bid).clamped(to: open))
-                            }
-                        }
-                    }
-                }
-                if canRaise {
-                    actionButton("Erhöhen \(Int(bid))",
-                                 style: .amethyst) {
-                        if let raise = legal.raiseRange {
-                            game.humanRaise(to: Int(bid).clamped(to: raise))
-                        }
-                    }
-                } else if canOpen && legal.canCall {
-                    actionButton("Pochen \(Int(bid))",
-                                 style: .amethyst) {
-                        if let open = legal.openRange {
-                            game.humanOpen(Int(bid).clamped(to: open))
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal, 2)
         }
+        .padding(.horizontal, 2)
     }
 
     private func wallLabel(_ range: ClosedRange<Int>) -> some View {
@@ -987,7 +951,7 @@ struct Phase2View: View {
         VStack(spacing: 10) {
             if let r = game.pochResult {
                 HStack(spacing: 10) {
-                    TableChip(tint: Tokens.amethystVivid, size: 28)
+                    TableChip(tint: pochAccent, size: 28)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(game.name(of: r.winner)) nimmt den Poch")
                             .font(.system(size: 14, weight: .heavy))
@@ -1056,7 +1020,7 @@ struct Phase2View: View {
                     .fill(fill)
                     .overlay(Capsule().strokeBorder(stroke.opacity(0.82), lineWidth: 1.15))
                     .overlay(Capsule().strokeBorder(Color.white.opacity(isEnabled ? 0.08 : 0.03), lineWidth: 0.7).padding(1.6))
-                    .shadow(color: style == .amethyst && isEnabled ? Tokens.amethystVivid.opacity(0.18) : .black.opacity(0.18),
+                    .shadow(color: style == .amethyst && isEnabled ? pochAccent.opacity(0.14) : .black.opacity(0.18),
                             radius: style == .amethyst && isEnabled ? 10 : 4,
                             y: style == .amethyst && isEnabled ? 5 : 2)
             )
@@ -1084,7 +1048,7 @@ struct Phase2View: View {
     private func actionStroke(style: ButtonTone, isEnabled: Bool) -> Color {
         guard isEnabled else { return Tokens.slate.opacity(0.20) }
         switch style {
-        case .amethyst: return Tokens.amethystVivid.opacity(0.8)
+        case .amethyst: return pochAccent.opacity(0.76)
         case .gold: return Tokens.jewelGold.opacity(0.6)
         case .quiet: return Tokens.slate.opacity(0.4)
         }
@@ -1117,6 +1081,9 @@ private struct PochBetFlight: View {
     let kind: BetTransferKind
     let trigger: Int
     let tint: Color
+    let onImpact: () -> Void
+
+    @State private var landed = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -1131,19 +1098,39 @@ private struct PochBetFlight: View {
             let tokenCount = min(max(amount, 1), 4)
             ZStack {
                 ForEach(0..<tokenCount, id: \.self) { i in
-                    PochFlyingChip(from: origin,
-                                   to: target,
-                                   tint: i == 0 ? Tokens.jewelGold : tint,
-                                   index: i,
-                                   lateralBias: curveBias(for: seat) * 0.16,
-                                   emphasized: kind.isPoch,
-                                   trigger: trigger)
+                    let offset = landingOffset(index: i)
+                    ImpactFlight(
+                        from: origin,
+                        to: CGPoint(x: target.x + offset.width,
+                                    y: target.y + offset.height),
+                        duration: Tokens.p2PochFlight,
+                        delay: Double(i) * 0.055,
+                        arcHeight: PhysicalMotion.shallowArcHeight(
+                            from: origin,
+                            to: target,
+                            minimum: 7,
+                            maximum: kind.isPoch ? 14 : 11),
+                        lateralBias: curveBias(for: seat) * 0.08 + CGFloat(i - 1) * 2,
+                        onImpact: {
+                            guard i == tokenCount - 1 else { return }
+                            landed = true
+                            onImpact()
+                        }
+                    ) { progress in
+                        TableChip(tint: i == 0 ? Tokens.jewelGold : tint,
+                                  size: kind.isPoch ? 22 : 21)
+                            .rotationEffect(.degrees(Double(i - 1) * 2 + Double(progress) * 3))
+                            .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 2.2),
+                                              axis: (x: 0.82, y: 0.18, z: 0),
+                                              perspective: 0.22)
+                            .scaleEffect(1 + sin(progress * .pi) * 0.018)
+                            .shadow(color: .black.opacity(0.64),
+                                    radius: progress > 0.84 ? 3 : 7,
+                                    y: progress > 0.84 ? 2 : 5)
+                    }
+                    .opacity(landed ? 0 : 1)
+                    .id("poch-chip-\(trigger)-\(i)")
                 }
-                PochImpactRing(at: target,
-                               tint: kind.isPoch ? tint : Tokens.jewelGold,
-                               emphasized: kind.isPoch,
-                               trigger: trigger)
-                    .id("poch-impact-\(trigger)")
             }
         }
     }
@@ -1165,94 +1152,15 @@ private struct PochBetFlight: View {
         default: return -30
         }
     }
-}
 
-private struct PochFlyingChip: View {
-    let from: CGPoint
-    let to: CGPoint
-    let tint: Color
-    let index: Int
-    let lateralBias: CGFloat
-    let emphasized: Bool
-    let trigger: Int
-    @State private var progress: CGFloat = 0
-
-    var body: some View {
-        let target = landingPoint
-        let p = PhysicalMotion.quadraticPoint(
-            progress: progress,
-            from: from,
-            to: target,
-            arcHeight: PhysicalMotion.shallowArcHeight(from: from,
-                                                       to: target,
-                                                       minimum: 7,
-                                                       maximum: emphasized ? 14 : 11),
-            lateralBias: lateralBias * 0.48 + CGFloat(index - 1) * 2
-        )
-        TableChip(tint: tint, size: emphasized ? 20 : 18.5)
-            .rotationEffect(.degrees(Double(index - 1) * 2 + Double(progress) * 4))
-            .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 3),
-                              axis: (x: 0.82, y: 0.18, z: 0),
-                              perspective: 0.28)
-            .scaleEffect(1 + sin(progress * .pi) * 0.025)
-            .position(p)
-            .opacity(progress > 0.992 ? 0 : 1)
-            .shadow(color: .black.opacity(0.66), radius: progress > 0.84 ? 3 : 8,
-                    y: progress > 0.84 ? 2 : 5)
-            .onAppear {
-                withAnimation(PhysicalMotion.travel(duration: Tokens.p2PochFlight)
-                    .delay(Double(index) * 0.055)) {
-                    progress = 1
-                }
-            }
-            .id("poch-chip-\(trigger)-\(index)")
-    }
-
-    private var landingPoint: CGPoint {
+    private func landingOffset(index: Int) -> CGSize {
         let offsets = [
             CGSize(width: -7, height: 4),
             CGSize(width: 6, height: 5),
             CGSize(width: -1, height: -5),
             CGSize(width: 5, height: -3)
         ]
-        let offset = offsets[index % offsets.count]
-        return CGPoint(x: to.x + offset.width, y: to.y + offset.height)
-    }
-}
-
-private struct PochImpactRing: View {
-    let at: CGPoint
-    let tint: Color
-    let emphasized: Bool
-    let trigger: Int
-    @State private var started = false
-    @State private var settled = false
-
-    var body: some View {
-        ZStack {
-            Ellipse()
-                .fill(Color.black.opacity(settled ? 0 : 0.48))
-                .frame(width: settled ? 30 : 18, height: settled ? 10 : 6)
-                .blur(radius: settled ? 3 : 1.2)
-                .offset(y: 4)
-
-            TableChip(tint: tint, size: emphasized ? 20 : 18.5)
-                .scaleEffect(settled ? 0.94 : 1.08, anchor: .bottom)
-                .opacity(settled ? 0 : 0.94)
-        }
-        .position(at)
-        .opacity(started ? 1 : 0)
-        .onAppear {
-            Task { @MainActor in
-                try? await Task.sleep(for: .seconds(Tokens.p2PochImpactDelay))
-                guard !Task.isCancelled else { return }
-                started = true
-                withAnimation(.easeOut(duration: 0.18)) {
-                    settled = true
-                }
-            }
-        }
-        .id("poch-impact-\(trigger)")
+        return offsets[index % offsets.count]
     }
 }
 

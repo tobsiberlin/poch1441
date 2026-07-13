@@ -328,14 +328,17 @@ final class GameState {
 
     private func resetPresentationState() {
         seatActions = Array(repeating: .none, count: playerCount)
-        dealtCount = 0
+        startedDeals = 0
+        landedDeals = 0
+        landedDealIndices.removeAll(keepingCapacity: true)
+        presentation.reset()
         trumpRevealed = false
         lightPulse = 0
+        startedMelds = 0
         meldShown = 0
         pulsingPool = nil
         revealedPlays = 0
-        kollapsInfo = nil
-        kollapsShock = 0
+        landedPlays = 0
         betTransfer = 0
         lastBetActor = nil
         lastBetAmount = 0
@@ -346,7 +349,7 @@ final class GameState {
     private func tutorialSeed(for lesson: TutorialLesson) -> UInt64 {
         let fallback: [TutorialLesson: UInt64] = [
             .meld: playerCount == 3 ? 1_444 : 1_442,
-            .bidding: playerCount == 3 ? 1_441 : 1_442,
+            .bidding: playerCount == 3 ? 1_441 : 7,
             .playout: 1_441
         ]
         guard let url = Bundle.main.url(forResource: "TutorialScenarios", withExtension: "json") else {
@@ -573,6 +576,7 @@ final class GameState {
     /// (Parameter-Lock), mit 350-ms-Beat-Drop am Kettenriss. `revealedPlays` ist der
     /// Präsentations-Zeiger in den Play-Strom.
     private(set) var revealedPlays = 0
+    private(set) var landedPlays = 0
     private var cascadeTask: Task<Void, Never>?
 
     var playout: PlayoutPhase? { round.playout }
@@ -690,12 +694,33 @@ final class GameState {
     }
 
     /// Anspiel des Menschen - nur wenn er führt und die Kaskade eingeholt ist.
+    private func startPlayPresentation() {
+        guard let phase = round.playout,
+              phase.plays.indices.contains(revealedPlays) else { return }
+        let sequence = revealedPlays + 1
+        let play = phase.plays[revealedPlays]
+        let eventID = "play-\(sequence)"
+        presentation.begin(id: eventID,
+                           kind: .playedCard,
+                           source: "seat-\(uiSeat(forRoundSeat: play.player))",
+                           target: "table-chain")
+        revealedPlays = sequence
+    }
+
+    func markPlayLanded(sequence: Int) {
+        guard sequence > landedPlays,
+              presentation.impact(id: "play-\(sequence)") else { return }
+        landedPlays = sequence
+        hapticTick += 1
+        presentation.complete(id: "play-\(sequence)")
+    }
+
     func humanLead(_ card: Card) {
         guard stage == .playout, let phase = round.playout, let humanRoundSeat,
               phase.leader == humanRoundSeat, cascadeIdle else { return }
         do {
             try round.applyLead(card)
-            revealedPlays += 1  // das eigene Anspiel erscheint sofort
+            startPlayPresentation()
             runCascadeIfNeeded()
         } catch {
             log.error("Illegales Anspiel: \(String(describing: error))")
@@ -714,7 +739,7 @@ final class GameState {
                 // Zwangskarte im Kaskaden-Takt enthüllen
                 try? await Task.sleep(for: .seconds(Tokens.p3CascadeStep))
                 guard !Task.isCancelled else { return }
-                revealedPlays += 1
+                startPlayPresentation()
                 let chainEnded = revealedPlays == phase.plays.count
                     || phase.plays[revealedPlays].isLead
                 if chainEnded {
@@ -738,7 +763,7 @@ final class GameState {
                 else { continue }
                 do {
                     try round.applyLead(card)
-                    revealedPlays += 1
+                    startPlayPresentation()
                 } catch {
                     log.error("Illegales Bot-Anspiel: \(String(describing: error))")
                     return
@@ -798,6 +823,7 @@ final class GameState {
             do { try round.applyLead(card) } catch { break }
         }
         revealedPlays = round.playout?.plays.count ?? revealedPlays
+        landedPlays = revealedPlays
         endPhase = .done
     }
 
@@ -832,9 +858,13 @@ final class GameState {
 
     // MARK: - Phase 1: Deal-Präsentation / Trumpf-Beat (§6a)
 
-    /// Visuell ausgeteilte Karten (0...31). Die Engine hat längst gegeben - das hier
-    /// ist reine Inszenierung im 40-ms-Takt (Parameter-Lock).
-    private(set) var dealtCount = 0
+    /// Engine und sichtbare Präsentation sind getrennt: eine gestartete Flugkarte
+    /// wird erst beim Kontakt Teil der sichtbaren Hand.
+    private(set) var startedDeals = 0
+    private(set) var landedDeals = 0
+    private var landedDealIndices: Set<Int> = []
+    let presentation = PresentationDirector()
+    var dealtCount: Int { landedDeals }
     private(set) var trumpRevealed = false
     /// Trigger des radialen Lichtpulses (Trumpf-Flip).
     private(set) var lightPulse = 0
@@ -864,8 +894,7 @@ final class GameState {
     /// Sichtbare Handkarten des Menschen - hinkt dem Austeil-Zeiger um die Flugdauer
     /// (~2 Takte) hinterher, damit Karte erst "ankommt", dann erscheint.
     var humanDealtVisible: Int {
-        if dealtCount >= totalDeals { return humanHand.count }
-        return 0
+        dealOrder.prefix(landedDeals).filter { $0.seat == 0 }.count
     }
 
     // MARK: - Melde-Strom (§6a b) - Anzeige läuft der Engine hinterher
@@ -882,20 +911,8 @@ final class GameState {
 
     /// Bereits präsentierte Meldungen (0...meldEvents.count).
     private(set) var meldShown = 0
-    /// Stufe-2-Kollaps (§6a e): Trigger + Kontext der Explosion.
-    private(set) var kollapsShock = 0
-    private(set) var kollapsInfo: (pool: Pool, chips: Int, player: Int)?
-    #if DEBUG
-    /// QA-Override (-kollapsDemo): erzwingt Zündung bei jedem Meld.
-    static var kollapsThresholdOverride: Int?
-    #endif
-
-    private var effectiveKollapsThreshold: Int {
-        #if DEBUG
-        if let override = Self.kollapsThresholdOverride { return override }
-        #endif
-        return Tokens.jackpotKollapsThreshold
-    }
+    /// Gestartete Meldetransfers. Sichtbare Konten folgen weiterhin nur `meldShown`.
+    private(set) var startedMelds = 0
     /// Mulde, die gerade pulst (aktive Meldung).
     private(set) var pulsingPool: Pool?
 
@@ -923,15 +940,21 @@ final class GameState {
 
     func runDealPresentation(reduceMotion: Bool) {
         dealTask?.cancel()
-        dealtCount = 0
+        startedDeals = 0
+        landedDeals = 0
+        landedDealIndices.removeAll(keepingCapacity: true)
+        presentation.reset()
         trumpRevealed = false
+        startedMelds = 0
         meldShown = 0
         pulsingPool = nil
         guard !reduceMotion else {
             // Safe-Mode (§6 Auflage 2): keine Flüge, sanfter Dissolve statt Puls -
             // Belohnung wandert in Haptik (ein einzelner Tick).
-            dealtCount = totalDeals
+            startedDeals = totalDeals
+            landedDeals = totalDeals
             trumpRevealed = true
+            startedMelds = meldEvents.count
             meldShown = meldEvents.count
             hapticTick += 1
             return
@@ -943,35 +966,44 @@ final class GameState {
     /// Regelrunde ist bereits deterministisch gegeben; nur ihre Sichtbarkeit wächst.
     func prepareGuidedDeal() {
         dealTask?.cancel()
-        dealtCount = 0
+        startedDeals = 0
+        landedDeals = 0
+        landedDealIndices.removeAll(keepingCapacity: true)
+        presentation.reset()
         trumpRevealed = false
+        startedMelds = 0
         meldShown = 0
         pulsingPool = nil
     }
 
     func revealGuidedDealRound(reduceMotion: Bool) async {
         dealTask?.cancel()
-        let target = min(totalDeals, dealtCount + playerCount)
-        while dealtCount < target, !Task.isCancelled {
+        let target = min(totalDeals, startedDeals + playerCount)
+        while startedDeals < target, !Task.isCancelled {
             if !reduceMotion {
                 try? await Task.sleep(for: .seconds(Tokens.p1GuidedDealStep))
             }
             guard !Task.isCancelled else { return }
-            dealtCount += 1
-            hapticTick += 1
+            startNextDeal()
+            if reduceMotion { markDealLanded(startedDeals - 1) }
         }
+        await waitForDealsToLand(target)
     }
 
     func finishGuidedDeal(reduceMotion: Bool) async {
         dealTask?.cancel()
-        while dealtCount < totalDeals, !Task.isCancelled {
+        while startedDeals < totalDeals, !Task.isCancelled {
             if !reduceMotion {
                 try? await Task.sleep(for: .seconds(Tokens.p1GuidedDealFinishStep))
             }
             guard !Task.isCancelled else { return }
-            dealtCount += 1
-            hapticTick += 1
+            while startedDeals - landedDeals >= 2, !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            startNextDeal()
+            if reduceMotion { markDealLanded(startedDeals - 1) }
         }
+        await waitForDealsToLand(totalDeals)
     }
 
     func revealGuidedTrumpf() {
@@ -982,29 +1014,27 @@ final class GameState {
     }
 
     func revealNextGuidedMeld(reduceMotion: Bool) async {
-        guard meldShown < meldEvents.count else { return }
-        let meld = meldEvents[meldShown]
-        pulsingPool = meld.pool
-        hapticTick += 1
-        if !reduceMotion {
-            try? await Task.sleep(for: .seconds(Tokens.p1MeldStep))
-        }
-        guard !Task.isCancelled else { return }
-        meldShown += 1
-        pulsingPool = nil
+        guard startedMelds < meldEvents.count else { return }
+        let sequence = startNextMeld()
+        if reduceMotion { markMeldLanded(sequence) }
+        await waitForMeldToLand(sequence)
     }
 
     /// Tap überspringt sofort (§6a b): Kaskade bricht ab, Meldungen saugen sich
     /// in Lichtgeschwindigkeit zu den Gewinnern.
     func skipDeal() {
-        guard dealtCount < totalDeals || !trumpRevealed || meldShown < meldEvents.count
+        guard landedDeals < totalDeals || !trumpRevealed || meldShown < meldEvents.count
         else { return }
         dealTask?.cancel()
-        dealtCount = totalDeals
+        startedDeals = totalDeals
+        landedDeals = totalDeals
+        landedDealIndices.removeAll(keepingCapacity: true)
+        presentation.cancelAll()
         if !trumpRevealed {
             trumpRevealed = true
             lightPulse += 1
         }
+        startedMelds = meldEvents.count
         meldShown = meldEvents.count
         pulsingPool = nil
         hapticTick += 1
@@ -1012,12 +1042,16 @@ final class GameState {
 
     private func dealLoop() async {
         let total = totalDeals
-        while dealtCount < total, !Task.isCancelled {
+        while startedDeals < total, !Task.isCancelled {
+            while startedDeals - landedDeals >= 2, !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(20))
+            }
             try? await Task.sleep(for: .seconds(Tokens.p1DealStep))
             guard !Task.isCancelled else { break }
-            dealtCount += 1
-            hapticTick += 1
+            startNextDeal()
         }
+        guard !Task.isCancelled else { return }
+        await waitForDealsToLand(total)
         guard !Task.isCancelled else { return }
         // Der Beat: Spiel friert ein, dann Trumpf-Flip + radialer Puls (§6a)
         try? await Task.sleep(for: .seconds(Tokens.p1TrumpFreeze))
@@ -1028,19 +1062,80 @@ final class GameState {
 
         // Melde-Strom (§6a b): rhythmisch reihum, Mulde pulst, Münzen fliegen
         try? await Task.sleep(for: .seconds(0.35))
-        while meldShown < meldEvents.count, !Task.isCancelled {
-            let meld = meldEvents[meldShown]
-            pulsingPool = meld.pool
-            hapticTick += 1
-            // Stufe 2: der Balatro-Kollaps zündet nur beim fetten Pott (Rarity-Lock)
-            if meld.chips >= effectiveKollapsThreshold {
-                kollapsInfo = (meld.pool, meld.chips, meld.player)
-                kollapsShock += 1
-            }
-            try? await Task.sleep(for: .seconds(Tokens.p1MeldStep))
+        while startedMelds < meldEvents.count, !Task.isCancelled {
+            let sequence = startNextMeld()
+            await waitForMeldToLand(sequence)
             guard !Task.isCancelled else { break }
-            meldShown += 1
+            try? await Task.sleep(for: .milliseconds(280))
         }
         pulsingPool = nil
+    }
+
+    func markDealLanded(_ sequence: Int) {
+        guard sequence >= 0, sequence < startedDeals else { return }
+        let eventID = dealEventID(sequence)
+        guard presentation.impact(id: eventID) else { return }
+        landedDealIndices.insert(sequence)
+        while landedDealIndices.contains(landedDeals) {
+            landedDealIndices.remove(landedDeals)
+            landedDeals += 1
+        }
+        hapticTick += 1
+        presentation.complete(id: eventID)
+    }
+
+    private func startNextDeal() {
+        guard startedDeals < totalDeals else { return }
+        let sequence = startedDeals
+        let entry = dealOrder[sequence]
+        presentation.begin(id: dealEventID(sequence),
+                           kind: .dealCard,
+                           source: "deck",
+                           target: "seat-\(entry.seat)-slot-\(entry.slot)")
+        startedDeals += 1
+    }
+
+    private func dealEventID(_ sequence: Int) -> String {
+        "deal-\(round.deal.upcard.rank.rawValue)-\(sequence)"
+    }
+
+    private func waitForDealsToLand(_ target: Int) async {
+        while landedDeals < target, !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
+    func markMeldLanded(_ sequence: Int) {
+        guard sequence == meldShown, sequence < startedMelds else { return }
+        let eventID = meldEventID(sequence)
+        guard presentation.impact(id: eventID) else { return }
+        meldShown += 1
+        pulsingPool = nil
+        hapticTick += 1
+        presentation.complete(id: eventID)
+    }
+
+    @discardableResult
+    private func startNextMeld() -> Int {
+        guard startedMelds < meldEvents.count else { return meldEvents.count }
+        let sequence = startedMelds
+        let meld = meldEvents[sequence]
+        presentation.begin(id: meldEventID(sequence),
+                           kind: .meldToken,
+                           source: "pool-\(meld.pool.rawValue)",
+                           target: "seat-\(meld.player)")
+        pulsingPool = meld.pool
+        startedMelds += 1
+        return sequence
+    }
+
+    private func meldEventID(_ sequence: Int) -> String {
+        "meld-\(round.deal.upcard.rank.rawValue)-\(sequence)"
+    }
+
+    private func waitForMeldToLand(_ sequence: Int) async {
+        while meldShown <= sequence, !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(20))
+        }
     }
 }

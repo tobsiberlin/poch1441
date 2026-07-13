@@ -24,4 +24,11 @@ enum Theme {
 
     /// Kategorie-Farbe je Theme: matt (Premium) vs. vivid/strahlend (Neon).
     func tint(_ pool: Pool) -> Color { isNeon ? pool.jewelVivid : pool.jewel }
+
+    /// Lesbare Fokusfarben dürfen heller als das physische Material sein, bleiben
+    /// im Premium-Theme aber nicht emissiv.
+    var goldFocus: Color { isNeon ? Tokens.goldVivid : Tokens.jewelGold }
+    var roseFocus: Color { isNeon ? Tokens.roseVivid : Tokens.jewelRose }
+    var smaragdFocus: Color { isNeon ? Tokens.smaragdVivid : Tokens.smaragdText }
+    var amethystFocus: Color { isNeon ? Tokens.amethystVivid : Tokens.amethystText }
 }

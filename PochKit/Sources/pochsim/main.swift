@@ -1,6 +1,11 @@
 import Foundation
 import PochKit
 
+if CommandLine.arguments.contains("tutorial-seeds") {
+    runTutorialSeedSearch(playerCount: 4, upperBound: 50_000)
+    exit(0)
+}
+
 // Subkommando "balance": Phasen-Balance-Analyse für den Gate-A-Report (Review-Runde 7/8).
 if CommandLine.arguments.contains("balance") {
     runBalanceAnalysis(seeds: 300)
