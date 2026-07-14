@@ -594,10 +594,10 @@ struct TableChip: View {
             // Enger Kontaktschatten: Das Asset bleibt flach auf der Mulde liegen
             // und liest sich nicht als Kugel oder schwebender UI-Punkt.
             Ellipse()
-                .fill(Color.black.opacity(0.82))
-                .frame(width: size * 0.78, height: size * 0.17)
-                .blur(radius: size * 0.022)
-                .offset(y: size * 0.38)
+                .fill(Color.black.opacity(0.72))
+                .frame(width: size * 0.82, height: size * 0.11)
+                .blur(radius: size * 0.012)
+                .offset(y: size * 0.37)
 
             Image("GameTokenGlass")
                 .resizable()
@@ -608,18 +608,29 @@ struct TableChip: View {
                     // und Studio-Reflex bleiben für alle Steine physisch gleich.
                     ZStack {
                         Circle()
-                            .fill(tint.opacity(0.72))
+                            .fill(tint.opacity(0.92))
                             .blendMode(.color)
                         Circle()
                             .fill(
                                 RadialGradient(
-                                    colors: [tint.opacity(0.52), tint.opacity(0.16), .clear],
-                                    center: .topLeading,
+                                    colors: [
+                                        Tokens.jewelPlatin.opacity(0.20),
+                                        tint.opacity(0.38),
+                                        Color.black.opacity(0.12)
+                                    ],
+                                    center: UnitPoint(x: 0.34, y: 0.28),
                                     startRadius: 0,
-                                    endRadius: size * 0.38
+                                    endRadius: size * 0.42
                                 )
                             )
-                            .blendMode(.screen)
+                            .blendMode(.softLight)
+                        Circle()
+                            .strokeBorder(tint.opacity(0.38), lineWidth: max(0.6, size * 0.035))
+                        Ellipse()
+                            .fill(Tokens.jewelPlatin.opacity(0.24))
+                            .frame(width: size * 0.24, height: size * 0.10)
+                            .rotationEffect(.degrees(-24))
+                            .offset(x: -size * 0.12, y: -size * 0.13)
                     }
                     .padding(size * 0.17)
                 }
@@ -641,14 +652,8 @@ struct TableTokenPile: View {
 
     var body: some View {
         let offsets = Self.layout(for: count)
-        let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.34)
+        let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.38)
         ZStack {
-            Ellipse()
-                .fill(Color.black.opacity(0.38))
-                .frame(width: diameter * 0.58, height: diameter * 0.22)
-                .blur(radius: diameter * 0.045)
-                .offset(y: diameter * 0.10)
-
             ForEach(offsets.indices, id: \.self) { index in
                 let offset = offsets[index]
                 TableChip(tint: tint, size: tokenDiameter)
@@ -726,10 +731,10 @@ struct RecessedTokenPile: View {
     var body: some View {
         ZStack {
             Ellipse()
-                .fill(Color.black.opacity(0.72))
-                .frame(width: diameter * 0.62, height: diameter * 0.25)
-                .blur(radius: diameter * 0.035)
-                .offset(y: diameter * 0.12)
+                .fill(Color.black.opacity(0.34))
+                .frame(width: diameter * 0.58, height: diameter * 0.14)
+                .blur(radius: diameter * 0.012)
+                .offset(y: diameter * 0.11)
 
             TableTokenPile(count: count,
                            tint: tint,

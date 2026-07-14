@@ -59,6 +59,11 @@ struct DealOverlay: View {
                     let meld = game.meldEvents[game.meldShown]
                     let from = poolPosition(pool, deck: boardCenter)
                     let to = playerTarget(meld.player, w: w, h: h)
+                    MeldPayoutTarget(name: game.name(of: meld.player),
+                                     amount: meld.chips,
+                                     tint: theme.tint(pool))
+                        .position(to)
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     CoinStream(from: from,
                                to: to,
                                tint: theme.tint(pool),
@@ -84,7 +89,7 @@ struct DealOverlay: View {
     }
 
     private func playerTarget(_ seat: Int, w: CGFloat, h: CGFloat) -> CGPoint {
-        seat == 0 ? CGPoint(x: w / 2, y: h - 96)
+        seat == 0 ? CGPoint(x: w / 2, y: h - 158)
                   : opponentTarget(seat, w: w, h: h)
     }
 
@@ -107,6 +112,49 @@ struct DealOverlay: View {
                            y: deck.y + anchor.offset.height)
         }
         return deck  // .center
+    }
+}
+
+/// Sichtbares Ziel eines Meldegewinns. Der Transfer endet nie im leeren Raum:
+/// Name, Betrag und Materialanker bleiben bis zum Kontakt eindeutig lesbar.
+private struct MeldPayoutTarget: View {
+    let name: String
+    let amount: Int
+    let tint: Color
+
+    var body: some View {
+        HStack(spacing: 7) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: 0x0B0910).opacity(0.92))
+                    .overlay(Circle().strokeBorder(tint.opacity(0.42), lineWidth: 1))
+                TableChip(tint: tint, size: 18)
+            }
+            .frame(width: 30, height: 30)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text(name.uppercased())
+                    .font(.system(size: 7.5, weight: .heavy))
+                    .tracking(0.9)
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.72))
+                    .lineLimit(1)
+                Text("+\(amount)")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(tint)
+            }
+        }
+        .padding(.leading, 5)
+        .padding(.trailing, 10)
+        .padding(.vertical, 5)
+        .background(
+            Capsule()
+                .fill(Color(hex: 0x0B0910).opacity(0.90))
+                .overlay(Capsule().strokeBorder(tint.opacity(0.28), lineWidth: 1))
+                .shadow(color: .black.opacity(0.44), radius: 8, y: 4)
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(name))
+        .accessibilityValue(Text("+\(amount)"))
     }
 }
 
@@ -271,11 +319,11 @@ private struct FlyingChip: View {
                      lateralBias: CGFloat(index - 1) * 2.2,
                      onImpact: onImpact) { progress in
             TableChip(tint: tint, size: 22)
-                .rotationEffect(.degrees(Double(index - 1) * 2 + Double(progress) * 12))
-                .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 3),
+                .rotationEffect(.degrees(Double(index - 1) * 1.1 + Double(progress) * 2.4))
+                .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 1.4),
                                   axis: (x: 0.82, y: 0.18, z: 0),
                                   perspective: 0.28)
-                .scaleEffect(1 + sin(progress * .pi) * 0.025)
+                .scaleEffect(1 + sin(progress * .pi) * 0.012)
             }
     }
 

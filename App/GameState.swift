@@ -916,10 +916,11 @@ final class GameState {
     /// Mulde, die gerade pulst (aktive Meldung).
     private(set) var pulsingPool: Pool?
 
-    /// Anzeige-Wert einer Mulde: Engine-Stand PLUS noch nicht präsentierte Melde-Chips
-    /// (die Engine hat beim Runden-Init längst kassiert - die Inszenierung zahlt einzeln aus).
+    /// Anzeige-Wert einer Mulde: Beim Start eines Transfers verlässt der Haufen
+    /// die Mulde und wird zum Flugobjekt. Das Gewinnerkonto wächst weiterhin
+    /// erst beim Kontakt (`meldShown`), sodass kein Stein doppelt sichtbar ist.
     func displayedChips(in pool: Pool) -> Int {
-        round.board[pool] + meldEvents.dropFirst(meldShown)
+        round.board[pool] + meldEvents.dropFirst(startedMelds)
             .filter { $0.pool == pool }
             .reduce(0) { $0 + $1.chips }
     }
