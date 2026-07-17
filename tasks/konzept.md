@@ -185,38 +185,46 @@ Radikaler Tempowechsel: aus dem psychologischen Belauern (Phase 2) wird ein blit
 
 **Status: Kern-Trias komplett.** Melden (§6), Pochen (§6b), Ausspielen (§6c) sind alle drei finalisiert + freigegeben (Tobsi, 6.7.) - das Feel-Fundament steht unzerstörbar. Rampe frei für Meta-Progression (§7) und den SwiftUI-Aufbau.
 
-## 7. Meta-Progression (Architektur, Tobsi 6.7. - mit Präzisierungen)
+## 7. Meta-Progression (durch Designkanon 2026 aktualisiert)
 
-Ohne Meta trägt das Regelwerk ~6-12 h; mit Meta 100 h+. Vier Säulen, alle rein kosmetisch/kompetitiv - **kein Pay2Win, kein Echtgeld-Vorteil, Core unangetastet.** **Status (7.7.): Architektur steht, Code = 0 %** - die 100-h-Tragfähigkeit ist geplant/gezeichnet, noch nicht gebaut (kommt nach dem Look-Layer).
+Die Meta verlängert die Motivation über Können, Gegnerkenntnis, Variation und Sammlung.
+Sie bleibt sachlich, gegenwärtig und vollständig ohne Pay-to-win oder Echtgeld-Vorteil.
+Historische Rollenbilder, royale Rangnamen, Gildenfiktion und Luxusmetaphern gehören
+nicht zur Produktidentität.
 
-**1. Charakter-Roster & KI-Persönlichkeiten**
-- Markante Archetypen statt austauschbarer Profilbilder, jeder bringt „faires Wissen" (Persönlichkeit + Rauschen) in Phase 2. Reduzierter, ausdrucksstarker Vektor-Porträt-Stil, modern.
-- Beispiele (Tobsi): „Blade" (aggressiv/dominant - pocht früh, nutzt die Limit-Wand aus), „Nova" (Mathematikerin - konservativ, minimales Rauschen, ihr Poch = echte Gefahr), „Glitch" (unberechenbar - maximales Rauschen, kein Muster).
-- **Mechanische Erdung:** die Archetypen mappen 1:1 auf die `BotProfile`-Parameter in PochKit (openAggression, bluffFrequency, riskTolerance, raiseAggression, thinkSeconds). Blade = hoch/hoch/kurz, Nova = niedrig/niedrig/lang, Glitch = hohe Varianz. Direkt als Daten definierbar.
-- **Optik der Charaktere:** das eine warme, painterly Material im cleanen Rahmen (Öl/Gouache, gedämpfte Palette). Presence-over-Persistence: groß am Entscheidungs-Beat, ruhiger Token sonst. Der Kontrast warme Menschen / präzises System ist die Eigenständigkeit - kein Cyber-Look. Offener Feinschliff: der exakte Render-Stil.
+**1. Gegner und öffentliche Tendenzen**
+- Hana, Noah und Jonas bilden die feste Besetzung der ersten geführten Partie.
+- Freie Partien werden automatisch aus dem datengetriebenen Roster besetzt; eine
+  manuelle Auswahl bleibt optional.
+- Profile zeigen nur wenige öffentlich beobachtbare Tendenzen. Aktuelle Handstärke,
+  interne Botwerte und garantierte Verhaltensversprechen bleiben verborgen.
 
-**2. Deck-Unlocks & Marken-System (Cosmetics)**
-- Zentrum der Progression = die **Kartenrücken-Signets** (das geometrische Ur-Motiv: der geschlossene Poch-Ring). Freischaltung über Saisons + Meilensteine.
-- Beispiele: „Obsidian-Deck" (tiefschwarz, Amethyst-Ring-Prägung, hauchdünne Silber-Indizes), „Smaragd-Gilden-Deck" (mattgrünes Geometrie-Muster, Ring lädt sich bei Rundenbeginn dezent auf).
-- Ein Deck verändert das visuelle Thema nur für den Spieler selbst (Hintergrund-Nuance, Misch-Partikel-Farbe) - Fairness unberührt.
-- **Präzisierung:** Decks dürfen die **funktionalen Mulden-Farben (Farbe = Label, §5) NICHT umfärben** - Gold/Rosé/Teal/Violett bleiben als Kategorie-Label konstant lesbar. Cosmetics ändern Rücken/Tisch-Theme/Partikel, nie das Label-System.
+**2. Kosmetische Sammlung**
+- Kartenrücken, R1-Materialvarianten und die beiden Tischwelten dürfen über Fortschritt
+  zugänglich werden, verändern aber weder Regeln noch Informationshierarchie.
+- Das geometrische, rotationssymmetrische Signet verbindet Karten, R1 und Produkthülle.
+- Funktionale Farben und Beschriftungen bleiben in allen Varianten unverändert lesbar.
 
-**3. Rangliste, Saisons & Prestige-Rahmen**
-- Ligen: „Hinterzimmer" → „Gildenhalle" → „Königliche Krypta" (Top 500). Der Avatar-Rahmen symbolisiert die Liga, modern-architektonisch reduziert (Schiefer-Kante → gebürstetes Platin mit Einkerbungen).
-- Saison-Ende: Rang verfällt, aber ein permanentes **Prestige-Insignium** (winziger Punkt/Kerbe) bleibt - zeigt historische Top-Liga-Dominanz.
-- **⚠️ Scope-Präzisierung:** Ligen/Ranglisten zuerst = **asynchrone Single-Player-Wertung** (Score/Performance gegen die Bots). Echtzeit-PvP-Ranked ist eine spätere Ausbaustufe (Netcode/Matchmaking/Anti-Cheat). „Top 500 Global" funktioniert als asynchrone Rangliste.
-- **Assist-Politik:** definiert, ob „Der Zähler" (§6c) in gewerteten Läufen erlaubt ist - vermutlich „Pur/Meister"-Ranked ohne Assists.
+**3. Leistung und Saisons**
+- Leistung wird direkt über verständliche Werte, persönliche Bestmarken und sachlich
+  benannte Stufen gezeigt. Es gibt keine erzählerisch verkleideten Ligen.
+- Eine erste Wertung kann asynchron gegen Bots funktionieren. Echtzeit-PvP,
+  Matchmaking und Anti-Cheat bleiben eine spätere, getrennt zu entscheidende Ausbaustufe.
+- Gewertete Läufe kennzeichnen klar, welche Hilfen aktiv sind.
 
-**4. Daily Challenges (Login-Loop)**
-- Täglich eine spezifische taktische Aufgabe, belohnt mit **Gilden-Splittern** (Währung für Decks/Avatare - nur erspielbar, kein Kauf). Feste Seeds.
-- Beispiele: Taktik („löse heute 3 Stopps mit einem Buben/J aus"), Psychologie („bring einen Bot zum Passen, während du nur ein Zehner-Paar oder schlechter hältst"), Rennen („gewinne Phase 3, während ein Gegner noch >5 Karten hält").
-- **Präzisierung:** die Bluff-Aufgabe (#2) hängt am Bot-Fold (personality+noise-getrieben, nicht hand-abhängig) - also mit vertretbarem Aufwand lösbar tunen, nicht RNG-gegated.
+**4. Tägliche Aufgaben**
+- Feste Seeds ermöglichen konkrete taktische Aufgaben ohne Zufallsbarriere.
+- Belohnungen bleiben kosmetisch oder dokumentieren Können; FOMO-Mechaniken und
+  künstliche Login-Strafen sind ausgeschlossen.
 
-**5. Die Gilden-Chronik (innere Progression, übernommen 6.7.)**
-- Ersetzt das schnöde Statistik-Menü: ein edles, interaktives Buch, das die psychologischen Profile + Aggregat-Tendenzen der KI-Gegner dokumentiert (z.B. „Nova knickt bei 12-Chip-Erhöhungen zu 84 % ein"). Die Gegner werden zu studierbaren „Bossen" - zahlt direkt auf „Charaktere = Herz" ein („innere Progression": deine Beziehung zum Spiel ändert sich, nicht nur der Kosmetik-Bestand).
-- **Leitplanke:** die Bots behalten genug Grundrauschen, dass „das Buch lesen" sie *bereichert*, nicht mathematisch *löst* - sonst stirbt die Herausforderung. NIE Live-Handinfo (Bluff-Integrität 100 % geschützt: Aggregat-Tendenzen ≠ aktuelle Hand).
+**5. Gegnerkenntnis**
+- Eine ruhige, zeitgenössische Profilansicht bündelt bekannte Tendenzen und eigene
+  Begegnungsstatistiken ohne Buch-, Archiv- oder Rollenmetapher.
+- Grundrauschen bewahrt die Herausforderung. Aggregierte Tendenzen sind niemals
+  aktuelle Handinformation.
 
-**Status: Design-Skelett komplett** - Kern-Trias + Meta stehen. Offen: die zwei ⚠️-Entscheidungen (Charakter-Optik-Flavor, Ranked-Scope). Rampe frei für den SwiftUI-Aufbau.
+**Status:** Die Leitplanken stehen. Konkrete Progressionsökonomie und Benennung werden
+erst nach dem vollständigen Kernflow datenbasiert festgelegt.
 
 ## 7b. Architektur-Seam (Multiplayer-vorbereitet)
 

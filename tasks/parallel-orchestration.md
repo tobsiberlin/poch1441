@@ -83,6 +83,8 @@ kleine Schnittstellen an Lead übergeben; keine Spur führt dort eigenständig E
 - [x] Gezielte Tests grün.
 - [x] Vollständiger Build und visuelle QA bestanden.
 - [x] Integrationspunkt committed und auf `main` gepusht.
+- [x] Statuscockpit auf Designkanon 2026 reduziert; verworfene historische Meta aus
+  Generator, Template und aktuellem Konzeptabschnitt entfernt.
 
 ## Belege des ersten Integrationspunkts
 
@@ -96,3 +98,5 @@ kleine Schnittstellen an Lead übergeben; keine Spur führt dort eigenständig E
   Trumpf, Verbindungslinie, Meldungsbeweis und gelandete Meldung ohne Überlagerung.
 - Noch physisch offen: Klang/Haptik auf echter Hardware sowie 60-/120-Hz-Profiling;
   Mapping, Lautstärkegrenze und gemeinsamer Impact-Trigger sind im Build integriert.
+- Cockpit-Gate: 7-KB-Gegenwartsansicht aus fünf aktuellen Quellen; kein Treffer für
+  verworfene Liga-, Gilden-, Prestige- oder alte Gegnerbegriffe.
