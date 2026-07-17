@@ -34,8 +34,18 @@ struct ContentView: View {
     // den grundlegend neuen, ruhigen Einstieg genau einmal erneut erleben.
     @AppStorage("didStartFirstTableV2") private var didStartFirstTable = false
     @AppStorage("tutorialProgressMask") private var tutorialProgressMask = 0
-    /// Track B bleibt bis zur sichtbaren Materialfreigabe aus dem Produktpfad.
-    private var theme: Theme { .pochDisc }
+    /// Track B bleibt bis zur vollständigen Board-/Materialmigration aus dem
+    /// Produktpfad. DEBUG kann beide Welten für Integrationsscreens explizit wählen.
+    private var theme: Theme {
+        #if DEBUG
+        if let argument = ProcessInfo.processInfo.arguments.first(where: {
+            $0.hasPrefix("-tableWorld=")
+        }), let value = argument.split(separator: "=").last {
+            return TableWorld.resolve(String(value))
+        }
+        #endif
+        return .pochDisc
+    }
     @State private var activeOverlay: AppOverlay?
     @State private var phaseCurtain: Akt?
     @State private var guidedRoundActive = false
@@ -55,6 +65,7 @@ struct ContentView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @ScaledMetric(relativeTo: .body) private var guidedActionFontSize: CGFloat = 17
     @AccessibilityFocusState private var guidedCoachFocused: Bool
     /// Phasen-Morph (§5b): ein Namespace über alle drei Akte - Tokens, Poch-Tile und
     /// Mulden fliegen via matchedGeometryEffect an ihre neuen Positionen.
@@ -134,7 +145,8 @@ struct ContentView: View {
             .overlay(alignment: .topTrailing) {
                 if !isGuidedOpeningBeat {
                     utilityButtons
-                        .offset(x: -12)
+                        .padding(.trailing, 18)
+                        .offset(x: -10)
                 }
             }
             .overlay { overlayPanel }
@@ -603,10 +615,7 @@ struct ContentView: View {
                     .padding(.top, compactHeight ? 6 : 12)
 
                     ZStack {
-                        Image("PochRingPM49")
-                            .resizable()
-                            .interpolation(.high)
-                            .scaledToFit()
+                        TableWorldBoardBase(world: .pochDisc, diameter: boardSize)
                             .frame(width: boardSize, height: boardSize)
                             .saturation(theme.isTravelTable ? 0.96 : 0.88)
                             .shadow(color: .black.opacity(0.65), radius: 28, y: 18)
@@ -800,10 +809,7 @@ struct ContentView: View {
             }
 
             ZStack {
-                Image("PochRingPM49")
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
+                TableWorldBoardBase(world: .pochDisc, diameter: introBoardSide)
                     .saturation(theme.isTravelTable ? 0.96 : 0.88)
                     .shadow(color: .black.opacity(0.65), radius: 22, y: 12)
 
@@ -1354,8 +1360,12 @@ struct ContentView: View {
                 .background(Circle().fill(guidedTint))
             VStack(alignment: .leading, spacing: 3) {
                 Text(copy.title)
-                    .font(.headline.weight(.heavy))
+                    .font(.system(size: min(guidedActionFontSize,
+                                            dynamicTypeSize.isAccessibilitySize ? 24 : 19),
+                                  weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.88)
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel(copy.title)
@@ -1393,13 +1403,26 @@ struct ContentView: View {
                                 .tint(Tokens.bgDeep)
                         } else {
                             Text(guidedMeldActionTitle)
-                            Image(systemName: "arrow.right")
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
+                                .multilineTextAlignment(.center)
+                                .minimumScaleFactor(0.88)
+                            if !dynamicTypeSize.isAccessibilitySize {
+                                Image(systemName: "arrow.right")
+                            }
                         }
                     }
-                    .font(.body.weight(.bold))
+                    .font(.system(size: min(guidedActionFontSize,
+                                            dynamicTypeSize.isAccessibilitySize ? 24 : 18),
+                                  weight: .bold))
                     .foregroundStyle(Tokens.bgDeep)
-                    .frame(maxWidth: .infinity, minHeight: 48)
-                    .background(Capsule().fill(guidedTint))
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity,
+                           minHeight: dynamicTypeSize.isAccessibilitySize ? 68 : 48)
+                    .background(
+                        RoundedRectangle(cornerRadius: dynamicTypeSize.isAccessibilitySize ? 22 : 24,
+                                         style: .continuous)
+                            .fill(guidedTint)
+                    )
                 }
                 .buttonStyle(.plain)
                 .disabled(guidedMeldBusy)
@@ -3015,11 +3038,19 @@ struct ContentView: View {
         }
     }
 
-    private var regularPhase1Stage: some View {
+    @ViewBuilder private var regularPhase1Stage: some View {
+        if verticalSizeClass == .compact {
+            regularPhase1LandscapeStage
+        } else {
+            regularPhase1PortraitStage
+        }
+    }
+
+    private var regularPhase1PortraitStage: some View {
         let dealActive = game.dealtCount < game.totalDeals && !game.trumpRevealed
         let boardScale = guidedRoundActive
             ? Tokens.guidedMeldBoardScale
-            : (dealActive ? 0.86 : 1)
+            : (dealActive ? 0.82 : 0.90)
         let boardOffset = guidedRoundActive
             ? Tokens.guidedMeldBoardOffsetY
             : (dealActive ? 72 : 0)
@@ -3045,6 +3076,39 @@ struct ContentView: View {
         }
     }
 
+    /// Landscape ist keine gedrehte Portrait-Spalte: Hand und Disc besitzen
+    /// getrennte Bühnenhälften und können sich deshalb nicht gegenseitig decken.
+    private var regularPhase1LandscapeStage: some View {
+        GeometryReader { proxy in
+            let ringDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
+            let boardSide = min(proxy.size.height * 0.84,
+                                proxy.size.width * 0.42,
+                                300)
+            ZStack {
+                ringView
+                    .frame(width: ringDiameter, height: ringDiameter)
+                    .scaleEffect(boardSide / ringDiameter)
+                    .position(x: proxy.size.width * 0.74,
+                              y: proxy.size.height * 0.48)
+                    .contentShape(Circle())
+                    .onTapGesture {
+                        if game.humanDealtVisible < game.humanHand.count {
+                            game.skipDeal()
+                        } else {
+                            transition(to: .pochen)
+                        }
+                    }
+
+                landscapeHandView
+                    .frame(width: proxy.size.width * 0.46,
+                           height: min(104, proxy.size.height * 0.44),
+                           alignment: .bottom)
+                    .position(x: proxy.size.width * 0.24,
+                              y: proxy.size.height - 26)
+            }
+        }
+    }
+
     /// Geführtes Melden besitzt eine eigene, kollisionsfreie Lernbühne. Das
     /// freie Spiel bleibt groß und mockup-nah; im Tutorial werden Brett,
     /// Erklärung und Hand dagegen als drei feste vertikale Zonen komponiert.
@@ -3060,7 +3124,13 @@ struct ContentView: View {
 
     private func guidedMeldAccessibilityStage(in size: CGSize) -> some View {
         let ringDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
-        let boardSide = min(size.width - 44, 260)
+        let landscape = size.width > size.height
+        let boardSide = landscape
+            ? min(size.width - 44, size.height * 0.54, 132)
+            : min(size.width - 44, 260)
+        let handHeight = landscape
+            ? min(132, size.height * 0.54)
+            : max(132, min(180, size.height * 0.34))
         return ScrollView(.vertical) {
             VStack(spacing: 18) {
                 HStack(spacing: 28) {
@@ -3084,13 +3154,31 @@ struct ContentView: View {
                     .opacity(guidedMeldBusy ? 0 : 1)
                     .allowsHitTesting(!guidedMeldBusy)
 
-                handView
+                ZStack(alignment: .bottom) {
+                    Group {
+                        if landscape {
+                            landscapeHandView
+                        } else {
+                            handView
+                        }
+                    }
                     .frame(width: size.width - 24,
-                           height: max(132, min(180, size.height * 0.34)),
+                           height: handHeight,
                            alignment: .bottom)
                     .clipped()
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("firstRun.learningHand")
+
+                    // Der messbare Handbereich entspricht dem wirklich sichtbaren
+                    // Clip. Die einzelnen Karten bleiben zusätzlich als eigene
+                    // VoiceOver-Elemente erreichbar.
+                    Color.clear
+                        .accessibilityElement()
+                        .accessibilityLabel(String(localized: "tutorial.meld.hand.title",
+                                                   defaultValue: "Deine Hand"))
+                        .accessibilityIdentifier("firstRun.learningHand")
+                }
+                .frame(width: size.width - 24,
+                       height: handHeight,
+                       alignment: .bottom)
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 6)
@@ -3167,7 +3255,7 @@ struct ContentView: View {
 
     private func guidedMeldConnection(in zones: FirstRunStageZones,
                                       ringDiameter: CGFloat) -> some View {
-        let well = PM49Geometry.wellCenter(for: guidedIntroPool, in: ringDiameter)
+        let well = PochDiscGeometry.wellCenter(for: guidedIntroPool, in: ringDiameter)
         let wellPoint = CGPoint(
             x: zones.board.minX + well.x / ringDiameter * zones.board.width,
             y: zones.board.minY + well.y / ringDiameter * zones.board.height
@@ -3245,13 +3333,7 @@ struct ContentView: View {
         // .position statt .offset: echte Layout-Frames, damit matchedGeometryEffect
         // beim Morph die korrekten Flugbahnen misst (§5b).
         return ZStack {
-            Image("PochRingPM49")
-                .resizable()
-                .interpolation(.high)
-                .scaledToFill()
-                .frame(width: d, height: d)
-                .clipShape(Circle())
-                .shadow(color: .black.opacity(0.70), radius: 18, y: 10)
+            TableWorldBoardBase(world: theme, diameter: d)
                 .position(x: d / 2, y: d / 2)
             if guidedRoundActive && guidedMeldBeat == 0 {
                 guidedBoardVeil(size: d,
@@ -3302,7 +3384,7 @@ struct ContentView: View {
             }
             if !guidedRoundActive || guidedMeldBeat > 0 {
                 if !theme.isTravelTable {
-                    PM49FrontLipOverlay(size: d, includesCenter: true)
+                    PochDiscFrontLipOverlay(size: d, includesCenter: true)
                         .position(x: d / 2, y: d / 2)
                 }
             }
@@ -3323,10 +3405,11 @@ struct ContentView: View {
                     .font(.system(size: 8.4, weight: .heavy, design: .rounded))
                     .tracking(1.1)
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
-                    .position(PM49Geometry.wellCenter(for: .center, in: d))
+                    .position(PochDiscGeometry.wellCenter(for: .center, in: d))
             }
         }
         .frame(width: d, height: d)
+        .accessibilityIdentifier("table.world.phase1.board")
     }
 
     private var guidedIntroPool: Pool {
@@ -3337,7 +3420,7 @@ struct ContentView: View {
         return Path { path in
             path.addRect(CGRect(origin: .zero, size: CGSize(width: size, height: size)))
             for pool in focusPools {
-                let center = PM49Geometry.wellCenter(for: pool, in: size)
+                let center = PochDiscGeometry.wellCenter(for: pool, in: size)
                 let diameter = pool == .center ? size * 0.30 : size * 0.20
                 path.addEllipse(in: CGRect(x: center.x - diameter / 2,
                                            y: center.y - diameter / 2,
@@ -3366,10 +3449,11 @@ struct ContentView: View {
                     .transition(.scale(scale: 0.82).combined(with: .opacity))
             }
             if chips > 0 {
-                RecessedTokenPile(count: chips,
-                                  tint: tint,
-                                  diameter: 58,
-                                  showCount: false)
+                TableWorldPiecePile(world: theme,
+                                    count: chips,
+                                    diameter: 58,
+                                    compartment: TravelCompartment(pool: pool),
+                                    placement: .well)
                     .contentTransition(.numericText())
             } else {
                 Circle()
@@ -3423,10 +3507,11 @@ struct ContentView: View {
         let chips = presentedChips(in: .center)
         return ZStack {
             if chips > 0 {
-                RecessedTokenPile(count: chips,
-                                  tint: Tokens.jewelGold,
-                                  diameter: 88,
-                                  showCount: false)
+                TableWorldPiecePile(world: theme,
+                                    count: chips,
+                                    diameter: 88,
+                                    compartment: .center,
+                                    placement: .well)
             } else {
                 Circle()
                     .fill(Tokens.jewelPlatin.opacity(0.30))
@@ -3470,7 +3555,7 @@ struct ContentView: View {
             ZStack {
                 ForEach(Array(pools.enumerated()), id: \.element) { index, pool in
                     let source = sourcePoint
-                    let target = PM49Geometry.wellCenter(for: pool, in: size)
+                    let target = PochDiscGeometry.wellCenter(for: pool, in: size)
                     ImpactFlight(
                         from: source,
                         to: target,
@@ -3511,12 +3596,20 @@ struct ContentView: View {
     // MARK: - Hand (Mockup-Fächer: groß, angewinkelt, Bleed am unteren Bildschirmrand)
 
     private var handView: some View {
+        handFan(cardScale: 1.62)
+    }
+
+    private var landscapeHandView: some View {
+        handFan(cardScale: 1.04)
+    }
+
+    private func handFan(cardScale: CGFloat) -> some View {
         let cards = Array(game.humanHand.prefix(game.humanDealtVisible))
         let N = cards.count
         // Fächer-Parameter: breite Spreizung, Karten leicht überlappend, Mockup-Optik
         let spreadDeg = min(Double(N) * 7.0, 38.0)
-        let totalW: CGFloat = min(CGFloat(N) * 30, 224)
-        let cardScale: CGFloat = 1.62
+        let scaleRatio = cardScale / 1.62
+        let totalW: CGFloat = min(CGFloat(N) * 30, 224) * scaleRatio
 
         return ZStack {
             ForEach(Array(cards.enumerated()), id: \.offset) { i, card in

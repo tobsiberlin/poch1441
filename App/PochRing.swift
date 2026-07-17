@@ -44,9 +44,9 @@ struct RingAnchor: Identifiable {
     }
 }
 
-/// Resolves the visible centers of the rendered PM49 wells in the coordinate
-/// space of the presentation overlay. Flights must originate from these anchors
-/// instead of reconstructing the photographed board with idealized geometry.
+/// Resolves the visible centers of the canonical 2026 disc wells in the
+/// presentation overlay. Flights must originate from these anchors instead of
+/// reconstructing the photographed board with idealized geometry.
 struct TablePoolAnchorPreferenceKey: PreferenceKey {
     static let defaultValue: [Pool: Anchor<CGPoint>] = [:]
 
@@ -70,22 +70,21 @@ enum PochRing {
     ]
 }
 
-/// Calibrated overlay geometry for the rendered PM49 board asset.
-/// The photographed board is slightly foreshortened, so a mathematical circle
-/// does not line up with the visible well floors.
-enum PM49Geometry {
+/// Calibrated overlay geometry for the canonical 2026 Poch Disc.
+/// The production asset is orthographic and intentionally symmetric.
+enum PochDiscGeometry {
     static func wellCenter(for pool: Pool, in size: CGFloat) -> CGPoint {
         let normalized: CGPoint
         switch pool {
-        case .king:     normalized = CGPoint(x: 0.512, y: 0.140)
-        case .queen:    normalized = CGPoint(x: 0.735, y: 0.224)
-        case .mariage:  normalized = CGPoint(x: 0.842, y: 0.435)
-        case .jack:     normalized = CGPoint(x: 0.744, y: 0.674)
-        case .ten:      normalized = CGPoint(x: 0.513, y: 0.797)
-        case .sequence: normalized = CGPoint(x: 0.251, y: 0.671)
-        case .poch:     normalized = CGPoint(x: 0.167, y: 0.433)
-        case .ace:      normalized = CGPoint(x: 0.293, y: 0.222)
-        case .center:   normalized = CGPoint(x: 0.510, y: 0.474)
+        case .king:     normalized = CGPoint(x: 0.500, y: 0.146)
+        case .queen:    normalized = CGPoint(x: 0.731, y: 0.242)
+        case .mariage:  normalized = CGPoint(x: 0.838, y: 0.432)
+        case .jack:     normalized = CGPoint(x: 0.733, y: 0.672)
+        case .ten:      normalized = CGPoint(x: 0.500, y: 0.798)
+        case .sequence: normalized = CGPoint(x: 0.267, y: 0.672)
+        case .poch:     normalized = CGPoint(x: 0.162, y: 0.432)
+        case .ace:      normalized = CGPoint(x: 0.269, y: 0.242)
+        case .center:   normalized = CGPoint(x: 0.500, y: 0.476)
         }
         return CGPoint(x: normalized.x * size, y: normalized.y * size)
     }
@@ -99,15 +98,15 @@ enum PM49Geometry {
     }
 }
 
-/// Reuses the photographed PM49 material as the foreground wall of every well.
+/// Reuses the canonical Disc material as the foreground wall of every well.
 /// Tokens therefore disappear behind the real graphite and inlay edge instead
 /// of receiving a synthetic UI border.
-struct PM49FrontLipOverlay: View {
+struct PochDiscFrontLipOverlay: View {
     let size: CGFloat
     var includesCenter = false
 
     var body: some View {
-        Image("PochRingPM49")
+        Image("PochDisc2026")
             .resizable()
             .interpolation(.high)
             .scaledToFill()
@@ -133,7 +132,7 @@ struct PM49FrontLipOverlay: View {
     }
 
     private func addLip(for pool: Pool, radius: CGFloat, to path: inout Path) {
-        let center = PM49Geometry.wellCenter(for: pool, in: size)
+        let center = PochDiscGeometry.wellCenter(for: pool, in: size)
         path.move(to: CGPoint(x: center.x - radius * 0.96,
                               y: center.y + radius * 0.14))
         path.addQuadCurve(

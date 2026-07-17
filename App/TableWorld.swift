@@ -52,7 +52,7 @@ enum TableWorldBoardGeometry {
                            in size: CGFloat,
                            world: TableWorld) -> CGPoint {
         guard world == .unterwegs else {
-            return PM49Geometry.wellCenter(for: pool, in: size)
+            return PochDiscGeometry.wellCenter(for: pool, in: size)
         }
         let point = TravelTableGeometry.center(for: TravelCompartment(pool: pool))
         return CGPoint(x: size * point.x, y: size * point.y)
@@ -62,12 +62,14 @@ enum TableWorldBoardGeometry {
                                in size: CGFloat,
                                world: TableWorld) -> CGPoint {
         guard world == .unterwegs else {
-            return PM49Geometry.notationCenter(for: pool, in: size)
+            return PochDiscGeometry.notationCenter(for: pool, in: size)
         }
         let well = wellCenter(for: pool, in: size, world: world)
-        let x = size * 0.5 + (well.x - size * 0.5) * 1.16
-        let y = size * 0.5 + (well.y - size * 0.5) * 1.16
-        return CGPoint(x: min(max(x, size * 0.08), size * 0.92),
-                       y: min(max(y, size * 0.08), size * 0.92))
+        // Die Gravur sitzt auf dem inneren Steg zwischen Zentrum und Außenmulde.
+        // Dort bleibt sie auch bei vollen Münzhaufen lesbar,
+        // ohne als schwebende Beschriftung außerhalb der Schale zu erscheinen.
+        let progress: CGFloat = 0.62
+        return CGPoint(x: size * 0.5 + (well.x - size * 0.5) * progress,
+                       y: size * 0.5 + (well.y - size * 0.5) * progress)
     }
 }

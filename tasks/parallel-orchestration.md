@@ -1,6 +1,6 @@
 # Poch 1441 - Parallele Orchestrierung First Run
 
-**Stand:** 17. Juli 2026
+**Stand:** 18. Juli 2026
 **Basis:** `1e2e6da` auf `main`
 **Ziel:** belastbarer Track-A-First-Run bis zur ersten selbst ausgelösten Meldung
 
@@ -16,7 +16,7 @@ nur Kompositions- beziehungsweise Regiereferenzen.
 | Lead | `App/ContentView.swift`, `App/GameState.swift`, `App/ImpactFlight.swift`, `App/DesignTokens.swift`, `App/DealOverlay.swift`, `project.yml`, Integrationsdokumente | PochKit-Regeln ohne Regel-Spur-Review | Integriert: Director, acht Beats, adaptive Bühne und UI-Test-Target |
 | Material | `App/PlayComponents.swift`, `App/Effects.swift`, neue Material-/Audio-/Haptikmodule und zugehörige Assets | Lead-Dateien, Timeline und PochKit | Integriert: R1, Endlagen, Keramikkontakt und gebündelte Haptik |
 | Gegner | `App/BotProfiles.json`, neue datengetriebene Gegner-/Besetzungsmodule und eigene Tests | Lead-Dateien, verdeckte Karten oder Timeline | Teilintegriert: Hana/Noah/Jonas produktiv; Tendenzen und Auswahlmodule getestet, UI noch offen |
-| QA | neue Dateien unter `tools/qa/`, `tasks/evidence/` und reine Test-/Auditdateien | Produktcode außerhalb eines koordinierten Integrationsfensters | Grün: Static Gate, UI-Interaktion, drei iPhone-Klassen, SE-Intro P/L und AX-Lernbühne P |
+| QA | neue Dateien unter `tools/qa/`, `tasks/evidence/` und reine Test-/Auditdateien | Produktcode außerhalb eines koordinierten Integrationsfensters | Grün für den Integrationspunkt: Standardflows, echte Orientierungen und gehärteter AX-XXXL-Landscape-Gate |
 | Regel | `PochKit/**`, `App/TutorialScenarios.json`, eigene Regeltests und Simulationswerkzeuge | Views, Nodes, Presentation Director und Layout | Grün: Seed 19, Meldungsbeleg und Bot-Informationsgrenzen |
 
 Nur die Lead-Spur integriert Änderungen in `ContentView`, `GameState`,
@@ -102,11 +102,11 @@ kleine Schnittstellen an Lead übergeben; keine Spur führt dort eigenständig E
   Mapping, Lautstärkegrenze und gemeinsamer Impact-Trigger sind im Build integriert.
 - Cockpit-Gate: 7-KB-Gegenwartsansicht aus fünf aktuellen Quellen; kein Treffer für
   verworfene Liga-, Gilden-, Prestige- oder alte Gegnerbegriffe.
-- Accessibility-XXXL-Gate: iPhone-SE-Intro in Portrait/Landscape grün; die neue
-  sequenzielle Lernbühne ist in Portrait grün. Der separate strenge Landscape-Test
-  bleibt offen, weil zwei SE-Simulatoren das App-Fenster nicht rotierten; er wurde
-  nicht als Produkt-Pass umgedeutet. Vollständiger Standard-SE-Flow mit zwei Tests
-  und Pro-Max-Rotation sind grün.
+- Accessibility-XXXL-Gate: Der frühere Landscape-Pass ist widerrufen. Obwohl Xcode
+  zeitweise ein `667 x 375`-Window meldete, war die Coach-Aktion `311,5 pt` hoch
+  und der einzige Anhang ein `750 x 1334`-Portrait-PNG. Der gehärtete Gate verlangt
+  nun initiales Viewport-Containment, Obergrenzen, vollständiges Reveal und echte
+  Landscape-Pixelgeometrie. Er bleibt bis zu einem neuen grünen Lauf offen.
 
 ## Zweiter Integrationspunkt - Tischwelten und Materialproben
 
@@ -196,9 +196,9 @@ automatisch. Chatbeschreibungen ersetzen keine sichtbare Abnahme.
 - Die Track-B-Runtime-Probe ist ausschließlich über `-travelTableProbe` in DEBUG
   erreichbar. Die kanonische Auswahl nach der ersten abgeschlossenen Partie ist der
   nächste Produktintegrationspunkt und wird nicht in den First Run vorgezogen.
-- Der zweite Integrationspunkt ist damit verifiziert und wird mit diesem Commit auf
-  `main` veröffentlicht. Die offene Landscape-Wiederholung der AX-Lernbühne bleibt
-  als strenger QA-Gate erhalten und blockiert keine falsche Designfreigabe.
+- Der zweite Integrationspunkt ist damit verifiziert und auf `main` veröffentlicht.
+  Die frühere AX-Landscape-Lücke ist inzwischen durch einen separaten strengen Gate
+  mit echtem Landscape-Frame geschlossen.
 
 ## Dritter Integrationspunkt - Daten- und Informationsgrenzen
 
@@ -218,3 +218,63 @@ automatisch. Chatbeschreibungen ersetzen keine sichtbare Abnahme.
 - Als nächster Produktintegrationspunkt folgt die gemeinsame Board-/Material-
   Rendererschnittstelle. Erst danach wird `Wähle deinen Tisch` freigeschaltet, damit
   Track B niemals Track-A-Geometrie oder R1-Steine mit Cent-Material mischt.
+
+## Vierter Integrationspunkt - gemeinsame Materialkante der Tischwelten
+
+**Ziel:** Phase 1, Phase 2 und Phase 3 verwenden für Brett, ruhende Steine und
+Steinflüge dieselbe erschöpfende `TableWorld`-Schnittstelle. Track B bleibt bis zum
+materialspezifischen Audio-/Haptik-Gate ausschließlich über DEBUG erreichbar.
+
+### Dateihoheit und Status
+
+| Spur | Exklusive Dateien | Abhängigkeit | Status |
+| --- | --- | --- | --- |
+| Lead | `App/ContentView.swift`, `App/Phase2View.swift`, `App/Phase3View.swift`, `App/TableWorld.swift`, `project.yml`, dieses Dokument | Material-Seam und QA-Verträge | Integriert: zentrale Phasen 1-3 und DEBUG-Weltwahl |
+| Material | `App/PlayComponents.swift`, `App/TravelTableRenderer.swift`, `App/R1TokenLayout.swift`, zugehörige Materialtests | kanonische 2026-Disc, R1- und Travel-Renderer | Integriert: 2026-Disc statt PM49, zwölf deterministische R1-Endlagen und getrennte Travel-Münzen |
+| QA | `Tests/Poch1441UITests/TableWorldStageUITests.swift`, `Tests/Poch1441UITests/FirstRunUITests.swift`, `tools/qa/`, `tasks/evidence/` | Lead-Accessibility-Identifier und generiertes UI-Test-Target | Grün: Track A und B in Phase 1/2, echte 667 x 375-Fenster sowie AX-XXXL-Landscape |
+| Regel | keine Änderung | unveränderte Pool-/Zählersemantik aus PochKit | Unberührt; Material erhält nur vorhandene Counts und Compartments |
+| Gegner | keine Änderung | stabile öffentliche Sitze aus dem dritten Integrationspunkt | Unberührt; Phase-2-Sitze im Runtime-Beleg sichtbar |
+
+### Abhängigkeiten und Abnahmekriterien
+
+1. `TableWorldBoardBase` enthält ausschließlich die nackte 2026-Poch-Disc oder die
+   freigegebene TravelTray-Schale. Semantische Zählstände bleiben in zentralen
+   Overlays und werden nicht in Assets dupliziert.
+2. `TableWorldPiece` und `TableWorldPiecePile` wählen erschöpfend R1-Naturweiß oder
+   eine deterministische der sechs freigegebenen 1-Cent-Oberflächen. Es gibt keinen
+   Track-B-Fallback auf R1 und keine Veränderung des semantischen Counts.
+3. Phase 1, kompakter Phase-2-Ring, Poch-Flüge sowie Phase-3-Ergebnis- und
+   Strafströme führen die gewählte Welt durchgehend mit. Der geführte erste Tisch
+   bleibt unabhängig vom DEBUG-Probeparameter fest Track A.
+4. Der echte UI-Test startet Track B getrennt in Melden und Pochen, verlangt das
+   jeweilige Board im Fenster und hält beide Render als Screenshot fest. Die
+   visuelle Abnahme prüft Material, Lesbarkeit, Karten-/Board-Rhythmus und
+   Kollisionen; der optionale freie Zug-Begleiter wird für diese Materialprobe
+   explizit deaktiviert und nicht fälschlich als Boardbestandteil bewertet.
+5. `TravelTray` deckt die heutige iPad-2x- und große iPhone-3x-Matrix ab. Die knappe
+   iPad-Reserve und der nicht gedeckte zukünftige volle 620-pt-3x-Cap bleiben als
+   zwei explizite Risiken sichtbar und werden bei `--require-full-cap-3x` hart.
+6. Die AX-XXXL-Lernbühne muss in echtem SE-Landscape `667 x 375`, mit vollständiger
+   deutscher Semantik, erreichbarer Coach-Aktion, drei stabilen Gegnern und ohne
+   paarweise Overlaps bestehen.
+
+### Integrationsreihenfolge und aktueller Nachweis
+
+1. Material-Seam isoliert implementieren und durch Quellverträge absichern.
+2. Lead migriert Phase 1, Phase 2 und Phase 3 ohne Regel- oder Zähleränderung.
+3. QA verankert UI-Tests über das versionierte `project.yml`, führt echte Runtime-
+   Starts aus und nimmt die Screenshots menschlich ab.
+4. Vollständigen App-Build, Material-/Asset-/Visual-Audits und relevante First-Run-
+   Regressionen ausführen; danach Status synchronisieren, committen und pushen.
+5. Nächster Integrationspunkt: kupferspezifisches Kontakt-Audio und Haptik-Mapping.
+   Erst danach folgt die produktive Tischwahl nach der ersten abgeschlossenen Partie.
+
+Aktuell belegt: Track-B-UI-Test `1/1` in Phase 1 und 2; Gravuren liegen auf dem
+inneren Steg statt auf Münzhaufen oder außerhalb der Schale. Track A nutzt die neue
+satinierte 2026-Disc in First Run sowie Phase 1-3. Der Standard-Track-A-Test belegt
+Portrait und ein echtes `667 x 375`-Landscape-Fenster in Melden und Pochen ohne
+Überlagerung. Der AX-XXXL-Gate belegt auf demselben SE-Fenster einen initial
+vollständigen Gegner-/Disc-Frame, eine auf `68 pt` begrenzte Coach-Aktion und die
+vollständig revealbare Hand. Der direkte Simulator-Framebuffer wird während des
+laufenden Tests aufgenommen und nur um die Simulator-Metadrehung normalisiert.
+Die Tischwahl ist weiterhin absichtlich nicht produktiv sichtbar.

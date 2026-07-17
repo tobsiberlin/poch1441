@@ -735,48 +735,6 @@ private struct R1BlindEmboss: Shape {
     }
 }
 
-struct R1TokenRestingPose: Equatable, Sendable {
-    /// Mittelpunkt relativ zum Durchmesser eines einzelnen R1-Steins.
-    let offset: CGSize
-    let rotation: Double
-}
-
-/// Handgesetzte, stabile Endlagen. Ein bereits gelandeter Stein wechselt seinen
-/// Slot nicht, wenn weitere Steine hinzukommen; dadurch springt kein Haufen bei
-/// einer Zählermutation. Alle zwölf Mittelpunkte halten zusätzlich mindestens
-/// einen Steinradius Abstand zur nutzbaren Muldenkontur.
-enum R1TokenSlots {
-    private static let poses: [R1TokenRestingPose] = [
-        .init(offset: .init(width: 0.00, height: 0.00), rotation: -2.0),
-        .init(offset: .init(width: -0.43, height: 0.14), rotation: 3.0),
-        .init(offset: .init(width: 0.43, height: 0.12), rotation: -4.0),
-        .init(offset: .init(width: -0.23, height: -0.38), rotation: 5.0),
-        .init(offset: .init(width: 0.29, height: -0.34), rotation: -1.0),
-        .init(offset: .init(width: 0.02, height: 0.47), rotation: 4.0),
-        .init(offset: .init(width: -0.54, height: -0.13), rotation: -5.0),
-        .init(offset: .init(width: 0.54, height: -0.10), rotation: 2.0),
-        .init(offset: .init(width: -0.42, height: 0.43), rotation: 1.0),
-        .init(offset: .init(width: 0.43, height: 0.41), rotation: -3.0),
-        .init(offset: .init(width: 0.03, height: -0.57), rotation: 5.0),
-        .init(offset: .init(width: -0.25, height: 0.58), rotation: -4.0)
-    ]
-
-    static func pose(for index: Int) -> R1TokenRestingPose {
-        poses[min(max(index, 0), poses.count - 1)]
-    }
-
-    static func offset(for index: Int, tokenDiameter: CGFloat) -> CGSize {
-        let pose = pose(for: index)
-        return CGSize(width: pose.offset.width * tokenDiameter,
-                      height: pose.offset.height * tokenDiameter)
-    }
-
-    static func layout(for count: Int) -> [R1TokenRestingPose] {
-        guard count > 0 else { return [] }
-        return Array(poses.prefix(min(count, poses.count)))
-    }
-}
-
 /// R1-Steine liegen als natürlich geschichtete Gruppe in der Mulde. Der
 /// Kontakt-Schatten bleibt hart, der Höhenschatten weich.
 struct TableTokenPile: View {
@@ -784,9 +742,13 @@ struct TableTokenPile: View {
     let tint: Color
     var diameter: CGFloat
     var showCount = true
+    var seed: UInt64 = 1_441
+    var compartment: TravelCompartment = .center
 
     var body: some View {
-        let poses = R1TokenSlots.layout(for: count)
+        let poses = R1TokenSlots.layout(for: count,
+                                        seed: seed,
+                                        compartment: compartment)
         let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.38)
         ZStack {
             ForEach(poses.indices, id: \.self) { index in
@@ -794,7 +756,7 @@ struct TableTokenPile: View {
                 R1Token(tint: tint, size: tokenDiameter)
                     .offset(x: pose.offset.width * tokenDiameter,
                             y: pose.offset.height * tokenDiameter
-                                - CGFloat(index) * tokenDiameter * 0.012)
+                                - pose.elevation * tokenDiameter * 0.06)
                     .rotationEffect(.degrees(pose.rotation))
                     .zIndex(Double(index))
             }
@@ -822,6 +784,8 @@ struct RecessedTokenPile: View {
     let tint: Color
     var diameter: CGFloat
     var showCount = false
+    var seed: UInt64 = 1_441
+    var compartment: TravelCompartment = .center
 
     var body: some View {
         let floorDiameter = diameter * Tokens.outerWellFloorRatio
@@ -835,7 +799,9 @@ struct RecessedTokenPile: View {
             TableTokenPile(count: count,
                            tint: tint,
                            diameter: floorDiameter,
-                           showCount: showCount)
+                           showCount: showCount,
+                           seed: seed,
+                           compartment: compartment)
                 .offset(y: diameter * 0.025)
                 .frame(width: floorDiameter, height: floorDiameter)
                 .clipShape(Circle())
@@ -855,6 +821,111 @@ struct RecessedTokenPile: View {
         }
         .frame(width: diameter, height: diameter)
         .accessibilityHidden(true)
+    }
+}
+
+/// Gemeinsame Materialkante der beiden kanonischen Tischwelten. Die Basis
+/// enthält bewusst weder Regeln noch Zählstände: zentrale Bühnen legen ihre
+/// semantischen Pool-Overlays über dieselbe physische Grundplatte.
+struct TableWorldBoardBase: View {
+    let world: TableWorld
+    let diameter: CGFloat
+
+    @ViewBuilder
+    var body: some View {
+        switch world {
+        case .pochDisc:
+            Image("PochDisc2026")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFill()
+                .frame(width: diameter, height: diameter)
+                .clipShape(Circle())
+                .shadow(color: .black.opacity(0.62),
+                        radius: diameter * 0.04,
+                        y: diameter * 0.024)
+                .accessibilityHidden(true)
+        case .unterwegs:
+            Image("TravelTray")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: diameter, height: diameter)
+                .shadow(color: .black.opacity(0.48),
+                        radius: diameter * 0.055,
+                        y: diameter * 0.035)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+/// Ein einzelner regelneutraler Spielstein. Track A bleibt in einer Partie
+/// durchgehend R1-Naturweiß; Track B wählt reproduzierbar eine der sechs
+/// freigegebenen 1-Cent-Oberflächen.
+struct TableWorldPiece: View {
+    let world: TableWorld
+    let size: CGFloat
+    var seed: UInt64 = 1_441
+    var index = 0
+    var compartment: TravelCompartment = .center
+
+    @ViewBuilder
+    var body: some View {
+        switch world {
+        case .pochDisc:
+            R1Token(size: size, colorway: .naturalWhite)
+        case .unterwegs:
+            TravelCentPiece(seed: seed,
+                            index: index,
+                            compartment: compartment,
+                            size: size)
+        }
+    }
+}
+
+enum TableWorldPiecePlacement: Sendable {
+    case free
+    case well
+}
+
+/// Gemeinsame Haufen-Schnittstelle für zentrale Bühnen. `diameter` bezeichnet
+/// die verfügbare Fläche beziehungsweise bei `.well` den sichtbaren
+/// Muldendurchmesser. Bereits gelandete Steine behalten in beiden Welten ihren
+/// deterministischen Slot, wenn der Zähler wächst.
+struct TableWorldPiecePile: View {
+    let world: TableWorld
+    let count: Int
+    let diameter: CGFloat
+    var seed: UInt64 = 1_441
+    var compartment: TravelCompartment = .center
+    var placement: TableWorldPiecePlacement = .free
+
+    @ViewBuilder
+    var body: some View {
+        switch world {
+        case .pochDisc:
+            switch placement {
+            case .free:
+                TableTokenPile(count: count,
+                               tint: Tokens.jewelGold,
+                               diameter: diameter,
+                               showCount: false,
+                               seed: seed,
+                               compartment: compartment)
+            case .well:
+                RecessedTokenPile(count: count,
+                                  tint: Tokens.jewelGold,
+                                  diameter: diameter,
+                                  showCount: false,
+                                  seed: seed,
+                                  compartment: compartment)
+            }
+        case .unterwegs:
+            TravelCoinPile(count: count,
+                           seed: seed,
+                           compartment: compartment,
+                           wellDiameter: diameter)
+        }
     }
 }
 

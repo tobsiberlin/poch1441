@@ -1,6 +1,6 @@
 # First-Run QA-Baseline
 
-**Stand:** 17. Juli 2026
+**Stand:** 18. Juli 2026
 **Basis:** Worktree nach `1e2e6da`, laufende Integration
 **Scope:** statischer Audit plus zentraler App-, UI-Test- und Screenshotbeleg
 
@@ -119,6 +119,24 @@ beiden Orientierungen.
   und beide Aktionen vollständig. Der UI-Test verlangt in Portrait komplette
   Fensteraufnahme und verbietet in beiden Orientierungen jede Überschneidung
   zwischen Disc, Gegnern, Ziel und Aktionen.
+- Der frühere grüne Status des alten Lernbühnen-Gates ist widerrufen. Im abgelehnten
+  Beleg `artifacts/qa/ax-xxxl-landscape-20260717-223905-4565/` meldete XCTest zwar
+  ein `667 x 375`-Window, der einzige Screenshot war jedoch ein
+  `750 x 1334`-Portrait-PNG. Die AX-Aktion war `311,5 pt` statt `48 pt` hoch. Das
+  alte Gate hatte weder eine Maximalhöhe noch Viewport-Containment und fotografierte
+  erst nach einem Scroll; `exists`, `isHittable` und paarweise Nichtüberlappung
+  konnten diesen geclippten Zustand deshalb nicht ablehnen.
+- Der gehärtete Gate `tools/qa/run_ax_xxxl_landscape_gate.sh <SE-UDID>` hängt nun
+  zwingend einen initialen Gesamtframe vor jeder
+  Interaktion sowie einen Bottom-Reveal an. Er verlangt, dass kein einzelner
+  Lernframe größer als der sichtbare Scroll-Viewport ist, dass Gegner und initialer
+  Disc-Anker im Viewport liegen und dass Gegner, Disc, Aktion und Hand jeweils
+  vollständig ohne Clipping revealbar sind. Der bestätigte Lauf verwendet ein
+  echtes `667 x 375`-App-Fenster; die Coach-Aktion wächst kontrolliert von `48 pt`
+  auf `68 pt`, die initiale `130 pt`-Disc und alle drei Gegner sind vollständig
+  sichtbar, Coach und Hand vollständig scrollbar. Während der App-Zustand aktiv
+  bleibt, nimmt der Runner den Simulator-Framebuffer direkt auf und normalisiert
+  nur dessen bekannte Metadrehung auf `1334 x 750 px`.
 - Erste sichtbare Karte, volle Hand, Trumpf, Verbinden, Beweisen und Loslassen
   wurden als Simulator-Screenshots visuell geprüft; keine Overlay-Kollision.
 - Accessibility-Baum benennt Lernzustand, 44-Punkt-Scheibe, Mitte, Ergebnis und

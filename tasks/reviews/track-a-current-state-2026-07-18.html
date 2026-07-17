@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poch 1441 - Track A, echter Simulatorstand</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #ebeef3;
+      --muted: #9da3ae;
+      --gold: #c9a45c;
+      --line: rgba(226, 232, 240, .12);
+      --panel: rgba(18, 18, 23, .82);
+      --positive: #9ccbb7;
+      --open: #e1bd73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% -10%, rgba(201,164,92,.11), transparent 32rem),
+        #09090d;
+    }
+    main { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 64px 0 96px; }
+    header { display: grid; gap: 18px; max-width: 940px; margin-bottom: 48px; }
+    .eyebrow { color: var(--gold); letter-spacing: .18em; text-transform: uppercase; font-size: 12px; font-weight: 750; }
+    h1 { margin: 0; max-width: 820px; font-size: clamp(40px, 6vw, 76px); line-height: .98; letter-spacing: -.055em; }
+    .lede { margin: 0; max-width: 760px; color: var(--muted); font-size: clamp(17px, 2vw, 22px); line-height: 1.48; }
+    .truth { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 9px 13px; color: var(--muted); font-size: 13px; }
+    .pill.ok { color: var(--positive); border-color: color-mix(in srgb, var(--positive), transparent 64%); }
+    .pill.open { color: var(--open); border-color: color-mix(in srgb, var(--open), transparent 64%); }
+    section { margin-top: 56px; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 18px; }
+    h2 { margin: 0; font-size: clamp(24px, 3vw, 38px); letter-spacing: -.035em; }
+    .caption { margin: 0; max-width: 620px; color: var(--muted); line-height: 1.5; }
+    .northstar, figure, .audit {
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+      box-shadow: 0 30px 90px rgba(0,0,0,.28);
+      overflow: hidden;
+    }
+    .northstar { display: grid; grid-template-columns: minmax(260px, .65fr) 1fr; }
+    .northstar img { width: 100%; height: min(72vh, 840px); object-fit: cover; object-position: center; background: #111; }
+    .northstar-copy { padding: clamp(28px, 5vw, 64px); display: grid; align-content: center; gap: 20px; }
+    .northstar-copy h3 { margin: 0; font-size: clamp(28px, 4vw, 52px); letter-spacing: -.045em; }
+    .northstar-copy p { margin: 0; color: var(--muted); font-size: 18px; line-height: 1.55; }
+    .northstar-copy ul { margin: 0; padding-left: 20px; color: var(--ink); line-height: 1.75; }
+    .shots { display: grid; grid-template-columns: minmax(260px, .58fr) 1fr; gap: 18px; }
+    figure { margin: 0; padding: 14px; }
+    figure img { display: block; width: 100%; border-radius: 18px; background: #08080c; }
+    figcaption { display: flex; justify-content: space-between; gap: 16px; padding: 14px 8px 4px; color: var(--muted); font-size: 13px; }
+    figcaption strong { color: var(--ink); }
+    .audit { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .audit article { padding: 28px; border-right: 1px solid var(--line); }
+    .audit article:last-child { border-right: 0; }
+    .audit h3 { margin: 0 0 10px; font-size: 18px; }
+    .audit p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .good { color: var(--positive); }
+    .pending { color: var(--open); }
+    footer { margin-top: 42px; color: #707680; font-size: 13px; }
+    @media (max-width: 820px) {
+      main { width: min(100% - 24px, 680px); padding-top: 38px; }
+      .northstar, .shots, .audit { grid-template-columns: 1fr; }
+      .northstar img { height: 62vh; }
+      .audit article { border-right: 0; border-bottom: 1px solid var(--line); }
+      .audit article:last-child { border-bottom: 0; }
+      .section-head { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Echter Simulatorstand · 18. Juli 2026</div>
+      <h1>Track A ist wieder auf dem richtigen Tisch.</h1>
+      <p class="lede">Kein PM49, kein Waschbeton im Gameplay, kein Tutorialersatz. Unten stehen die vier aktuell gebauten App-Zustände - nicht gerenderte Wunschbilder.</p>
+      <div class="truth">
+        <span class="pill ok">Build grün</span>
+        <span class="pill ok">667 × 375 echtes Landscape-Fenster</span>
+        <span class="pill ok">Phase 1/2 ohne Überlagerungen</span>
+        <span class="pill ok">First-Run AX XXXL in 667 × 375 grün</span>
+      </div>
+    </header>
+
+    <section>
+      <div class="section-head">
+        <h2>Verbindlicher Northstar</h2>
+        <p class="caption">Das physische Foto gewinnt gegen historische PM-Varianten, alte Mockups und Render.</p>
+      </div>
+      <div class="northstar">
+        <img src="file:///Users/tobsi/Library/Mobile%20Documents/com~apple~CloudDocs/TEMP/Screenshots/SCR-20260717-txfs.png" alt="Physischer Track-A-Northstar">
+        <div class="northstar-copy">
+          <h3>Präzise Disc, heutige Gegenwart.</h3>
+          <p>Der App-Tisch folgt jetzt wieder der sachlichen Produktidee des Fotos statt einer historischen Ornamentrichtung.</p>
+          <ul>
+            <li>satiniertes Aluminium außen</li>
+            <li>Graphit und tiefes Nachtblau</li>
+            <li>acht eingelassene Mulden plus Zentrum</li>
+            <li>matte, naturweiße R1-Steine</li>
+            <li>ruhiger dunkler Gameplay-Untergrund</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Phase 1 · Melden</h2>
+        <p class="caption">Portrait bleibt disc-zentriert. Landscape trennt Hand und Disc vollständig; die linke Bühnenmitte ist aktuell bewusst ruhig, aber noch der stärkste Kompositionskandidat.</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="file:///Users/tobsi/poch1441/artifacts/qa/track-a-current-20260718/phase1-portrait.png" alt="Phase 1 Portrait">
+          <figcaption><strong>Portrait</strong><span>750 × 1334 · echter Simulator</span></figcaption>
+        </figure>
+        <figure>
+          <img src="file:///Users/tobsi/poch1441/artifacts/qa/track-a-current-20260718/phase1-landscape.png" alt="Phase 1 Landscape">
+          <figcaption><strong>Landscape</strong><span>1334 × 750 · normalisierter Simulatorbeleg</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Phase 2 · Pochen</h2>
+        <p class="caption">Der Maßstab folgt wieder dem freigegebenen Mockup: Range links, kompakte Disc, klare Entscheidung, stabile Gegnerplätze und Kartenbleed am unteren Rand.</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="file:///Users/tobsi/poch1441/artifacts/qa/track-a-current-20260718/phase2-portrait.png" alt="Phase 2 Portrait">
+          <figcaption><strong>Portrait</strong><span>750 × 1334 · echter Simulator</span></figcaption>
+        </figure>
+        <figure>
+          <img src="file:///Users/tobsi/poch1441/artifacts/qa/track-a-current-20260718/phase2-landscape.png" alt="Phase 2 Landscape">
+          <figcaption><strong>Landscape</strong><span>1334 × 750 · normalisierter Simulatorbeleg</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>First Run · Accessibility XXXL</h2>
+        <p class="caption">Der kurze Landscape-Viewport zeigt zuerst Orientierung: drei stabile Gegner und die vollständige Disc. Coach und Karten folgen als klar getrennte, vollständig erreichbare Scroll-Zonen.</p>
+      </div>
+      <figure>
+        <img src="file:///Users/tobsi/poch1441/artifacts/qa/track-a-current-20260718/first-run-ax-xxxl-landscape.png" alt="First Run Accessibility XXXL Landscape">
+        <figcaption><strong>Verbinden · initialer Gesamtframe</strong><span>1334 × 750 · direkter Simulator-Framebuffer</span></figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Ehrliche Abnahme</h2>
+      </div>
+      <div class="audit">
+        <article>
+          <h3 class="good">Gelöst</h3>
+          <p>PM49 ist kein Live-Anker mehr. Disc, Hand, Entscheidung und Gegner kollidieren in den vier gezeigten Zuständen nicht.</p>
+        </article>
+        <article>
+          <h3 class="good">R1 verbessert</h3>
+          <p>Vier Steine lesen sich als vier. Mulden verwenden stabile, aber unterschiedliche Endlagen statt sichtbar geklonter Rosetten.</p>
+        </article>
+        <article>
+          <h3 class="pending">Noch offen</h3>
+          <p>Die R1-Oberfläche darf materiell noch näher an die Disc rücken. Gesprochene VoiceOver-Reihenfolge, Keramikklang und Taptic-Charakter benötigen zusätzlich echte Hardware.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer>Quelle: Poch1441 Simulator, iPhone SE (3. Generation), DE, Track A. Landscape-Dateien wurden nur zur korrekten Betrachtung um 90° normalisiert; der geprüfte App-Viewport war 667 × 375 pt.</footer>
+  </main>
+</body>
+</html>

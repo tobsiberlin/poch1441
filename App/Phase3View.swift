@@ -79,7 +79,7 @@ struct Phase3View: View {
         // Straf-Strom (§6c c): Chips fliegen PARALLEL von jedem Verlierer zum Sieger
         .overlay {
             if game.endPhase == .punishing, let result = game.roundResult, !reduceMotion {
-                PunishStreams(result: result)
+                PunishStreams(result: result, world: theme)
                     .allowsHitTesting(false)
             }
         }
@@ -408,7 +408,10 @@ struct Phase3View: View {
             Spacer(minLength: 0)
             HStack(spacing: -4) {
                 ForEach(0..<3, id: \.self) { i in
-                    R1Token(tint: i == 0 ? Tokens.jewelPlatin : Tokens.jewelGold, size: 15)
+                    TableWorldPiece(world: theme,
+                                    size: 15,
+                                    index: i,
+                                    compartment: .center)
                         .offset(y: CGFloat(i) * -2)
                 }
             }
@@ -757,7 +760,9 @@ struct Phase3View: View {
     private func paymentRow(seat: Int, payment: Int, stack: Int) -> some View {
         HStack(spacing: 8) {
             if seat == 0 {
-                R1Token(tint: payment > 0 ? Tokens.jewelGold : Tokens.slate, size: 14)
+                TableWorldPiece(world: theme,
+                                size: 14,
+                                compartment: .center)
             } else {
                 OpponentPortrait(seat: seat,
                                  name: game.name(of: seat),
@@ -854,6 +859,7 @@ private struct Phase3CardArrival: View {
 /// (nie sequenzielle Einzelflüge - Auflage). Zahlungen visuell auf 5 Chips gedeckelt.
 private struct PunishStreams: View {
     let result: (winner: Int, centerPool: Int, payments: [Int])
+    let world: TableWorld
     @State private var flown = false
 
     var body: some View {
@@ -865,6 +871,7 @@ private struct PunishStreams: View {
                 ForEach(0..<min(result.centerPool, 8), id: \.self) { i in
                     EndChip(from: CGPoint(x: w / 2, y: h * 0.45),
                             to: winnerPos,
+                            world: world,
                             tint: Tokens.jewelPlatin,
                             index: i,
                             lane: -1,
@@ -876,6 +883,7 @@ private struct PunishStreams: View {
                         ForEach(0..<min(payment, 5), id: \.self) { i in
                             EndChip(from: from,
                                     to: winnerPos,
+                                    world: world,
                                     tint: Tokens.jewelGold,
                                     index: i,
                                     lane: seat,
@@ -897,6 +905,7 @@ private struct PunishStreams: View {
 private struct EndChip: View {
     let from: CGPoint
     let to: CGPoint
+    let world: TableWorld
     let tint: Color
     let index: Int
     let lane: Int
@@ -905,7 +914,11 @@ private struct EndChip: View {
     var body: some View {
         let t: CGFloat = trigger ? 1 : 0
         let p = point(t)
-        R1Token(tint: tint, size: 12)
+        TableWorldPiece(world: world,
+                        size: 12,
+                        seed: UInt64(max(index, 0)) + 1_441,
+                        index: index,
+                        compartment: lane < 0 ? .center : .poch)
             .rotationEffect(.degrees((Double(index % 3) - 1) * 6 + Double(t) * 12))
             .position(p)
             .opacity(trigger ? 0.10 : 1)

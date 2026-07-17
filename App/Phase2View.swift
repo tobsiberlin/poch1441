@@ -52,7 +52,10 @@ struct Phase2View: View {
             let latestSeatsTop = h - Tokens.phase2HandReservedHeight
             let seatsY = min(naturalSeatsTop, latestSeatsTop)
 
-            ZStack(alignment: .top) {
+            if w > h {
+                landscapeStage(width: w, height: h)
+            } else {
+                ZStack(alignment: .top) {
                 topArea
                     .frame(width: w, height: topH)
                     .modifier(TableShake(
@@ -89,12 +92,13 @@ struct Phase2View: View {
                     .opacity(isGuidedRound && guidedFocus != .opponents ? 0 : 1)
                     .allowsHitTesting(!isGuidedRound || guidedFocus == .opponents)
 
-                handFan
+                handFan(cardScale: 1.62)
                     .frame(width: w, height: 150, alignment: .bottom)
                     .position(x: w / 2, y: h - 58)
                     // Die eigene Hand bleibt immer vollständig deckend. Opacity
                     // auf dem gesamten Fächer lässt sonst Karten darunter durch-
                     // scheinen und liest sich wie ein unscharfes Doppelbild.
+                }
             }
         }
         .onAppear {
@@ -126,6 +130,7 @@ struct Phase2View: View {
                               amount: game.lastBetAmount,
                               kind: game.lastBetKind,
                               trigger: game.betTransfer,
+                              world: theme,
                               tint: theme.tint(.poch),
                               onImpact: commitBetImpact)
                     .allowsHitTesting(false)
@@ -136,6 +141,7 @@ struct Phase2View: View {
                               amount: 4,
                               kind: .raise,
                               trigger: qaPochFlight,
+                              world: theme,
                               tint: theme.tint(.poch),
                               onImpact: {})
                     .allowsHitTesting(false)
@@ -159,6 +165,64 @@ struct Phase2View: View {
             }
         }
         #endif
+    }
+
+    /// Kompakte Querformat-Bühne mit drei unabhängigen Zonen. Links liegen Range
+    /// und Karten, in der Mitte die Entscheidung, rechts Disc und Gegnerplätze.
+    private func landscapeStage(width w: CGFloat, height h: CGFloat) -> some View {
+        let boardDiameter = compactRingDiameter
+        let centerX = w * 0.43
+        let decisionWidth = min(286, w * 0.44)
+        let opponentWidth = min(292, w * 0.43)
+        return ZStack(alignment: .top) {
+            sliderPanel
+                .scaleEffect(0.72)
+                .position(x: 34, y: min(h * 0.38, 96))
+                .modifier(GuidedFocusModifier(
+                    isActive: isGuidedRound,
+                    isRelevant: guidedFocus == .range,
+                    reduceMotion: reduceMotion
+                ))
+
+            compactRing
+                .position(x: w - boardDiameter / 2 - 2,
+                          y: boardDiameter / 2 + 2)
+                .modifier(TableShake(
+                    amplitude: reduceMotion ? 0 : Tokens.pochShakeAmp,
+                    animatableData: CGFloat(game.pochShock)))
+                .animation(.linear(duration: Tokens.pochShake), value: game.pochShock)
+
+            pochenDecisionCard
+                .frame(width: decisionWidth, height: 98, alignment: .top)
+                .position(x: centerX, y: 50)
+
+            actionArea
+                .frame(width: decisionWidth - 8, height: 44, alignment: .top)
+                .position(x: centerX, y: 126)
+                .modifier(GuidedFocusModifier(
+                    isActive: isGuidedRound,
+                    isRelevant: guidedFocus == .actions,
+                    reduceMotion: reduceMotion
+                ))
+                .allowsHitTesting(!isGuidedRound || guidedFocus == .actions)
+                .opacity(isGuidedRound && guidedFocus != .actions ? 0 : 1)
+
+            portraitsRow(maxPanelWidth: 86)
+                .frame(width: opponentWidth, height: 84, alignment: .top)
+                .position(x: w - opponentWidth / 2,
+                          y: max(boardDiameter + 46, h - 44))
+                .modifier(GuidedFocusModifier(
+                    isActive: isGuidedRound,
+                    isRelevant: guidedFocus == .opponents,
+                    reduceMotion: reduceMotion
+                ))
+                .opacity(isGuidedRound && guidedFocus != .opponents ? 0 : 1)
+                .allowsHitTesting(!isGuidedRound || guidedFocus == .opponents)
+
+            handFan(cardScale: 0.82)
+                .frame(width: w * 0.42, height: 64, alignment: .bottom)
+                .position(x: w * 0.34, y: h - 18)
+        }
     }
 
     private var guidedFocus: GuidedFocus {
@@ -621,14 +685,8 @@ struct Phase2View: View {
         let tileDia = Tokens.tileDiameter * scale
         let d = r * 2 + tileDia
         return ZStack {
-            Image("PochRingPM49")
-                .resizable()
-                .interpolation(.high)
-                .scaledToFill()
-                .frame(width: d, height: d)
-                .clipShape(Circle())
+            TableWorldBoardBase(world: theme, diameter: d)
                 .opacity(0.88)
-                .shadow(color: .black.opacity(0.62), radius: 10, y: 6)
                 .position(x: d / 2, y: d / 2)
             pochPotMini.position(TableWorldBoardGeometry.wellCenter(for: .center,
                                                                     in: d,
@@ -641,7 +699,7 @@ struct Phase2View: View {
                                                                  world: theme))
             }
             if !theme.isTravelTable {
-                PM49FrontLipOverlay(size: d)
+                PochDiscFrontLipOverlay(size: d)
                     .position(x: d / 2, y: d / 2)
             }
             ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
@@ -656,6 +714,7 @@ struct Phase2View: View {
             }
         }
         .frame(width: d, height: d)
+        .accessibilityIdentifier("table.world.phase2.board")
     }
 
     private var compactRingDiameter: CGFloat {
@@ -673,10 +732,11 @@ struct Phase2View: View {
         let growth = 1 + CGFloat(min(presentedPot, 40)) / 400
         return ZStack {
             if presentedPot > 0 {
-                RecessedTokenPile(count: presentedPot,
-                                  tint: Tokens.jewelGold,
-                                  diameter: Tokens.centerDiameter * 0.42,
-                                  showCount: false)
+                TableWorldPiecePile(world: theme,
+                                    count: presentedPot,
+                                    diameter: Tokens.centerDiameter * 0.42,
+                                    compartment: .poch,
+                                    placement: .well)
                     .offset(y: 1.5)
                     .transition(.scale(scale: 0.72).combined(with: .opacity))
             }
@@ -717,10 +777,11 @@ struct Phase2View: View {
         let chips = game.chips(in: pool)
         return ZStack {
             if chips > 0 {
-                RecessedTokenPile(count: chips,
-                                  tint: theme.tint(pool),
-                                  diameter: dia,
-                                  showCount: false)
+                TableWorldPiecePile(world: theme,
+                                    count: chips,
+                                    diameter: dia,
+                                    compartment: TravelCompartment(pool: pool),
+                                    placement: .well)
             } else {
                 Circle()
                     .fill(theme.tint(pool).opacity(theme.isTravelTable ? 0.44 : 0.36))
@@ -820,13 +881,12 @@ struct Phase2View: View {
 
     // MARK: - Hand (identisch zu Phase 1: grosser Mockup-Faecher am unteren Rand)
 
-    private var handFan: some View {
+    private func handFan(cardScale: CGFloat) -> some View {
         let cards = game.humanHand
         let isHighlighted = game.stage == .betting
         let N = cards.count
-        let cardScale: CGFloat = 1.62
         let spreadDeg = min(Double(N) * 7.0, 38.0)
-        let totalW: CGFloat = min(CGFloat(N) * 30, 224)
+        let totalW: CGFloat = min(CGFloat(N) * 30, 224) * (cardScale / 1.62)
         return ZStack {
             ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
                 let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
@@ -964,7 +1024,9 @@ struct Phase2View: View {
         VStack(spacing: 10) {
             if let r = game.pochResult {
                 HStack(spacing: 10) {
-                    R1Token(tint: pochAccent, size: 28)
+                    TableWorldPiece(world: theme,
+                                    size: 28,
+                                    compartment: .poch)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(game.name(of: r.winner)) nimmt den Poch")
                             .font(.system(size: 14, weight: .heavy))
@@ -978,7 +1040,9 @@ struct Phase2View: View {
                 }
             } else {
                 HStack(spacing: 10) {
-                    R1Token(tint: Tokens.jewelAmethyst, size: 28)
+                    TableWorldPiece(world: theme,
+                                    size: 28,
+                                    compartment: .poch)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Niemand pocht")
                             .font(.system(size: 14, weight: .heavy))
@@ -1093,6 +1157,7 @@ private struct PochBetFlight: View {
     let amount: Int
     let kind: BetTransferKind
     let trigger: Int
+    let world: TableWorld
     let tint: Color
     let onImpact: () -> Void
 
@@ -1130,8 +1195,11 @@ private struct PochBetFlight: View {
                             onImpact()
                         }
                     ) { progress in
-                        R1Token(tint: i == 0 ? Tokens.jewelGold : tint,
-                                  size: kind.isPoch ? 22 : 21)
+                        TableWorldPiece(world: world,
+                                        size: kind.isPoch ? 22 : 21,
+                                        seed: UInt64(max(trigger, 0)) + 1_441,
+                                        index: i,
+                                        compartment: .poch)
                             .rotationEffect(.degrees(Double(i - 1) * 2 + Double(progress) * 3))
                             .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 2.2),
                                               axis: (x: 0.82, y: 0.18, z: 0),

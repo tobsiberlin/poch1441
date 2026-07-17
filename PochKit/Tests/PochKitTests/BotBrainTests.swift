@@ -192,6 +192,27 @@ struct BotBrainTests {
         #expect(first == second)
     }
 
+    /// Die Factory leitet die eigene Hand aus der Runde ab und gilt nur für den
+    /// aktuell handelnden Sitz in der laufenden Bietphase.
+    @Test func bietObservationIstAnZugUndPhaseGebunden() throws {
+        var round = Round(stacks: [60, 60, 60], board: Board(), seed: 1_444)
+        let actingPlayer = round.betting.turn
+        let observation = try #require(round.botObservation(for: actingPlayer))
+
+        #expect(observation.ownHand == round.deal.hands[actingPlayer])
+        #expect(observation.trump == round.deal.trump)
+        #expect(observation.currentBet == round.betting.currentBet)
+        #expect(observation.ownCommitted == round.betting.seats[actingPlayer].committed)
+
+        let otherPlayer = (actingPlayer + 1) % round.deal.hands.count
+        #expect(round.botObservation(for: otherPlayer) == nil)
+
+        while round.stage == .betting {
+            try round.applyBet(.pass, by: round.betting.turn)
+        }
+        #expect(round.botObservation(for: actingPlayer) == nil)
+    }
+
     /// Phase-3-Fairnessgrenze: Die Observation enthält nur legale eigene Karten
     /// und öffentliche Tischwerte. Fremde Resthände sind kein darstellbares Feld.
     @Test func ausspielObservationSchliesstFremdhaendeStrukturellAus() throws {

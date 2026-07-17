@@ -10,12 +10,7 @@ struct TravelSnackTray: View {
 
     var body: some View {
         ZStack {
-            Image("TravelTray")
-                .resizable()
-                .interpolation(.high)
-                .scaledToFit()
-                .shadow(color: .black.opacity(0.48), radius: diameter * 0.055,
-                        y: diameter * 0.035)
+            TableWorldBoardBase(world: .unterwegs, diameter: diameter)
 
             ForEach(TravelTableGeometry.compartments) { compartment in
                 TravelCoinPile(
@@ -75,7 +70,7 @@ struct TravelSnackTray: View {
     }
 }
 
-private struct TravelCoinPile: View {
+struct TravelCoinPile: View {
     let count: Int
     let seed: UInt64
     let compartment: TravelCompartment
@@ -102,9 +97,9 @@ private struct TravelCoinPile: View {
     }
 
     private func assetIndex(for index: Int) -> Int {
-        let compartmentIndex = TravelTableGeometry.compartments
-            .firstIndex(of: compartment) ?? 0
-        return (Int(seed % 6) + index * 5 + compartmentIndex * 3) % 6
+        TravelCentAssetResolver.index(seed: seed,
+                                      index: index,
+                                      compartment: compartment)
     }
 
     private var accessibilityLabel: String {
@@ -114,6 +109,44 @@ private struct TravelCoinPile: View {
                       locale: Locale.current,
                       compartment.accessibilityLabel,
                       max(0, count))
+    }
+}
+
+enum TravelCentAssetResolver {
+    static let variantCount = 6
+
+    static func index(seed: UInt64,
+                      index: Int,
+                      compartment: TravelCompartment) -> Int {
+        let compartmentIndex = TravelTableGeometry.compartments
+            .firstIndex(of: compartment) ?? 0
+        let safeIndex = max(index, 0)
+        return (Int(seed % UInt64(variantCount))
+                + safeIndex * 5
+                + compartmentIndex * 3) % variantCount
+    }
+}
+
+/// Einzelmünze für Flüge und freie Stapel. Oberflächenvariante und Drehung
+/// stammen aus derselben deterministischen Quelle wie die Münzen in der Schale.
+struct TravelCentPiece: View {
+    let seed: UInt64
+    let index: Int
+    let compartment: TravelCompartment
+    let size: CGFloat
+
+    var body: some View {
+        let safeIndex = min(max(index, 0), TravelCoinLayout.capacity - 1)
+        let pose = TravelCoinLayout.poses(count: safeIndex + 1,
+                                          seed: seed,
+                                          compartment: compartment)[safeIndex]
+        TravelCentCoin(
+            assetIndex: TravelCentAssetResolver.index(seed: seed,
+                                                       index: safeIndex,
+                                                       compartment: compartment),
+            pose: pose,
+            size: size
+        )
     }
 }
 

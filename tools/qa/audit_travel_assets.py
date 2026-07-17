@@ -7,7 +7,9 @@ claim that raster material, lighting, or composition passed a human art review.
 
 from __future__ import annotations
 
+import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -36,12 +38,17 @@ MIN_TRANSPARENT_CORNER_RATIO = 0.98
 MIN_TRANSPARENT_CANVAS_RATIO = 0.08
 MAX_OPAQUE_NEAR_BLACK_RATIO = 0.005
 MAX_CHROMA_RESIDUE_RATIO = 0.00001
+IPAD_DISPLAY_SCALE = 2
+LARGE_IPHONE_DISPLAY_SCALE = 3
+LARGE_IPHONE_SHORT_EDGE_POINTS = 440
+LOW_RESOLUTION_HEADROOM = 0.05
 
 
 class Gate:
     def __init__(self) -> None:
         self.failures: list[str] = []
         self.passes: list[str] = []
+        self.risks: list[str] = []
 
     def check(self, condition: bool, label: str, detail: str = "") -> None:
         if condition:
@@ -50,13 +57,18 @@ class Gate:
         suffix = f": {detail}" if detail else ""
         self.failures.append(f"{label}{suffix}")
 
+    def risk(self, label: str, detail: str) -> None:
+        self.risks.append(f"{label}: {detail}")
+
     def report(self) -> int:
         for label in self.passes:
             print(f"PASS  {label}")
+        for risk in self.risks:
+            print(f"RISK  {risk}")
         for failure in self.failures:
             print(f"FAIL  {failure}")
         print(f"\nTravel asset contract: {len(self.passes)} PASS, "
-              f"{len(self.failures)} FAIL")
+              f"{len(self.risks)} RISK, {len(self.failures)} FAIL")
         return 1 if self.failures else 0
 
 
@@ -74,7 +86,92 @@ def declared_filename(imageset: Path) -> str | None:
     return filenames[0] if len(filenames) == 1 else None
 
 
-def inspect_asset(gate: Gate, name: str, filename: str, minimum_side: int) -> None:
+def renderer_size_contract() -> tuple[float, float] | None:
+    try:
+        source = RENDERER.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    match = re.search(
+        r"let side = min\(proxy\.size\.width \* (?P<fraction>\d+(?:\.\d+)?), "
+        r"proxy\.size\.height \* (?P=fraction), (?P<cap>\d+(?:\.\d+)?)\)",
+        source,
+    )
+    if not match:
+        return None
+    return float(match.group("fraction")), float(match.group("cap"))
+
+
+def inspect_tray_resolution(
+    gate: Gate,
+    width: int,
+    height: int,
+    require_full_cap_3x: bool,
+) -> None:
+    contract = renderer_size_contract()
+    gate.check(
+        contract is not None,
+        "Travel renderer exposes an auditable viewport fraction and point cap",
+        "expected min(width * fraction, height * fraction, cap)",
+    )
+    if contract is None:
+        return
+
+    viewport_fraction, point_cap = contract
+    ipad_2x_pixels = math.ceil(point_cap * IPAD_DISPLAY_SCALE)
+    large_iphone_points = min(
+        point_cap,
+        LARGE_IPHONE_SHORT_EDGE_POINTS * viewport_fraction,
+    )
+    large_iphone_3x_pixels = math.ceil(
+        large_iphone_points * LARGE_IPHONE_DISPLAY_SCALE
+    )
+    current_required_pixels = max(ipad_2x_pixels, large_iphone_3x_pixels)
+    available_pixels = min(width, height)
+    gate.check(
+        available_pixels >= current_required_pixels,
+        "TravelTray covers current iPad 2x and large-iPhone 3x render targets",
+        (
+            f"asset={available_pixels}px, iPad-cap@2x={ipad_2x_pixels}px, "
+            f"{large_iphone_points:.1f}pt-phone@3x={large_iphone_3x_pixels}px"
+        ),
+    )
+
+    headroom = available_pixels / ipad_2x_pixels - 1
+    if headroom < LOW_RESOLUTION_HEADROOM:
+        gate.risk(
+            "TravelTray iPad 2x headroom is narrow",
+            (
+                f"{available_pixels - ipad_2x_pixels}px / {headroom:.2%}; "
+                "any larger point cap or crop requires a new raster"
+            ),
+        )
+
+    full_cap_3x_pixels = math.ceil(point_cap * LARGE_IPHONE_DISPLAY_SCALE)
+    full_cap_3x_ready = available_pixels >= full_cap_3x_pixels
+    if require_full_cap_3x:
+        gate.check(
+            full_cap_3x_ready,
+            "TravelTray covers the full renderer cap at 3x",
+            f"asset={available_pixels}px, required={full_cap_3x_pixels}px",
+        )
+    elif not full_cap_3x_ready:
+        gate.risk(
+            "TravelTray does not cover a future full-cap 3x surface",
+            (
+                f"asset={available_pixels}px, required={full_cap_3x_pixels}px; "
+                f"current 3x ceiling without upsampling is "
+                f"{available_pixels / LARGE_IPHONE_DISPLAY_SCALE:.0f}pt"
+            ),
+        )
+
+
+def inspect_asset(
+    gate: Gate,
+    name: str,
+    filename: str,
+    minimum_side: int,
+    require_full_cap_3x: bool,
+) -> None:
     imageset = ASSET_ROOT / f"{name}.imageset"
     png = imageset / filename
     gate.check(imageset.is_dir(), f"{name} imageset exists")
@@ -106,6 +203,7 @@ def inspect_asset(gate: Gate, name: str, filename: str, minimum_side: int) -> No
     )
     if name == "TravelTray":
         gate.check(width == height, "TravelTray is exactly square", f"{width}x{height}")
+        inspect_tray_resolution(gate, width, height, require_full_cap_3x)
 
     pixels = list(image.getdata())
     pixel_count = len(pixels)
@@ -184,25 +282,41 @@ def inspect_renderer(gate: Gate) -> None:
         gate.check(False, "Travel renderer exists", str(error))
         return
 
+    active_sources = "\n".join(
+        path.read_text(encoding="utf-8", errors="replace")
+        for path in sorted((ROOT / "App").rglob("*.swift"))
+    )
     gate.check(
-        'Image("TravelTray")' in source,
-        "Renderer references the approved tray asset",
+        'TableWorldBoardBase(world: .unterwegs' in source
+        and 'Image("TravelTray")' in active_sources,
+        "Renderer reaches the approved tray asset through the shared board base",
     )
     gate.check(
         'Image("TravelCent\\(assetIndex)")' in source,
         "Renderer references the six indexed cent assets",
     )
     function_match = re.search(
-        r"private func assetIndex\(for index: Int\) -> Int \{(?P<body>.*?)\n    \}",
+        r"static func index\(seed: UInt64,\s*"
+        r"index: Int,\s*"
+        r"compartment: TravelCompartment\) -> Int \{(?P<body>.*?)\n    \}",
         source,
         flags=re.DOTALL,
     )
     body = function_match.group("body") if function_match else ""
-    gate.check(bool(function_match), "Renderer has an explicit asset-index function")
+    gate.check(bool(function_match), "Renderer has an explicit shared asset resolver")
     gate.check(
-        all(token in body for token in ("seed % 6", "index * 5", "compartmentIndex * 3", ") % 6")),
+        "static let variantCount = 6" in source
+        and all(
+            token in body
+            for token in (
+                "seed % UInt64(variantCount)",
+                "safeIndex * 5",
+                "compartmentIndex * 3",
+                ") % variantCount",
+            )
+        ),
         "Renderer selects all six variants deterministically",
-        "expected seed/index/compartment arithmetic modulo six",
+        "expected shared seed/index/compartment arithmetic modulo variantCount=6",
     )
     gate.check("hashValue" not in source, "Renderer does not use hashValue")
     gate.check(
@@ -210,10 +324,6 @@ def inspect_renderer(gate: Gate) -> None:
         "Renderer does not use nondeterministic random APIs",
     )
 
-    active_sources = "\n".join(
-        path.read_text(encoding="utf-8", errors="replace")
-        for path in sorted((ROOT / "App").rglob("*.swift"))
-    )
     string_literals = re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', active_sources)
     static_v3_reference = next(
         (
@@ -231,11 +341,32 @@ def inspect_renderer(gate: Gate) -> None:
     )
 
 
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--require-full-cap-3x",
+        action="store_true",
+        help=(
+            "Treat a raster smaller than the renderer's full point cap at 3x "
+            "as a hard failure. The default audits the current iPad-2x and "
+            "large-iPhone-3x device matrix and reports future 3x-cap debt as RISK."
+        ),
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    arguments = parse_arguments()
     gate = Gate()
     inspect_asset_inventory(gate)
     for name, (filename, minimum_side) in EXPECTED.items():
-        inspect_asset(gate, name, filename, minimum_side)
+        inspect_asset(
+            gate,
+            name,
+            filename,
+            minimum_side,
+            arguments.require_full_cap_3x,
+        )
     inspect_renderer(gate)
     return gate.report()
 

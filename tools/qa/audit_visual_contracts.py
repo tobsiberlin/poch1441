@@ -127,7 +127,7 @@ def audit(root: Path) -> list[Finding]:
         )
     )
 
-    board_asset = app / "Assets.xcassets/PochRingPM49.imageset/poch_ring_pm49.png"
+    board_asset = app / "Assets.xcassets/PochDisc2026.imageset/poch-disc-2026.png"
     try:
         width, height = png_size(board_asset)
         asset_ok = width == height and width >= max(READABILITY_GATES) * 2
@@ -138,7 +138,8 @@ def audit(root: Path) -> list[Finding]:
     findings.append(Finding("PASS" if asset_ok else "FAIL", "TRACK-A-ASSET", asset_detail))
 
     real_board_in_first_run = (
-        'Image("PochRingPM49")' in section(content, "private var firstRunIntro", "private func startGuidedRound")
+        'TableWorldBoardBase(world: .pochDisc' in section(content, "private var firstRunIntro", "private func startGuidedRound")
+        and 'Image("PochDisc2026")' in components
         and 'accessibilityIdentifier("firstRun.intro.board")' in content
     )
     findings.append(
@@ -151,12 +152,20 @@ def audit(root: Path) -> list[Finding]:
         )
     )
 
+    historical_pm49_live = "PochRingPM49" in all_swift or "PM49Geometry" in all_swift
+    findings.append(
+        Finding(
+            "FAIL" if historical_pm49_live else "PASS",
+            "TRACK-A-NORTHSTAR",
+            "Historisches PM49 ist weiterhin als Live-Renderer oder Geometrieanker aktiv."
+            if historical_pm49_live
+            else "Track A verwendet die kanonische 2026-Disc statt PM49 als Designanker.",
+        )
+    )
+
     overlay_labels = (
         "ForEach(PochRing.anchors)" in content
-        and (
-            "PM49Geometry.notationCenter" in content
-            or "TableWorldBoardGeometry.notationCenter" in content
-        )
+        and "TableWorldBoardGeometry.notationCenter" in content
         and 'String(localized: "board.center"' in content
     )
     findings.append(

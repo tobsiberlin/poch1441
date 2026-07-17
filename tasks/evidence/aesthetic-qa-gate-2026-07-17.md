@@ -1,6 +1,6 @@
 # Ästhetik-QA-Gate - First Run und Tischwelten
 
-**Stand:** 17. Juli 2026
+**Stand:** 18. Juli 2026
 **Status:** Abnahmeraster; keine automatische Designfreigabe
 
 ## Design Read
@@ -100,11 +100,24 @@ Noch offen:
   tatsächlich vergrößerten Textframes, Scroll-Erreichbarkeit und vollständigen
   VoiceOver-Labels belegt. Ab den drei größten Stufen verhindert kürzere lokalisierte
   Sichtcopy Ellipsen, ohne den gesprochenen Volltext zu verkürzen.
-- Die Lernbühne bei Accessibility XXXL ist in Portrait interaktiv belegt: Gegner,
-  Board, Coach-Aktion und Hand liegen in einer sequenziellen Scrollkomposition ohne
-  Überlagerung. Der gleichlautende strenge Landscape-Test bleibt bestehen, konnte
-  auf zwei SE-Simulatoren aber nicht ausgeführt werden, weil deren App-Fenster trotz
-  bestätigter Geräteorientierung bei `375 x 667` blieb. Das ist kein Landscape-Pass.
+- Der frühere AX-XXXL-Landscape-Beleg war falsch positiv. Der vermeintliche
+  Landscape-Beleg `artifacts/qa/ax-xxxl-landscape-20260717-223905-4565/` ist
+  widerrufen: Das XCTest-Log sah zwar ein `667 x 375`-Window, exportierte aber einen
+  `750 x 1334`-Portrait-Screenshot. Die Coach-Aktion wuchs von `48 pt` auf groteske
+  `311,5 pt`; der Test verlangte nur `> 20 %`, keine Obergrenze. Vor den
+  Frameprüfungen wurde einmal gescrollt; geprüft wurden danach nur Existenz,
+  Hittability und paarweise Nichtüberlappung, nicht vollständige Sichtbarkeit im
+  Scroll-Viewport. Der Runner zählte lediglich einen passend benannten Anhang und
+  validierte weder Pixelorientierung noch Bildaspekt.
+- Der gehärtete Gate nimmt nun den unveränderten initialen Gesamtframe vor jedem
+  Scroll auf, begrenzt jeden relevanten Frame auf den realen Lernviewport, deckelt
+  die Coach-Aktion und verlangt vollständiges Reveal ohne Clipping. Nach der
+  Produktkorrektur ist er auf dem iPhone SE grün: echtes `667 x 375`-Fenster, drei
+  vollständige Gegnerplätze, vollständige `130 pt`-Disc, `68 pt`-Coach-Aktion und
+  vollständig revealbare Kartenhand. Der direkte Simulator-Framebuffer wird
+  während des laufenden Tests aufgenommen und verlustfrei auf `1334 x 750 px`
+  normalisiert; formal gedrehte oder beschnittene XCTest-Anhänge gelten nicht mehr
+  als Bildbeleg.
 - Portrait-Grading und Augenhöhe der drei Gegner bleiben eine spätere gemeinsame
   Asset-Abnahme, obwohl die aktuelle Komposition funktioniert.
 - Die 360-/180-/120-/64-px-Disc-Matrix und physisches Klang-/Haptikgefühl auf
@@ -128,9 +141,36 @@ Bestanden:
 - 360 px vollständig lesbar und 180 px brauchbar. Bei 120 px bleiben Topologie und
   Besatz, bei 64 px die unterscheidbare 8+1-Silhouette; den vollständigen Feldnamen
   liefert dort absichtlich Accessibility statt unlesbarer Mikroschrift.
+- Der gemeinsame produktionsnahe Renderer ist zusätzlich in den echten Melden- und
+  Pochen-Bühnen auf dem iPhone SE gelaufen. Beide Zustände verwenden dieselbe
+  TravelTray-Basis und 1-Cent-Endlagen; Gravuren liegen auf dem inneren Steg,
+  Münzhaufen in den Mulden und die Pausensteuerung innerhalb des sicheren Randes.
+  Die Materialprobe deaktiviert den optionalen freien Zug-Begleiter explizit, damit
+  ein Coach-Overlay nicht fälschlich als Teil des Brettlayouts bewertet wird.
+  Beleg: `artifacts/qa/table-world-stage-20260717-225000/` (`1/1` UI-Test,
+  zwei Screenshot-Anhänge, Phase 1 und Phase 2).
 
 Noch nicht freigegeben sind die produktive Tischwahl nach der ersten Partie,
 physischer Münzklang/Haptik auf Hardware sowie die iPad-Matrix.
+
+### Track-B-Auflösungsvertrag
+
+`TravelTray` ist `1254 x 1254 px` groß. Der aktuelle Renderer begrenzt die
+Darstellung auf `min(kurze Viewportkante * 0,82, 620 pt)`. Daraus folgen zwei
+getrennte Aussagen:
+
+- Der heutige iPad-Pfad bei `2x` benötigt maximal `1240 px`. Das Asset besteht den
+  Vertrag, hat aber nur `14 px` beziehungsweise `1,13 %` Reserve. Jede Erhöhung des
+  Point-Caps oder zusätzlicher Crop erzwingt einen neuen Rasterexport.
+- Ein großer iPhone-Pfad mit `440 pt` kurzer Kante benötigt bei `3x` aktuell
+  `1083 px` und ist gedeckt. Ein zukünftiges Ausschöpfen des vollen `620-pt`-Caps
+  bei `3x` bräuchte dagegen `1860 px`; das heutige Asset deckt bei `3x` nur
+  `418 pt` ohne Upsampling.
+
+`python3 tools/qa/audit_travel_assets.py` meldet den aktuellen Zustand deshalb als
+`74 PASS, 2 RISK, 0 FAIL`. Für eine künftige Anforderung des vollen 3x-Caps macht
+`--require-full-cap-3x` diese Schuld bewusst zum harten Fehler (`Exit 1`). Dieser
+rechnerische Vertrag ersetzt ausdrücklich keinen visuellen iPad-Matrix-Pass.
 
 Gemini Vision bestätigt die Ablehnung der ersten Probe: fehlende Transparenz und
 Wandstärke, Plastik- statt Metallmünzen, inkonsistentes Licht, fehlende
@@ -150,7 +190,7 @@ reicht nicht.
 
 | Geräteklasse | Standardtext | Accessibility XXXL | DE | längste EN/FR/IT/ES/NL/PL-Variante |
 |---|---:|---:|---:|---:|
-| iPhone SE | Intro und Track B bestanden | Intro P/L, Lernbühne P bestanden | DE bestanden | offen |
+| iPhone SE | Intro, Track A und Track B bestanden | Intro P/L und Lernbühne P/L bestanden | DE bestanden | offen |
 | iPhone Standard | First-Run-Flow bestanden | offen | DE bestanden | offen |
 | iPhone Pro Max | Intro und Track B bestanden | offen | DE bestanden | offen |
 | iPad mini | offen | offen | offen | offen |

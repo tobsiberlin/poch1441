@@ -30,7 +30,9 @@ enum Tokens {
     static let tileDiameter: CGFloat = 56
     static let centerDiameter: CGFloat = 84
     static let tileCorner: CGFloat = 16
-    static let phase2BoardScale: CGFloat = 0.60
+    // Der kompakte Phase-2-Auftritt folgt dem freigegebenen Mockup: Die Disc ist
+    // ein präziser Tischanker, aber nicht die dominante Vollbildfläche aus Phase 1.
+    static let phase2BoardScale: CGFloat = 0.45
     static let phase2StageHeight: CGFloat = 246
     static let phase2CompactHeight: CGFloat = 760
     static let phase2OpponentRowHeight: CGFloat = 116

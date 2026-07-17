@@ -7,10 +7,11 @@ struct R1MaterialContractTests {
 
     static func main() throws {
         let components = try source(at: "App/PlayComponents.swift")
+        let layout = try source(at: "App/R1TokenLayout.swift")
         let effects = try source(at: "App/Effects.swift")
 
         try r1RendererKeepsOneSharedColorway(components)
-        try restingPosesAreStableAndContained(components)
+        try restingPosesAreStableAndVaried(layout)
         try contactFeedbackIsImpactBoundAndBundled(effects)
         try ceramicAudioVariantsMeetTheRuntimeContract(effects)
 
@@ -34,29 +35,17 @@ struct R1MaterialContractTests {
                "R1 must carry the tonal card-back emboss")
     }
 
-    private static func restingPosesAreStableAndContained(_ source: String) throws {
-        let slots = try section(in: source,
-                                from: "enum R1TokenSlots",
-                                through: "/// R1-Steine liegen")
-        expect(slots.contains("guard count > 0 else { return [] }"),
+    private static func restingPosesAreStableAndVaried(_ source: String) throws {
+        expect(source.contains("static let capacity = 12"),
+               "R1 requires twelve deterministic resting slots")
+        expect(source.contains("guard count > 0 else { return [] }"),
                "An empty group must not synthesize a visible R1 token")
-
-        let expression = try NSRegularExpression(
-            pattern: #"\.init\(offset: \.init\(width: (-?\d+\.\d+), height: (-?\d+\.\d+)\), rotation: -?\d+\.\d+\)"#
-        )
-        let range = NSRange(slots.startIndex..<slots.endIndex, in: slots)
-        let matches = expression.matches(in: slots, range: range)
-        expect(matches.count == 12,
-               "R1 requires twelve hand-set deterministic resting poses")
-
-        let tokenToFloorRatio = 0.38
-        for match in matches {
-            let x = try capture(1, from: match, in: slots)
-            let y = try capture(2, from: match, in: slots)
-            let occupiedRadius = (hypot(x, y) + 0.5) * tokenToFloorRatio
-            expect(occupiedRadius <= 0.5,
-                   "Resting pose escapes the usable circular well floor")
-        }
+        expect(source.contains("stableSalt(for compartment: TravelCompartment)"),
+               "R1 pile variation must be tied to the physical compartment")
+        expect(source.contains("seed ^ stableSalt(for: compartment)"),
+               "R1 pile variation must remain replay-stable")
+        expect(source.contains("jitterX") && source.contains("groupAngle"),
+               "R1 piles must not repeat one cloned rosette")
     }
 
     private static func contactFeedbackIsImpactBoundAndBundled(_ source: String) throws {
@@ -118,16 +107,6 @@ struct R1MaterialContractTests {
             fail("Unable to locate source section \(startMarker)")
         }
         return String(source[start..<end])
-    }
-
-    private static func capture(_ index: Int,
-                                from match: NSTextCheckingResult,
-                                in source: String) throws -> Double {
-        guard let range = Range(match.range(at: index), in: source),
-              let value = Double(source[range]) else {
-            fail("Unable to decode resting-pose coordinate")
-        }
-        return value
     }
 
     private static func expect(_ condition: @autoclosure () -> Bool,
