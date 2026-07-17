@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Geändert
+- Neuer verbindlicher `tasks/design-canon-2026.md`: Poch 1441 wird als erstmals
+  2026 erfundenes Strategieprodukt gestaltet - Präzision statt Effekte,
+  Produktdesign statt Luxusinszenierung und Funktion statt Dekoration.
+- Board- und Materialgrundlage konsolidiert: Track A `Poch Disc`, optionaler Track B
+  `Unterwegs`, gemeinsame 8+1-Regelgeometrie, R1-Keramiksteine und individuell
+  gealterte gleichwertige 1-Cent-Münzen. Ältere PM-/Glas-Token-/Mockup-Anker sind
+  nicht mehr bindend.
 - `CardFace.swift` / `CardWarp.metal`: Kartenwölbung feiner abgestimmt
   (Eckenhub 2.4 → 1.6 × scale, ruhigeres Licht); Kartonrand bleibt unabhängig
   vom Wölbungswert konstant.

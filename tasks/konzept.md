@@ -1,6 +1,6 @@
 # Poch 1441 - Konzept
 
-**Stand:** 7. Juli 2026 · **Status:** kanonische Design-Quelle. `CLAUDE.md §0` ist die Kurzfassung, dieses Dokument der vollständige Kanon.
+**Stand:** 17. Juli 2026 · **Status:** kanonische Produkt- und Regelquelle. Der neueste und bei visuellen Konflikten verbindliche Qualitätsfilter steht in `tasks/design-canon-2026.md`.
 
 ---
 
@@ -8,29 +8,49 @@
 
 Poch 1441 ist das **reine Poch**: drei Phasen, Charaktere mit Persönlichkeit, Cosmetics, Rangliste - der **Bluff ist heilig**.
 
-- **Kein Roguelike im Kern.** Balatro-artige Joker, Verbrauchsgüter oder regeländernde Power-Drafts kommen NICHT in den Standard-/Ranked-Kern. Das wäre ein Genre-Wechsel und würde Pochs Alleinstellung (der psychologische Bluff-Brawler) in einem 2026 mit Balatro-Klonen überschwemmten Markt zerstören.
+- **Kein Roguelike im Kern.** Joker, Verbrauchsgüter oder regeländernde Power-Drafts kommen NICHT in den Standard-/Ranked-Kern. Das wäre ein Genre-Wechsel und würde Pochs Alleinstellung als psychologisches Bluffspiel zerstören.
 - **Verdeckte Information ist unantastbar.** Keine Fähigkeit, die eine gegnerische Karte aufdeckt / „X sehen" erlaubt - das tötet den Bluff, also genau den Kern. (Explizit verworfen: die „Blick hinter den Schleier"-Idee.)
 - **Regelwerk bleibt eingefroren** (Gate A, 5.7.2026). Hausregeln bleiben opt-in - nie Power-Creep in Ranked.
 - **Roguelite/Kampagne = Produkt-Linie Y**, optional, SPÄTER, als strikt getrennter Modus. Falls je gebaut, dann bluff-sicher: Fähigkeiten dürfen nur Playstyles verstärken oder Solo-UX-Hilfen sein (z.B. „Der Glückspilz" - 1×/Partie zählt eine Mulde doppelt; „Das Pokerface" - schwerer lesbare Tells; „Der Zähler" - Ketten-Vorschau nur für dich). Nie Info-Bruch, nie Ranked-Verwässerung.
 
-## 2. Die Balatro-Doktrin: Feel klauen, Struktur nicht (bindend)
+## 2. Game-Feel-Doktrin (bindend)
 
-- **Feel übernehmen:** unverschämt gutes Feedback, Eskalations-Drama, Kaskaden-Payoff, cleane moderne Optik.
-- **Struktur NICHT übernehmen:** keine Joker/Consumables/Regel-Draft.
-- **Der Jackpot IST der Multiplikator.** Poch hat seine Eskalations-Engine schon eingebaut - stehengebliebene Mulden wachsen organisch. Wir feiern den Jackpot proportional zu seiner Größe (Juice skaliert mit dem Pott), statt künstliche Multiplikatoren zu erfinden.
-- **Der Bluff ist die native Tiefe.** Balatro ist Solitär gegen Mathe; Poch ist Psychologie gegen Menschen. Das schützen, nicht verwässern.
+- **Eigenständig bleiben:** keine Joker, Verbrauchsgüter oder Regel-Drafts im Kern.
+- **Präzises Feedback:** Ursache, Ziel, Kontakt und Wirkung sind körperlich und zeitlich nachvollziehbar.
+- **Stehende Gewinne erzeugen natürliche Spannung.** Ihre Bedeutung wächst aus den Regeln und braucht keine künstlichen Multiplikatoren oder Effektkaskaden.
+- **Der Bluff ist die native Tiefe.** Poch ist Psychologie gegen Menschen. Das schützen, nicht verwässern.
 
 ## 3. Positionierung (bindend)
 
 **„Das Strategiespiel, aus dem Poker wurde."** Modern-first; die 1441-/Straßburg-Herkunft ist Lore und Prestige-Reveal, nie das Hauptverkaufsargument. Weder verstaubtes Museum noch generisches Neon-Casino. 18+, kein Zock-/Glücksspiel-Marketing (Chips nie echtgeld-/übertragbar).
 
+### 3a. Qualitätsfilter 2026 (bindend)
+
+Poch 1441 wird so gestaltet, als wäre es 2026 zum ersten Mal erfunden worden. Die
+vollständige Festlegung steht in `tasks/design-canon-2026.md` und ersetzt bei
+Widersprüchen ältere PM-, Mockup-, Material- und Feel-Entscheidungen.
+
+- Präzision statt Effekte.
+- Außergewöhnlich gutes Produktdesign statt Luxusinszenierung.
+- Funktion statt Dekoration.
+- Selbstverständlichkeit statt Lautstärke.
+- Jede Entscheidung muss Bedienbarkeit, Klarheit, Emotion oder Spielbarkeit verbessern.
+
 ## 4. Visuelle Identität (Richtung festgelegt)
 
-**Visueller Style-Anker:** `artifacts/style-ref/mockup-anchor.png` - der clean-digitale Look, dessen Layout-/Kompositions-Sprache (leuchtende/gefräste Ringe, gefächerte Karten, Regler, zentraler Poch-Ring) übernommen ist. **Nicht** übernommen: All-in-Button, Arcade-/Spielhallen-Raum, Cyber-Namen (Signal-/Daten-Modus), sichtbarer AI-Slop.
+**Historische Kompositionsreferenz:** `artifacts/style-ref/mockup-anchor.png`. Das
+Bild ist kein visueller Style-Anker mehr. Übernommen werden nur bewährte
+Größenverhältnisse, die Hand am unteren Rand und ein dominantes Hauptelement pro
+Phase. Glow, Slider, Arcade-Raum, Cyber-Begriffe, All-in-Sprache und AI-Artefakte
+sind ausdrücklich keine Vorgabe.
 
-- **Clean, minimalistisch, edel, modern.** Fokus auf das Premium-Gefühl, wenn Karten sliden und der Jackpot explodiert.
-- **Farbe = Label (Balatro-Prinzip):** jede Mulden-Kategorie hat eine feste Farbe - im echten Spiel braucht es dann kaum Textlabels, die Farbe kommuniziert. **Aber: Juwel-Töne, NIE Neon** (Neon = das generische Cyber-Casino, das wir verwerfen). Vivid/satt für Lesbarkeit, aber premium/juwelenhaft, nicht elektrisch-glühend.
-- **Der Poch-Ring ist die Signatur.** Das runde 9-Fächer-Brett ist Pochs Markenzeichen seit über 500 Jahren und reduziert sich sauber auf Geometrie. **Kein 3×3-Raster** (zu generisch, Tic-Tac-Toe/Casino-Assoziation). Das Ring-Layout und das Kartenrücken-Signet sprechen **dieselbe Sprache**.
+- **Clean, minimalistisch, modern und selbstverständlich.** Fokus auf Lesbarkeit,
+  glaubwürdiges Material, präzise Kartenbewegung und klar verständliche Gewinne.
+- **Farbe unterstützt Bedeutung:** jede Kategorie darf einen ruhigen, materiell glaubwürdigen Farbton tragen. Farbe ersetzt nie Text, Symbol oder räumliche Zuordnung und leuchtet nicht selbst.
+- **Die 8+1-Topologie ist die funktionale Signatur.** Track A übersetzt sie als
+  kreisförmige Poch Disc. Track B darf eine unrunde, improvisierte 8+1-Schale
+  verwenden. Ein generisches 3×3-Raster bleibt ausgeschlossen. Das geometrische
+  Kartenrücken-Signet verbindet beide Welten.
 - **Kartenvorderseiten:** clean/lesbar (klarer Index + Farbe), NICHT ornament-überladen - eine Hand aus 8 Karten wird ständig gelesen, Lesbarkeit vor Pracht.
 - **Kartenrücken = Marken-Hero** (UNO/SKIP-BO-Struktur, Premium-Ton): der Rücken IST die Marke. Empfohlenes Signet: der **Mulden-Ring** (farbcodiert = das Pochbrett), rotationssymmetrisch (gespiegelte Eck-Monogramme „P · 1441"). Der Rücken ist zugleich der **Anker fürs Cosmetic-Unlock-System** (freischaltbare Decks). Alternativen: Klopf-Schockwelle, heraldisches Monogramm.
 
@@ -46,15 +66,23 @@ Poch 1441 ist das **reine Poch**: drei Phasen, Charaktere mit Persönlichkeit, C
 
 Matte, satte **Juwelen-Töne** auf tiefdunklem, fast schwarzem Grund - NIE Neon. Tiles flach, rahmenlos. Zahlen: fetter, serifenloser Font, sofort lesbar.
 
-**Glow-Budget (bindend, Material > Glow):** Emission ist ein *rarer belohnter Akzent* („Der Poch", Balatro-Kollaps, Stich gewonnen) - **nie die Grundstimmung**. Die glow-Formulierungen in den Feel-Specs (§6/6b/6c: „Lichtpuls", „pulsierendes Glühen", „Poch-Pott pulst") gelten unter diesem Budget: kurz aufleuchten, dann zurück auf matt/Material. Dauer-Glow ist der Casino-/Cyber-Rückfall - verboten. (Der Mockup-Anker ist eine **Layout**-Referenz; sein Glow ist NICHT die Rendering-Vorgabe.)
+**Materialregel (bindend):** Aktive Zustände entstehen durch Kontrast, Fokus,
+wandernde Materialreflexion und räumliche Reaktion. Emission, Dauer-Glow, Bloom und
+Neon sind ausgeschlossen. Ältere Glow- und Explosionsformulierungen in den
+historischen Feel-Notizen sind nicht mehr bindend.
 
-**Entschieden (Tobsi, 6.7.): internationale Notation A, K, Q, J, 10** auf den Karten und den Index-Labels des Poch-Rings. Begründung: Poch 1441 positioniert sich als Ur-Poker-Strategiespiel; die Zielgruppe kennt A/K/Q/J aus Poker/Balatro (sofortige Vertrautheit), und es eliminiert Lokalisierungs-Clashes im Code (kein D/B↔Q/J-Umschalten je Systemsprache). In deutschen Menü-/Erklärtexten weiter „Dame"/„Bube", aber auf Karten + Index-Labels international.
+**Entschieden (Tobsi, 6.7.): internationale Notation A, K, Q, J, 10** auf den Karten und den Index-Labels des Spielfelds. Begründung: Die Zielgruppe kennt A/K/Q/J aus internationalen Kartenspielen, und es eliminiert Lokalisierungs-Clashes im Code (kein D/B↔Q/J-Umschalten je Systemsprache). In deutschen Menü-/Erklärtexten weiter „Dame"/„Bube", aber auf Karten und kompakten Feldlabels international.
 
 ## 5b. Phasen-Morph - Drei Akte, eine Bühne (Regie-Ebene, Tobsi 6.7.)
 
+> **Hinweis:** Die folgenden alten Feel-Spezifikationen dokumentieren Mechanik und
+> frühere Timing-Hypothesen. Für Gestaltung, Material, Motion und Abnahme gilt
+> ausschließlich `tasks/design-canon-2026.md`; widersprechende Effekt-, Glow-, PM-
+> oder Mockup-Anweisungen sind verworfen.
+
 Gegen Repetitivität („fühlt sich nach 10 Runden gleich an"): der Poch-Ring steht NICHT starr die ganze Zeit zentral. Das Interface **morpht mit dem Spielfluss** - dieselbe Welt (Kohärenz + Marke), aber pro Phase eine völlig andere UI-Komposition, Energie-Richtung, Farb-Logik und Kamera. Drei Akte:
 
-- **Akt 1 · Melden:** großer, zentrierter Ring, füllt fast den Screen - kein Interface-Rauschen. Energie nach AUSSEN (radial), volle Juwelen-Palette, Stakkato. Fokus = Jackpots + Verteilen.
+- **Akt 1 · Melden:** großes, zentriertes Spielfeld, füllt fast den Screen - kein Interface-Rauschen. Energie nach außen, ruhige Materialpalette, präziser Rhythmus. Fokus = stehende Gewinne und Verteilen.
 - **Akt 2 · Pochen (Kompression & Psychologie):** der Ring kollabiert/tritt zurück (mathematisch passend - nur noch die Poch-Mulde ist aktiv), die 8 äußeren Mulden entsättigen. Slider + „Die Wand" + Gegner-Avatare/Gesichter dominieren. Energie nach INNEN, alles grau außer Violett. Fokus = das Duell. **⚠ Verfeinerung:** der **Poch-Pott bleibt der prominente Held** (der Preis, der Anker von P2, §6b) - er wird promotet, während der übrige Ring zurücktritt; NICHT den Pott mit in die Ecke schrumpfen.
 - **Akt 3 · Ausspielen (Combo-Layout):** der Ring wird zum Backdrop / funktionalen Zentrum, um das sich die gespielten Karten fächern - die Kaskade braucht physischen Platz (180 ms/Karte). Energie GERICHTET/linear, Karten-/Farbwerte + Gold-Stopper. Fokus = das Rennen.
 
@@ -66,7 +94,7 @@ Gegen Repetitivität („fühlt sich nach 10 Runden gleich an"): der Poch-Ring s
 
 Die Gegner-Präsenz folgt dem Phasen-Morph (§5b) - das UI ist ein lebendiger Organismus, kein starres HUD. Du sitzt immer unten (Sitz 0).
 
-- **Phase 1 (Melden) - diskreter Status-Feed:** die Gegner ziehen sich in eine schmale, elegante **Top-Bar** zurück (reduziertes rundes Token: Avatar-Vektor + Name + Chip-Konto). Voller, ungestörter Fokus auf Ring + Jackpots. Meldet ein Spieler, fliegt die Chip-Fontäne von der Ring-Mulde diagonal nach oben in sein Mini-Token.
+- **Phase 1 (Melden) - diskreter Status-Feed:** die Gegner ziehen sich in eine schmale, elegante **Top-Bar** zurück (reduziertes rundes Porträt + Name + Spielsteinkonto). Voller, ungestörter Fokus auf Spielfeld und stehende Gewinne. Meldet ein Spieler, wandern die Spielsteine nachvollziehbar vom Feld zu seinem Platz.
 - **Phase 2 (Pochen) - Kardinalpunkte-Kollaps:** die Tokens lösen sich via `.matchedGeometryEffect` aus der Top-Bar, fliegen an ihre Kardinalpunkte (Oben/Links/Rechts) ums Zentrum und expandieren ~3× zu prominenten Vektor-Porträts. Die Gesichter rücken nah, die Limit-Wand verbindet sie mechanisch mit deinem Biet-Slider. Das Face-to-Face-Duell.
 - **Phase 3 (Ausspielen) - funktionales Backdrop:** die Porträts verharren an den Kardinalpunkten, entsättigen aber zu mattem Schiefer (Opacity ~40 %) - ruhiger, stabiler Rahmen mit max. Kontrast fürs Domino-Rennen im Zentrum.
 - **Warum es trägt:** kein Platzmangel (die fetten Porträts nehmen erst Platz, wenn der äußere Ring ohnehin ausgeblendet ist - umgeht Ansatz-A-Überladung); das UI erzählt eine Geschichte (distanzierte Beobachtung P1 → intensiver Bluff P2).
@@ -81,9 +109,9 @@ High-Speed-Dopamin in 2-4 s, null Leerlauf. Fühlt sich an wie das präzise Einr
 
 **b) Der rhythmische Melde-Strom**
 - Reihum, aber schnell + rhythmisch getaktet: Karte leuchtet auf → zugehörige Mulde pulst in ihrer Farbe → Münzen fliegen im Bogen von der Mulde zum Spieler → Zähler rollt hoch → Haptik.
-- **Tap überspringt** sofort: Sequenz bricht ab, Münzen saugen sich in Lichtgeschwindigkeit zum Gewinner, Jackpots stehen fest.
+- **Tap beschleunigt** die Sequenz kontrolliert; Spielsteine bleiben bis zum sichtbaren Kontakt nachvollziehbar, stehende Gewinne bleiben liegen.
 
-**c) Die unberührten Jackpots (psychologisch zentral)**
+**c) Die unberührten Gewinne (psychologisch zentral)**
 - Nicht abgeholte Mulden (Trumpf liegt offen / niemand hält sie) **schimmern und BLEIBEN stehen** - langsames pulsierendes Glühen, die Zahl erhöht sich per Count-up (+ Antes). Signal: „Hier wartet nächste Runde mehr Beute."
 
 **d) Layout** - der Poch-Ring (siehe §4/§5): 8 farbcodierte Tiles im Ring um den Mitte-Pott (Held) im Zentrum. Gegner oben, eigene Hand unten.
@@ -91,7 +119,7 @@ High-Speed-Dopamin in 2-4 s, null Leerlauf. Fühlt sich an wie das präzise Einr
 **e) Skalierungs-Matrix Partikel & Haptik** (Juice skaliert mit der Pott-Größe, Farbe = Kategorie-Farbe)
 
 - **Stufe 1 - „Daily Business" (1-8 Chips):** helles trockenes „Ching" (kurzer Reverb); Haptik `.light`; ~5 Funken in der Kategorie-Farbe im Parabelbogen zum Avatar.
-- **Stufe 2 - „Balatro-Kollaps" (Schwellwert kalibriert, s.u.):** anschwellendes Münz-Crescendo (Frequenz steigt pro Chip) → abrupter Stopp → tiefer Sub-Bass-„Boom", sobald die letzte Münze den Zähler erreicht. Haptik `.heavy` beim Bersten + getaktete Reihe `.medium` (Kadenz ~80-100 ms, NICHT eine pro Münze - Taptic Engine schluckt zu schnelle Haptiks). Tile „explodiert" in seiner Kategorie-Farbe (~30 Partikel), Screen-Shake 2-3 px (~150 ms), farbgetönter Vignetten-Flash für einen Wimpernschlag, Konto-Zahl rollt rasant hoch mit schwebendem, verblassendem „+42".
+- **Stufe 2 - großer Gewinn (Schwellwert kalibriert, s.u.):** Kontaktklänge verdichten sich, stoppen mit dem letzten Stein und lösen eine einzelne tiefe Haptik aus. Der Haufen setzt sich sichtbar, die Materialkante fängt kurz Licht und das Konto zählt nach dem Kontakt hoch. Keine Partikel-Explosion, kein Screen-Shake und keine schwebende Gewinnzahl.
 
 **Korrektur-Auflagen (finalisiert + freigegeben, Tobsi 6.7.):**
 1. **Jewel statt Neon** - die Kategorie-Farben sind matte, satte Juwelen-Töne auf fast-schwarzem Grund, nie Neon/elektrisch (§5).
@@ -151,7 +179,7 @@ Radikaler Tempowechsel: aus dem psychologischen Belauern (Phase 2) wird ein blit
 - **Skill-Ceiling bleibt:** „Der Zähler" ist ein Assist-Toggle; in einem „Meister/Pur"-Modus ist er aus, damit das rohe Selbst-Mitzählen als Herausforderung erhalten bleibt.
 
 **Korrektur-Auflagen:**
-1. **Rundenende-Juice ≠ immer Stufe 2.** Der Centerpot wird JEDE Runde gewonnen - würde jedes Rundenende die rare „Balatro-Kollaps"-Juice zünden, verliert sie ihre Seltenheit (Widerspruch zum Rarity-Lock §6). Also: befriedigender Baseline-Rundenschluss, volle Stufe-2 nur bei genuin fettem Centerpot. Juice skaliert mit der echten Pott-Größe.
+1. **Rundenende bleibt proportional.** Die Mitte wird jede Runde gewonnen. Der Baseline-Abschluss ist ruhig und befriedigend; zusätzliche Betonung gibt es nur bei einem tatsächlich großen Gewinn. Die Intensität folgt der echten Größe.
 2. **`reduceMotion`:** Kaskade läuft, aber ohne Screen-Shake/Whoosh-Effekte - Pitch + Haptik tragen die Belohnung.
 3. Alle ms-Werte Parameter-Lock (Playtest-getunt).
 
@@ -176,7 +204,7 @@ Ohne Meta trägt das Regelwerk ~6-12 h; mit Meta 100 h+. Vier Säulen, alle rein
 **3. Rangliste, Saisons & Prestige-Rahmen**
 - Ligen: „Hinterzimmer" → „Gildenhalle" → „Königliche Krypta" (Top 500). Der Avatar-Rahmen symbolisiert die Liga, modern-architektonisch reduziert (Schiefer-Kante → gebürstetes Platin mit Einkerbungen).
 - Saison-Ende: Rang verfällt, aber ein permanentes **Prestige-Insignium** (winziger Punkt/Kerbe) bleibt - zeigt historische Top-Liga-Dominanz.
-- **⚠️ Scope-Präzisierung:** Ligen/Ranglisten zuerst = **asynchrone Single-Player-Wertung** (Score/Performance gegen die Bots, Balatro-artige Bestenlisten). Echtzeit-PvP-Ranked ist eine spätere Ausbaustufe (Netcode/Matchmaking/Anti-Cheat). „Top 500 Global" funktioniert als async Leaderboard.
+- **⚠️ Scope-Präzisierung:** Ligen/Ranglisten zuerst = **asynchrone Single-Player-Wertung** (Score/Performance gegen die Bots). Echtzeit-PvP-Ranked ist eine spätere Ausbaustufe (Netcode/Matchmaking/Anti-Cheat). „Top 500 Global" funktioniert als asynchrone Rangliste.
 - **Assist-Politik:** definiert, ob „Der Zähler" (§6c) in gewerteten Läufen erlaubt ist - vermutlich „Pur/Meister"-Ranked ohne Assists.
 
 **4. Daily Challenges (Login-Loop)**
@@ -204,12 +232,12 @@ Saubere Datentrennung im SwiftUI-Skelett, damit späterer Multiplayer keine UI-Z
 - **Aktives Stechen / Twitch-Interrupt (300 ms)** - bricht die deterministische Zwangsketten-Phase 3, macht aus Taktik einen Reflex-Brawler, zerstört Determinismus (Sim/Replay/Sync).
 - **7er/8er streichen bei 3 Spielern** - killt die Sequenz-Mulde (7-8-9) + die Ausspiel-Rangleiter. 3-Spieler-Varianz erst per Sim messen, dann ggf. über die Economy tunen.
 - **„3-Karten-Talon" bei 4 Spielern** - faktisch falsch: Regelwerk + `Dealing.swift` geben alle bis auf eine Karte aus → 8/8/8/7 + Trumpf, kein Talon.
-- **Pochen-ohne-Paar als Default + Auto-Switch bei All-Pass** - NEIN (Tobsi 6.7.): killt den wachsenden Poch-Jackpot (Eskalations-Drama). Bleibt optionale Hausregel, kein Auto-Switch.
+- **Pochen-ohne-Paar als Default + Auto-Switch bei All-Pass** - NEIN (Tobsi 6.7.): entfernt die wachsende stehende Poch-Prämie. Bleibt optionale Hausregel, kein Auto-Switch.
 
 - [x] **Kartenindizes: international A/K/Q/J/10 entschieden** (§5, Tobsi 6.7.) - auf Karten + Index-Labels; deutsche Prosa weiter „Dame/Bube".
 - [x] **Phase 1 (Melden) finalisiert + freigegeben** (§6, Tobsi 6.7.).
 - [~] **Phase 2 (Pochen) Entwurf** steht (§6b) - zur externen Verfeinerung wie Phase 1.
-- [ ] Schwellwert „Balatro-Kollaps" per Headless-Sim kalibrieren (§6).
+- [ ] Schwellwert für die Betonung eines großen Gewinns per Headless-Sim kalibrieren (§6).
 - [ ] Erster echter Screen: Phase 1 (Melden) - Tobsi generiert Optik extern, dann Umsetzung.
 - [ ] Kartenrücken-Signet final (Empfehlung: Mulden-Ring, premium-gedämpft).
 - [ ] Charakter-Render-Stil final (§7.1) + Phase-2/3-Layouts (dann Transition-Koordinaten §5b).

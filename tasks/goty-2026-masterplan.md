@@ -1,6 +1,6 @@
 # Poch 1441 - GOTY-2026-Masterplan
 
-Stand: 11. Juli 2026
+Stand: 17. Juli 2026
 
 ## 1. Zielbild
 
@@ -17,6 +17,12 @@ North Star:
 > Karte und jeder Spielstein besitzt nachvollziehbare Herkunft, Flugbahn, Material,
 > Ziel und Wirkung.
 
+Verbindlicher Designfilter: `tasks/design-canon-2026.md`. Bei visuellen
+Widersprüchen gewinnen dessen neueste Festlegungen gegen ältere Mockups, PM-Render,
+Materialstudien und Timing-Ideen. Das Qualitätsziel ist nicht sichtbarer Luxus,
+sondern eine so präzise und verständliche Produktlösung, dass die Alternative
+altmodisch wirkt.
+
 ## 2. Red-Team-Befund
 
 Die größten Risiken sind nicht fehlende Effekte, sondern fehlende Kausalität und
@@ -31,7 +37,7 @@ fehlende Priorisierung:
 4. Karten bewegen sich teilweise wie weiche UI-Kacheln statt wie steife Karten.
    Rotation, Translation, Wölbung und Zielausrichtung erzählen nicht dieselbe Physik.
 5. Spielsteine bewegen sich über zu große Wege und landen nicht wie reale flache
-   Glas-Token. Quelle, Flug, Kontakt und endgültige Muldenposition sind nicht sauber
+   Keramiksteine beziehungsweise Cent-Münzen. Quelle, Flug, Kontakt und endgültige Position sind nicht sauber
    gekoppelt.
 6. Mehrere lokale Buttonstile, kleine Schriftgrade und feste Frames erzeugen
    Überläufe, zu kleine Tap-Ziele und eine uneinheitliche Hierarchie.
@@ -88,7 +94,8 @@ Jede relevante Aktion folgt demselben Rhythmus:
 
 - Kein Dauer-Glow.
 - Karten bleiben steife Körper mit geringer elastischer Verformung.
-- Glas-Token bleiben flache Scheiben, keine Kugeln, Bonbons oder Pokerchips.
+- Spielsteine folgen dem aktuellen Materialsystem aus `tasks/design-canon-2026.md`:
+  R1-Keramiksteine in Track A, individuelle 1-Cent-Münzen in Track B.
 - Haptik und Audio liegen exakt auf Materialkontakt, nicht auf Animationsstart.
 - Reduce Motion ersetzt Flug durch klare Quelle-Ziel-Überblendung und Kontaktfeedback.
 
@@ -167,7 +174,7 @@ vollständigen Spiel. Ein neuer Spieler sieht immer nur das, was er bereits vers
 Der Tisch wächst mit seinem Wissen.
 
 1. **Stille vor dem Spiel:** dunkler Tisch, Mitte und genau eine relevante
-   Außenmulde, ein ruhender Glas-Token. Kein Phasenlabel, keine Gegnerwerte, keine
+   Außenmulde, ein ruhender R1-Spielstein. Kein Phasenlabel, keine Gegnerwerte, keine
    Range und keine Aktionswand.
 2. **Erster eigener Kontakt:** Der Spieler legt den Token selbst. Erst beim Kontakt
    erscheinen die acht äußeren Mulden aus dem Material. Damit wird das Brett durch
@@ -239,7 +246,7 @@ vor der Handlung, die ihn beweist.
 - Mitte und genau eine aktuell relevante Außenmulde werden über ihren Zweck
   eingeführt. Die übrigen Kategorien erscheinen erst bei ihrer ersten Relevanz.
 - Nur die aktuell erklärte Mulde erhält Materialkontrast.
-- Spieler legt den ersten eigenen Glas-Token selbst in eine Mulde.
+- Spieler legt den ersten eigenen R1-Spielstein selbst in eine Mulde.
 - Danach übernimmt eine ruhige, beschleunigte Ante-Sequenz die restlichen Einzahlungen.
 
 ### Beat 2: Geben und Trumpf
@@ -318,14 +325,14 @@ vor der Handlung, die ihn beweist.
 - Zielkarte endet pixelgenau im Handfächer beziehungsweise Gegnerstapel.
 - Phase 1 und Phase 2 verwenden identische Handgröße und Bottom-Bleed-Geometrie.
 
-## 8. Gate 4 - Glas-Token und Münzwanderung
+## 8. Gate 4 - Spielsteine und glaubwürdige Bewegung
 
-### Verbindliches Tokenmodell
+### Verbindliches Spielsteinmodell
 
-- Flache, schwere Glas-Spielsteine, etwa 22 mm Durchmesser und 4 mm Stärke im
-  gedachten physischen Maßstab.
-- Leicht transluzenter Körper, matter Kern, kontrollierte Kantenreflexion.
-- Keine Kugeln, keine Jetons mit Casino-Streifen, keine perfekten Stapelsäulen.
+- Track A verwendet R1: flache, matte Keramik-/Clay-Steine mit tonaler
+  Signet-Blindprägung und feiner Rändelung.
+- Track B verwendet individuell gealterte, gleichwertige 1-Cent-Münzen.
+- Keine Kugeln, Pokerchips, Candy-Glassteine oder perfekten Stapelsäulen.
 
 ### Ablagepositionen
 
@@ -452,7 +459,7 @@ Done:
 
 ## 12. Gate 8 - Audio, Haptik und Ruhe
 
-- Eigene akustische Identität pro Material: Karte, Glas-Token, Keramikmulde,
+- Eigene akustische Identität pro Material: Karte, R1-Stein, Cent-Münze, Spielfeld,
   Messingkante, Poch-Schlag.
 - Musik reagiert subtil auf Akt und Spannung, ohne Casino-Fanfaren.
 - Stille wird bewusst vor Kettenriss, Showdown und letzter Karte eingesetzt.
@@ -591,7 +598,7 @@ Arbeitsströme laufen parallel, besitzen aber feste Übergabepunkte:
 
 ### Strom C - Material und Bewegung
 
-- Karten, Glas-Token, Kontakt, Audio, Haptik und Phasenübergänge.
+- Karten, Spielsteine, Kontakt, Audio, Haptik und Phasenübergänge.
 - Beginnt erst, wenn Quelle und Ziel aus Strom B geometrisch stabil sind.
 - Liefert Frame-Audits und Parameterwerte, keine frei verteilten lokalen Timer.
 
@@ -713,7 +720,7 @@ Jedes Finding wird klassifiziert:
 
 ### Schleife 2 - Gewicht
 
-- Kartenflug und Glas-Token mit echten Zielslots.
+- Kartenflug und Spielsteine mit echten Zielslots.
 - Impact-synchrone Mutation, Audio und Haptik.
 - Video-/Frame-Audit auf Standard-iPhone.
 
@@ -764,7 +771,7 @@ Vorhandenes Fundament, aber noch kein bestandenes Erlebnisgate:
 - Bots erhalten eingeschränkte öffentliche Beobachtungen statt fremder Hände.
 - First Run, geführte Runde, drei Akt-Screens, Hilfe, Einstellungen und Ergebnis sind
   technisch vorhanden.
-- PM49, Kartensatz, Kartenrücken und Gegnerporträts sind als produktive Assets eingebaut.
+- Der frühere Board-Stand, Kartensatz, Kartenrücken und Gegnerporträts sind technisch eingebaut; das Board ist kein aktueller Designanker mehr.
 - Build, 50 XCTest-Fälle, 5 Swift-Testing-Fälle und 85 explizite Strings in sieben
   Zielsprachen sind grün.
 - Simulatorzustände existieren für wesentliche Phasen und Geräteklassen.
@@ -776,7 +783,7 @@ Nach Code- und Erlebnisreview ausdrücklich wieder offen:
 - Deal-Kadenz, Flugdauer und sichtbarer Kartenstand erzeugen überlappende Doppelbilder.
 - Haptik und Zähler mutieren teilweise beim Start statt beim Materialkontakt.
 - Token sitzen geometrisch besser in den Mulden, besitzen aber noch keine überzeugende
-  Glasmaterialität und Übergabe vom Flugobjekt in den ruhenden Haufen.
+  überzeugende R1-/Cent-Materialität und Übergabe vom Flugobjekt in den ruhenden Haufen.
 - Kartenmotiv und Kartenrücken sind brauchbar, die Bewegungs- und Kontaktphysik nicht.
 - Curtain, Coach, HUD und Aktinformationen können zeitlich miteinander konkurrieren.
 - Vivid-Farben, Kollaps-Burst, Floating Gain, Flash und Shake verletzen im Premium-Pfad
@@ -888,22 +895,23 @@ Kann parallel zu A mit statischen Zuständen und Mock-Daten arbeiten:
 6. Kein Auto-Advance; Weiter nur nach Impact und bewusster Bestätigung.
 7. Skip-Pfad erhält einmalige kontextuelle Hinweise in der ersten freien Partie.
 
-### Strom C - Materialsystem für Karten und Glassteine
+### Strom C - Materialsystem für Karten und Spielsteine
 
 Kann parallel zu A experimentieren, integriert aber erst nach eingefrorener Geometrie:
 
-1. `TableChip` mit radialem, mattem Glaskörper statt linearem Candy-Gradient.
-2. Ein kleiner spekularer Reflex, subtile Glaskante, harter Kontaktschatten.
-3. Gedachter Durchmesser 21-22 pt; gleiche Sprache im Flug und im Haufen.
+1. `TableChip` bildet R1-Keramik beziehungsweise individuelle Cent-Münzen aus
+   demselben Materialasset wie die Endlage ab.
+2. Ein kontrollierter Materialreflex und harter Kontaktschatten statt Candy-Gradient.
+3. Maßstab aus dem Board-Brief; identische Sprache im Flug und im Haufen.
 4. Deterministische Slots für 1-12 Token pro äußerer Mulde und Mitte.
-5. Vorderlippen-Occlusion und Innenmaskierung bleiben an PM49 kalibriert.
+5. Vorderlippen-Occlusion und Innenmaskierung werden an die neue Poch Disc und die
+   Unterwegs-Schale kalibriert.
 6. Kartenwölbung reduzieren: Steifigkeit, dunkle Kontur, Kontakt statt Flattern.
 7. Kartenfläche auditieren: reines Weiß ohne Grauschleier, sattes Rubinrot, kräftige
    Eckindizes, sichere Randabstände und lesbare Hofkarten in kleinster Spielgröße.
 8. Kartenrücken groß und ruhig inszenieren; keine zusätzliche Art-Exploration.
-9. PM49-Geometrie und Farbverteilung bleiben eingefroren. Materialtiefe darf über
-   getrennte Boden-, Vorderlippen-, Schatten- und Lichtreaktionsebenen verbessert
-   werden; kein neuer Board-Variantenloop vor bestandenem Slice.
+9. Verbindlich sind die 8+1-Regelgeometrie und die beiden Tischwelten aus dem neuen
+   Designkanon. Alte PM-Geometrie und Farbverteilung sind nicht eingefroren.
 
 ### Strom D - Komposition und progressive Disclosure
 
@@ -1143,7 +1151,7 @@ Kritische Kette:
 Parallel ab `A1`:
 
 - `B1` statischer First-Run-Storyboard-Prototyp mit exakt zehn Beats,
-- `C1` drei codebasierte Glas-Token-Materialproben im identischen Muldenzustand,
+- `C1` drei codebasierte R1-/Cent-Materialproben im identischen Zielfeldzustand,
 - `C2` Kartenlesbarkeitsmatrix in kleinster, normaler und Hero-Größe,
 - `D1` Zonen- und Overlap-Audit für SE, Standard und Pro Max,
 - `E1` trockene Kontaktklänge und Haptik-Mapping ohne Integration,

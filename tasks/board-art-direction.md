@@ -1,130 +1,178 @@
 # Poch 1441 - Verbindlicher Board-Brief
 
-**Stand:** 10. Juli 2026
-**Status:** Render- und Integrations-Gate. PM49 bleibt bis zur ausdrücklichen Freigabe das App-Board.
+**Stand:** 17. Juli 2026
+**Status:** Render-, Implementierungs- und Integrations-Gate
 
-## 1. Regelgeometrie
+Dieser Brief setzt `tasks/design-canon-2026.md` für Spielfeld und Spielsteine um.
+Ältere PM-Nummern und Render sind nur noch Provenienz. Sie definieren weder Form,
+Material noch Token.
 
-- Exakt neun echte Mulden: acht Außenmulden plus eine größere Mittelmulde.
-- außen, im Uhrzeigersinn ab 12 Uhr: `K`, `Q`, `MARIAGE`, `J`, `10`,
-  `SEQUENZ`, `POCH`, `A`. Diese Reihenfolge entspricht `PochRing.anchors`.
+## 1. Gemeinsame Regelgeometrie
+
+- Exakt neun funktionale Bereiche: acht äußere Gewinnfelder plus eine größere Mitte.
+- Außen, im Uhrzeigersinn ab 12 Uhr: `K`, `Q`, `MARIAGE`, `J`, `10`,
+  `SEQUENZ`, `POCH`, `A`. Die Reihenfolge entspricht `PochRing.anchors`.
 - Keine weiteren Felder, Bonus-Pots, Segmente, Zeiger oder Roulette-Teilungen.
-- Jede Mulde ist ein physischer Behälter mit flachem Boden, gerundeter Wand und
-  sichtbarer Tiefe. Keine Linse, kein Knopf, kein Cabochon und keine aufgesetzte
-  Scheibe.
-- Die Mittelmulde ist ruhig, frei von Emblem und etwa 1,55 bis 1,75 mal so breit
-  wie eine außenmulde. Sie nimmt den Gewinn aus Akt 3 auf.
+- Jedes Feld nimmt reale Spielsteine vollständig auf. Die Mitte nimmt den Gewinn
+  aus Akt 3 auf und ist größer als ein Außenfeld.
+- Beschriftungen, Zahlen und Symbole sind lokalisierbare SwiftUI-/Vektor-Ebenen.
+  Sie werden nie in KI-Artwork eingebrannt.
 
-## 2. Proportionen und Herstellbarkeit
+Die 8+1-Topologie ist verbindlich. Nur Track A muss kreisförmig sein; Track B darf
+eine glaubwürdig improvisierte, unrunde 8+1-Geometrie besitzen.
 
-Alle Maße sind relativ zum Brettdurchmesser `D`, damit dasselbe Objekt als
-SwiftUI-Asset und als späteres reales Brett funktioniert.
+## 2. Track A - Poch Disc
+
+### Produktidee
+
+Ein herstellbares Designobjekt, das in App und Realität identisch gedacht wird.
+Kein historisches Brett, kein Casino-Tray und kein Luxus-Requisit.
+
+### Form und Material
+
+- Nahezu geschlossene, kreisförmige Disc mit präziser, ruhiger Silhouette.
+- Satinierter Aluminiumrahmen ohne Chrom- oder Spiegelwirkung.
+- Körper in Graphit oder tiefem Nachtblau, matt und fein strukturiert.
+- Muldenböden aus hochwertigem Textil, matter Keramik oder einem glaubwürdigen
+  Verbundmaterial. Keine Hochglanzschalen.
+- Fasen und Hairlines dienen Orientierung und Herstellbarkeit, nicht Dekoration.
+- Akzente entstehen durch Materialreflexion. Kein Dauer-Glow, Bloom oder Neon.
+
+### Zielproportionen
+
+Alle Maße beziehen sich auf den Brettdurchmesser `D`.
 
 | Element | Zielwert |
 |---|---:|
-| außenmulde, Öffnung | `0,15-0,17 D` |
-| Mittelmulde, Öffnung | `0,24-0,27 D` |
-| Radius der Außenmulden-Mittelpunkte | `0,33-0,35 D` |
+| Außenmulde, Öffnung | `0,15-0,17 D` |
+| Mitte, Öffnung | `0,24-0,27 D` |
+| Radius der Außenmittelpunkte | `0,33-0,35 D` |
 | Flacher Muldenboden | `0,62-0,70` der Öffnung |
 | Reale Tiefe bei `D = 200 mm` | außen `3,5-4,5 mm`, Mitte `4,5-6 mm` |
-| Materialsteg zwischen Mulden | mindestens `0,025 D` |
+| Steg zwischen Mulden | mindestens `0,025 D` |
 
-Der Boden muss Chips flach oder leicht überlappend aufnehmen. Eine
-halbkugelförmige Suppenschalen-Geometrie ist ausgeschlossen, weil Chips darin
-verkanten und die digitale Stapelkomposition unglaubwürdig wird.
+Mulden haben einen flachen Boden und gerundete Wände. Halbkugelförmige Schalen,
+Linsen, Knöpfe und Cabochons sind ausgeschlossen.
 
-## 3. Material-DNA
+### Bühne
 
-- Körper: PM1/PM49-naher, seidenmatter Graphit oder schwarze Keramik mit feiner
-  gebürsteter Mikrotextur und realistischen gefrästen Fasen.
-- Akzente: haarfeines satiniertes Messing. Kein durchgehender heller Gold-Vollring.
-- Muldenlippen: matte mineralische oder emaillierte Materialeinlagen, nie Licht.
-- PM49-Achtfarbenfolge:
-  - A Gold `#C69A4A`
-  - K Bronze/Messing `#A87C3D`
-  - Q Granat `#9E3B4E`
-  - J Kupfer-Rose `#B06A4E`
-  - 10 Bernstein/Ocker `#C08A2E`
-  - Mariage Amethyst `#6B5AA6`
-  - Sequenz Smaragd `#2E8B6B`
-  - Poch Saphir/Petrol `#356B8A`
-- Idle: Materialreflexion, Ambient Occlusion und Kontakt-Schatten. Keine Emission,
-  kein Bloom, kein Neon und kein Edge-Glow.
-- Vivid-Theme: dieselbe Geometrie und dieselben Materialien; nur die
-  SwiftUI-Fokusfarbe wird satter. Das Brett wird nicht zu einem anderen Objekt.
+- Splash, Store und Ergebnis dürfen die Disc auf hellem Sicht- oder Waschbeton mit
+  weichem seitlichem Tageslicht zeigen.
+- Im wiederholten Gameplay liegt sie auf einem sehr ruhigen, kontrastarmen
+  Graphitgrund. Keine sichtbaren Poren, Hotspots oder harten Schlagschatten unter
+  funktionalen Informationen.
 
-## 4. Kartenhinweise und Beschriftung
+## 3. Track B - Unterwegs
 
-Historische Pochbretter verbinden die Einsatzfächer mit Kartenfiguren oder
-Kombinationen. Diese Regelklarheit wird übernommen, nicht ihre Ornamentik.
+### Produktidee
 
-- Pro außenmulde genau ein eindeutiger Kartenhinweis: `A`, `K`, `Q`, `J`, `10`,
-  `K+Q`, `7-8-9`, Klopf-/Poch-Signet.
-- Hinweise sitzen auf dem inneren Steg oder im oberen, von Chips freien Drittel
-  der Mulde. Sie dürfen niemals wie ein zehnter Pot wirken.
-- KI-Render enthalten keine Schrift, Zahlen oder Logos. Finaler Text und finale
-  Symbole sind Vektor-/SwiftUI-Overlays.
-- Beschriftung bleibt auch bei belegter Mulde sichtbar. Chips nutzen primär das
-  untere Mulden-Drittel.
+Poch entsteht glaubwürdig aus verfügbaren Gegenständen. Die Welt ist warm,
+unmittelbar und menschlich, aber weder trashig noch nostalgisch kostümiert.
 
-## 5. Chip-Regel
+### Form und Material
 
-`PM68 Glass Tokens In Pot` ist die verbindliche Referenz für belegte Mulden.
+- Bevorzugt eine generische transparente oder leicht getönte Servier-/Snackschale
+  mit acht Außenfächern und einer Mitte.
+- Das Feld darf rund, oval oder organisch segmentiert sein, solange 8+1 eindeutig
+  lesbar und regelkonform bleibt.
+- Keine reale Marke, Verpackungsgrafik oder Produktkopie.
+- Bezeichnungen können wie präzise handbeschriftetes Kreppband aussehen, bleiben
+  aber scharfe, lokalisierbare UI-Ebenen.
+- Kratzer und Gebrauchsspuren sind plausibel und zurückhaltend. Schmutz,
+  künstliche Vintage-Filter und absichtliche Verwahrlosung sind ausgeschlossen.
 
-- Schwere Glas-/Metall-Tokens mit dunklem Kern und fein geriffelter Metallkante.
-- Natürliche, leicht überlappende Kleingruppen statt mathematischer Punkte.
-- Bis vier sichtbare Tokens: lockere Einzelgruppe. Ab fünf: maximal zwei kleine
-  Stapel plus einzelne überlappende Tokens.
-- Jeder sichtbare Token bleibt vollständig innerhalb der Muldenlippe.
-- Zwei Schattenebenen: harter Kontakt-Schatten direkt unter dem Token und weicher
-  Höhenschatten für Gewicht. Keine schwebenden Tokens.
-- Animation und Endzustand verwenden dieselben Token-Proportionen und Materialien.
+### Bühne
 
-## 6. Kamera und UI-Eignung
+- Die konkrete Umgebung bleibt bis zum eigenen Vergleichsartefakt eine
+  Explorationsfrage.
+- Zulässig sind wenige funktionale Hinweise auf einen improvisierten Spielort.
+- Laterne, Emaillebecher, Flasche, gefaltete Karte und Camping-Klischees sind keine
+  Pflicht und werden nicht gleichzeitig als Requisitenwand eingesetzt.
+- Im Gameplay wird eng auf Schale, Karten, Hände und aktuelle Entscheidung
+  komponiert; die Umgebung tritt zurück.
 
-- Primärasset: orthografische Top-down-Ansicht, exakt zentriert und radial
-  symmetrisch. Keine perspektivische Ellipse.
-- Das Brett belegt im Quellbild höchstens 88 Prozent der Breite; transparenter
-  oder neutral dunkler Rand ermöglicht Schatten und SwiftUI-Crop.
-- Beleuchtung weich von oben, ein kontrolliertes Streiflicht für Fasen. Keine
-  dramatischen Hotspots, die Labels oder Chips verschlucken.
-- Lesegates bei `360 px`, `180 px`, `120 px` und `64 px`: Silhouette, 8+1-Geometrie
-  und Farbfolge müssen erhalten bleiben.
+## 4. Spielsteine
 
-## 7. Phasenverhalten
+### Track A - R1
 
-- Akt 1 Melden: großes Hero-Board. Alle neun Mulden, Kartenhinweise und stehende
-  Jackpots sind lesbar.
-- Akt 2 Pochen: dasselbe Board kompakt; äußere Mulden entsättigt, Poch-Mulde und
-  Poch-Pott bleiben prominent. Keine alternative Boardgrafik.
-- Akt 3 Ausspielen: Board wird ruhiges funktionales Backdrop; Mittelmulde bleibt
-  Ziel und Kartenfächer-Haltepunkt.
-- Phasenwechsel verändern Position, Maßstab und Fokus, nicht die Objektidentität.
+- 36 mm Durchmesser, 3 mm Stärke, gedachtes Gewicht 9 bis 10 g.
+- Mattes Clay-Composite oder durchgefärbte Keramik.
+- Große tonale Blindprägung des geometrischen Kartenrücken-Signets.
+- Feine umlaufende Präzisionsrändelung.
+- Naturweiß, Terrakotta, Salbeigrün und Schiefergrau.
+- Ein Wert pro Stein; keine Ziffern, Währungszeichen oder Poker-Edge-Spots.
 
-## 8. Harte Ausschlusskriterien
+### Track B - 1-Cent-Münzen
 
-Ein Kandidat fällt sofort aus bei:
+- Ausschließlich 1-Cent-Münzen als gleichwertige Einsatzeinheit.
+- Varianten unterscheiden sich kontrolliert in Rotation, Oxidation, Patina,
+  Kratzern, Kantenabrieb und Restglanz.
+- Keine gemischten Nennwerte und keine Eurobeträge im Interface.
 
-- nicht exakt acht Außenmulden plus Mitte;
-- flacher oder erhabener Mittelknopf statt Mulde;
-- Roulette-, Pokerchip-, Lautsprecher-, Objektiv- oder Uhrwerk-Lesart;
-- Glow als Grundzustand, Chrom, Spiegelglas oder Hochglanz-Cabochons;
-- KI-Schrift, falschen Kartenwerten oder dekorativen Zusatzsymbolen;
-- Chips außerhalb der Mulden oder verdeckter Farb-/Wertcodierung;
-- inkonsistenter Symmetrie oder nicht herstellbarer Wandstärke.
+### Lage und Physik
 
-## 9. Bewertungsmatrix
+- Endlagen werden deterministisch aus vorbereiteten Slots und Varianten gewählt.
+- Kleine Gruppen liegen natürlich, leicht überlappend und nicht wiederholt in
+  derselben Rosette.
+- Jeder Stein bleibt vollständig innerhalb der Mulde beziehungsweise des Fachs.
+- Zwei Schattenebenen zeigen Kontakt und Höhe; nichts schwebt.
+- Animation und Endzustand verwenden exakt dasselbe Asset, denselben Maßstab und
+  dieselbe Orientierung.
+- Sichtbarer Zähler und Haptik ändern sich erst beim Kontakt.
 
-Jeder Render erhält je `0-5` Punkte in: Regelkorrektheit, Münzphysik,
-Mockup-Komposition, PM1/PM49-Materialtreue, Lesbarkeit klein, Anti-Casino,
-Herstellbarkeit und Marken-Eigenständigkeit. Regelkorrektheit oder Münzphysik
-unter `5` ist ein Ausschluss, kein Mittelwertproblem.
+## 5. Beschriftung und Lesbarkeit
 
-## Quellenanker
+- Kartenwerte sind international: `A`, `K`, `Q`, `J`, `10`.
+- Kombinationen werden in Prosa als `Mariage`, `Sequenz` und `Poch` erklärt.
+- Auf dem Brett dürfen kompakte Zeichen stehen, wenn Tutorial und Accessibility
+  die vollständige Bedeutung liefern.
+- Labels bleiben bei belegtem Feld sichtbar und stehen orthogonal zum Spieler.
+- Reine Farbcodierung ist nie die einzige Information.
+- Lesegates: `360 px`, `180 px`, `120 px`, `64 px`, iPhone SE, Standard und Pro Max.
 
-- `PochKit/Sources/PochKit/Board.swift` und `App/PochRing.swift` sind die
-  verbindliche Produktregel.
-- `tasks/konzept.md` definiert Material, Farben, Glow-Budget und Phasen-Morph.
-- `PM49` bleibt Style- und App-Anker; `PM68` bleibt Token-Anker.
-- Historische Referenz: acht Einsatzvertiefungen mit Kartenfiguren und
-  Kombinationen; das Brett ist ein Funktionsobjekt, nicht nur ein Ringmotiv.
+## 6. Phasenverhalten
+
+- **Melden:** großes, zentral gesetztes Feld; 8+1-Geometrie und relevante Gewinne
+  sind lesbar.
+- **Pochen:** dasselbe Objekt wird kleiner, bleibt aber bewusst positioniert. Poch,
+  Einsatzwahl und Gegnerentscheidung bilden eine klare Dreierhierarchie.
+- **Ausspielen:** das Feld wird ruhiger Hintergrund und die Karten übernehmen die
+  Hauptbühne. Die Mitte bleibt räumliches Ziel.
+- Phasen verändern Kamera, Maßstab und Fokus, niemals Regelgeometrie oder
+  Objektidentität.
+
+## 7. Harte Ausschlusskriterien
+
+Ein Kandidat fällt aus bei:
+
+- nicht exakt acht Außenfeldern plus Mitte;
+- Casino-, Roulette-, Spielautomaten- oder generischer Poker-Tray-Lesart;
+- Glow, Chrom, Spiegelglas, Hochglanzplastik oder Ornament als Grundzustand;
+- KI-Schrift, falschen Kartenwerten oder dekorativen Zusatzfeldern;
+- Spielsteinen außerhalb der Zielfläche oder ohne glaubwürdigen Kontakt;
+- UI-Informationen, die mit Spielfeld, Karten oder Gegnern kollidieren;
+- einer Form, die nur im Hero-Render, aber nicht im wiederholten Spiel funktioniert.
+
+## 8. Abnahme
+
+Jeder Kandidat erhält `0-5` Punkte in:
+
+1. Regelkorrektheit;
+2. Spielsteinphysik;
+3. Verständlichkeit;
+4. Herstellbarkeit;
+5. Ergonomie;
+6. kleine Lesbarkeit;
+7. Anti-Casino-Eigenständigkeit;
+8. Markenidentität;
+9. Qualität im echten Spielfluss.
+
+Regelkorrektheit, Spielsteinphysik oder Verständlichkeit unter `5` sind ein
+Ausschluss und werden nicht durch schöne Materialbilder kompensiert.
+
+## Quellen
+
+- `tasks/design-canon-2026.md` - neueste visuelle Grundlage.
+- `tasks/konzept.md` - Produkt, Regeln, Phasen und Positionierung.
+- `PochKit/Sources/PochKit/Board.swift` und `App/PochRing.swift` - technische
+  Regelgeometrie.

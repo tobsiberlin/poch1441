@@ -1,7 +1,7 @@
 # Poch 1441 - Projekt-CLAUDE.md
 
 **Projekt:** Premium-iOS-Kartenspiel (Poch, 1441) | **Repo:** github.com/tobsiberlin/poch1441
-**Letzte Aktualisierung:** 8. Juli 2026
+**Letzte Aktualisierung:** 17. Juli 2026
 
 > Basis-Regeln stehen in `~/.claude/CLAUDE.md` und gelten zusätzlich. Diese Datei enthält nur Poch-1441-spezifische Ergänzungen (destilliert aus den earned Regeln von hot take, kwittung, pawbie, hottake-web). Bei Konflikt gewinnt die spezifischere Regel hier. Spec + Regelwerk: `tasks/poch-spec.md`.
 
@@ -9,14 +9,15 @@
 
 ## 0. Die Seele des Spiels
 
-Poch 1441 ist ein modernes Premium-Strategie-/Bluffspiel - der Urahn des Pokers, in eine zeitgemäße Produktästhetik übersetzt. Diese Bullets sind bindend. Vollständiger Kanon: `tasks/konzept.md`.
+Poch 1441 ist ein modernes Premium-Strategie-/Bluffspiel - der Urahn des Pokers, in eine zeitgemäße Produktästhetik übersetzt. Diese Bullets sind bindend. Produktkanon: `tasks/konzept.md`. Neuester visueller Qualitätsfilter: `tasks/design-canon-2026.md`; er gewinnt bei Konflikten gegen ältere PM-Varianten, Mockups und Render.
 
 - **Drei Phasen = drei Gefühle:** Melden (Lotterie-Freude), Pochen (Bluff-Spannung), Ausspielen (Renn-Taktik). Jede Phase hat ihre eigene Dramaturgie, Komposition und Energie-Richtung - keine Phase fühlt sich wie Verwaltung an.
-- **Clean-modern-premium, dunkel:** warmes Tinten-Schwarz, matte/pigmentierte Farben, gefräste Ringe. Kein Mittelalter, kein Holztisch, kein Casino-Neon, nichts Verwaschenes. Referenz-Feel: Apple-Watch-Ultra-Premium, nicht Gaming-RGB. **Visueller Style-Anker: `artifacts/style-ref/mockup-anchor.png`** (Layout-/Kompositions-Sprache übernommen; NICHT: All-in-Button, Arcade-/Spielhallen-Raum, Cyber-Namen, AI-Slop).
+- **2026 zuerst:** Präzision statt Effekte, Produktdesign statt Luxusinszenierung, Funktion statt Dekoration und Selbstverständlichkeit statt Lautstärke. Geschichte gibt Tiefe, aber keine mittelalterliche Formensprache. Casino-Neon, Gaming-RGB, All-in-Sprache und Fake-Luxus sind ausgeschlossen. Das alte Mockup ist nur noch Kompositionsreferenz.
 - **Material > Glow:** Premium entsteht aus Material, Kante, Tiefe, Schatten - nicht aus Dauer-Leuchten. Glow ist eine Belohnung (Stich gewonnen, Bluff erkannt), kein Grundzustand.
-- **Farbe = Label (Balatro-Prinzip):** jede Mulden-Kategorie hat eine feste Farbe - in Juwelen-Tönen (Gold/Rose/Smaragd/Amethyst/Platin), NIE grelles Neon. Zwei Themes teilen dieselbe Geometrie: **Premium-matt** und **Vivid-Electronic** (dieselben Juwelen, matt vs. strahlend); der Held wird live gewählt.
-- **Der Poch-Ring** (rundes 9-Fächer-Brett) ist die Signatur - Layout und Kartenrücken-Signet sprechen dieselbe Sprache. Karten international A/K/Q/J/10; deutsche Prosa „Dame/Bube".
-- **Balatro-Feel, nicht -Struktur:** Eskalations-Drama, Juice, Kaskaden-Payoff, cleane Optik - aber kein Joker/Draft. Der Jackpot IST der native Multiplikator, der Bluff die native Tiefe. Balatro ist Messlatte für Feel-Qualität, nie Referenz für Stil oder Inhalt.
+- **Farbe unterstützt Bedeutung:** Kategorien dürfen durch ruhige, materiell glaubwürdige Farbtöne unterscheidbar sein. Farbe ist nie die einzige Information und kein Anlass für Neon, Emission oder ein zweites Gaming-Designsystem.
+- **8+1 ist die Signatur:** Track A ist die kreisförmige Poch Disc aus satiniertem Aluminium und ruhigem Graphit/Nachtblau. Track B ist die optionale authentische `Unterwegs`-Welt und darf eine generische unrunde 8+1-Servierschale nutzen. Das Kartenrücken-Signet verbindet beide Welten. Karten international A/K/Q/J/10; deutsche Prosa „Dame/Bube".
+- **Spielsteine:** Track A verwendet R1 - matte Keramik-/Clay-Steine mit großer tonaler Blindprägung des Kartenrücken-Signets und feiner Rändelung. Track B verwendet ausschließlich individuell gealterte, gleichwertige 1-Cent-Münzen. Keine gemischten Nennwerte und keine Eurobeträge im UI.
+- **Eigenständiges Game Feel:** klare Ursache-Wirkung, präziser Rhythmus, glaubwürdiger Materialkontakt und strategische Spannung - aber keine Joker/Drafts, keine übernommene Spielästhetik und keine künstliche Belohnungsmaschine. Stehende Gewinne und Bluff sind die native Tiefe.
 - **Menschen statt Systeme:** Gegner sind Charaktere mit Wärme (Tells, Erinnerungen, Geplauder) - das eine warme, painterly Material im cleanen Rahmen; der Kontrast ist die Eigenständigkeit. Presence-over-Persistence: groß am Entscheidungs-Beat, ruhiger Token sonst. **Bluff-Integrität (eiserne Regel):** kein UI-Element - auch kein Tell - korreliert je mit der echten Handstärke (die Tell-Funktion bekommt die Karten nicht als Input).
 - **Positionierung modern-first:** „Das Strategiespiel, aus dem Poker wurde." 1441/Straßburg ist Prestige-Reveal (Trojanisches Pferd im Splash/Onboarding), nie das Hauptargument. 18+, kein Zock-/Casino-Marketing.
 - **Detailverliebtheit (bindend):** JEDES Element - Zähler, Badge, Trennlinie, Button, Empty State - wird maximal schön und detailverliebt gestaltet; Platzhalter sind Zwischenstände, nie Endzustände. Cozy Wording: warmes, einladendes Deutsch („Ein neuer Abend" statt „Neues Spiel"), charmant, nie verstaubt; Transcreation in alle 7 Sprachen (§8), dieselbe Wärme statt wörtlicher Übersetzung.
@@ -52,7 +53,7 @@ Poch 1441 ist ein modernes Premium-Strategie-/Bluffspiel - der Urahn des Pokers,
 
 - Kern-Interaktionen (Karte ziehen/spielen, Chips kassieren, Poch-Schlag, Kettenbruch) werden als **Phasen-Enums mit ms-Timing** definiert und stehen unter **Parameter-Lock**: Timing-Änderungen nur nach Vorher/Nachher-Vergleich, jede Änderung ist eine große Änderung (ankündigen, nicht nebenbei).
 - Animation-Tuning ist Kernarbeit, nicht Nebensache.
-- **Balance nie per LLM-Judge:** PochKit ist deterministisch - Economy/Balance-Ziele als Headless-Simulations-Metriken formulieren (Partiedauer, Bankrottquote, Jackpot-Verteilung).
+- **Balance nie per LLM-Judge:** PochKit ist deterministisch - Economy/Balance-Ziele als Headless-Simulations-Metriken formulieren (Partiedauer, Bankrottquote, Verteilung stehender Gewinne).
 
 ## 5. Asset-Pipeline (Replicate/FLUX)
 
