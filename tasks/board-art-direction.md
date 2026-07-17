@@ -141,7 +141,44 @@ unmittelbar und menschlich, aber weder trashig noch nostalgisch kostümiert.
 - Phasen verändern Kamera, Maßstab und Fokus, niemals Regelgeometrie oder
   Objektidentität.
 
-## 7. Harte Ausschlusskriterien
+## 7. Lernmodus der echten Disc
+
+Es gibt kein separates Tutorialbrett. Die echte Track-A-Disc führt durch vier
+reversible Darstellungszustände, ohne Form, Material oder 8+1-Topologie zu wechseln:
+
+1. **Orientieren:** Mitte und genau ein relevantes Außenfeld sind scharf und gut
+   beleuchtet. Die übrigen Felder bleiben an ihrer realen Position, treten aber stark
+   zurück. Noch keine Gegnerdaten, Einsatzsteuerung oder Aktionsmatrix.
+2. **Zusammenhang:** Die passende Handkarte und ihr Feld werden gleichzeitig gezeigt.
+   Weitere Felder gewinnen erst bei ihrer Bedeutung Materialkontrast.
+3. **Verstehen:** Lokalisierbare UI-Labels und höchstens eine Hairline verbinden
+   Quelle, Zielfeld und konkrete Wirkung. Eine einzige Aktion beweist den Satz.
+4. **Spielen:** Hairline und Lernlabel verschwinden. Die unveränderte Disc bleibt in
+   der regulären Spielkomposition zurück.
+
+Die Lernansicht darf niemals `[VAR_*]`, `BET`, Maße, Konstruktionslinien oder andere
+Werkstattnotation zeigen. Sie ist Produkt-UI, keine technische Explosionszeichnung.
+
+## 8. Portrait und Landscape
+
+Die Disc verwendet dieselbe Geometrie und dieselben Assets in beiden Orientierungen.
+Nur Maßstab, Kamera und Bühnenposition ändern sich.
+
+- **Portrait, Melden:** Disc groß und zentral, mit sichtbarer Hand am unteren Rand.
+- **Portrait, Pochen:** Disc kompakter im oberen Bühnenbereich; Entscheidung und Hand
+  erhalten eigene, kollisionsfreie Zonen.
+- **Landscape, Melden:** Disc groß auf der rechten beziehungsweise mittleren
+  Spielfeldhälfte; Gegner liegen an einer stabilen linken Sitzachse.
+- **Landscape, Pochen:** Gegner und Einsatzsteuerung links, Entscheidung mittig, Disc
+  rechts, Hand unten. Keine Zone darf eine andere überlagern.
+- **Landscape, Ausspielen:** zentrale Kartenkomposition gewinnt Breite; Disc bleibt
+  kleiner als räumliches Ziel sichtbar.
+- Die Disc darf nie an den rechten Displayrand gequetscht werden. Außenabstand und
+  optisches Gewicht müssen links und rechts ausgewogen sein.
+- Auf Geräten mit Dynamic Island, Home Indicator oder Landscape-Sensorausschnitt
+  richten sich Zonen nach Safe Areas, nicht nach den Rohmaßen des Displays.
+
+## 9. Harte Ausschlusskriterien
 
 Ein Kandidat fällt aus bei:
 
@@ -153,7 +190,7 @@ Ein Kandidat fällt aus bei:
 - UI-Informationen, die mit Spielfeld, Karten oder Gegnern kollidieren;
 - einer Form, die nur im Hero-Render, aber nicht im wiederholten Spiel funktioniert.
 
-## 8. Abnahme
+## 10. Abnahme
 
 Jeder Kandidat erhält `0-5` Punkte in:
 
@@ -166,6 +203,11 @@ Jeder Kandidat erhält `0-5` Punkte in:
 7. Anti-Casino-Eigenständigkeit;
 8. Markenidentität;
 9. Qualität im echten Spielfluss.
+
+Zusätzlich werden alle drei Phasen und alle vier Lernzustände auf mindestens einer
+kompakten und einer großen Portrait- sowie Landscape-Größe geprüft. Kein Element darf
+abgeschnitten werden, Text ungewollt umbrechen oder Quelle, Ziel und Primäraktion
+gleichzeitig verdecken.
 
 Regelkorrektheit, Spielsteinphysik oder Verständlichkeit unter `5` sind ein
 Ausschluss und werden nicht durch schöne Materialbilder kompensiert.

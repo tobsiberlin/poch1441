@@ -177,6 +177,11 @@ Das Tutorial ist eine eigene, inszenierte Partie und kein Text-Layer über dem
 vollständigen Spiel. Ein neuer Spieler sieht immer nur das, was er bereits versteht.
 Der Tisch wächst mit seinem Wissen.
 
+`Der Tisch wächst` bedeutet keinen Austausch des Spielfelds. Das Tutorial verwendet
+die echte Track-A-Poch-Disc in identischer Geometrie, Materialität und Orientierung.
+Nur Fokus, Materialkontrast und temporäre UI-Hilfen verändern sich. Damit überträgt
+jede gelernte räumliche Beziehung direkt in die erste freie Partie.
+
 1. **Stille vor dem Spiel:** dunkler Tisch, Mitte und genau eine relevante
    Außenmulde, ein ruhender R1-Spielstein. Kein Phasenlabel, keine Gegnerwerte, keine
    Range und keine Aktionswand.
@@ -209,6 +214,30 @@ Der Tisch wächst mit seinem Wissen.
 - Jeder Schritt besitzt `Zurück`, `Noch einmal` und eine einzige primäre Aktion.
 - Fortschritt zeigt nie `3/6`, `1/5` oder ähnliche Zähler, sondern benennt den nächsten Erkenntnisgewinn,
   beispielsweise `Als Nächstes: deine erste Meldung`.
+
+### Verbindliche Lernzustände der Disc
+
+1. `Orientieren`: Mitte plus ein Außenfeld, eine kurze Aussage, eine Aktion.
+2. `Verbinden`: passende Karte und Zielfeld gleichzeitig scharf; übrige Bühne ruhig.
+3. `Beweisen`: eine Hairline zeigt Quelle zu Ziel, der Spieler löst die Wirkung aus.
+4. `Loslassen`: Hilfen verschwinden, die reguläre Disc und Komposition bleiben.
+
+Die Lernzustände sind keine vier automatischen Folien. Jeder Zustand endet durch eine
+verständliche Nutzerhandlung oder eine explizite Bestätigung. Die Darstellung aus
+technischen Konzeptbildern mit `[VAR_*]`, englischen Platzhaltern oder Konstruktions-
+beschriftung ist ausschließlich internes Storyboarding und niemals Produkt-UI.
+
+### Portrait und Landscape im Tutorial
+
+- Derselbe Beat, Fokuszustand und Fortschritt gelten in beiden Orientierungen.
+- Portrait reserviert den unteren Bereich für Hand und Primäraktion. Lerntexte dürfen
+  weder die Hand noch die Disc überdecken.
+- Landscape nutzt links die stabile Gegnerachse, mittig die Lernhandlung und rechts
+  die Disc. Die Hand bleibt groß am unteren Rand.
+- Eine Rotation pausiert die Regie, übernimmt den letzten bestätigten Beat und ordnet
+  nur die Bühnenzonen neu. Sie startet keinen Beat neu und überspringt keine Wirkung.
+- Screenshots und Interaktionstests für Tutorial-Beats werden in beiden Orientierungen
+  auf kompakter und großer Geräteklasse abgenommen.
 
 ### Begriffe werden über ihren Zweck eingeführt
 

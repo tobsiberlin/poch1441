@@ -171,6 +171,15 @@ Markenzeichen von Karten, R1-Spielsteinen und Produkthülle.
 - Ursache erscheint vor Wirkung. Zahlen ändern sich beim Kontakt, nicht beim Start.
 - Das Tutorial ist eine spielbare Lehrpartie und enthüllt Elemente erst bei ihrer
   ersten Bedeutung.
+- Das Tutorial verwendet immer dieselbe Poch Disc wie das freie Spiel. Es gibt kein
+  vereinfachtes Ersatzbrett, keine technische Tutorialscheibe und keine abweichende
+  Regelgeometrie. Lernen verändert Fokus und Sichtbarkeit, niemals das Objekt.
+- Im Lernmodus bleibt die vollständige 8+1-Disc räumlich stabil. Noch nicht erklärte
+  Bereiche treten durch Licht, Kontrast und leichte Defokussierung zurück; sie werden
+  bei ihrer ersten Bedeutung aus demselben Material heraus sichtbar.
+- Temporäre Hairlines und scharfe UI-Beschriftungen dürfen Karte, Feld und Wirkung
+  verbinden. Sie verschwinden nach dem Lernmoment vollständig. Platzhalter,
+  Messlinien, technische Variablennamen und Text im Board-Render sind verboten.
 - Karten, Spielsteine und Gegner besitzen immer eine sichtbare räumliche Herkunft.
 - Gegner bleiben am Tisch räumlich stabil und reagieren auf öffentliche Zustände,
   niemals auf verdeckte Handstärke.
@@ -178,6 +187,28 @@ Markenzeichen von Karten, R1-Spielsteinen und Produkthülle.
 - Sound und Haptik verstärken Materialkontakt; sie ersetzen keine visuelle Klarheit.
 - Reduce Motion, VoiceOver, große Schrift und lange Übersetzungen sind Teil der
   Gestaltung, keine nachträgliche Prüfung.
+
+### Adaptive Komposition
+
+Poch 1441 ist in Portrait und Landscape vollständig spielbar. Landscape ist keine
+gedrehte oder verkleinerte Portrait-Ansicht, sondern eine eigenständige Komposition
+derselben Spielzustände, Hierarchie und Regeln.
+
+- Portrait bleibt die vertikale, intime Einhand-Komposition mit Hand am unteren Rand.
+- Landscape nutzt die Breite als Tisch: feste Gegnerachse links, Entscheidung in der
+  ruhigen Mitte, Disc rechts und die eigene Hand groß am unteren Rand.
+- In Phase 2 darf die Einsatzsteuerung links erscheinen, ohne Gegner, Entscheidung
+  oder Hand zu überdecken. Ihre konkrete Form bleibt eine UX-Entscheidung und wird
+  nicht durch den alten vertikalen Mockup-Regler festgelegt.
+- In Phase 3 übernimmt die Kartenfolge die Hauptbühne; die Disc wird kleiner und bleibt
+  als räumliches Ziel sichtbar.
+- Gegnerplätze bleiben zwischen Phasen und Orientierungen semantisch stabil. Karten
+  fliegen immer zu einem sichtbaren Sitz, nie ins Leere.
+- Rotation während einer laufenden Kontaktanimation wird erst nach dem Impact in die
+  neue Komposition überführt. Es gibt keinen Sprung, keine doppelte Karte und keinen
+  verlorenen Tutorialschritt.
+- Für beide Orientierungen gelten dieselben Regeln für Safe Areas, Dynamic Type,
+  Lokalisierung, VoiceOver-Reihenfolge und Reduce Motion.
 
 ## 9. Geschichte und Positionierung
 

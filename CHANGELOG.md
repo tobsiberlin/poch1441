@@ -13,6 +13,12 @@
 - Tischwahl festgelegt: `Nur diese Partie` verwendet einen Session-Override,
   `Als Standard` speichert die Wahl bis zur nächsten Änderung. Eine spontane Wahl
   überschreibt die dauerhafte Präferenz nicht.
+- Tutorialbrett festgelegt: keine separate Lernscheibe. Die echte Poch Disc führt
+  über vier progressive Fokuszustände vom ersten Feld zur spielbereiten 8+1-Disc;
+  temporäre UI-Hilfen verschwinden danach vollständig.
+- Portrait und Landscape sind vollwertige adaptive Kompositionen. Landscape nutzt
+  stabile Gegnerplätze links, Entscheidung mittig, Disc rechts und Hand unten,
+  ohne die Portrait-Ansicht lediglich zu drehen oder zu skalieren.
 - `CardFace.swift` / `CardWarp.metal`: Kartenwölbung feiner abgestimmt
   (Eckenhub 2.4 → 1.6 × scale, ruhigeres Licht); Kartonrand bleibt unabhängig
   vom Wölbungswert konstant.

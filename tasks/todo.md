@@ -1,11 +1,16 @@
 # Poch 1441 - Arbeitsloop / Todo
 
-**Stand:** 10. Juli 2026, laufender GOTY-Politurpass
-**Ziel:** App maximal Richtung Mockup bringen, aber mit unserem Kanon: Poch 1441,
-PM49-Ring, finale Karten, Premium-matt plus Vivid-Theme, Material > Glow, kein Casino.
-**Mockup-Referenz:** `/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/935b2c31-45a6-44d1-b74d-0dfd39cc8817.JPG`
+**Stand:** 17. Juli 2026, laufender Produkt- und Lernmodus-Pass
+**Ziel:** App nach `tasks/design-canon-2026.md` und
+`tasks/board-art-direction.md` entwickeln. Ältere Mockups, PM-Nummern und
+Materialstudien sind nur Provenienz und keine bindende Designvorgabe.
 
 ## Aktueller belastbarer Zwischenstand
+
+Die folgenden älteren Implementierungs- und QA-Angaben dokumentieren erreichte
+Zwischenstände. Vor einer Übernahme in den neuen Vertical Slice müssen sichtbare
+Claims gegen den Stand vom 17. Juli erneut geprüft werden; sie überschreiben weder
+Designkanon noch Board-Brief.
 
 - [x] Phase 2 besitzt feste Bühnenzonen. Entscheidung, Aktionen, Gegner und Hand
   überlagern sich im normalen und geführten Zustand nicht mehr.
@@ -53,21 +58,21 @@ PM49-Ring, finale Karten, Premium-matt plus Vivid-Theme, Material > Glow, kein C
 
 ---
 
-## Harte Layout-Leitplanke
+## Verbindliche Layout-Leitplanke
 
-Das Mockup ist fuer die **Komposition** sehr nah zu treffen:
+Das alte Mockup liefert nur noch einzelne Kompositionserkenntnisse. Bindend sind
+`tasks/design-canon-2026.md` und `tasks/board-art-direction.md`:
 
-- Kartenlage, Kartenfaecher, Anschnitt am unteren Bildschirmrand und zentrale
-  Karten-/Medaillon-Komposition moeglichst nahe am Mockup.
-- Element-Proportionen zuerst nach Mockup setzen, danach erst an unsere Farben,
-  Namen und PM49-/Premium-Ästhetik anpassen.
-- Phase 1: grosser zentraler Ring, Karten unten breit angeschnitten, wenig UI-Lärm.
-- Phase 2: linker Vertikalregler, kompakter Ring rechts/oben, Actions mittig,
-  Portrait-/Statusbereich unten.
-- Phase 3: grosser dramatischer Kartenfaecher als Hauptbild, Medaillon/Ring im Zentrum,
-  Handkarten unten wie Mockup.
-- Abweichungen sind nur erlaubt, wenn sie durch echte Poch-Regeln, Lesbarkeit oder
-  unseren Anti-Casino-Kanon begruendet sind.
+- Phase 1: große echte Poch Disc, breite lesbare Hand am unteren Rand, wenig UI-Lärm.
+- Phase 2: klare getrennte Zonen für Einsatzsteuerung, Entscheidung, Gegner, Disc und
+  Hand. Der alte vertikale Range-Regler ist keine bindende Lösung.
+- Phase 3: große Kartenkomposition als Hauptbild, Disc beziehungsweise Mitte als
+  räumliches Ziel, Hand am unteren Rand.
+- Portrait und Landscape erhalten eigenständige adaptive Kompositionen desselben
+  Zustands. Kein Text, Panel oder Gegner darf Karte, Zielfeld oder Primäraktion
+  überlagern.
+- Abweichungen von alten Bildern sind erwünscht, wenn sie Regelklarheit,
+  Materialglaubwürdigkeit, Accessibility oder den Anti-Casino-Kanon verbessern.
 
 ## Harte Qualitaets-Gates Aus Tobsi-Kritik 9.7.
 
@@ -509,6 +514,16 @@ Diese Punkte blockieren die Umsetzung nicht. Falls Tobsi nichts anderes sagt, so
 ---
 
 ## Track B - Tutorial / Onboarding
+
+- [ ] Kein separates Tutorialbrett verwenden. Die echte Track-A-Poch-Disc durchläuft
+  die vier Lernzustände `Orientieren`, `Verbinden`, `Beweisen`, `Loslassen`; Form,
+  Material und 8+1-Geometrie bleiben identisch zum freien Spiel.
+- [ ] Tutorial-Komposition in Portrait und Landscape adaptiv umsetzen. Landscape:
+  stabile Gegnerachse links, Lernhandlung mittig, Disc rechts, Hand unten. Rotation
+  übernimmt den bestätigten Beat ohne Neustart oder Überspringen.
+- [ ] Technische Platzhalter, Messlinien und Konstruktionsbeschriftung aus jeder
+  produktiven Lernansicht ausschließen. Labels sind lokalisiert und verschwinden
+  nach dem Lernmoment vollständig.
 
 - [x] Erster Start: kurze, spielbare Einführung statt Text. Der erste App-Start
   springt direkt in eine deterministische geführte Runde; DEBUG kann den Zustand
