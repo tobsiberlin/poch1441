@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### Geändert
+- First-Run-Vertical-Slice integriert: echte Poch Disc, acht reproduzierbare Beats
+  von Orientierung bis Loslassen, erste sichtbare Karte, Trumpf und regelbelegte
+  Meldung mit identischem semantischem Zustand in Portrait und Landscape.
+- Tutorialbesetzung auf Hana, Noah und Jonas mit stabilen Sitzen festgelegt;
+  öffentliche Spieltendenzen und automatische beziehungsweise freiwillig manuelle
+  Auswahl liegen datengetrieben in `BotProfiles.json`.
+- R1-Spielsteine auf matte Keramik mit Blindprägung, deterministischen natürlichen
+  Endlagen und einem gemeinsamen Kontaktframe für Zählermutation, trockenes
+  Keramikklacken und gebündelte Haptik umgestellt.
+- Reproduzierbares UI-Test-Gate für First Run, echte Rotation und Lernzustände
+  ergänzt; SE, Standard und Pro Max bestehen Portrait und Landscape.
 - Neuer verbindlicher `tasks/design-canon-2026.md`: Poch 1441 wird als erstmals
   2026 erfundenes Strategieprodukt gestaltet - Präzision statt Effekte,
   Produktdesign statt Luxusinszenierung und Funktion statt Dekoration.

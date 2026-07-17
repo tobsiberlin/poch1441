@@ -45,19 +45,29 @@ struct ContentView: View {
     @State private var activeTutorialLesson: TutorialLesson?
     @State private var completedTutorialLesson: TutorialLesson?
     @State private var tutorialMilestoneLesson: TutorialLesson?
-    @State private var guidedMeldBeat = 0
     @State private var guidedMeldBusy = false
     @State private var guidedOpeningDrag: CGSize = .zero
     @State private var guidedOpeningSettled = false
+    @State private var guidedTableFundingTargeted = false
     @State private var guidedAntePoolCounts: [Pool: Int] = [:]
     @State private var guidedAnteLandedEvents: Set<Int> = []
     @State private var guidedAnteWave: GuidedAnteWaveState?
     @State private var showFirstRunIntro = false
     @State private var matchEndResult: Match.MatchResult?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @AccessibilityFocusState private var guidedCoachFocused: Bool
     /// Phasen-Morph (§5b): ein Namespace über alle drei Akte - Tokens, Poch-Tile und
     /// Mulden fliegen via matchedGeometryEffect an ihre neuen Positionen.
     @Namespace private var morph
+
+    private var guidedMeldBeat: Int {
+        game.presentation.firstRunBeat.rawValue
+    }
+
+    private var guidedLearningState: DiscLearningState {
+        game.presentation.discLearningState
+    }
 
     var body: some View {
         #if DEBUG
@@ -133,8 +143,7 @@ struct ContentView: View {
             .overlay(alignment: .top) { tutorialMilestoneOverlay }
             .overlay {
                 if akt == .melden, activeOverlay == nil,
-                   (isGuidedOpeningBeat ||
-                    (!guidedRoundActive && assistHints && moveCoach)) {
+                   !guidedRoundActive && assistHints && moveCoach {
                     guidedCoachPlacement
                 }
             }
@@ -186,6 +195,9 @@ struct ContentView: View {
             #endif
         }
         .sensoryFeedback(.impact(weight: .light), trigger: haptics ? game.hapticTick : 0)
+        .r1ContactFeedback(trigger: game.r1ImpactTick,
+                           groupSize: game.r1ImpactGroupSize,
+                           surface: game.r1ImpactSurface)
         .onChange(of: game.endPhase) { _, phase in
             guard phase == .done, guidedRoundActive else { return }
             completeTutorialRound()
@@ -271,7 +283,7 @@ struct ContentView: View {
                 runGuidedMeldMotionQA()
             } else if let stepArgument = args.first(where: { $0.hasPrefix("-tutorialMeldStep=") }),
                let step = Int(stepArgument.split(separator: "=").last ?? "0") {
-                prepareGuidedMeldDebugStep(min(max(step, 0), 6))
+                prepareGuidedMeldDebugStep(min(max(step, 0), 7))
             } else if args.contains("-tutorialSeed") {
                 startGuidedRound()
             }
@@ -510,7 +522,11 @@ struct ContentView: View {
                 ], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 10, endRadius: 280)
                 .ignoresSafeArea()
 
-                VStack(spacing: 0) {
+                if proxy.size.width > proxy.size.height {
+                    firstRunLandscapeIntro(size: proxy.size,
+                                           safeArea: proxy.safeAreaInsets)
+                } else {
+                  VStack(spacing: 0) {
                     Spacer(minLength: compactHeight ? 10 : 42)
 
                     HStack(spacing: 6) {
@@ -530,7 +546,7 @@ struct ContentView: View {
                         .padding(.top, compactHeight ? 9 : 18)
 
                     Text(String(localized: "firstRun.intro.body",
-                                defaultValue: "In der Mitte wartet dein erster Gewinn. Mira zeigt dir immer nur den nächsten Zug."))
+                                defaultValue: "In der Mitte wartet dein erster Gewinn. Hana zeigt dir immer nur den nächsten Zug."))
                         .font(.system(size: compactHeight ? 13.5 : 15.5, weight: .medium))
                         .foregroundStyle(Tokens.jewelPlatin.opacity(0.72))
                         .multilineTextAlignment(.center)
@@ -554,9 +570,11 @@ struct ContentView: View {
                                        showCount: false)
                             .offset(y: -boardSize * 0.015)
 
-                        firstRunOpponent(name: "Mira", seat: 1)
+                        firstRunOpponent(name: "Hana", seat: 1)
                             .offset(x: -boardSize * 0.36, y: boardSize * 0.30)
-                        firstRunOpponent(name: "Kian", seat: 2)
+                        firstRunOpponent(name: "Noah", seat: 2)
+                            .offset(y: -boardSize * 0.34)
+                        firstRunOpponent(name: "Jonas", seat: 3)
                             .offset(x: boardSize * 0.36, y: boardSize * 0.30)
                     }
                     .frame(height: min(boardSize * (compactHeight ? 0.92 : 0.84),
@@ -600,6 +618,7 @@ struct ContentView: View {
                         .background(Capsule().fill(Tokens.jewelGold))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("firstRun.intro.primary")
                     .padding(.horizontal, 28)
 
                     Button {
@@ -615,8 +634,97 @@ struct ContentView: View {
                     .padding(.horizontal, 28)
                     .padding(.bottom, max(compactHeight ? 8 : 18,
                                          proxy.safeAreaInsets.bottom + 8))
+                  }
                 }
             }
+        }
+    }
+
+    private func firstRunLandscapeIntro(size: CGSize, safeArea: EdgeInsets) -> some View {
+        let zones = FirstRunStageZones.resolve(in: size, safeArea: safeArea)
+        return ZStack {
+            VStack(spacing: 8) {
+                ForEach(Array(["Hana", "Noah", "Jonas"].enumerated()), id: \.offset) { index, name in
+                    firstRunOpponent(name: name, seat: index + 1)
+                }
+            }
+            .frame(width: zones.opponents.width, height: zones.opponents.height)
+            .position(x: zones.opponents.midX, y: zones.opponents.midY)
+
+            VStack(spacing: 8) {
+                HStack(spacing: 5) {
+                    Text("POCH")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(Tokens.jewelPlatin)
+                    Text("1441")
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundStyle(Tokens.jewelGold)
+                }
+                .accessibilityElement(children: .combine)
+
+                Text(String(localized: "tutorial.firstTable.title",
+                            defaultValue: "Dein erster Tisch"))
+                    .font(.title2.weight(.heavy))
+                    .foregroundStyle(Tokens.jewelPlatin)
+
+                Text(String(localized: "firstRun.intro.body",
+                            defaultValue: "In der Mitte wartet dein erster Gewinn. Hana zeigt dir immer nur den nächsten Zug."))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.74))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Label(String(localized: "firstRun.goal",
+                             defaultValue: "Werde zuerst deine Karten los und gewinne die Mitte."),
+                      systemImage: "hand.raised.fill")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
+                    .multilineTextAlignment(.center)
+
+                Button {
+                    enterFirstTable(guided: true)
+                } label: {
+                    Label(String(localized: "firstRun.intro.primary",
+                                 defaultValue: "Am Tisch Platz nehmen"),
+                          systemImage: "chair.lounge.fill")
+                        .font(.body.weight(.bold))
+                        .foregroundStyle(Tokens.bgDeep)
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .background(Capsule().fill(Tokens.jewelGold))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("firstRun.intro.primary")
+
+                Button {
+                    enterFirstTable(guided: false)
+                } label: {
+                    Text(String(localized: "firstRun.intro.secondary",
+                                defaultValue: "Ohne Einführung spielen"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Tokens.jewelPlatin.opacity(0.68))
+                        .frame(minHeight: 44)
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(width: zones.decision.width)
+            .position(x: zones.decision.midX,
+                      y: size.height / 2)
+
+            ZStack {
+                Image("PochRingPM49")
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .saturation(theme.isNeon ? 1.08 : 0.88)
+                    .shadow(color: .black.opacity(0.65), radius: 22, y: 12)
+
+                TableTokenPile(count: playerCount,
+                               tint: Tokens.jewelGold,
+                               diameter: zones.board.width * 0.23,
+                               showCount: false)
+            }
+            .frame(width: zones.board.width, height: zones.board.height)
+            .position(x: zones.board.midX, y: zones.board.midY)
         }
     }
 
@@ -638,6 +746,9 @@ struct ContentView: View {
                     .background(Capsule().fill(Color.black.opacity(0.72)))
                     .offset(y: 10)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(name)
+            .accessibilityIdentifier("firstRun.opponent.\(seat)")
     }
 
     private var firstRunActStrip: some View {
@@ -684,7 +795,7 @@ struct ContentView: View {
         game.startTutorialRound(lesson)
         switch lesson {
         case .meld:
-            guidedMeldBeat = 0
+            game.presentation.startFirstRun()
             guidedMeldBusy = false
             guidedAntePoolCounts.removeAll(keepingCapacity: true)
             guidedAnteLandedEvents.removeAll(keepingCapacity: true)
@@ -831,7 +942,7 @@ struct ContentView: View {
                 .font(.system(size: 24, weight: .light))
                 .foregroundStyle(Tokens.jewelGold)
         }
-        .frame(height: 164, alignment: .center)
+        .frame(height: verticalSizeClass == .compact ? 54 : 164, alignment: .center)
         .accessibilityElement(children: .combine)
     }
 
@@ -864,14 +975,39 @@ struct ContentView: View {
     }
 
     private var guidedPill: some View {
-        Text(guidedRoundActive ? "GEFÜHRTE RUNDE" : "ZUG-BEGLEITER")
-            .font(.system(size: 8.5, weight: .heavy))
-            .tracking(1.4)
-            .foregroundStyle(Tokens.bgDeep)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(Capsule().fill(guidedTint.opacity(0.92)))
-            .shadow(color: guidedTint.opacity(0.18), radius: 8, y: 3)
+        HStack(spacing: 5) {
+            Image(systemName: "scope")
+            Text(guidedLearningStateTitle)
+        }
+        .font(.system(size: 8.5, weight: .heavy))
+        .tracking(1.2)
+        .foregroundStyle(Tokens.bgDeep)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(guidedTint.opacity(0.92)))
+        .shadow(color: guidedTint.opacity(0.18), radius: 8, y: 3)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "tutorial.learningState.label",
+                                   defaultValue: "Lernzustand"))
+        .accessibilityValue(guidedLearningStateTitle)
+        .accessibilityIdentifier("firstRun.learningState")
+    }
+
+    private var guidedLearningStateTitle: String {
+        switch guidedLearningState {
+        case .orientieren:
+            return String(localized: "tutorial.learningState.orient",
+                          defaultValue: "Orientieren")
+        case .verbinden:
+            return String(localized: "tutorial.learningState.connect",
+                          defaultValue: "Verbinden")
+        case .beweisen:
+            return String(localized: "tutorial.learningState.prove",
+                          defaultValue: "Beweisen")
+        case .loslassen:
+            return String(localized: "tutorial.learningState.release",
+                          defaultValue: "Loslassen")
+        }
     }
 
     private var guidedTint: Color {
@@ -910,9 +1046,12 @@ struct ContentView: View {
 
     private func guidedOpeningInteraction(in size: CGSize, focus: CGRect) -> some View {
         let target = CGPoint(x: focus.midX, y: focus.midY)
-        let source = CGPoint(x: size.width / 2,
-                             y: min(size.height - 124,
-                                    focus.maxY + Tokens.guidedOpeningSourceGap))
+        let landscape = size.width > size.height
+        let source = landscape
+            ? CGPoint(x: max(132, focus.minX - 112), y: focus.midY)
+            : CGPoint(x: size.width / 2,
+                      y: min(size.height - 124,
+                             focus.maxY + Tokens.guidedOpeningSourceGap))
         let projected = CGPoint(x: source.x + guidedOpeningDrag.width,
                                 y: source.y + guidedOpeningDrag.height)
         let distance = hypot(projected.x - target.x, projected.y - target.y)
@@ -938,18 +1077,28 @@ struct ContentView: View {
                 .frame(width: 76, height: 76)
                 .position(target)
                 .animation(.easeOut(duration: 0.12), value: distance)
+                .accessibilityElement()
+                .accessibilityLabel(String(localized: "board.center", defaultValue: "Mitte"))
+                .accessibilityIdentifier("firstRun.openingTarget")
 
-            TableChip(tint: Tokens.jewelGold,
-                      size: Tokens.guidedOpeningTokenSize)
-                .scaleEffect(distance < Tokens.guidedOpeningSnapRadius ? 0.94 : 1)
+            Button {
+                settleGuidedOpeningToken(from: source, to: target)
+            } label: {
+                TableChip(tint: Tokens.jewelGold,
+                          size: Tokens.guidedOpeningTokenSize)
+                    .scaleEffect(distance < Tokens.guidedOpeningSnapRadius ? 0.94 : 1)
+                    .frame(width: 44, height: 44)
+            }
+                .buttonStyle(.plain)
+                .frame(width: 44, height: 44)
                 .position(source)
                 .offset(guidedOpeningDrag)
                 .shadow(color: .black.opacity(0.72), radius: 9, y: 7)
-                .contentShape(Circle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 6)
                         .onChanged { value in
                             guard !guidedOpeningSettled else { return }
+                            game.beginGuidedOpeningToken()
                             guidedOpeningDrag = value.translation
                         }
                         .onEnded { value in
@@ -968,26 +1117,25 @@ struct ContentView: View {
                 )
                 .accessibilityLabel(String(localized: "tutorial.meld.action.openTable",
                                            defaultValue: "Stein in die Mitte legen"))
-                .accessibilityAddTraits(.isButton)
-                .accessibilityAction {
-                    settleGuidedOpeningToken(from: source, to: target)
-                }
+                .accessibilityIdentifier("firstRun.openingToken")
         }
     }
 
     private func settleGuidedOpeningToken(from source: CGPoint, to target: CGPoint) {
         guard !guidedOpeningSettled else { return }
         guidedOpeningSettled = true
-        withAnimation(.spring(response: 0.38, dampingFraction: 0.92)) {
+        game.beginGuidedOpeningToken()
+        withAnimation(.easeOut(duration: reduceMotion ? 0.06 : 0.16),
+                      completionCriteria: .logicallyComplete) {
             guidedOpeningDrag = CGSize(width: target.x - source.x,
                                        height: target.y - source.y)
-        }
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 420))
+        } completion: {
+            game.markGuidedOpeningTokenLanded()
+            guidedAntePoolCounts[.center] = 1
+            game.presentation.setFirstRunBeat(.fundTable)
+            guidedCoachFocused = true
             guidedOpeningDrag = .zero
             guidedOpeningSettled = false
-            guidedAntePoolCounts[.center] = 1
-            advanceGuidedMeld()
         }
     }
 
@@ -1079,14 +1227,17 @@ struct ContentView: View {
                 .background(Circle().fill(guidedTint))
             VStack(alignment: .leading, spacing: 3) {
                 Text(copy.title)
-                    .font(.system(size: 15, weight: .heavy))
+                    .font(.headline.weight(.heavy))
                     .foregroundStyle(Tokens.jewelPlatin)
                 Text(copy.text)
-                    .font(.system(size: 11.8, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.76))
-                    .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(copy.title)
+            .accessibilityValue(copy.text)
+            .accessibilityFocused($guidedCoachFocused)
             Spacer(minLength: 0)
             Button {
                 withAnimation(.easeOut(duration: 0.16)) {
@@ -1097,13 +1248,13 @@ struct ContentView: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(Tokens.slate)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 44, height: 44)
                     .background(Circle().fill(.white.opacity(0.06)))
             }
             .buttonStyle(.plain)
             }
 
-            if guidedRoundActive, akt == .melden, guidedMeldBeat > 0, guidedMeldBeat <= 6 {
+            if guidedRoundActive, akt == .melden, guidedMeldBeat > 0, guidedMeldBeat <= 7 {
                 Button(action: advanceGuidedMeld) {
                     HStack(spacing: 8) {
                         if guidedMeldBusy {
@@ -1114,13 +1265,14 @@ struct ContentView: View {
                             Image(systemName: "arrow.right")
                         }
                     }
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.body.weight(.bold))
                     .foregroundStyle(Tokens.bgDeep)
                     .frame(maxWidth: .infinity, minHeight: 48)
                     .background(Capsule().fill(guidedTint))
                 }
                 .buttonStyle(.plain)
                 .disabled(guidedMeldBusy)
+                .accessibilityIdentifier("firstRun.coachAction")
             }
         }
         .padding(.horizontal, 13)
@@ -1136,42 +1288,57 @@ struct ContentView: View {
 
     private func advanceGuidedMeld() {
         guard !guidedMeldBusy else { return }
+        if guidedMeldBeat == FirstRunBeat.fundTable.rawValue {
+            runGuidedTableFundingImpact()
+            return
+        }
         guidedMeldBusy = true
         Task { @MainActor in
             switch guidedMeldBeat {
             case 0:
-                if reduceMotion {
-                    guidedMeldBeat = 1
-                } else {
-                    withAnimation(.spring(response: 0.48, dampingFraction: 0.86)) {
-                        guidedMeldBeat = 1
-                    }
-                    try? await Task.sleep(for: .milliseconds(420))
-                }
+                game.presentation.setFirstRunBeat(.fundTable)
             case 1:
-                await runGuidedAnteSequence()
-                guidedMeldBeat = 2
+                break
             case 2:
                 await game.revealGuidedDealRound(reduceMotion: reduceMotion)
-                guidedMeldBeat = 3
+                game.presentation.setFirstRunBeat(.completeHand)
             case 3:
                 await game.finishGuidedDeal(reduceMotion: reduceMotion)
-                guidedMeldBeat = 4
+                game.presentation.setFirstRunBeat(.revealTrump)
             case 4:
                 game.revealGuidedTrumpf()
-                guidedMeldBeat = 5
+                game.presentation.setFirstRunBeat(.connectMeld)
             case 5:
-                await game.revealNextGuidedMeld(reduceMotion: reduceMotion)
-                guidedMeldBeat = 6
+                game.presentation.setFirstRunBeat(.proveMeld)
             case 6:
-                try? await Task.sleep(for: .seconds(
-                    reduceMotion ? 0.06 : Tokens.guidedPhaseHandoffRest
-                ))
+                await game.revealAllGuidedMelds(reduceMotion: reduceMotion)
+                game.presentation.setFirstRunBeat(.release)
+            case 7:
                 transition(to: .pochen)
             default:
                 break
             }
             guidedMeldBusy = false
+            guidedCoachFocused = true
+        }
+    }
+
+    private func runGuidedTableFundingImpact() {
+        guidedMeldBusy = true
+        guidedTableFundingTargeted = false
+        game.beginGuidedTableFunding()
+        withAnimation(.easeInOut(duration: reduceMotion ? 0.16 : 0.30),
+                      completionCriteria: .logicallyComplete) {
+            guidedTableFundingTargeted = true
+        } completion: {
+            game.markGuidedTableFundingLanded(groupSize: game.playerCount)
+            guidedAntePoolCounts = Dictionary(
+                uniqueKeysWithValues: Pool.allCases.map { ($0, game.playerCount) }
+            )
+            guidedTableFundingTargeted = false
+            game.presentation.setFirstRunBeat(.firstCard)
+            guidedMeldBusy = false
+            guidedCoachFocused = true
         }
     }
 
@@ -1179,32 +1346,36 @@ struct ContentView: View {
     private func runGuidedMeldMotionQA() {
         startGuidedRound()
         guidedAntePoolCounts[.center] = 1
-        guidedMeldBeat = 1
+        game.presentation.setFirstRunBeat(.fundTable)
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
             guidedMeldBusy = true
             await runGuidedAnteSequence()
-            guidedMeldBeat = 2
+            game.presentation.setFirstRunBeat(.firstCard)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
             guidedMeldBusy = true
             await game.revealGuidedDealRound(reduceMotion: reduceMotion)
-            guidedMeldBeat = 3
+            game.presentation.setFirstRunBeat(.completeHand)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAOutcomeHold))
             guidedMeldBusy = true
             await game.finishGuidedDeal(reduceMotion: reduceMotion)
-            guidedMeldBeat = 4
+            game.presentation.setFirstRunBeat(.revealTrump)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
             guidedMeldBusy = true
             game.revealGuidedTrumpf()
-            guidedMeldBeat = 5
+            game.presentation.setFirstRunBeat(.connectMeld)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAOutcomeHold))
             guidedMeldBusy = true
-            await game.revealNextGuidedMeld(reduceMotion: reduceMotion)
-            guidedMeldBeat = 6
+            game.presentation.setFirstRunBeat(.proveMeld)
+            guidedMeldBusy = false
+            try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
+            guidedMeldBusy = true
+            await game.revealAllGuidedMelds(reduceMotion: reduceMotion)
+            game.presentation.setFirstRunBeat(.release)
             guidedMeldBusy = false
         }
     }
@@ -1216,29 +1387,32 @@ struct ContentView: View {
                 guidedAntePoolCounts = Dictionary(
                     uniqueKeysWithValues: Pool.allCases.map { ($0, 1) }
                 )
-                guidedMeldBeat = 1
+                game.presentation.setFirstRunBeat(.fundTable)
             }
             if step >= 2 {
                 guidedAntePoolCounts = Dictionary(
                     uniqueKeysWithValues: Pool.allCases.map { ($0, game.playerCount) }
                 )
-                guidedMeldBeat = 2
+                game.presentation.setFirstRunBeat(.firstCard)
             }
             if step >= 3 {
                 await game.revealGuidedDealRound(reduceMotion: true)
-                guidedMeldBeat = 3
+                game.presentation.setFirstRunBeat(.completeHand)
             }
             if step >= 4 {
                 await game.finishGuidedDeal(reduceMotion: true)
-                guidedMeldBeat = 4
+                game.presentation.setFirstRunBeat(.revealTrump)
             }
             if step >= 5 {
                 game.revealGuidedTrumpf()
-                guidedMeldBeat = 5
+                game.presentation.setFirstRunBeat(.connectMeld)
             }
             if step >= 6 {
-                await game.revealNextGuidedMeld(reduceMotion: true)
-                guidedMeldBeat = 6
+                game.presentation.setFirstRunBeat(.proveMeld)
+            }
+            if step >= 7 {
+                await game.revealAllGuidedMelds(reduceMotion: true)
+                game.presentation.setFirstRunBeat(.release)
             }
         }
     }
@@ -1261,7 +1435,13 @@ struct ContentView: View {
         case 4:
             return String(localized: "tutorial.meld.action.revealTrump",
                           defaultValue: "Trumpf aufdecken")
+        case 5:
+            return String(localized: "tutorial.meld.action.connectClaim",
+                          defaultValue: "Karte und Mulde verbinden")
         case 6:
+            return String(localized: "tutorial.meld.action.showClaim",
+                          defaultValue: "Meldung zeigen")
+        case 7:
             return String(localized: "tutorial.meld.action.continueBidding",
                           defaultValue: "Weiter zum Pochen")
         default:
@@ -1317,8 +1497,8 @@ struct ContentView: View {
                             String(localized: "tutorial.meld.table.body", defaultValue: "Lege ihn in die Mitte. Sie wird am Ende der Runde gewonnen."))
                 case 1:
                     return ("circle.grid.3x3.fill",
-                            String(localized: "tutorial.meld.ante.title", defaultValue: "Alle legen gemeinsam ein"),
-                            String(localized: "tutorial.meld.ante.body", defaultValue: "Jeder legt einen Stein in jede Mulde. Nicht gewonnene Steine bleiben für die nächste Runde liegen."))
+                            String(localized: "tutorial.meld.ante.title", defaultValue: "Dein Stein liegt"),
+                            String(localized: "tutorial.meld.ante.body", defaultValue: "Die Mitte enthält jetzt 1. Als Nächstes legt jeder einen Stein in jede Mulde."))
                 case 2:
                     return ("rectangle.stack.fill",
                             String(localized: "tutorial.meld.firstDeal.title", defaultValue: "Die erste Runde"),
@@ -1331,10 +1511,18 @@ struct ContentView: View {
                     return ("suit.diamond.fill",
                             String(localized: "tutorial.guide.trump.title", defaultValue: "Trumpf aufdecken"),
                             String(localized: "tutorial.guide.trump.body", defaultValue: "Die letzte offene Karte bestimmt die Trumpffarbe dieser Runde."))
-                default:
+                case 5:
+                    return ("point.topleft.down.to.point.bottomright.curvepath",
+                            String(localized: "tutorial.meld.connect.title", defaultValue: "Karte trifft Mulde"),
+                            String(localized: "tutorial.meld.connect.body", defaultValue: "Dein Trumpf-König gehört zur König-Mulde. Verfolge die eine Verbindung."))
+                case 6:
                     return ("checkmark.seal.fill",
                             String(localized: "tutorial.meld.claim.title", defaultValue: "Meldung erkennen"),
                             String(localized: "tutorial.meld.claim.body", defaultValue: "Passende Trumpfkarten holen die benannte äußere Mulde."))
+                default:
+                    return ("checkmark.circle.fill",
+                            String(localized: "tutorial.meld.release.title", defaultValue: "Die Disc ist bereit"),
+                            String(localized: "tutorial.meld.release.body", defaultValue: "Deine Meldung ist angekommen. Die Lernhilfen können jetzt verschwinden."))
                 }
             }
             if game.dealtCount < game.totalDeals {
@@ -1690,7 +1878,7 @@ struct ContentView: View {
                         String(localized: "tutorial.firstTable.body", defaultValue: "Du spielst sofort. Mira erklärt immer nur die eine Entscheidung, die jetzt zählt."),
                         tint: Tokens.jewelGold)
             tutorialLessonPicker
-            coachBubble("Mira", String(localized: "tutorial.coach.body", defaultValue: "Drei Akte, drei klare Ziele. Ich bleibe am Tisch, bis du den Rhythmus selbst fühlst."))
+            coachBubble("Hana", String(localized: "tutorial.coach.body", defaultValue: "Drei Akte, drei klare Ziele. Ich bleibe am Tisch, bis du den Rhythmus selbst fühlst."))
             tutorialDecisionRail
             tutorialProgressStrip
             overlayStep("1",
@@ -2702,10 +2890,46 @@ struct ContentView: View {
     /// Phase 1 folgt dem Mockup: Brett als Hauptdarsteller, keine Gegnerleiste im
     /// ersten Blick, Kartenfächer als unterer Bleed.
     @ViewBuilder private var phase1Stage: some View {
-        if guidedRoundActive && guidedMeldBeat > 0 {
+        if isGuidedOpeningBeat {
+            guidedOpeningStage
+        } else if guidedRoundActive {
             guidedMeldLearningStage
         } else {
             regularPhase1Stage
+        }
+    }
+
+    private var guidedOpeningStage: some View {
+        GeometryReader { proxy in
+            let zones = FirstRunStageZones.resolve(in: proxy.size,
+                                                   safeArea: proxy.safeAreaInsets)
+            let ringDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
+            let boardScale = zones.board.width / ringDiameter
+
+            ZStack {
+                guidedOpponentAxis(in: zones)
+
+                if guidedTableFundingTargeted {
+                    Path { path in
+                        path.move(to: CGPoint(x: zones.opponents.midX,
+                                              y: zones.opponents.midY))
+                        path.addLine(to: CGPoint(x: zones.board.midX,
+                                                y: zones.board.midY))
+                    }
+                    .stroke(Tokens.jewelGold.opacity(0.74),
+                            style: StrokeStyle(lineWidth: 1, lineCap: .round))
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
+
+                ringView
+                    .scaleEffect(boardScale)
+                    .frame(width: ringDiameter, height: ringDiameter)
+                    .position(x: zones.board.midX, y: zones.board.midY)
+                    .allowsHitTesting(false)
+
+                guidedOpeningInteraction(in: proxy.size, focus: zones.board)
+            }
         }
     }
 
@@ -2744,48 +2968,130 @@ struct ContentView: View {
     /// Erklärung und Hand dagegen als drei feste vertikale Zonen komponiert.
     private var guidedMeldLearningStage: some View {
         GeometryReader { proxy in
-            let compact = proxy.size.height < Tokens.phase2CompactHeight
-            let handHeight = compact
-                ? Tokens.guidedMeldLearningHandCompact
-                : Tokens.guidedMeldLearningHandRegular
-            let reserved = Tokens.guidedMeldLearningCoachHeight
-                + handHeight
-                + Tokens.guidedMeldLearningGap * 2
-            let boardDiameter = min(
-                Tokens.guidedMeldLearningBoardMax,
-                max(Tokens.guidedMeldLearningBoardMin,
-                    proxy.size.height - reserved)
-            )
+            let zones = FirstRunStageZones.resolve(in: proxy.size,
+                                                   safeArea: proxy.safeAreaInsets)
             let ringDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
-            let boardScale = boardDiameter / ringDiameter
-            let coachTop = boardDiameter + Tokens.guidedMeldLearningGap
+            let boardScale = zones.board.width / ringDiameter
 
-            ZStack(alignment: .top) {
+            ZStack {
+                guidedOpponentAxis(in: zones)
+
+                if guidedTableFundingTargeted {
+                    Path { path in
+                        path.move(to: CGPoint(x: zones.opponents.midX,
+                                              y: zones.opponents.midY))
+                        path.addLine(to: CGPoint(x: zones.board.midX,
+                                                y: zones.board.midY))
+                    }
+                    .stroke(Tokens.jewelGold.opacity(0.74),
+                            style: StrokeStyle(lineWidth: 1, lineCap: .round))
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
+
                 ringView
-                    .scaleEffect(boardScale, anchor: .top)
-                    .frame(width: ringDiameter, height: boardDiameter,
-                           alignment: .top)
-                    .position(x: proxy.size.width / 2,
-                              y: boardDiameter / 2)
+                    .scaleEffect(boardScale)
+                    .frame(width: ringDiameter, height: ringDiameter)
+                    .position(x: zones.board.midX, y: zones.board.midY)
                     .contentShape(Circle())
                     .allowsHitTesting(false)
 
+                if guidedMeldBeat == FirstRunBeat.connectMeld.rawValue
+                    || guidedMeldBeat == FirstRunBeat.proveMeld.rawValue {
+                    guidedMeldConnection(in: zones,
+                                         ringDiameter: ringDiameter)
+                }
+
                 guidedCoachRail
-                    .frame(width: min(proxy.size.width - 24, guidedCoachWidth),
-                           height: Tokens.guidedMeldLearningCoachHeight,
-                           alignment: .top)
-                    .offset(y: coachTop)
+                    .frame(width: min(zones.decision.width, guidedCoachWidth))
+                    .position(x: zones.decision.midX,
+                              y: zones.decision.midY)
                     .opacity(guidedMeldBusy ? 0 : 1)
                     .allowsHitTesting(!guidedMeldBusy)
 
                 handView
-                    .frame(width: proxy.size.width,
-                           height: handHeight,
+                    .frame(width: zones.hand.width,
+                           height: zones.hand.height,
                            alignment: .bottom)
                     .clipped()
-                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .position(x: zones.hand.midX, y: zones.hand.midY)
             }
             .animation(.easeOut(duration: 0.18), value: guidedMeldBusy)
+        }
+    }
+
+    private func guidedMeldConnection(in zones: FirstRunStageZones,
+                                      ringDiameter: CGFloat) -> some View {
+        let well = PM49Geometry.wellCenter(for: guidedIntroPool, in: ringDiameter)
+        let wellPoint = CGPoint(
+            x: zones.board.minX + well.x / ringDiameter * zones.board.width,
+            y: zones.board.minY + well.y / ringDiameter * zones.board.height
+        )
+        let cardPoint = guidedMeldCardPoint(in: zones.hand)
+
+        return ZStack {
+            Path { path in
+                path.move(to: cardPoint)
+                path.addLine(to: wellPoint)
+            }
+            .stroke(Tokens.jewelGold.opacity(0.82),
+                    style: StrokeStyle(lineWidth: 1,
+                                       lineCap: .round,
+                                       dash: [3, 4]))
+
+            Circle()
+                .fill(Tokens.jewelGold)
+                .frame(width: 6, height: 6)
+                .position(cardPoint)
+            Circle()
+                .fill(Tokens.jewelGold)
+                .frame(width: 6, height: 6)
+                .position(wellPoint)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func guidedMeldCardPoint(in hand: CGRect) -> CGPoint {
+        let cards = Array(game.humanHand.prefix(game.humanDealtVisible))
+        let index = cards.firstIndex(where: { $0.rank == guidedIntroRank }) ?? 0
+        let count = cards.count
+        let totalWidth = min(CGFloat(count) * 30, 224)
+        let progress = count > 1 ? CGFloat(index) / CGFloat(count - 1) : 0.5
+        return CGPoint(x: hand.midX - totalWidth / 2 + progress * totalWidth,
+                       y: hand.minY + 30)
+    }
+
+    private var guidedIntroRank: Rank {
+        switch guidedIntroPool {
+        case .ace: .ace
+        case .king: .king
+        case .queen: .queen
+        case .jack: .jack
+        case .ten: .ten
+        case .mariage: .king
+        case .sequence, .poch, .center: .ace
+        }
+    }
+
+    @ViewBuilder
+    private func guidedOpponentAxis(in zones: FirstRunStageZones) -> some View {
+        if zones.isLandscape {
+            VStack(spacing: 8) {
+                ForEach(1..<game.playerCount, id: \.self) { seat in
+                    firstRunOpponent(name: game.name(of: seat), seat: seat)
+                }
+            }
+            .frame(width: zones.opponents.width, height: zones.opponents.height)
+            .position(x: zones.opponents.midX, y: zones.opponents.midY)
+        } else {
+            HStack(spacing: 28) {
+                ForEach(1..<game.playerCount, id: \.self) { seat in
+                    firstRunOpponent(name: game.name(of: seat), seat: seat)
+                }
+            }
+            .frame(width: zones.opponents.width, height: zones.opponents.height)
+            .position(x: zones.opponents.midX, y: zones.opponents.midY)
         }
     }
 
@@ -2810,7 +3116,14 @@ struct ContentView: View {
                     }
             }
             if guidedRoundActive && guidedMeldBeat == 0 {
-                guidedBoardVeil(size: d)
+                guidedBoardVeil(size: d,
+                                focusPools: [.center, guidedIntroPool])
+                    .position(x: d / 2, y: d / 2)
+                    .allowsHitTesting(false)
+            } else if guidedRoundActive,
+                      guidedMeldBeat == FirstRunBeat.connectMeld.rawValue
+                        || guidedMeldBeat == FirstRunBeat.proveMeld.rawValue {
+                guidedBoardVeil(size: d, focusPools: [guidedIntroPool])
                     .position(x: d / 2, y: d / 2)
                     .allowsHitTesting(false)
             }
@@ -2874,14 +3187,17 @@ struct ContentView: View {
         game.meldEvents.first?.pool ?? .ace
     }
 
-    private func guidedBoardVeil(size: CGFloat) -> some View {
-        let center = PM49Geometry.wellCenter(for: .center, in: size)
+    private func guidedBoardVeil(size: CGFloat, focusPools: [Pool]) -> some View {
         return Path { path in
             path.addRect(CGRect(origin: .zero, size: CGSize(width: size, height: size)))
-            path.addEllipse(in: CGRect(x: center.x - size * 0.15,
-                                       y: center.y - size * 0.15,
-                                       width: size * 0.30,
-                                       height: size * 0.30))
+            for pool in focusPools {
+                let center = PM49Geometry.wellCenter(for: pool, in: size)
+                let diameter = pool == .center ? size * 0.30 : size * 0.20
+                path.addEllipse(in: CGRect(x: center.x - diameter / 2,
+                                           y: center.y - diameter / 2,
+                                           width: diameter,
+                                           height: diameter))
+            }
         }
         .fill(Color.black.opacity(0.72), style: FillStyle(eoFill: true))
         .frame(width: size, height: size)
@@ -2971,7 +3287,7 @@ struct ContentView: View {
                     .frame(width: 4, height: 4)
             }
 
-            Text("MITTE")
+            Text(String(localized: "board.center", defaultValue: "MITTE"))
                 .font(.system(size: 7.2, weight: .bold, design: .rounded))
                 .tracking(1.1)
                 .foregroundStyle(Tokens.jewelPlatin.opacity(0.62))

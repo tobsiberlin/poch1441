@@ -5,7 +5,7 @@ Modernes Premium-Strategie-/Bluffspiel für iOS - der Urahn des Pokers (1441 in 
 - **Design-Kanon 2026:** `tasks/design-canon-2026.md` · **Produkt und Regeln:** `tasks/konzept.md` · **Kurzfassung:** `CLAUDE.md §0`
 - **Regelwerk & Roadmap:** `tasks/poch-spec.md` · **Status/Cockpit:** lokal generiert über `tools/gen_cockpit.py`
 - **Stack:** Swift, SwiftUI + PochKit (Engine als UI-freies, deterministisches Swift Package); SpriteKit für die Spieltisch-Juice-Ebene geplant
-- **Status:** Engine (Gate A) eingefroren · Produktwelt in zwei regelidentischen Tischen festgelegt: Poch Disc und Unterwegs · Material-, UX- und Motion-Qualität folgen dem Designkanon 2026
+- **Status:** Engine (Gate A) eingefroren · First-Run-Vertical-Slice auf der echten Poch Disc integriert und auf SE, Standard und Pro Max in Portrait/Landscape geprüft · Produktwelt bleibt Poch Disc plus regelidentisches Unterwegs-Set
 
 ## Struktur
 

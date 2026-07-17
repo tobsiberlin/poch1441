@@ -310,9 +310,26 @@ final class GameState {
     /// Startet eine reproduzierbare, regelkonforme Lernszene. Die Seeds liegen als
     /// Build-Time-Daten vor; die Engine bleibt für alle Karten und Ergebnisse die Wahrheit.
     func startTutorialRound(_ lesson: TutorialLesson = .meld) {
+        applyCuratedTutorialLineup()
         adoptRound(seed: tutorialSeed(for: lesson))
         if lesson == .playout {
             advanceTutorialToPlayout()
+        }
+    }
+
+    private func applyCuratedTutorialLineup() {
+        guard let url = Bundle.main.url(forResource: "BotProfiles", withExtension: "json") else {
+            Self.profileLog.error("BotProfiles.json fehlt im App-Bundle")
+            return
+        }
+        do {
+            let data = try Data(contentsOf: url)
+            let lineup = try OpponentRosterCatalog(data: data).curatedTutorialLineup()
+            opponentNames = lineup.seats
+                .sorted { $0.uiSeatIndex < $1.uiSeatIndex }
+                .map(\.opponent.displayName)
+        } catch {
+            Self.profileLog.error("Tutorialbesetzung konnte nicht geladen werden: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -348,7 +365,7 @@ final class GameState {
 
     private func tutorialSeed(for lesson: TutorialLesson) -> UInt64 {
         let fallback: [TutorialLesson: UInt64] = [
-            .meld: playerCount == 3 ? 1_444 : 1_442,
+            .meld: playerCount == 3 ? 1_444 : 19,
             .bidding: playerCount == 3 ? 1_441 : 7,
             .playout: 1_441
         ]
@@ -871,7 +888,44 @@ final class GameState {
     /// Haptik-Ticker in fester 90-ms-Kadenz - entkoppelt von der Karten-Anzahl
     /// (§6 Auflage 4: Taptic Engine schluckt zu schnelle Haptiks).
     private(set) var hapticTick = 0
+    private(set) var r1ImpactTick = 0
+    private(set) var r1ImpactGroupSize = 1
+    private(set) var r1ImpactSurface: R1ContactSurface = .outerWell
     private var dealTask: Task<Void, Never>?
+
+    func beginGuidedOpeningToken() {
+        presentation.begin(id: "first-run-opening-token",
+                           kind: .tableToken,
+                           source: "player-seat-0",
+                           target: "pool-center")
+    }
+
+    func beginGuidedTableFunding() {
+        presentation.begin(id: "first-run-table-funding",
+                           kind: .tableToken,
+                           source: "stable-player-seats",
+                           target: "all-nine-pools")
+    }
+
+    func markGuidedTableFundingLanded(groupSize: Int) {
+        beginGuidedTableFunding()
+        guard presentation.impact(id: "first-run-table-funding") else { return }
+        recordR1Impact(groupSize: groupSize, surface: .outerWell)
+        presentation.complete(id: "first-run-table-funding")
+    }
+
+    func markGuidedOpeningTokenLanded() {
+        beginGuidedOpeningToken()
+        guard presentation.impact(id: "first-run-opening-token") else { return }
+        recordR1Impact(groupSize: 1, surface: .centerWell)
+        presentation.complete(id: "first-run-opening-token")
+    }
+
+    private func recordR1Impact(groupSize: Int, surface: R1ContactSurface) {
+        r1ImpactGroupSize = max(1, groupSize)
+        r1ImpactSurface = surface
+        r1ImpactTick += 1
+    }
 
     var totalDeals: Int { round.deal.hands.map(\.count).reduce(0, +) }
 
@@ -1021,6 +1075,16 @@ final class GameState {
         await waitForMeldToLand(sequence)
     }
 
+    func revealAllGuidedMelds(reduceMotion: Bool) async {
+        while startedMelds < meldEvents.count, !Task.isCancelled {
+            await revealNextGuidedMeld(reduceMotion: reduceMotion)
+            guard !Task.isCancelled, startedMelds < meldEvents.count else { return }
+            if !reduceMotion {
+                try? await Task.sleep(for: .milliseconds(180))
+            }
+        }
+    }
+
     /// Tap überspringt sofort (§6a b): Kaskade bricht ab, Meldungen saugen sich
     /// in Lichtgeschwindigkeit zu den Gewinnern.
     func skipDeal() {
@@ -1112,7 +1176,10 @@ final class GameState {
         guard presentation.impact(id: eventID) else { return }
         meldShown += 1
         pulsingPool = nil
-        hapticTick += 1
+        let groupSize = meldEvents.indices.contains(sequence)
+            ? meldEvents[sequence].chips
+            : 1
+        recordR1Impact(groupSize: groupSize, surface: .outerWell)
         presentation.complete(id: eventID)
     }
 

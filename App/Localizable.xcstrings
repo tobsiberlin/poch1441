@@ -1356,43 +1356,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du spielst sofort. Mira erklärt immer nur die eine Entscheidung, die jetzt zählt."
+            "value" : "Du spielst sofort. Hana erklärt immer nur die eine Entscheidung, die jetzt zählt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You start playing right away. Mira explains only the one decision that matters now."
+            "value" : "You start playing right away. Hana explains only the one decision that matters now."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Empiezas a jugar de inmediato. Mira explica solo la decisión que importa ahora."
+            "value" : "Empiezas a jugar de inmediato. Hana explica solo la decisión que importa ahora."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous jouez immédiatement. Mira n'explique que la décision qui compte maintenant."
+            "value" : "Vous jouez immédiatement. Hana n'explique que la décision qui compte maintenant."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inizi subito a giocare. Mira spiega solo la decisione che conta adesso."
+            "value" : "Inizi subito a giocare. Hana spiega solo la decisione che conta adesso."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je speelt meteen. Mira legt alleen de beslissing uit die nu telt."
+            "value" : "Je speelt meteen. Hana legt alleen de beslissing uit die nu telt."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Od razu zaczynasz grać. Mira wyjaśnia tylko decyzję, która liczy się teraz."
+            "value" : "Od razu zaczynasz grać. Hana wyjaśnia tylko decyzję, która liczy się teraz."
           }
         }
       }
@@ -1825,6 +1825,116 @@
         "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pokaż meldunek" } }
       }
     },
+    "tutorial.learningState.label" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lernzustand" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Learning state" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estado de aprendizaje" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Étape d’apprentissage" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Stato di apprendimento" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Leerstand" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Stan nauki" } }
+      }
+    },
+    "tutorial.learningState.orient" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Orientieren" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Orient" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Orientarse" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "S’orienter" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Orientarsi" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Oriënteren" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Orientacja" } }
+      }
+    },
+    "tutorial.learningState.connect" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Verbinden" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connect" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Conectar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Relier" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Collegare" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Verbinden" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Łączenie" } }
+      }
+    },
+    "tutorial.learningState.prove" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Beweisen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Prove" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprobar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Prouver" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Dimostrare" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Bewijzen" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Potwierdzenie" } }
+      }
+    },
+    "tutorial.learningState.release" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Loslassen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Let go" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Soltar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Lâcher prise" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Lasciare andare" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Loslaten" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Samodzielna gra" } }
+      }
+    },
+    "tutorial.meld.action.connectClaim" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Karte und Mulde verbinden" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connect card and well" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Conectar carta y hueco" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Relier carte et coupelle" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Collega carta e vaschetta" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Verbind kaart en vak" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Połącz kartę i pole" } }
+      }
+    },
+    "tutorial.meld.connect.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Karte trifft Mulde" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Card meets well" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La carta encuentra su hueco" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La carte rejoint sa coupelle" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La carta trova la vaschetta" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Kaart ontmoet vak" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Karta trafia do pola" } }
+      }
+    },
+    "tutorial.meld.connect.body" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein Trumpf-König gehört zur König-Mulde. Verfolge die eine Verbindung." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your trump king belongs to the king well. Follow the single connection." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu rey de triunfo pertenece al hueco del rey. Sigue esta única conexión." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ton roi d’atout rejoint la coupelle du roi. Suis ce seul lien." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il tuo re di briscola appartiene alla vaschetta del re. Segui questo unico legame." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Je troefkoning hoort bij het koningsvak. Volg deze ene verbinding." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Twój król atutowy należy do pola króla. Śledź to jedno połączenie." } }
+      }
+    },
+    "tutorial.meld.release.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Disc ist bereit" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The disc is ready" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El disco está listo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Le disque est prêt" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il disco è pronto" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "De disc is klaar" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Dysk jest gotowy" } }
+      }
+    },
+    "tutorial.meld.release.body" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Deine Meldung ist angekommen. Die Lernhilfen können jetzt verschwinden." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your meld has landed. The learning aids can now disappear." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu declaración ha llegado. Las ayudas ya pueden desaparecer." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ton annonce est arrivée. Les aides peuvent maintenant disparaître." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La tua dichiarazione è arrivata. Gli aiuti possono ora scomparire." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Je melding is aangekomen. De leerhulpen kunnen nu verdwijnen." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Twój meldunek dotarł. Wskazówki mogą teraz zniknąć." } }
+      }
+    },
     "tutorial.meld.table.title" : {
       "localizations" : {
         "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein erster Stein" } },
@@ -1849,24 +1959,24 @@
     },
     "tutorial.meld.ante.title" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Alle legen gemeinsam ein" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Everyone contributes" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Todos contribuyen" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Tout le monde contribue" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tutti contribuiscono" } },
-        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Iedereen legt in" } },
-        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Każdy dokłada stawkę" } }
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein Stein liegt" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your token has landed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu ficha ha llegado" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ton jeton est posé" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il tuo gettone è arrivato" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Je steen ligt" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Twój żeton wylądował" } }
       }
     },
     "tutorial.meld.ante.body" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Jeder legt einen Stein in jede Mulde. Nicht gewonnene Steine bleiben für die nächste Runde liegen." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Everyone places one token in every well. Unclaimed tokens carry into the next round." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada jugador pone una ficha en cada hueco. Las fichas no ganadas pasan a la siguiente ronda." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chacun met un jeton dans chaque coupelle. Les jetons non gagnés restent pour la manche suivante." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ognuno mette un gettone in ogni vaschetta. I gettoni non vinti restano per il turno successivo." } },
-        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Iedereen legt één steen in elk kuiltje. Niet gewonnen stenen blijven liggen voor de volgende ronde." } },
-        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Każdy kładzie po jednym żetonie w każdym zagłębieniu. Niewygrane żetony zostają na następną rundę." } }
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Mitte enthält jetzt 1. Als Nächstes legt jeder einen Stein in jede Mulde." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The centre now contains 1. Next, everyone places one token in every well." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El centro ahora contiene 1. Después, cada jugador pone una ficha en cada hueco." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Le centre contient maintenant 1. Ensuite, chacun pose un jeton dans chaque coupelle." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il centro ora contiene 1. Poi, ognuno mette un gettone in ogni vaschetta." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Het midden bevat nu 1. Daarna legt iedereen één steen in elk vak." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Na środku jest teraz 1. Następnie każdy kładzie po jednym żetonie w każdym polu." } }
       }
     },
     "tutorial.meld.firstDeal.title" : {
@@ -2536,13 +2646,13 @@
     },
     "firstRun.intro.body" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "In der Mitte wartet dein erster Gewinn. Mira zeigt dir immer nur den nächsten Zug." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your first prize is waiting in the centre. Mira shows you only the next move." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu primer premio te espera en el centro. Mira solo te muestra el siguiente movimiento." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre premier gain vous attend au centre. Mira vous montre uniquement le prochain coup." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "La tua prima vincita ti aspetta al centro. Mira ti mostra solo la prossima mossa." } },
-        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Je eerste winst wacht in het midden. Mira toont alleen de volgende zet." } },
-        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pierwsza wygrana czeka na środku. Mira pokazuje tylko następny ruch." } }
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "In der Mitte wartet dein erster Gewinn. Hana zeigt dir immer nur den nächsten Zug." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your first prize is waiting in the centre. Hana shows you only the next move." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu primer premio te espera en el centro. Hana solo te muestra el siguiente movimiento." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre premier gain vous attend au centre. Hana vous montre uniquement le prochain coup." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La tua prima vincita ti aspetta al centro. Hana ti mostra solo la prossima mossa." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Je eerste winst wacht in het midden. Hana toont alleen de volgende zet." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pierwsza wygrana czeka na środku. Hana pokazuje tylko następny ruch." } }
       }
     },
     "firstRun.goal" : {

@@ -585,65 +585,177 @@ struct CoachHint: View {
     }
 }
 
+enum R1Colorway: CaseIterable, Sendable {
+    case naturalWhite
+    case terracotta
+    case sage
+    case slate
+
+    fileprivate var face: Color {
+        switch self {
+        case .naturalWhite: Color(hex: 0xCEC7B8)
+        case .terracotta: Color(hex: 0x9B5D48)
+        case .sage: Color(hex: 0x758071)
+        case .slate: Color(hex: 0x62666A)
+        }
+    }
+
+    fileprivate var edge: Color {
+        switch self {
+        case .naturalWhite: Color(hex: 0x928B7D)
+        case .terracotta: Color(hex: 0x693D31)
+        case .sage: Color(hex: 0x4D564C)
+        case .slate: Color(hex: 0x3D4145)
+        }
+    }
+}
+
+/// Track-A-Spielstein R1. `tint` bleibt vorerst als quellkompatibler Parameter
+/// bestehen, bezeichnet aber ausdrücklich weder Pool noch Besitzer: Innerhalb
+/// einer Partie verwenden alle Steine dieselbe keramische Farbwelt.
 struct TableChip: View {
     var tint: Color = Tokens.jewelGold
     var size: CGFloat = 11
+    var colorway: R1Colorway = .naturalWhite
 
     var body: some View {
         ZStack {
-            // Enger Kontaktschatten: Das Asset bleibt flach auf der Mulde liegen
-            // und liest sich nicht als Kugel oder schwebender UI-Punkt.
             Ellipse()
-                .fill(Color.black.opacity(0.72))
-                .frame(width: size * 0.82, height: size * 0.11)
-                .blur(radius: size * 0.012)
-                .offset(y: size * 0.37)
+                .fill(Color.black.opacity(0.76))
+                .frame(width: size * 0.84, height: max(1, size * 0.10))
+                .blur(radius: size * 0.018)
+                .offset(y: size * 0.40)
 
-            Image("GameTokenGlass")
-                .resizable()
-                .interpolation(.high)
-                .frame(width: size, height: size)
+            // Sichtbare 3-mm-Kante mit feiner Rändelung. Die Kante ist bewusst
+            // flach und trocken statt transparent, hochglänzend oder metallisch.
+            Circle()
+                .fill(colorway.edge)
+                .frame(width: size * 0.97, height: size * 0.97)
+                .offset(y: size * 0.045)
                 .overlay {
-                    // Nur der Glaskern übernimmt die Kategorie. Metallfassung
-                    // und Studio-Reflex bleiben für alle Steine physisch gleich.
-                    ZStack {
-                        Circle()
-                            .fill(tint.opacity(0.92))
-                            .blendMode(.color)
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [
-                                        Tokens.jewelPlatin.opacity(0.20),
-                                        tint.opacity(0.38),
-                                        Color.black.opacity(0.12)
-                                    ],
-                                    center: UnitPoint(x: 0.34, y: 0.28),
-                                    startRadius: 0,
-                                    endRadius: size * 0.42
-                                )
-                            )
-                            .blendMode(.softLight)
-                        Circle()
-                            .strokeBorder(tint.opacity(0.38), lineWidth: max(0.6, size * 0.035))
-                        Ellipse()
-                            .fill(Tokens.jewelPlatin.opacity(0.24))
-                            .frame(width: size * 0.24, height: size * 0.10)
-                            .rotationEffect(.degrees(-24))
-                            .offset(x: -size * 0.12, y: -size * 0.13)
-                    }
-                    .padding(size * 0.17)
+                    Circle()
+                        .strokeBorder(
+                            AngularGradient(colors: [
+                                Color.black.opacity(0.30),
+                                Color.white.opacity(0.07),
+                                Color.black.opacity(0.22),
+                                Color.white.opacity(0.06),
+                                Color.black.opacity(0.30)
+                            ], center: .center),
+                            lineWidth: max(0.55, size * 0.055)
+                        )
                 }
-                .compositingGroup()
+                .overlay {
+                    Circle()
+                        .strokeBorder(
+                            Color.black.opacity(0.18),
+                            style: StrokeStyle(
+                                lineWidth: max(0.3, size * 0.014),
+                                dash: [max(0.35, size * 0.016),
+                                       max(0.5, size * 0.024)]
+                            )
+                        )
+                        .padding(size * 0.01)
+                }
+
+            Circle()
+                .fill(colorway.face)
+                .overlay {
+                    Circle()
+                        .fill(
+                            LinearGradient(colors: [
+                                Color.white.opacity(0.07),
+                                .clear,
+                                Color.black.opacity(0.065)
+                            ], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                }
+                .overlay {
+                    R1BlindEmboss()
+                        .stroke(colorway.edge.opacity(0.30),
+                                lineWidth: max(0.42, size * 0.025))
+                        .padding(size * 0.20)
+                        .shadow(color: Color.white.opacity(0.08),
+                                radius: 0,
+                                x: -max(0.2, size * 0.01),
+                                y: -max(0.2, size * 0.01))
+                }
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.075),
+                                               lineWidth: max(0.35, size * 0.016)))
+                .padding(size * 0.055)
         }
         .frame(width: size, height: size)
-        .shadow(color: .black.opacity(0.72), radius: size * 0.07, y: size * 0.055)
         .accessibilityHidden(true)
     }
 }
 
-/// PM68-Regel: schwere Tokens liegen als natürlich geschichtete Gruppe in der
-/// Mulde. Der Kontakt-Schatten bleibt hart, der Höhenschatten weich.
+/// Tonale Blindprägung des rotationssymmetrischen Kartenrücken-Signets.
+private struct R1BlindEmboss: Shape {
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let width = rect.width * 0.48
+        let height = rect.height * 0.48
+        var path = Path()
+        path.move(to: CGPoint(x: center.x, y: center.y - height))
+        path.addLine(to: CGPoint(x: center.x + width, y: center.y))
+        path.addLine(to: CGPoint(x: center.x, y: center.y + height))
+        path.addLine(to: CGPoint(x: center.x - width, y: center.y))
+        path.closeSubpath()
+
+        let coreWidth = width * 0.36
+        let coreHeight = height * 0.36
+        path.move(to: CGPoint(x: center.x, y: center.y - coreHeight))
+        path.addLine(to: CGPoint(x: center.x + coreWidth, y: center.y))
+        path.addLine(to: CGPoint(x: center.x, y: center.y + coreHeight))
+        path.addLine(to: CGPoint(x: center.x - coreWidth, y: center.y))
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct R1TokenRestingPose: Equatable, Sendable {
+    /// Mittelpunkt relativ zum Durchmesser eines einzelnen R1-Steins.
+    let offset: CGSize
+    let rotation: Double
+}
+
+/// Handgesetzte, stabile Endlagen. Ein bereits gelandeter Stein wechselt seinen
+/// Slot nicht, wenn weitere Steine hinzukommen; dadurch springt kein Haufen bei
+/// einer Zählermutation. Alle zwölf Mittelpunkte halten zusätzlich mindestens
+/// einen Steinradius Abstand zur nutzbaren Muldenkontur.
+enum R1TokenSlots {
+    private static let poses: [R1TokenRestingPose] = [
+        .init(offset: .init(width: 0.00, height: 0.00), rotation: -2.0),
+        .init(offset: .init(width: -0.43, height: 0.14), rotation: 3.0),
+        .init(offset: .init(width: 0.43, height: 0.12), rotation: -4.0),
+        .init(offset: .init(width: -0.23, height: -0.38), rotation: 5.0),
+        .init(offset: .init(width: 0.29, height: -0.34), rotation: -1.0),
+        .init(offset: .init(width: 0.02, height: 0.47), rotation: 4.0),
+        .init(offset: .init(width: -0.54, height: -0.13), rotation: -5.0),
+        .init(offset: .init(width: 0.54, height: -0.10), rotation: 2.0),
+        .init(offset: .init(width: -0.42, height: 0.43), rotation: 1.0),
+        .init(offset: .init(width: 0.43, height: 0.41), rotation: -3.0),
+        .init(offset: .init(width: 0.03, height: -0.57), rotation: 5.0),
+        .init(offset: .init(width: -0.25, height: 0.58), rotation: -4.0)
+    ]
+
+    static func pose(for index: Int) -> R1TokenRestingPose {
+        poses[min(max(index, 0), poses.count - 1)]
+    }
+
+    static func offset(for index: Int, tokenDiameter: CGFloat) -> CGSize {
+        let pose = pose(for: index)
+        return CGSize(width: pose.offset.width * tokenDiameter,
+                      height: pose.offset.height * tokenDiameter)
+    }
+
+    static func layout(for count: Int) -> [R1TokenRestingPose] {
+        Array(poses.prefix(min(max(count, 1), poses.count)))
+    }
+}
+
+/// R1-Steine liegen als natürlich geschichtete Gruppe in der Mulde. Der
+/// Kontakt-Schatten bleibt hart, der Höhenschatten weich.
 struct TableTokenPile: View {
     let count: Int
     let tint: Color
@@ -651,15 +763,16 @@ struct TableTokenPile: View {
     var showCount = true
 
     var body: some View {
-        let offsets = Self.layout(for: count)
+        let poses = R1TokenSlots.layout(for: count)
         let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.38)
         ZStack {
-            ForEach(offsets.indices, id: \.self) { index in
-                let offset = offsets[index]
+            ForEach(poses.indices, id: \.self) { index in
+                let pose = poses[index]
                 TableChip(tint: tint, size: tokenDiameter)
-                    .offset(x: offset.width * tokenDiameter,
-                            y: offset.height * tokenDiameter - CGFloat(index) * tokenDiameter * 0.015)
-                    .rotationEffect(.degrees(Double((index * 3) % 7) - 3))
+                    .offset(x: pose.offset.width * tokenDiameter,
+                            y: pose.offset.height * tokenDiameter
+                                - CGFloat(index) * tokenDiameter * 0.012)
+                    .rotationEffect(.degrees(pose.rotation))
                     .zIndex(Double(index))
             }
 
@@ -677,47 +790,6 @@ struct TableTokenPile: View {
         .frame(width: diameter, height: diameter)
     }
 
-    /// Jede sichtbare Anzahl besitzt eine eigene, zentrierte Ablage. So sitzt ein
-    /// einzelner Stein exakt in der Mulde und kleine Gruppen wirken nicht zufällig
-    /// an eine Wand geschoben.
-    private static func layout(for count: Int) -> [CGSize] {
-        let shown = min(max(count, 1), 12)
-        switch shown {
-        case 1:
-            return [.zero]
-        case 2:
-            return [.init(width: -Tokens.tableTokenOverlap, height: 0.03),
-                    .init(width: Tokens.tableTokenOverlap, height: -0.03)]
-        case 3:
-            return [.init(width: -0.43, height: 0.34),
-                    .init(width: 0.43, height: 0.34),
-                    .init(width: 0, height: -0.42)]
-        case 4:
-            // Dicht geschichtete PM68-Ablage statt eines technischen 2x2-Rasters.
-            // Die Mitte bleibt exakt zentriert, die Silhouette wirkt aber wie
-            // vier physisch abgelegte Glassteine.
-            return [.init(width: -0.34, height: 0.23),
-                    .init(width: 0.29, height: 0.31),
-                    .init(width: -0.22, height: -0.27),
-                    .init(width: 0.31, height: -0.20)]
-        default:
-            let ring: [CGSize] = [
-                .init(width: 0, height: -0.58),
-                .init(width: 0.52, height: -0.28),
-                .init(width: 0.52, height: 0.30),
-                .init(width: 0, height: 0.60),
-                .init(width: -0.52, height: 0.30),
-                .init(width: -0.52, height: -0.28),
-                .zero,
-                .init(width: 0.26, height: 0.08),
-                .init(width: -0.26, height: 0.08),
-                .init(width: 0.25, height: -0.25),
-                .init(width: -0.25, height: -0.25),
-                .init(width: 0, height: 0.28)
-            ]
-            return Array(ring.prefix(shown))
-        }
-    }
 }
 
 /// Places a token group on the visible floor of a recessed board well. The
@@ -729,6 +801,7 @@ struct RecessedTokenPile: View {
     var showCount = false
 
     var body: some View {
+        let floorDiameter = diameter * Tokens.outerWellFloorRatio
         ZStack {
             Ellipse()
                 .fill(Color.black.opacity(0.34))
@@ -738,11 +811,10 @@ struct RecessedTokenPile: View {
 
             TableTokenPile(count: count,
                            tint: tint,
-                           diameter: diameter * 0.92,
+                           diameter: floorDiameter,
                            showCount: showCount)
                 .offset(y: diameter * 0.025)
-                .frame(width: diameter * Tokens.outerWellFloorRatio,
-                       height: diameter * Tokens.outerWellFloorRatio)
+                .frame(width: floorDiameter, height: floorDiameter)
                 .clipShape(Circle())
 
             Circle()

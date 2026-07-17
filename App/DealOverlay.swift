@@ -67,6 +67,7 @@ struct DealOverlay: View {
                     CoinStream(from: from,
                                to: to,
                                tint: theme.tint(pool),
+                               amount: meld.chips,
                                onImpact: { game.markMeldLanded(game.meldShown) })
                         .id("meld\(game.meldShown)")
                 }
@@ -281,61 +282,37 @@ private struct CoinStream: View {
     let from: CGPoint
     let to: CGPoint
     let tint: Color
-    let onImpact: () -> Void
-
-    var body: some View {
-        ZStack {
-            ForEach(0..<4, id: \.self) { i in
-                FlyingChip(from: from,
-                           to: to,
-                           tint: tint,
-                           index: i,
-                           duration: Tokens.p1CoinFlight,
-                           delay: Double(i) * 0.06,
-                           onImpact: i == 3 ? onImpact : {})
-            }
-        }
-    }
-}
-
-private struct FlyingChip: View {
-    let from: CGPoint
-    let to: CGPoint
-    let tint: Color
-    let index: Int
-    let duration: Double
-    let delay: Double
+    let amount: Int
     let onImpact: () -> Void
 
     var body: some View {
         ImpactFlight(from: from,
-                     to: landingPoint,
-                     duration: duration,
-                     delay: delay,
+                     to: to,
+                     duration: Tokens.p1CoinFlight,
                      arcHeight: PhysicalMotion.shallowArcHeight(from: from,
-                                                                to: landingPoint,
+                                                                to: to,
                                                                 minimum: 7,
                                                                 maximum: 12),
-                     lateralBias: CGFloat(index - 1) * 2.2,
                      onImpact: onImpact) { progress in
-            TableChip(tint: tint, size: 22)
-                .rotationEffect(.degrees(Double(index - 1) * 1.1 + Double(progress) * 2.4))
-                .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 1.4),
-                                  axis: (x: 0.82, y: 0.18, z: 0),
-                                  perspective: 0.28)
-                .scaleEffect(1 + sin(progress * .pi) * 0.012)
+            let count = min(max(amount, 1), 4)
+            let compression = progress > 0.90
+                ? 1 - (progress - 0.90) / 0.10 * 0.055
+                : 1
+            ZStack {
+                ForEach(0..<count, id: \.self) { index in
+                    let pose = R1TokenSlots.pose(for: index)
+                    TableChip(tint: tint, size: 22)
+                        .rotationEffect(.degrees(pose.rotation))
+                        .offset(R1TokenSlots.offset(for: index,
+                                                    tokenDiameter: 22))
+                }
             }
-    }
-
-    private var landingPoint: CGPoint {
-        let offsets = [
-            CGSize(width: -6, height: 3),
-            CGSize(width: 5, height: 4),
-            CGSize(width: -1, height: -4),
-            CGSize(width: 4, height: -3)
-        ]
-        let offset = offsets[index % offsets.count]
-        return CGPoint(x: to.x + offset.width, y: to.y + offset.height)
+            .scaleEffect(compression)
+            .rotationEffect(.degrees(Double(progress) * 2.8))
+            .shadow(color: .black.opacity(0.42),
+                    radius: progress > 0.86 ? 3 : 8,
+                    y: progress > 0.86 ? 2 : 5)
+        }
     }
 }
 

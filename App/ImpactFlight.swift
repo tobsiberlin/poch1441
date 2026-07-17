@@ -3,6 +3,7 @@ import SwiftUI
 import os
 
 enum PresentationEventKind: String, Sendable {
+    case tableToken
     case dealCard
     case meldToken
     case pochToken
@@ -31,6 +32,31 @@ final class PresentationDirector {
     private static let log = Logger(subsystem: "com.tobc.poch1441",
                                     category: "Presentation")
     private(set) var events: [String: PresentationEvent] = [:]
+    private(set) var firstRunBeat: FirstRunBeat = .orientTable
+
+    var firstRunStep: FirstRunStep {
+        FirstRunScript.step(for: firstRunBeat)
+    }
+
+    var discLearningState: DiscLearningState {
+        firstRunStep.learningState
+    }
+
+    func startFirstRun() {
+        setFirstRunBeat(.orientTable)
+    }
+
+    func advanceFirstRun() {
+        guard let next = FirstRunScript.next(after: firstRunBeat) else { return }
+        setFirstRunBeat(next)
+    }
+
+    func setFirstRunBeat(_ beat: FirstRunBeat) {
+        guard firstRunBeat != beat else { return }
+        let previous = firstRunBeat
+        firstRunBeat = beat
+        Self.log.debug("first-run \(String(describing: previous), privacy: .public) -> \(String(describing: beat), privacy: .public)")
+    }
 
     func begin(id: String,
                kind: PresentationEventKind,

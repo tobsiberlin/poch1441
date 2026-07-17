@@ -148,4 +148,46 @@ struct BotBrainTests {
             #expect(seconds >= 0.3 && seconds <= 0.6)
         }
     }
+
+    /// Informationsgrenze aus Spec Abschnitt 5/6: Auch die Headless-Baseline erhält nur
+    /// eigene Karten und öffentliche Gebotswerte. Bei identischer Observation und gleichem
+    /// RNG bleibt die Aktion identisch; eine Fremdhand kann nicht übergeben werden.
+    @Test func baselineEntscheidungIstVonFremdhaendenStrukturellGetrennt() {
+        let ownHand = [
+            Card(suit: .hearts, rank: .queen),
+            Card(suit: .spades, rank: .queen),
+        ]
+        let observation = BotObservation(
+            ownHand: ownHand,
+            trump: .hearts,
+            currentBet: 3,
+            ownCommitted: 0
+        )
+        let fields = Set(Mirror(reflecting: observation).children.compactMap(\.label))
+        #expect(fields == ["ownHand", "trump", "currentBet", "ownCommitted"])
+
+        let legal = BettingPhase.LegalActions(
+            canPass: true,
+            openRange: nil,
+            canCall: true,
+            raiseRange: 4...12
+        )
+        var firstRNG = SeededRNG(seed: 1441)
+        var secondRNG = SeededRNG(seed: 1441)
+
+        let first = MatchSimulator.baselineAction(
+            policy: .cautious,
+            observation: observation,
+            legal: legal,
+            rng: &firstRNG
+        )
+        let second = MatchSimulator.baselineAction(
+            policy: .cautious,
+            observation: observation,
+            legal: legal,
+            rng: &secondRNG
+        )
+
+        #expect(first == second)
+    }
 }

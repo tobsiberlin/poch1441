@@ -1,3 +1,5 @@
+import AVFoundation
+import os
 import SwiftUI
 
 /// Gemeinsame, deterministische Tischphysik. Die Funktionen liefern nur
@@ -40,6 +42,114 @@ enum PhysicalMotion {
             x: inverse * inverse * from.x + 2 * inverse * t * control.x + t * t * to.x,
             y: inverse * inverse * from.y + 2 * inverse * t * control.y + t * t * to.y
         )
+    }
+}
+
+enum R1ContactSurface: Sendable {
+    case outerWell
+    case centerWell
+}
+
+/// Kontaktfeedback für R1. Der aufrufende Presentation Director ändert den
+/// Trigger ausschließlich in `ImpactFlight.onImpact`; dieses Modul besitzt
+/// weder Timeline noch Timer und mutiert keinen sichtbaren Spielzustand.
+struct R1ContactFeedback: ViewModifier {
+    let trigger: Int
+    let groupSize: Int
+    let surface: R1ContactSurface
+
+    @AppStorage("sound") private var soundEnabled = true
+    @AppStorage("haptics") private var hapticsEnabled = true
+
+    func body(content: Content) -> some View {
+        content
+            .sensoryFeedback(trigger: trigger) { previous, current in
+                guard hapticsEnabled, previous != current else { return nil }
+                return .impact(weight: groupSize > 1 ? .medium : .light)
+            }
+            .onAppear {
+                guard soundEnabled else { return }
+                R1ContactAudio.shared.prepare()
+            }
+            .onChange(of: soundEnabled) { _, enabled in
+                guard enabled else { return }
+                R1ContactAudio.shared.prepare()
+            }
+            .onChange(of: trigger) { previous, current in
+                guard soundEnabled, previous != current else { return }
+                R1ContactAudio.shared.play(surface: surface,
+                                           variantSeed: current)
+            }
+    }
+}
+
+extension View {
+    /// An eine stabile Bühnenwurzel hängen. `trigger` muss genau im
+    /// `onImpact`-Callback wechseln, gemeinsam mit Kompression und Zähler.
+    func r1ContactFeedback(trigger: Int,
+                           groupSize: Int = 1,
+                           surface: R1ContactSurface = .outerWell) -> some View {
+        modifier(R1ContactFeedback(trigger: trigger,
+                                   groupSize: max(1, groupSize),
+                                   surface: surface))
+    }
+}
+
+@MainActor
+private final class R1ContactAudio {
+    static let shared = R1ContactAudio()
+
+    private static let log = Logger(subsystem: "com.tobc.poch1441",
+                                    category: "R1ContactAudio")
+    private let outerVariants = [
+        "r1-ceramic-outer-01",
+        "r1-ceramic-outer-02",
+        "r1-ceramic-outer-03"
+    ]
+    private let centerVariants = [
+        "r1-ceramic-center-01",
+        "r1-ceramic-center-02",
+        "r1-ceramic-center-03"
+    ]
+    private var players: [String: AVAudioPlayer] = [:]
+    private var lastContactTime: TimeInterval = -.infinity
+
+    func prepare() {
+        for name in outerVariants + centerVariants {
+            _ = player(named: name)
+        }
+    }
+
+    func play(surface: R1ContactSurface, variantSeed: Int) {
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastContactTime >= 0.12 else { return }
+
+        let variants = surface == .centerWell ? centerVariants : outerVariants
+        let index = Int(UInt(bitPattern: variantSeed) % UInt(variants.count))
+        let name = variants[index]
+        guard let player = player(named: name) else { return }
+
+        lastContactTime = now
+        player.currentTime = 0
+        player.volume = surface == .centerWell ? 0.58 : 0.52
+        player.play()
+    }
+
+    private func player(named name: String) -> AVAudioPlayer? {
+        if let cached = players[name] { return cached }
+        guard let url = Bundle.main.url(forResource: name, withExtension: "caf") else {
+            Self.log.error("Missing R1 contact sound: \(name, privacy: .public)")
+            return nil
+        }
+        do {
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.prepareToPlay()
+            players[name] = player
+            return player
+        } catch {
+            Self.log.error("Unable to prepare R1 contact sound: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 }
 

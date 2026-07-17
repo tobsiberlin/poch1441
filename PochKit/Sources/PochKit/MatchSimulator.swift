@@ -47,8 +47,14 @@ public enum MatchSimulator {
                     let player = round.betting.turn
                     guard let legal = round.betting.legalActions(for: player) else { break }
                     decisions += 1
+                    let observation = BotObservation(
+                        ownHand: round.deal.hands[player],
+                        trump: round.deal.trump,
+                        currentBet: round.betting.currentBet,
+                        ownCommitted: round.betting.seats[player].committed
+                    )
                     try? round.applyBet(
-                        baselineAction(policy: policy, round: round, player: player, legal: legal, rng: &rng),
+                        baselineAction(policy: policy, observation: observation, legal: legal, rng: &rng),
                         by: player
                     )
                 case .playout:
@@ -75,12 +81,12 @@ public enum MatchSimulator {
         )
     }
 
-    /// Baseline-Bietentscheidung - öffentlich, damit die App sie als Platzhalter-Bot nutzen
-    /// kann, bis die echten Charakter-Profile kommen (Phase 4).
+    /// Baseline-Bietentscheidung für Headless-Simulationen. Die Signatur akzeptiert bewusst
+    /// nur die eigene Hand und öffentlichen Bietzustand. Eine vollständige Runde und damit
+    /// Fremdhände sind an dieser Informationsgrenze nicht verfügbar.
     public static func baselineAction(
         policy: Policy,
-        round: Round,
-        player: Int,
+        observation: BotObservation,
         legal: BettingPhase.LegalActions,
         rng: inout SeededRNG
     ) -> BettingPhase.Action {
@@ -93,7 +99,10 @@ public enum MatchSimulator {
             return actions[rng.nextInt(in: 0..<actions.count)]
 
         case .cautious:
-            guard let combo = ComboEvaluator.best(in: round.deal.hands[player], trump: round.deal.trump) else {
+            guard let combo = ComboEvaluator.best(
+                in: observation.ownHand,
+                trump: observation.trump
+            ) else {
                 return .pass
             }
             if let open = legal.openRange {
@@ -103,7 +112,7 @@ public enum MatchSimulator {
                 return .pass
             }
             if legal.canCall {
-                let cost = round.betting.currentBet - round.betting.seats[player].committed
+                let cost = observation.currentBet - observation.ownCommitted
                 if combo.kind == .quad, let raise = legal.raiseRange {
                     return .raise(to: min(raise.lowerBound + 2, raise.upperBound))
                 }

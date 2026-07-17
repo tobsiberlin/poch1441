@@ -23,9 +23,32 @@ targets:
         SWIFT_STRICT_CONCURRENCY: complete
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchStoryboardName: LaunchScreen
-        # Orientierung: Arbeitsstand Portrait (iPhone); finale Entscheidung fällt mit dem Tisch-Layout in Phase 3
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        # Portrait und Landscape sind vollwertige adaptive Tischkompositionen.
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         TARGETED_DEVICE_FAMILY: "1,2"
         MARKETING_VERSION: 0.1.0
         CURRENT_PROJECT_VERSION: 1
+  Poch1441UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - Tests/Poch1441UITests
+    dependencies:
+      - target: Poch1441
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tobc.poch1441.uitests
+        DEVELOPMENT_TEAM: GWP236628H
+        SWIFT_VERSION: "5.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Poch1441:
+    build:
+      targets:
+        Poch1441: all
+        Poch1441UITests: [test]
+    test:
+      targets:
+        - Poch1441UITests
