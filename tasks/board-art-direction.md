@@ -99,7 +99,10 @@ unmittelbar und menschlich, aber weder trashig noch nostalgisch kostümiert.
 - Mattes Clay-Composite oder durchgefärbte Keramik.
 - Große tonale Blindprägung des geometrischen Kartenrücken-Signets.
 - Feine umlaufende Präzisionsrändelung.
-- Naturweiß, Terrakotta, Salbeigrün und Schiefergrau.
+- Naturweiß, Terrakotta, Salbeigrün und Schiefergrau sind gemeinsame
+  Tisch-Farbwelten, keine Spielerfarben. Pro Partie ist genau eine R1-Farbwelt aktiv.
+- Herkunft wird nur während Quelle-Ziel-Bewegung und am stabilen Sitz gezeigt.
+- Kein Stein morpht nach einem Gewinn seine Farbe.
 - Ein Wert pro Stein; keine Ziffern, Währungszeichen oder Poker-Edge-Spots.
 
 ### Track B - 1-Cent-Münzen
@@ -119,6 +122,9 @@ unmittelbar und menschlich, aber weder trashig noch nostalgisch kostümiert.
 - Animation und Endzustand verwenden exakt dasselbe Asset, denselben Maßstab und
   dieselbe Orientierung.
 - Sichtbarer Zähler und Haptik ändern sich erst beim Kontakt.
+- Der erste Kontakt einer Gruppe trägt das Hauptfeedback: trockenes Keramikklacken,
+  kurze glaubwürdige Resonanz und synchroner Taptic-Impuls. Weitere Kontakte bleiben
+  akustisch und haptisch untergeordnet. Kein Casino-Chip-Klappern.
 
 ## 5. Beschriftung und Lesbarkeit
 

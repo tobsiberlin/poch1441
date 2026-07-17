@@ -19,6 +19,15 @@
 - Portrait und Landscape sind vollwertige adaptive Kompositionen. Landscape nutzt
   stabile Gegnerplätze links, Entscheidung mittig, Disc rechts und Hand unten,
   ohne die Portrait-Ansicht lediglich zu drehen oder zu skalieren.
+- R1-Farbsemantik festgelegt: Naturweiß, Terrakotta, Salbeigrün und Schiefergrau
+  sind gemeinsame Tisch-Farbwelten statt Spielerfarben. Gewonnene Steine morphen
+  nicht; der sichtbare Transfer kommuniziert die Herkunft.
+- R1-Impact festgelegt: trockenes Keramikklacken, sichtbare Kompression,
+  Zählermutation und Taptic-Impuls treffen denselben Kontaktframe. Gruppen bündeln
+  Folgekontakte statt Klick- oder Vibrationsdauerfeuer.
+- Gegnerführung festgelegt: feste kuratierte Besetzung im ersten Tutorial,
+  Spieltendenzen erst nach der ersten Poch-Entscheidung, automatische Tischbesetzung
+  als Standard und freiwillige manuelle Mitspielerwahl.
 - `CardFace.swift` / `CardWarp.metal`: Kartenwölbung feiner abgestimmt
   (Eckenhub 2.4 → 1.6 × scale, ruhigeres Licht); Kartonrand bleibt unabhängig
   vom Wölbungswert konstant.

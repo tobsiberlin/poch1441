@@ -134,7 +134,14 @@ Gegenständen entstehen kann, ohne trashig oder nostalgisch verkleidet zu wirken
 - Mattes Clay-Composite oder durchgefärbte Keramik mit warmer, steiniger Haptik.
 - Große tonale Blindprägung des geometrischen Kartenrücken-Signets.
 - Feine umlaufende Präzisionsrändelung.
-- Palette: Naturweiß, Terrakotta, Salbeigrün und Schiefergrau.
+- Palette: Naturweiß, Terrakotta, Salbeigrün und Schiefergrau als wählbare
+  gemeinsame Tisch-Farbwelten beziehungsweise Materialeditionen.
+- Innerhalb einer Partie verwenden alle Spieler dieselbe R1-Farbwelt. Die Farbe
+  bezeichnet niemals Besitzer, Wert oder verdeckte Information.
+- Herkunft wird während einer Bewegung kurz über Sitz, Flugbahn und einen
+  nichtfarbigen Fokusindikator gezeigt. Der ruhende Stein bleibt neutral zur Person.
+- Es gibt kein Umfärben oder Morphen gewonnener Steine. Digitales Verhalten und
+  glaubwürdiges physisches Produkt bleiben dadurch identisch.
 - Alle Steine haben denselben Wert. Keine Zahlen, Dollarzeichen oder Edge-Spots.
 
 ### Track B - echte Cent-Münzen
@@ -153,6 +160,11 @@ Gegenständen entstehen kann, ohne trashig oder nostalgisch verkleidet zu wirken
 - Kontakt-, Überlappungs- und Höhenschatten stimmen mit der realen Lage überein.
 - Quelle, Flug, Kontakt, sichtbarer Zähler und Ruheposition bilden eine einzige
   kausale Sequenz.
+- Beim tatsächlichen Kontakt erzeugt R1 ein trockenes, sattes Keramikklacken mit
+  kurzer Körperresonanz und einen exakt synchronisierten Taptic-Impuls. Material,
+  Zielfeld und Gruppengröße bestimmen die Intensität.
+- Kein Sound und keine Haptik starten beim Abflug. Tokenströme bündeln untergeordnete
+  Kontakte, damit weder Klicksalve noch Vibrationsdauerfeuer entstehen.
 
 ## 7. Karten und Signet
 
@@ -183,6 +195,12 @@ Markenzeichen von Karten, R1-Spielsteinen und Produkthülle.
 - Karten, Spielsteine und Gegner besitzen immer eine sichtbare räumliche Herkunft.
 - Gegner bleiben am Tisch räumlich stabil und reagieren auf öffentliche Zustände,
   niemals auf verdeckte Handstärke.
+- Die erste geführte Partie besitzt eine feste, kuratierte Besetzung. Gegner werden
+  zuerst als Menschen mit Name, Portrait und Sitz eingeführt; Spieltendenzen folgen
+  erst nach der ersten verstandenen Poch-Entscheidung.
+- Freie Partien werden standardmäßig automatisch besetzt. Eine manuelle Auswahl ist
+  freiwillig und zeigt nur wenige verständliche Tendenzen, keine RPG-Werte,
+  Seltenheiten oder garantierten Verhaltensversprechen.
 - Motion erklärt Zustand und Zusammenhang. Häufige Aktionen bleiben direkt.
 - Sound und Haptik verstärken Materialkontakt; sie ersetzen keine visuelle Klarheit.
 - Reduce Motion, VoiceOver, große Schrift und lange Übersetzungen sind Teil der

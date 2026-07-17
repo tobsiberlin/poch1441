@@ -364,6 +364,10 @@ vor der Handlung, die ihn beweist.
 
 - Track A verwendet R1: flache, matte Keramik-/Clay-Steine mit tonaler
   Signet-Blindprägung und feiner Rändelung.
+- R1-Farben sind gemeinsame Tisch-Farbwelten, keine Spielerfarben. Eine Partie nutzt
+  genau eine Farbwelt; gewonnene Steine werden nicht umgefärbt oder gemorpht.
+- Spielerherkunft ist nur während der Bewegung über sichtbare Quelle, Flugbahn und
+  Sitz verständlich. Sie wird nicht dauerhaft in den Stein codiert.
 - Track B verwendet individuell gealterte, gleichwertige 1-Cent-Münzen.
 - Keine Kugeln, Pokerchips, Candy-Glassteine oder perfekten Stapelsäulen.
 
@@ -389,10 +393,16 @@ vor der Handlung, die ihn beweist.
 
 ### Audio und Haptik
 
-- Kurzer Glas-/Metallkontakt mit 3-4 Tonvarianten gegen Wiederholung.
-- Tieferer Kontakt in der großen Mitte, leichterer Kontakt in Außenmulden.
-- `light` für einzelnen Token, `medium` für Haufen, `heavy` ausschließlich für
-  den Poch-Tischschlag.
+- R1 besitzt 3-4 eng verwandte Varianten eines trockenen, satten Keramikklackens.
+  Track B besitzt getrennte, realistische Cent-auf-Kunststoff-Kontakte.
+- Ein kurzer Körperanteil vermittelt Masse; die große Mitte klingt etwas tiefer als
+  ein Außenfeld. Kein Pokerchip-, Kassen- oder Spielautomatenklang.
+- Audio, sichtbare Kompression, Zählermutation und Taptic-Impuls liegen auf demselben
+  Kontaktframe. Nichts feuert beim Start der Bewegung.
+- `light` für einzelnen R1-Stein, `medium` für den ersten Kontakt einer Gruppe;
+  `heavy` bleibt ausschließlich dem Poch-Tischschlag vorbehalten.
+- Nachfolgende Kontakte einer Gruppe werden reduziert und zeitlich gebündelt. Kein
+  Haptik-Dauerfeuer bei Ante, Auszahlung oder Abrechnung.
 
 ### Done
 
@@ -484,10 +494,29 @@ vor der Handlung, die ihn beweist.
 - Pro Tisch zufälliger Pool nach festgelegter Geschlechter- und Diversitätslogik.
 - Namen und kulturelle Herkunft respektvoll und datengetrieben.
 
+### Einführung und Auswahl
+
+- Die erste geführte Partie verwendet eine kuratierte feste Besetzung mit klar
+  unterscheidbaren Spielweisen. Vor Spielbeginn gibt es keine Gegnerauswahl.
+- In den ersten 45 Sekunden werden nur Name, Portrait und stabiler Sitz gezeigt.
+  Tendenzen erscheinen erst nach der ersten verstandenen Poch-Entscheidung.
+- Der Lernbeat `Gegner lesen` erklärt genau eine öffentlich beobachtbare Tendenz und
+  stellt klar, dass sie eine Neigung und kein Versprechen ist.
+- Für freie Partien ist `Tisch automatisch besetzen` der empfohlene Standard.
+  `Mitspieler wählen` ist eine freiwillige Vertiefung, kein Pflichtschritt.
+- Auswahlkarten zeigen Portrait, Namen und höchstens drei verständliche
+  Spieltendenzen wie `vorsichtig`, `druckvoll` oder `wechselhaft`. Keine Seltenheit,
+  Sterne, RPG-Attribute oder exakten Wahrscheinlichkeiten.
+- Profile und Botparameter stammen aus derselben datengetriebenen Quelle. Sichtbare
+  Aussagen dürfen das tatsächliche öffentliche Verhalten beschreiben, aber niemals
+  verdeckte Handstärke oder zukünftige Einzelaktionen garantieren.
+
 Done:
 
 - Alle Charaktere bleiben über sechs Stimmungen identifizierbar.
 - Kreisrahmen springt bei keinem Wechsel mehr als 1 px.
+- Ein Neuling kann nach dem optionalen Lernbeat eine Tendenz benennen, ohne daraus
+  eine konkrete verdeckte Hand abzuleiten.
 - Reaktion, Sprechblase und Botaktion ergeben einen einzigen zeitlichen Beat.
 
 ## 12. Gate 8 - Audio, Haptik und Ruhe
@@ -1000,6 +1029,9 @@ Läuft ab dem ersten integrierten Slice kontinuierlich:
 - Rotation während Flug unter 12 Grad halten; kein Bounce.
 - Zielkarte erscheint exakt im Impact-Frame.
 - Haptik und sichtbarer Deal-Zähler wandern auf `landedDeals`.
+- R1-Kontakt erhält im selben Frame ein trockenes Keramikklacken, sichtbare
+  Kompression und einen materialgerechten Taptic-Impuls. Gruppentransfers bündeln
+  Folgekontakte und erzeugen kein Vibrationsdauerfeuer.
 
 ### Welle 2 - Token-Transaktion
 
@@ -1103,6 +1135,9 @@ Kein Gate darf durch subjektives `sieht besser aus` ersetzt werden.
 - Feste Sitzpositionen über alle Akte.
 - Zustandswechsel behalten Ausschnitt, Blickrichtung und Kopfgeometrie.
 - Reaktionen nur auf öffentliche Information.
+- Geführte Erstpartie mit fester Besetzung; Tendenzen erst nach der ersten
+  verstandenen Poch-Entscheidung erklären.
+- Freie Partie standardmäßig automatisch besetzen, manuelle Auswahl optional.
 - Mikroreaktionen selten, lesbar und unterbrechungsfrei.
 - Sprechblasen nur für Signaturmomente, nicht als Dauerkommentar.
 

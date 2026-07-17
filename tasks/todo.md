@@ -524,6 +524,11 @@ Diese Punkte blockieren die Umsetzung nicht. Falls Tobsi nichts anderes sagt, so
 - [ ] Technische Platzhalter, Messlinien und Konstruktionsbeschriftung aus jeder
   produktiven Lernansicht ausschließen. Labels sind lokalisiert und verschwinden
   nach dem Lernmoment vollständig.
+- [ ] Geführte Erstpartie mit fester Gegnerbesetzung. In den ersten 45 Sekunden nur
+  Name, Portrait und Sitz; danach optionaler Lernbeat `Gegner lesen` mit genau einer
+  öffentlichen Tendenz. Keine Handstärke-Tells.
+- [ ] Freie Partie: `Tisch automatisch besetzen` als empfohlener Standard und
+  `Mitspieler wählen` als freiwillige Vertiefung mit maximal drei Tendenzbegriffen.
 
 - [x] Erster Start: kurze, spielbare Einführung statt Text. Der erste App-Start
   springt direkt in eine deterministische geführte Runde; DEBUG kann den Zustand
