@@ -92,7 +92,13 @@ enum OpponentSelection: Equatable, Sendable {
 
 enum OpponentRosterError: Error, Equatable {
     case unsupportedVersion(Int)
+    case emptyOpponentID
+    case emptyDisplayName(OpponentID)
+    case emptyPortraitAssetPrefix(OpponentID)
+    case emptyPublicTendencyID(OpponentID)
     case duplicateOpponent(OpponentID)
+    case duplicateDisplayName(String)
+    case duplicatePortraitAssetPrefix(String)
     case duplicateTutorialSeat(StableOpponentSeatID)
     case duplicateTutorialOpponent(OpponentID)
     case incompleteTutorialSeats
@@ -137,9 +143,29 @@ struct OpponentRosterCatalog: Sendable {
         var descriptorsByID: [OpponentID: OpponentDescriptor] = [:]
         var orderedDescriptors: [OpponentDescriptor] = []
         var automaticCandidateIDs: [OpponentID] = []
+        var seenDisplayNames: Set<String> = []
+        var seenPortraitAssetPrefixes: Set<String> = []
         for profile in payload.profiles {
+            guard !profile.id.rawValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw OpponentRosterError.emptyOpponentID
+            }
+            guard !profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw OpponentRosterError.emptyDisplayName(profile.id)
+            }
+            guard !profile.portraitAssetPrefix.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw OpponentRosterError.emptyPortraitAssetPrefix(profile.id)
+            }
+            guard !profile.publicTendency.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw OpponentRosterError.emptyPublicTendencyID(profile.id)
+            }
             guard descriptorsByID[profile.id] == nil else {
                 throw OpponentRosterError.duplicateOpponent(profile.id)
+            }
+            guard seenDisplayNames.insert(profile.name).inserted else {
+                throw OpponentRosterError.duplicateDisplayName(profile.name)
+            }
+            guard seenPortraitAssetPrefixes.insert(profile.portraitAssetPrefix).inserted else {
+                throw OpponentRosterError.duplicatePortraitAssetPrefix(profile.portraitAssetPrefix)
             }
             let descriptor = OpponentDescriptor(
                 id: profile.id,
@@ -171,6 +197,9 @@ struct OpponentRosterCatalog: Sendable {
         }
         guard seenSeats == Set(StableOpponentSeatID.allCases) else {
             throw OpponentRosterError.incompleteTutorialSeats
+        }
+        guard automaticCandidateIDs.count >= StableOpponentSeatID.allCases.count else {
+            throw OpponentRosterError.insufficientAutomaticCandidates
         }
 
         self.descriptorsByID = descriptorsByID

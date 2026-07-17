@@ -229,7 +229,7 @@ struct ContentView: View {
                 }
                 // -autoLead: niedrigste Karte anspielen (Kaskaden-QA ohne UI-Tap)
                 if args.contains("-autoLead"),
-                   let card = game.displayedHand(of: 0)
+                   let card = game.displayedHumanHand
                        .min(by: { $0.rank.rawValue < $1.rank.rawValue }) {
                     game.humanLead(card)
                 }
@@ -594,9 +594,11 @@ struct ContentView: View {
                         .accessibilityIdentifier("firstRun.intro.body")
 
                     HStack(spacing: compactHeight ? 28 : 38) {
-                        firstRunOpponent(name: "Hana", seat: 1, size: opponentSize + 6)
-                        firstRunOpponent(name: "Noah", seat: 2, size: opponentSize)
-                        firstRunOpponent(name: "Jonas", seat: 3, size: opponentSize)
+                        ForEach(Array(game.tutorialOpponentNames.enumerated()), id: \.offset) { index, name in
+                            firstRunOpponent(name: name,
+                                             seat: index + 1,
+                                             size: index == 0 ? opponentSize + 6 : opponentSize)
+                        }
                     }
                     .padding(.top, compactHeight ? 6 : 12)
 
@@ -768,7 +770,7 @@ struct ContentView: View {
         }
         return ZStack {
             VStack(spacing: 8) {
-                ForEach(Array(["Hana", "Noah", "Jonas"].enumerated()), id: \.offset) { index, name in
+                ForEach(Array(game.tutorialOpponentNames.enumerated()), id: \.offset) { index, name in
                     firstRunOpponent(name: name,
                                      seat: index + 1,
                                      size: index == 0 ? 54 : 46)
@@ -889,13 +891,18 @@ struct ContentView: View {
     }
 
     private func startGuidedRound(_ lesson: TutorialLesson = .meld) {
+        game.configurePlayerCount(4)
+        guard game.startTutorialRound(lesson) else {
+            guidedRoundActive = false
+            activeTutorialLesson = nil
+            showFirstRunIntro = true
+            return
+        }
         guidedRoundActive = true
         activeTutorialLesson = lesson
         completedTutorialLesson = nil
         moveCoach = true
         activeOverlay = nil
-        game.configurePlayerCount(4)
-        game.startTutorialRound(lesson)
         switch lesson {
         case .meld:
             game.presentation.startFirstRun()
@@ -1700,7 +1707,7 @@ struct ContentView: View {
                         String(localized: "tutorial.guide.finish.title", defaultValue: "Runde lesen"),
                         String(localized: "tutorial.guide.finish.body", defaultValue: "Mitte und Restkarten fließen zum Sieger. Danach beginnt eine freie Runde."))
             }
-            guard game.playout != nil else {
+            guard game.hasPlayout else {
                 return ("rectangle.on.rectangle.angled", "Ausspielen", "Die Mitte wartet. Wer zuerst leer ist, nimmt den Hauptpott.")
             }
             if game.playoutLeader == 0, game.cascadeIdle {

@@ -740,7 +740,7 @@ struct Phase2View: View {
         return OpponentPanel(seat: seat,
                              name: game.name(of: seat),
                              stack: (s?.stack ?? 0) + (s?.committed ?? 0),
-                             cards: game.displayedHand(of: seat).count,
+                             cards: game.displayedCardCount(of: seat),
                              actionText: reaction.text,
                              actionTint: reaction.tone,
                              isActive: s?.isActive ?? false,

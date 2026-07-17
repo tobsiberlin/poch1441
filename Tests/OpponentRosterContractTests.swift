@@ -9,8 +9,11 @@ struct OpponentRosterContractTests {
         try curatedTutorialLineupIsStable(catalog)
         try automaticSelectionIsDeterministicAndPublic(catalog)
         try manualSelectionPreservesStableSeats(catalog)
+        try malformedTutorialDataFailsClosed(data)
+        try invalidPresentationMetadataFailsClosed(data)
         try legacyBotProfileShapeStillDecodes(data)
         presentationDescriptorsExcludeHiddenState(catalog)
+        automaticSelectionInputExcludesGameState()
 
         FileHandle.standardOutput.write(Data("OpponentRosterContractTests: PASS\n".utf8))
     }
@@ -19,6 +22,8 @@ struct OpponentRosterContractTests {
         let lineup = try catalog.curatedTutorialLineup()
         expect(lineup.seats.map(\.id) == [.left, .across, .right],
                "Tutorial seats must keep their semantic order")
+        expect(lineup.seats.map(\.opponent.id.rawValue) == ["hana", "noah", "jonas"],
+               "Tutorial identities must remain Hana, Noah and Jonas from BotProfiles.json")
         expect(lineup.seats.map(\.opponent.displayName) == ["Hana", "Noah", "Jonas"],
                "Tutorial lineup must remain curated")
         expect(lineup.seats.allSatisfy {
@@ -90,13 +95,106 @@ struct OpponentRosterContractTests {
         expect(legacy.profiles.allSatisfy { !$0.name.isEmpty }, "Legacy names must remain readable")
     }
 
+    private static func malformedTutorialDataFailsClosed(_ data: Data) throws {
+        let payload = try jsonObject(data)
+
+        var missingSeat = payload
+        missingSeat["tutorialLineup"] = [
+            ["seatID": "left", "opponentID": "hana"],
+            ["seatID": "across", "opponentID": "noah"],
+        ]
+        expectRosterError(.incompleteTutorialSeats, payload: missingSeat)
+
+        var unknownOpponent = payload
+        unknownOpponent["tutorialLineup"] = [
+            ["seatID": "left", "opponentID": "hana"],
+            ["seatID": "across", "opponentID": "noah"],
+            ["seatID": "right", "opponentID": "unknown"],
+        ]
+        expectRosterError(.unknownOpponent(OpponentID(rawValue: "unknown")),
+                          payload: unknownOpponent)
+
+        var duplicateOpponent = payload
+        duplicateOpponent["tutorialLineup"] = [
+            ["seatID": "left", "opponentID": "hana"],
+            ["seatID": "across", "opponentID": "noah"],
+            ["seatID": "right", "opponentID": "hana"],
+        ]
+        expectRosterError(.duplicateTutorialOpponent(OpponentID(rawValue: "hana")),
+                          payload: duplicateOpponent)
+    }
+
+    private static func invalidPresentationMetadataFailsClosed(_ data: Data) throws {
+        let payload = try jsonObject(data)
+
+        var duplicateName = payload
+        var profiles = duplicateName["profiles"] as? [[String: Any]] ?? []
+        guard profiles.count >= 2 else { fail("Fixture must contain at least two profiles") }
+        profiles[1]["name"] = profiles[0]["name"]
+        duplicateName["profiles"] = profiles
+        expectRosterError(.duplicateDisplayName("Liv"), payload: duplicateName)
+
+        var insufficientCandidates = payload
+        profiles = insufficientCandidates["profiles"] as? [[String: Any]] ?? []
+        for index in profiles.indices {
+            profiles[index]["automaticEligible"] = index < 2
+        }
+        insufficientCandidates["profiles"] = profiles
+        expectRosterError(.insufficientAutomaticCandidates, payload: insufficientCandidates)
+    }
+
     private static func presentationDescriptorsExcludeHiddenState(_ catalog: OpponentRosterCatalog) {
-        let forbiddenFragments = ["hand", "strength", "card", "action", "trump"]
         for descriptor in catalog.manualSelectionOptions {
-            let labels = Mirror(reflecting: descriptor).children.compactMap(\.label)
-            expect(labels.allSatisfy { label in
-                forbiddenFragments.allSatisfy { !label.lowercased().contains($0) }
-            }, "Presentation descriptor must not expose hidden or per-action state")
+            let descriptorLabels = Set(Mirror(reflecting: descriptor).children.compactMap(\.label))
+            expect(descriptorLabels == ["id", "displayName", "portraitAssetPrefix", "publicTendency"],
+                   "Presentation descriptor must contain only approved public metadata")
+
+            let tendencyLabels = Set(
+                Mirror(reflecting: descriptor.publicTendency).children.compactMap(\.label)
+            )
+            expect(tendencyLabels == ["id", "basis", "disclosure", "semantics"],
+                   "A public tendency must not gain hidden or per-action state")
+        }
+    }
+
+    private static func automaticSelectionInputExcludesGameState() {
+        let selection = OpponentSelection.automatic(
+            seed: 1_441,
+            excludingPrevious: [OpponentID(rawValue: "hana")]
+        )
+        guard let payload = Mirror(reflecting: selection).children.first?.value else {
+            fail("Automatic selection must expose a typed payload")
+        }
+        let fields = Dictionary(uniqueKeysWithValues: Mirror(reflecting: payload).children.compactMap {
+            child -> (String, Any)? in
+            guard let label = child.label else { return nil }
+            return (label, child.value)
+        })
+        expect(Set(fields.keys) == ["seed", "excludingPrevious"],
+               "Automatic selection may depend only on a presentation seed and prior opponent IDs")
+        expect(fields["seed"] is UInt64,
+               "Automatic selection seed must remain independent of game-state types")
+        expect(fields["excludingPrevious"] is Set<OpponentID>,
+               "Automatic exclusions must contain only stable opponent IDs")
+    }
+
+    private static func jsonObject(_ data: Data) throws -> [String: Any] {
+        guard let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            fail("BotProfiles fixture must be a JSON object")
+        }
+        return payload
+    }
+
+    private static func expectRosterError(_ expected: OpponentRosterError,
+                                          payload: [String: Any]) {
+        do {
+            let data = try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])
+            _ = try OpponentRosterCatalog(data: data)
+            fail("Malformed roster must fail closed with \(expected)")
+        } catch let error as OpponentRosterError {
+            expect(error == expected, "Expected \(expected), received \(error)")
+        } catch {
+            fail("Expected OpponentRosterError, received \(error)")
         }
     }
 

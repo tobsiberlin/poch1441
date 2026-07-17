@@ -199,3 +199,22 @@ automatisch. Chatbeschreibungen ersetzen keine sichtbare Abnahme.
 - Der zweite Integrationspunkt ist damit verifiziert und wird mit diesem Commit auf
   `main` veröffentlicht. Die offene Landscape-Wiederholung der AX-Lernbühne bleibt
   als strenger QA-Gate erhalten und blockiert keine falsche Designfreigabe.
+
+## Dritter Integrationspunkt - Daten- und Informationsgrenzen
+
+- Tutorial-Seeds werden im PochKit-Test direkt aus `App/TutorialScenarios.json`
+  geladen. Vier Verträge prüfen Schema, Vollständigkeit und die semantischen
+  Meldungs-, Poch- und Ausspielziele; insgesamt sind 54 XCTest- und acht
+  Swift-Testing-Fälle grün.
+- Intro und geführte Partie lesen Hana, Noah und Jonas aus demselben validierten
+  Gegnerkatalog. Fehlerhafte oder unvollständige Daten starten keine zufällige
+  Ersatz-Tutorialrunde; der Director wechselt erst nach erfolgreicher Übernahme.
+- App-Views erhalten nur die eigene sichtbare Hand, gegnerische Kartenanzahlen und
+  bereits enthüllte Spielereignisse. Vollständige Gegnerhände und zukünftige
+  Zwangskarten bleiben hinter `GameState`; ein eigenständiger Quellvertrag sperrt
+  die Rückkehr der früheren breiten APIs.
+- Der vollständige First-Contact-/Lernzustands-UI-Test ist nach der Migration grün;
+  der Simulatorbuild und der eigenständige Gegnerkatalog-Contract bestehen.
+- Als nächster Produktintegrationspunkt folgt die gemeinsame Board-/Material-
+  Rendererschnittstelle. Erst danach wird `Wähle deinen Tisch` freigeschaltet, damit
+  Track B niemals Track-A-Geometrie oder R1-Steine mit Cent-Material mischt.

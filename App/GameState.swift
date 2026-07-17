@@ -190,13 +190,16 @@ final class GameState {
 
     private(set) var opponentNames: [String]
     private let botProfiles: [String: BotProfile]
+    private let opponentCatalog: OpponentRosterCatalog?
 
     init(source: MatchSource = BotMatchSource()) {
+        let opponentCatalog = Self.loadOpponentRosterCatalog()
         self.source = source
         self.round = source.round
         self.seatActions = Array(repeating: .none, count: source.tablePlayerCount)
         self.completedMatchResult = nil
         self.botProfiles = Self.loadBotProfiles()
+        self.opponentCatalog = opponentCatalog
         self.opponentNames = OpponentRoster.draw(
             opponentCount: max(0, source.tablePlayerCount - 1),
             excluding: []
@@ -225,6 +228,10 @@ final class GameState {
     var matchStacks: [Int] { source.matchStacks }
     private(set) var completedMatchResult: Match.MatchResult?
     var matchResult: Match.MatchResult? { completedMatchResult ?? source.matchResult }
+    var tutorialOpponentNames: [String] {
+        guard let lineup = try? opponentCatalog?.curatedTutorialLineup() else { return [] }
+        return lineup.seats.map(\.opponent.displayName)
+    }
 
     func uiSeat(forRoundSeat roundSeat: Int) -> Int {
         source.tableSeat(forRoundSeat: roundSeat) ?? roundSeat
@@ -259,6 +266,19 @@ final class GameState {
         } catch {
             profileLog.error("BotProfiles unlesbar: \(String(describing: error), privacy: .public)")
             return [:]
+        }
+    }
+
+    private static func loadOpponentRosterCatalog() -> OpponentRosterCatalog? {
+        guard let url = Bundle.main.url(forResource: "BotProfiles", withExtension: "json") else {
+            profileLog.error("BotProfiles.json fehlt im App-Bundle")
+            return nil
+        }
+        do {
+            return try OpponentRosterCatalog(data: Data(contentsOf: url))
+        } catch {
+            profileLog.error("Gegnerkatalog unlesbar: \(String(describing: error), privacy: .public)")
+            return nil
         }
     }
 
@@ -309,27 +329,29 @@ final class GameState {
 
     /// Startet eine reproduzierbare, regelkonforme Lernszene. Die Seeds liegen als
     /// Build-Time-Daten vor; die Engine bleibt für alle Karten und Ergebnisse die Wahrheit.
-    func startTutorialRound(_ lesson: TutorialLesson = .meld) {
-        applyCuratedTutorialLineup()
+    func startTutorialRound(_ lesson: TutorialLesson = .meld) -> Bool {
+        guard applyCuratedTutorialLineup() else { return false }
         adoptRound(seed: tutorialSeed(for: lesson))
         if lesson == .playout {
             advanceTutorialToPlayout()
         }
+        return true
     }
 
-    private func applyCuratedTutorialLineup() {
-        guard let url = Bundle.main.url(forResource: "BotProfiles", withExtension: "json") else {
-            Self.profileLog.error("BotProfiles.json fehlt im App-Bundle")
-            return
+    private func applyCuratedTutorialLineup() -> Bool {
+        guard let opponentCatalog else {
+            Self.profileLog.error("Tutorialbesetzung ist nicht verfügbar")
+            return false
         }
         do {
-            let data = try Data(contentsOf: url)
-            let lineup = try OpponentRosterCatalog(data: data).curatedTutorialLineup()
+            let lineup = try opponentCatalog.curatedTutorialLineup()
             opponentNames = lineup.seats
                 .sorted { $0.uiSeatIndex < $1.uiSeatIndex }
                 .map(\.opponent.displayName)
+            return true
         } catch {
             Self.profileLog.error("Tutorialbesetzung konnte nicht geladen werden: \(error.localizedDescription, privacy: .public)")
+            return false
         }
     }
 
@@ -591,7 +613,14 @@ final class GameState {
     private(set) var landedPlays = 0
     private var cascadeTask: Task<Void, Never>?
 
-    var playout: PlayoutPhase? { round.playout }
+    var hasPlayout: Bool { round.playout != nil }
+    var resolvedPlayCount: Int { round.playout?.plays.count ?? 0 }
+    /// Ausschließlich bereits präsentierte öffentliche Kartenereignisse. Zukünftige
+    /// Zwangskarten und die verbliebenen Gegnerhände bleiben hinter GameState.
+    var revealedPlayEvents: [PlayoutPhase.Play] {
+        guard let phase = round.playout else { return [] }
+        return Array(phase.plays.prefix(revealedPlays))
+    }
     var playoutLeader: Int? {
         round.playout.map { uiSeat(forRoundSeat: $0.leader) }
     }
@@ -636,9 +665,17 @@ final class GameState {
         return round.stacks[roundSeat] + result.payments[seat]
     }
 
-    /// Sichtbare Hand eines Sitzes: Deal minus enthüllte Plays (nicht Engine-Stand,
-    /// der der Präsentation vorausläuft).
-    func displayedHand(of seat: Int) -> [Card] {
+    /// Die eigene sichtbare Hand darf als Kartenliste an die View. Gegner werden
+    /// ausschließlich über `displayedCardCount(of:)` beschrieben.
+    var displayedHumanHand: [Card] { displayedCards(of: 0) }
+
+    func displayedCardCount(of seat: Int) -> Int {
+        displayedCards(of: seat).count
+    }
+
+    /// Deal minus enthüllte Plays, nicht der Engine-Stand, der der Präsentation
+    /// vorausläuft. Bleibt privat, damit keine View eine Gegnerhand erhalten kann.
+    private func displayedCards(of seat: Int) -> [Card] {
         guard let roundSeat = roundSeat(forUISeat: seat),
               round.deal.hands.indices.contains(roundSeat) else { return [] }
         guard let phase = round.playout else {

@@ -84,7 +84,7 @@ struct Phase3View: View {
             }
         }
         .onAppear {
-            settledPlays = min(game.revealedPlays, game.playout?.plays.count ?? 0)
+            settledPlays = min(game.revealedPlays, game.resolvedPlayCount)
         }
         .onChange(of: game.revealedPlays) { _, newValue in
             if reduceMotion {
@@ -103,7 +103,7 @@ struct Phase3View: View {
             guard ProcessInfo.processInfo.arguments.contains("-phase3ActionQA") else { return }
             try? await Task.sleep(for: .milliseconds(1_200))
             guard game.playoutLeader == 0,
-                  let card = game.displayedHand(of: 0).first else { return }
+                  let card = game.displayedHumanHand.first else { return }
             game.humanLead(card)
         }
         #endif
@@ -129,7 +129,7 @@ struct Phase3View: View {
             && game.roundResult?.winner == seat
             && game.endPhase <= .frozen
         let focused = isLeader || isWinner
-        let restCards = game.displayedHand(of: seat).count
+        let restCards = game.displayedCardCount(of: seat)
         return OpponentPortrait(seat: seat,
                                 name: game.name(of: seat),
                                 caption: "\(restCards) Karten",
@@ -187,9 +187,7 @@ struct Phase3View: View {
     private var playedCardsFan: some View {
         let chains = settledChains
         let currentChain = chains.last ?? []
-        let finalCards = game.playout.map {
-            Array($0.plays.prefix(settledPlays).suffix(8)).map(\.card)
-        } ?? []
+        let finalCards = Array(game.revealedPlayEvents.prefix(settledPlays).suffix(8)).map(\.card)
         let finalTableau = game.stage != .playout && !finalCards.isEmpty
         let displayCards = finalTableau
             ? finalCards
@@ -251,9 +249,8 @@ struct Phase3View: View {
     }
 
     private var settledChains: [[PlayoutPhase.Play]] {
-        guard let phase = game.playout else { return [] }
         var chains: [[PlayoutPhase.Play]] = []
-        for play in phase.plays.prefix(settledPlays) {
+        for play in game.revealedPlayEvents.prefix(settledPlays) {
             if play.isLead || chains.isEmpty {
                 chains.append([play])
             } else {
@@ -576,16 +573,12 @@ struct Phase3View: View {
     }
 
     private var lastRevealedPlay: PlayoutPhase.Play? {
-        guard game.revealedPlays > 0,
-              let phase = game.playout,
-              phase.plays.indices.contains(game.revealedPlays - 1)
-        else { return nil }
-        return phase.plays[game.revealedPlays - 1]
+        game.revealedPlayEvents.last
     }
 
     /// Angewinkelter Handfächer (Muster von ContentView::handView, §5b Akt 3 Spielerhand).
     private var handFan: some View {
-        let cards = game.displayedHand(of: 0)
+        let cards = game.displayedHumanHand
         let canLead = game.cascadeIdle && game.playoutLeader == 0
             && game.stage == .playout
         let N = cards.count

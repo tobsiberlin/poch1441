@@ -10,13 +10,10 @@ den noch nicht gelandeten sichtbaren Zustand. Beide ausgelieferten Meldeseeds
 erzeugen eine frühe menschliche Meldung. Die feste Tutorialbesetzung und die
 öffentlichen Tendenzmetadaten sind datengetrieben und handunabhängig.
 
-Noch nicht vollständig integriert sind zwei Architekturgrenzen:
+Noch nicht vollständig integriert ist eine Architekturgrenze:
 
 1. Die First-Run-Beatfolge ist semantisch korrekt, aber als Swift-Array und
    `switch` verdrahtet, nicht aus datengetriebenen Tutorialschritten geladen.
-2. Die Regeltests pinnen die ausgelieferten Meldeseeds, lesen sie aber noch nicht
-   direkt aus `TutorialScenarios.json`; eine abweichende JSON-Änderung würde daher
-   erst im UI-/Integrationsgate auffallen.
 
 ## Regel- und Seed-Belege
 
@@ -32,11 +29,11 @@ Noch nicht vollständig integriert sind zwei Architekturgrenzen:
   `PresentationDirector` akzeptierten Impact.
 - `App/TutorialScenarios.json:5-14` enthält die Meldeseeds `1444` für drei und
   `19` für vier Personen sowie getrennte Seeds für Pochen und Ausspielen.
-- `PochKit/Tests/PochKitTests/TutorialScenarioTests.swift:8-32` belegt für Seed
-  `1444` eine zuerst vom Menschen gewonnene Bube- und Zehn-Mulde.
-- `PochKit/Tests/PochKitTests/TutorialScenarioTests.swift:38-80` belegt für Seed
-  `19` Herz-Bube als offene Trumpfkarte sowie König, Dame und Mariage beim
-  Menschen. Alle Auszahlungen entstehen aus unveränderten Runderegeln.
+- `TutorialScenarioTests` liest die ausgelieferte JSON-Datei direkt relativ zu
+  seiner Quelle und prüft Version, eindeutige Lektionen sowie 3-/4-Spieler-
+  Vollständigkeit. Meldeseeds müssen menschliche Auszahlungen liefern, Poch-Seeds
+  eine erste legale menschliche Eröffnung und Ausspiel-Seeds eine menschlich
+  geführte Zwangskette mit anschließendem Riss.
 - Der First Run setzt vor der Lernrunde bewusst auf vier Personen
   (`App/ContentView.swift:833-840`), daher ist Seed `19` der aktive Produktpfad.
 
@@ -106,9 +103,9 @@ geladen werden; PochKit bleibt alleinige Regelwahrheit.
 
 ## Ausgeführte Checks
 
-- `swift test --package-path PochKit`: 52 XCTest- und 8 Swift-Testing-Fälle grün.
-- `swift test --package-path PochKit --filter TutorialScenarioTests`: 2 Tests grün
-  nach Ergänzung des Drei-Personen-Seeds.
+- `swift test --package-path PochKit`: 54 XCTest- und 8 Swift-Testing-Fälle grün.
+- `swift test --package-path PochKit --filter TutorialScenarioTests`: 4 Tests grün;
+  alle Werte stammen aus `App/TutorialScenarios.json`.
 - `swift test --package-path PochKit --filter BotBrainTests`: 8 Tests grün.
 - `swift test --package-path PochKit --filter TellGeneratorTests`: 3 Tests grün.
 - `swiftc App/OpponentRosterCatalog.swift Tests/OpponentRosterContractTests.swift`
