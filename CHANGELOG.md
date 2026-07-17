@@ -10,6 +10,9 @@
   `Unterwegs`, gemeinsame 8+1-Regelgeometrie, R1-Keramiksteine und individuell
   gealterte gleichwertige 1-Cent-Münzen. Ältere PM-/Glas-Token-/Mockup-Anker sind
   nicht mehr bindend.
+- Tischwahl festgelegt: `Nur diese Partie` verwendet einen Session-Override,
+  `Als Standard` speichert die Wahl bis zur nächsten Änderung. Eine spontane Wahl
+  überschreibt die dauerhafte Präferenz nicht.
 - `CardFace.swift` / `CardWarp.metal`: Kartenwölbung feiner abgestimmt
   (Eckenhub 2.4 → 1.6 × scale, ruhigeres Licht); Kartonrand bleibt unabhängig
   vom Wölbungswert konstant.

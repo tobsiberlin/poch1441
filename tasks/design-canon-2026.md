@@ -113,10 +113,18 @@ Gegenständen entstehen kann, ohne trashig oder nostalgisch verkleidet zu wirken
 - Die erste geführte Partie verwendet immer Track A. Der Einstieg darf keine
   Stilentscheidung vor das Verständnis stellen.
 - Nach der ersten abgeschlossenen Partie erscheint einmalig `Wähle deinen Tisch`.
-- Die Auswahl wird gespeichert und bleibt unter `Tisch & Material` jederzeit
-  reversibel.
 - Die Auswahl zeigt zwei große visuelle Vorschauen und jeweils einen sachlichen
   Ein-Satz-Unterschied. Kein Modal mit kleinen Radio-Buttons.
+- Nach der Tischwahl folgt eine kompakte Gültigkeitsauswahl als Segment:
+  `Nur diese Partie` oder `Als Standard`. Vorausgewählt ist `Nur diese Partie`.
+- Eine einzige Primäraktion `Mit diesem Tisch spielen` bestätigt Tisch und
+  Gültigkeit. Es gibt keine zwei konkurrierenden Startbuttons.
+- `Nur diese Partie` setzt einen Session-Override und verändert den gespeicherten
+  Standard nicht. Nach dem Partieende fällt die App auf den bisherigen Standard zurück.
+- `Als Standard` verwendet den Tisch sofort und speichert ihn für künftige Partien,
+  bis der Spieler die Einstellung erneut ändert.
+- Der Standard bleibt unter `Tisch & Material` jederzeit reversibel. Die UI verwendet
+  deshalb nicht die absolute Formulierung `für immer`.
 
 ## 6. Spielsteine
 

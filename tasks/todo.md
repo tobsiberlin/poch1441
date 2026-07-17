@@ -591,6 +591,10 @@ Diese Punkte blockieren die Umsetzung nicht. Falls Tobsi nichts anderes sagt, so
 
 ## Track E - Einstellungen / Menues
 
+- [ ] Tischwahl implementieren: große Vorschauen für `Poch Disc` und `Unterwegs`,
+  Segment `Nur diese Partie` / `Als Standard` und eine Primäraktion. Session-Override
+  und gespeicherten Standard getrennt halten; Standard unter `Tisch & Material`
+  jederzeit änderbar. Default der Gültigkeit: `Nur diese Partie`.
 - [~] Settings-Screen: Audio/Haptik/Effekte. Stand: Sound, Haptik, Assist-Hinweise,
   Tischeffekte, Theme, Sprache-/Tutorial-/Rechtliches-Platzhalter und DEBUG-
   Startzustände sichtbar. Stand 9.7.: Settings sind im gemeinsamen Overlay-System

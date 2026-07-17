@@ -23,6 +23,10 @@ Materialstudien und Timing-Ideen. Das Qualitätsziel ist nicht sichtbarer Luxus,
 sondern eine so präzise und verständliche Produktlösung, dass die Alternative
 altmodisch wirkt.
 
+Tischpräferenzen besitzen zwei getrennte Zustände: einen gespeicherten Standard und
+einen optionalen Override für die laufende Partie. Ein Session-Override darf den
+gespeicherten Standard niemals still verändern.
+
 ## 2. Red-Team-Befund
 
 Die größten Risiken sind nicht fehlende Effekte, sondern fehlende Kausalität und
