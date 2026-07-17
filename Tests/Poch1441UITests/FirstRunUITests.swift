@@ -10,13 +10,13 @@ final class FirstRunUITests: XCTestCase {
         app.launch()
 
         assertWindow(in: app, hasOrientation: .portrait)
-        assertIntroContract(in: app)
+        assertIntroContract(in: app, orientation: .portrait)
         attachScreenshot(of: app, named: "first-run-portrait")
 
         XCUIDevice.shared.orientation = .landscapeLeft
         assertWindow(in: app, hasOrientation: .landscape)
 
-        assertIntroContract(in: app)
+        assertIntroContract(in: app, orientation: .landscape)
         attachScreenshot(of: app, named: "first-run-landscape")
     }
 
@@ -96,7 +96,7 @@ final class FirstRunUITests: XCTestCase {
     }
 
     @MainActor
-    private func assertIntroContract(in app: XCUIApplication) {
+    private func assertIntroContract(in app: XCUIApplication, orientation: ExpectedOrientation) {
         for opponent in ["Hana", "Noah", "Jonas"] {
             XCTAssertTrue(
                 app.staticTexts[opponent].waitForExistence(timeout: 3),
@@ -108,6 +108,75 @@ final class FirstRunUITests: XCTestCase {
             app.buttons.firstMatch.waitForExistence(timeout: 3),
             "Die primäre First-Run-Aktion muss erreichbar bleiben."
         )
+
+        let windowFrame = app.windows.firstMatch.frame
+        let identifiers = [
+            "firstRun.intro.title",
+            "firstRun.intro.body",
+            "firstRun.intro.goal",
+            "firstRun.intro.primary",
+            "firstRun.intro.secondary"
+        ]
+        let scrollView = app.scrollViews.firstMatch
+
+        for identifier in identifiers {
+            let element = app.descendants(matching: .any)[identifier]
+            XCTAssertTrue(element.waitForExistence(timeout: 3), "\(identifier) muss existieren.")
+            if scrollView.exists {
+                for _ in 0..<4 where !windowFrame.intersects(element.frame) {
+                    scrollView.swipeUp()
+                }
+            }
+            let frame = element.frame
+            let isFullyVisible: Bool
+            switch orientation {
+            case .portrait:
+                isFullyVisible = windowFrame.contains(frame)
+            case .landscape:
+                isFullyVisible = windowFrame.intersects(frame) && frame.height <= windowFrame.height
+            }
+            XCTAssertTrue(
+                isFullyVisible && frame.width >= 44 && frame.height >= 20,
+                "\(identifier) liegt mit Frame \(frame) außerhalb von \(windowFrame)."
+            )
+        }
+
+        let board = app.descendants(matching: .any)["firstRun.intro.board"]
+        XCTAssertTrue(board.waitForExistence(timeout: 3), "Die echte Poch Disc muss sichtbar bleiben.")
+        switch orientation {
+        case .portrait:
+            XCTAssertTrue(
+                windowFrame.contains(board.frame),
+                "Die echte Poch Disc muss vollständig sichtbar bleiben: \(board.frame)."
+            )
+        case .landscape:
+            XCTAssertTrue(
+                windowFrame.intersects(board.frame),
+                "Die echte Poch Disc muss die rechte Landscape-Zone belegen: \(board.frame)."
+            )
+        }
+        let protectedFrames = [
+            app.descendants(matching: .any)["firstRun.intro.goal"].frame,
+            app.descendants(matching: .any)["firstRun.intro.primary"].frame,
+            app.descendants(matching: .any)["firstRun.intro.secondary"].frame
+        ]
+        for protectedFrame in protectedFrames {
+            XCTAssertFalse(
+                board.frame.intersects(protectedFrame),
+                "Disc und Informations- oder Aktionsfläche dürfen sich nicht überschneiden."
+            )
+        }
+        for seat in 1...3 {
+            let opponent = app.descendants(matching: .any)["firstRun.opponent.\(seat)"]
+            XCTAssertTrue(
+                windowFrame.contains(opponent.frame),
+                "Tutorialplatz \(seat) muss vollständig im App-Fenster liegen."
+            )
+            XCTAssertFalse(
+                board.frame.intersects(opponent.frame),
+                "Disc und Tutorialplatz \(seat) dürfen sich in \(orientation) nicht überschneiden."
+            )
+        }
     }
 
     @MainActor
@@ -145,7 +214,8 @@ final class FirstRunUITests: XCTestCase {
     @MainActor
     private func attachScreenshot(of app: XCUIApplication, named name: String) {
         Thread.sleep(forTimeInterval: 0.35)
-        let attachment = XCTAttachment(screenshot: app.screenshot())
+        XCTAssertTrue(app.windows.firstMatch.exists)
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)

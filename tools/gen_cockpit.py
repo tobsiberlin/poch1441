@@ -74,7 +74,7 @@ tracks = [
     (
         "arbeit",
         "QA",
-        "Geräte und Rotation sind grün; Accessibility XXXL und Hardwaregefühl werden vertieft.",
+        "Geräte, Rotation und SE Accessibility XXXL sind grün; Hardwaregefühl bleibt offen.",
     ),
 ]
 
@@ -84,11 +84,11 @@ evidence = [
     "102 explizite Lokalisierungsschlüssel sind in DE, EN, FR, IT, ES, NL und PL vollständig.",
     "First-Run-UI-Tests belegen Kontakt, erste Karte, Trumpf, Meldung und alle vier Lernzustände.",
     "SE, Standard und Pro Max bestehen Portrait und Landscape mit stabilen Gegnerplätzen.",
+    "SE Accessibility XXXL trennt Gegner, Disc, Ziel und beide Aktionen ohne Überlagerung.",
     "Der Simulator-Build besteht ohne Swift-Warnung; AppIntents meldet nur den erwarteten Metadatenhinweis.",
 ]
 
 next_steps = [
-    "Accessibility XXXL auf SE in Portrait und Landscape kollisionsfrei abschließen.",
     "Reduce Motion und gesprochene VoiceOver-Reihenfolge im echten Flow prüfen.",
     "Rotation während eines laufenden Impacts auf Zustandsduplikate testen.",
     "Keramikklang, Taptic-Charakter und 60-/120-Hz-Verhalten auf Hardware abnehmen.",

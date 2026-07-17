@@ -50,7 +50,8 @@ Flugobjekte und optische Schatten brauchen weiterhin Screenshots und Interaktion
 5. Jede sichtbare Center-Beschriftung verwendet den siebenfach übersetzten
    Katalogschlüssel `board.center`.
 6. Coach-Titel, Body und Primäraktion verwenden semantische Textstile ohne
-   Drei-Zeilen-Limit; der echte Accessibility-XXXL-Beleg bleibt visuell offen.
+   Drei-Zeilen-Limit; Accessibility XXXL ist auf dem iPhone SE in beiden
+   Orientierungen interaktiv belegt.
 7. Der Funding-Beat zeigt auch bei Reduce Motion eine Quelle-Ziel-Hairline und
    mutiert alle Zähler erst in der Completion zusammen mit gebündeltem R1-Impact.
 8. Nach dem Opening-Impact fokussiert VoiceOver den siebenfach lokalisierten
@@ -114,6 +115,10 @@ beiden Orientierungen.
   (440 x 956 / 956 x 440).
 - Feste Plätze Hana, Noah und Jonas liegen in jedem geprüften Beat mit mindestens
   44 x 44 Punkten im sichtbaren App-Fenster.
+- Der Intro-Screenshot bei Accessibility XXXL trennt Gegnerreihe, Disc, Lernziel
+  und beide Aktionen vollständig. Der UI-Test verlangt in Portrait komplette
+  Fensteraufnahme und verbietet in beiden Orientierungen jede Überschneidung
+  zwischen Disc, Gegnern, Ziel und Aktionen.
 - Erste sichtbare Karte, volle Hand, Trumpf, Verbinden, Beweisen und Loslassen
   wurden als Simulator-Screenshots visuell geprüft; keine Overlay-Kollision.
 - Accessibility-Baum benennt Lernzustand, 44-Punkt-Scheibe, Mitte, Ergebnis und

@@ -16,7 +16,7 @@ nur Kompositions- beziehungsweise Regiereferenzen.
 | Lead | `App/ContentView.swift`, `App/GameState.swift`, `App/ImpactFlight.swift`, `App/DesignTokens.swift`, `App/DealOverlay.swift`, `project.yml`, Integrationsdokumente | PochKit-Regeln ohne Regel-Spur-Review | Integriert: Director, acht Beats, adaptive Bühne und UI-Test-Target |
 | Material | `App/PlayComponents.swift`, `App/Effects.swift`, neue Material-/Audio-/Haptikmodule und zugehörige Assets | Lead-Dateien, Timeline und PochKit | Integriert: R1, Endlagen, Keramikkontakt und gebündelte Haptik |
 | Gegner | `App/BotProfiles.json`, neue datengetriebene Gegner-/Besetzungsmodule und eigene Tests | Lead-Dateien, verdeckte Karten oder Timeline | Integriert: Hana/Noah/Jonas, feste Sitze und öffentliche Tendenzen |
-| QA | neue Dateien unter `tools/qa/`, `tasks/evidence/` und reine Test-/Auditdateien | Produktcode außerhalb eines koordinierten Integrationsfensters | Grün: Static Gate, UI-Interaktion und drei iPhone-Klassen |
+| QA | neue Dateien unter `tools/qa/`, `tasks/evidence/` und reine Test-/Auditdateien | Produktcode außerhalb eines koordinierten Integrationsfensters | Grün: Static Gate, UI-Interaktion, drei iPhone-Klassen und SE Accessibility XXXL |
 | Regel | `PochKit/**`, `App/TutorialScenarios.json`, eigene Regeltests und Simulationswerkzeuge | Views, Nodes, Presentation Director und Layout | Grün: Seed 19, Meldungsbeleg und Bot-Informationsgrenzen |
 
 Nur die Lead-Spur integriert Änderungen in `ContentView`, `GameState`,
@@ -85,6 +85,8 @@ kleine Schnittstellen an Lead übergeben; keine Spur führt dort eigenständig E
 - [x] Integrationspunkt committed und auf `main` gepusht.
 - [x] Statuscockpit auf Designkanon 2026 reduziert; verworfene historische Meta aus
   Generator, Template und aktuellem Konzeptabschnitt entfernt.
+- [x] Intro-Overlap auf kompaktem Portrait entfernt; Gegner, Disc, Ziel und Aktionen
+  sind bei Accessibility XXXL getrennt und über Rotation getestet.
 
 ## Belege des ersten Integrationspunkts
 
@@ -100,3 +102,5 @@ kleine Schnittstellen an Lead übergeben; keine Spur führt dort eigenständig E
   Mapping, Lautstärkegrenze und gemeinsamer Impact-Trigger sind im Build integriert.
 - Cockpit-Gate: 7-KB-Gegenwartsansicht aus fünf aktuellen Quellen; kein Treffer für
   verworfene Liga-, Gilden-, Prestige- oder alte Gegnerbegriffe.
+- Accessibility-XXXL-Gate: iPhone SE Portrait/Landscape grün; vollständiger
+  Standard-SE-Flow mit zwei Tests und Pro-Max-Rotation ebenfalls grün.

@@ -55,6 +55,7 @@ struct ContentView: View {
     @State private var showFirstRunIntro = false
     @State private var matchEndResult: Match.MatchResult?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @AccessibilityFocusState private var guidedCoachFocused: Bool
     /// Phasen-Morph (§5b): ein Namespace über alle drei Akte - Tokens, Poch-Tile und
@@ -506,9 +507,6 @@ struct ContentView: View {
 
     private var firstRunIntro: some View {
         GeometryReader { proxy in
-            let compactHeight = proxy.size.height < 760
-            let boardSize = min(proxy.size.width * (compactHeight ? 0.76 : 0.86),
-                                compactHeight ? 286 : 390)
             ZStack {
                 LinearGradient(colors: [
                     Color(hex: 0x111018),
@@ -526,9 +524,21 @@ struct ContentView: View {
                     firstRunLandscapeIntro(size: proxy.size,
                                            safeArea: proxy.safeAreaInsets)
                 } else {
-                  VStack(spacing: 0) {
-                    Spacer(minLength: compactHeight ? 10 : 42)
+                    firstRunPortraitIntro(size: proxy.size,
+                                          safeArea: proxy.safeAreaInsets)
+                }
+            }
+        }
+    }
 
+    private func firstRunPortraitIntro(size: CGSize, safeArea: EdgeInsets) -> some View {
+        let compactHeight = size.height < 760
+        let boardSize = min(size.width * (compactHeight ? 0.62 : 0.72),
+                            compactHeight ? 232 : 310,
+                            size.height * (compactHeight ? 0.34 : 0.36))
+        let opponentSize: CGFloat = compactHeight ? 44 : 48
+
+        return VStack(spacing: 0) {
                     HStack(spacing: 6) {
                         Text("POCH")
                             .font(.system(size: compactHeight ? 25 : 31, weight: .bold))
@@ -544,6 +554,7 @@ struct ContentView: View {
                         .font(.system(size: compactHeight ? 23 : 28, weight: .heavy))
                         .foregroundStyle(Tokens.jewelPlatin)
                         .padding(.top, compactHeight ? 9 : 18)
+                        .accessibilityIdentifier("firstRun.intro.title")
 
                     Text(String(localized: "firstRun.intro.body",
                                 defaultValue: "In der Mitte wartet dein erster Gewinn. Hana zeigt dir immer nur den nächsten Zug."))
@@ -554,6 +565,14 @@ struct ContentView: View {
                         .frame(maxWidth: 330)
                         .padding(.horizontal, 24)
                         .padding(.top, compactHeight ? 4 : 8)
+                        .accessibilityIdentifier("firstRun.intro.body")
+
+                    HStack(spacing: compactHeight ? 28 : 38) {
+                        firstRunOpponent(name: "Hana", seat: 1, size: opponentSize)
+                        firstRunOpponent(name: "Noah", seat: 2, size: opponentSize)
+                        firstRunOpponent(name: "Jonas", seat: 3, size: opponentSize)
+                    }
+                    .padding(.top, compactHeight ? 6 : 12)
 
                     ZStack {
                         Image("PochRingPM49")
@@ -569,17 +588,11 @@ struct ContentView: View {
                                        diameter: boardSize * 0.23,
                                        showCount: false)
                             .offset(y: -boardSize * 0.015)
-
-                        firstRunOpponent(name: "Hana", seat: 1)
-                            .offset(x: -boardSize * 0.36, y: boardSize * 0.30)
-                        firstRunOpponent(name: "Noah", seat: 2)
-                            .offset(y: -boardSize * 0.34)
-                        firstRunOpponent(name: "Jonas", seat: 3)
-                            .offset(x: boardSize * 0.36, y: boardSize * 0.30)
                     }
-                    .frame(height: min(boardSize * (compactHeight ? 0.92 : 0.84),
-                                       proxy.size.height * (compactHeight ? 0.42 : 0.39)))
-                    .padding(.top, compactHeight ? 7 : 16)
+                    .frame(width: boardSize, height: boardSize)
+                    .padding(.top, compactHeight ? 5 : 10)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("firstRun.intro.board")
 
                     HStack(spacing: 9) {
                         Image(systemName: "hand.raised.fill")
@@ -598,8 +611,8 @@ struct ContentView: View {
                         .overlay(Capsule().strokeBorder(Tokens.jewelGold.opacity(0.24), lineWidth: 1)))
                     .padding(.horizontal, 28)
                     .padding(.top, compactHeight ? 5 : 10)
-
-                    Spacer(minLength: compactHeight ? 8 : 18)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("firstRun.intro.goal")
 
                     Button {
                         enterFirstTable(guided: true)
@@ -620,6 +633,7 @@ struct ContentView: View {
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("firstRun.intro.primary")
                     .padding(.horizontal, 28)
+                    .padding(.top, compactHeight ? 12 : 18)
 
                     Button {
                         enterFirstTable(guided: false)
@@ -629,19 +643,85 @@ struct ContentView: View {
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Tokens.jewelPlatin.opacity(0.68))
                             .frame(maxWidth: .infinity, minHeight: compactHeight ? 40 : 44)
+                            .background(Color.white.opacity(0.001))
                     }
                     .buttonStyle(.plain)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("firstRun.intro.secondary")
                     .padding(.horizontal, 28)
                     .padding(.bottom, max(compactHeight ? 8 : 18,
-                                         proxy.safeAreaInsets.bottom + 8))
-                  }
-                }
-            }
+                                         safeArea.bottom + 8))
         }
+        .padding(.top, compactHeight ? 8 : 28)
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private func firstRunLandscapeIntro(size: CGSize, safeArea: EdgeInsets) -> some View {
         let zones = FirstRunStageZones.resolve(in: size, safeArea: safeArea)
+        let decisionContent = VStack(spacing: 8) {
+            HStack(spacing: 5) {
+                Text("POCH")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(Tokens.jewelPlatin)
+                Text("1441")
+                    .font(.system(size: 22, weight: .light))
+                    .foregroundStyle(Tokens.jewelGold)
+            }
+            .accessibilityElement(children: .combine)
+
+            Text(String(localized: "tutorial.firstTable.title",
+                        defaultValue: "Dein erster Tisch"))
+                .font(.title2.weight(.heavy))
+                .foregroundStyle(Tokens.jewelPlatin)
+                .accessibilityIdentifier("firstRun.intro.title")
+
+            Text(String(localized: "firstRun.intro.body",
+                        defaultValue: "In der Mitte wartet dein erster Gewinn. Hana zeigt dir immer nur den nächsten Zug."))
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.74))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("firstRun.intro.body")
+
+            Label(String(localized: "firstRun.goal",
+                         defaultValue: "Werde zuerst deine Karten los und gewinne die Mitte."),
+                  systemImage: "hand.raised.fill")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
+                .multilineTextAlignment(.center)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("firstRun.intro.goal")
+
+            Button {
+                enterFirstTable(guided: true)
+            } label: {
+                Label(String(localized: "firstRun.intro.primary",
+                             defaultValue: "Am Tisch Platz nehmen"),
+                      systemImage: "chair.lounge.fill")
+                    .font(.body.weight(.bold))
+                    .foregroundStyle(Tokens.bgDeep)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .background(Capsule().fill(Tokens.jewelGold))
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("firstRun.intro.primary")
+
+            Button {
+                enterFirstTable(guided: false)
+            } label: {
+                Text(String(localized: "firstRun.intro.secondary",
+                            defaultValue: "Ohne Einführung spielen"))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.68))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .background(Color.white.opacity(0.001))
+            }
+            .buttonStyle(.plain)
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("firstRun.intro.secondary")
+        }
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+
         return ZStack {
             VStack(spacing: 8) {
                 ForEach(Array(["Hana", "Noah", "Jonas"].enumerated()), id: \.offset) { index, name in
@@ -651,64 +731,24 @@ struct ContentView: View {
             .frame(width: zones.opponents.width, height: zones.opponents.height)
             .position(x: zones.opponents.midX, y: zones.opponents.midY)
 
-            VStack(spacing: 8) {
-                HStack(spacing: 5) {
-                    Text("POCH")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundStyle(Tokens.jewelPlatin)
-                    Text("1441")
-                        .font(.system(size: 22, weight: .light))
-                        .foregroundStyle(Tokens.jewelGold)
+            if dynamicTypeSize.isAccessibilitySize {
+                ScrollView(.vertical) {
+                    decisionContent
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 10)
                 }
-                .accessibilityElement(children: .combine)
-
-                Text(String(localized: "tutorial.firstTable.title",
-                            defaultValue: "Dein erster Tisch"))
-                    .font(.title2.weight(.heavy))
-                    .foregroundStyle(Tokens.jewelPlatin)
-
-                Text(String(localized: "firstRun.intro.body",
-                            defaultValue: "In der Mitte wartet dein erster Gewinn. Hana zeigt dir immer nur den nächsten Zug."))
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.74))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Label(String(localized: "firstRun.goal",
-                             defaultValue: "Werde zuerst deine Karten los und gewinne die Mitte."),
-                      systemImage: "hand.raised.fill")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
-                    .multilineTextAlignment(.center)
-
-                Button {
-                    enterFirstTable(guided: true)
-                } label: {
-                    Label(String(localized: "firstRun.intro.primary",
-                                 defaultValue: "Am Tisch Platz nehmen"),
-                          systemImage: "chair.lounge.fill")
-                        .font(.body.weight(.bold))
-                        .foregroundStyle(Tokens.bgDeep)
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(Capsule().fill(Tokens.jewelGold))
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("firstRun.intro.primary")
-
-                Button {
-                    enterFirstTable(guided: false)
-                } label: {
-                    Text(String(localized: "firstRun.intro.secondary",
-                                defaultValue: "Ohne Einführung spielen"))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Tokens.jewelPlatin.opacity(0.68))
-                        .frame(minHeight: 44)
-                }
-                .buttonStyle(.plain)
+                .scrollIndicators(.hidden)
+                .frame(width: zones.decision.width,
+                       height: size.height - safeArea.top - safeArea.bottom - 16)
+                .position(x: zones.decision.midX,
+                          y: safeArea.top
+                            + (size.height - safeArea.top - safeArea.bottom) / 2)
+            } else {
+                decisionContent
+                    .frame(width: zones.decision.width)
+                    .position(x: zones.decision.midX,
+                              y: size.height / 2)
             }
-            .frame(width: zones.decision.width)
-            .position(x: zones.decision.midX,
-                      y: size.height / 2)
 
             ZStack {
                 Image("PochRingPM49")
@@ -725,27 +765,28 @@ struct ContentView: View {
             }
             .frame(width: zones.board.width, height: zones.board.height)
             .position(x: zones.board.midX, y: zones.board.midY)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("firstRun.intro.board")
         }
     }
 
-    private func firstRunOpponent(name: String, seat: Int) -> some View {
-        OpponentPortrait(seat: seat,
-                         name: name,
-                         isActive: true,
-                         isFocus: false,
-                         mood: .neutral,
-                         size: 54,
-                         showsText: false,
-                         morph: nil)
-            .overlay(alignment: .bottom) {
-                Text(name)
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Capsule().fill(Color.black.opacity(0.72)))
-                    .offset(y: 10)
-            }
+    private func firstRunOpponent(name: String, seat: Int, size: CGFloat = 48) -> some View {
+        VStack(spacing: 3) {
+            OpponentPortrait(seat: seat,
+                             name: name,
+                             isActive: true,
+                             isFocus: false,
+                             mood: .neutral,
+                             size: size,
+                             showsText: false,
+                             morph: nil)
+            Text(name)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.88))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Capsule().fill(Color.black.opacity(0.72)))
+        }
             .accessibilityElement(children: .combine)
             .accessibilityLabel(name)
             .accessibilityIdentifier("firstRun.opponent.\(seat)")
