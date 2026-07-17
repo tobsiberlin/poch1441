@@ -284,16 +284,16 @@ struct Phase3View: View {
                 .frame(width: 92, height: 92)
             RoundedRectangle(cornerRadius: 12)
                 .fill(LinearGradient(colors: [
-                    Tokens.jewelSmaragd.opacity(theme.isNeon ? 0.92 : 0.58),
-                    Tokens.jewelAmethyst.opacity(theme.isNeon ? 0.92 : 0.52)
+                    Tokens.jewelSmaragd.opacity(theme.isTravelTable ? 0.66 : 0.58),
+                    Tokens.jewelAmethyst.opacity(theme.isTravelTable ? 0.60 : 0.52)
                 ], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .frame(width: 54, height: 54)
                 .rotationEffect(.degrees(45))
                 .overlay(RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(Tokens.jewelPlatin.opacity(0.30), lineWidth: 1)
                     .rotationEffect(.degrees(45)))
-                .shadow(color: theme.smaragdFocus.opacity(theme.isNeon ? 0.34 : 0.10),
-                        radius: theme.isNeon ? 14 : 5)
+                .shadow(color: theme.smaragdFocus.opacity(theme.isTravelTable ? 0.16 : 0.10),
+                        radius: theme.isTravelTable ? 7 : 5)
             VStack(spacing: -1) {
                 Text("MITTE")
                     .font(.system(size: 8, weight: .heavy))
@@ -411,7 +411,7 @@ struct Phase3View: View {
             Spacer(minLength: 0)
             HStack(spacing: -4) {
                 ForEach(0..<3, id: \.self) { i in
-                    TableChip(tint: i == 0 ? Tokens.jewelPlatin : Tokens.jewelGold, size: 15)
+                    R1Token(tint: i == 0 ? Tokens.jewelPlatin : Tokens.jewelGold, size: 15)
                         .offset(y: CGFloat(i) * -2)
                 }
             }
@@ -764,7 +764,7 @@ struct Phase3View: View {
     private func paymentRow(seat: Int, payment: Int, stack: Int) -> some View {
         HStack(spacing: 8) {
             if seat == 0 {
-                TableChip(tint: payment > 0 ? Tokens.jewelGold : Tokens.slate, size: 14)
+                R1Token(tint: payment > 0 ? Tokens.jewelGold : Tokens.slate, size: 14)
             } else {
                 OpponentPortrait(seat: seat,
                                  name: game.name(of: seat),
@@ -912,7 +912,7 @@ private struct EndChip: View {
     var body: some View {
         let t: CGFloat = trigger ? 1 : 0
         let p = point(t)
-        TableChip(tint: tint, size: 12)
+        R1Token(tint: tint, size: 12)
             .rotationEffect(.degrees((Double(index % 3) - 1) * 6 + Double(t) * 12))
             .position(p)
             .opacity(trigger ? 0.10 : 1)

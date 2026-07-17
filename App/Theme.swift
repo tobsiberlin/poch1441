@@ -1,34 +1,26 @@
 import PochKit
 import SwiftUI
 
-/// Zwei Gesichter, eine Geometrie (konzept §7): dieselben Jewel-Farben, einmal
-/// **matt** (Premium) und einmal **strahlend/emissiv** (Vivid-Electronic, „Neon").
-/// Light-Touch: kein Protocol auf Vorrat - nur ein Konfig-Wert, der die ViewModifier
-/// steuert. Der Glow kommt IMMER in der eigenen Kategorie-Farbe eines Elements
-/// (Gold glüht gold, Amethyst glüht violett) - nie ein fremdes Cyan (das wäre der
-/// Cyber-Casino-Rückfall, den wir verwerfen).
-enum Theme {
-    case premium, neon
+/// Übergangsname für bestehende View-Schnittstellen. Die Produktauswahl ist eine
+/// `TableWorld`; eine dritte Farbstimmung oder regelrelevante Abzweigung existiert
+/// nicht mehr.
+typealias Theme = TableWorld
 
-    var isNeon: Bool { self == .neon }
+extension TableWorld {
+    var isTravelTable: Bool { self == .unterwegs }
 
-    /// Emissive Bloom (0 im Premium) - breit + intensiv, „Leuchten von innen".
-    var tileGlow: CGFloat { isNeon ? 18 : 0 }
-    var glowOpacity: Double { isNeon ? 1.0 : 0 }
-    /// Neon: dunklerer Kern, damit der Glow trägt; Premium: matt-neutral.
-    var tileFillOpacity: Double { isNeon ? 0.28 : 0.40 }
-    var borderWidth: CGFloat { isNeon ? 2 : 1.5 }
-    var ringLineOpacity: Double { isNeon ? 0.5 : 0.18 }
-    /// Mitte-Aura-Radius.
-    var centerGlow: CGFloat { isNeon ? 32 : 10 }
+    /// Unterwegs bleibt etwas heller und unmittelbarer, ohne emissiven Casino-Glow.
+    var tileGlow: CGFloat { isTravelTable ? 5 : 0 }
+    var glowOpacity: Double { isTravelTable ? 0.24 : 0 }
+    var tileFillOpacity: Double { isTravelTable ? 0.34 : 0.40 }
+    var borderWidth: CGFloat { isTravelTable ? 1.25 : 1.5 }
+    var ringLineOpacity: Double { isTravelTable ? 0.26 : 0.18 }
+    var centerGlow: CGFloat { isTravelTable ? 8 : 10 }
 
-    /// Kategorie-Farbe je Theme: matt (Premium) vs. vivid/strahlend (Neon).
-    func tint(_ pool: Pool) -> Color { isNeon ? pool.jewelVivid : pool.jewel }
+    func tint(_ pool: Pool) -> Color { pool.jewel }
 
-    /// Lesbare Fokusfarben dürfen heller als das physische Material sein, bleiben
-    /// im Premium-Theme aber nicht emissiv.
-    var goldFocus: Color { isNeon ? Tokens.goldVivid : Tokens.jewelGold }
-    var roseFocus: Color { isNeon ? Tokens.roseVivid : Tokens.jewelRose }
-    var smaragdFocus: Color { isNeon ? Tokens.smaragdVivid : Tokens.smaragdText }
-    var amethystFocus: Color { isNeon ? Tokens.amethystVivid : Tokens.amethystText }
+    var goldFocus: Color { Tokens.jewelGold }
+    var roseFocus: Color { Tokens.jewelRose }
+    var smaragdFocus: Color { Tokens.smaragdText }
+    var amethystFocus: Color { Tokens.amethystText }
 }

@@ -13,12 +13,10 @@ struct BotBrainTests {
                                           thinkSecondsMin: 0.3, thinkSecondsMax: 0.6)
 
     private func observation(round: Round, player: Int) -> BotObservation {
-        BotObservation(
-            ownHand: round.deal.hands[player],
-            trump: round.deal.trump,
-            currentBet: round.betting.currentBet,
-            ownCommitted: round.betting.seats[player].committed
-        )
+        guard let observation = round.botObservation(for: player) else {
+            fatalError("Test fordert Observation für einen nicht handelnden Sitz an")
+        }
+        return observation
     }
 
     /// Anforderung: Profile wählen ausschließlich legale Aktionen und die Runden-Invariante
@@ -153,18 +151,21 @@ struct BotBrainTests {
     /// eigene Karten und öffentliche Gebotswerte. Bei identischer Observation und gleichem
     /// RNG bleibt die Aktion identisch; eine Fremdhand kann nicht übergeben werden.
     @Test func baselineEntscheidungIstVonFremdhaendenStrukturellGetrennt() {
-        let ownHand = [
-            Card(suit: .hearts, rank: .queen),
-            Card(suit: .spades, rank: .queen),
-        ]
-        let observation = BotObservation(
-            ownHand: ownHand,
-            trump: .hearts,
-            currentBet: 3,
-            ownCommitted: 0
-        )
+        var round = Round(stacks: [60, 60, 60], board: Board(), seed: 19)
+        let player = round.betting.turn
+        guard let openRange = round.betting.legalActions(for: player)?.openRange else {
+            Issue.record("Eröffnungsaktion fehlt")
+            return
+        }
+        try? round.applyBet(.open(openRange.lowerBound), by: player)
+        let actingPlayer = round.betting.turn
+        guard let observation = round.botObservation(for: actingPlayer) else {
+            Issue.record("Observation für handelnden Sitz fehlt")
+            return
+        }
         let fields = Set(Mirror(reflecting: observation).children.compactMap(\.label))
         #expect(fields == ["ownHand", "trump", "currentBet", "ownCommitted"])
+        #expect(round.botObservation(for: player) == nil)
 
         let legal = BettingPhase.LegalActions(
             canPass: true,
@@ -189,5 +190,61 @@ struct BotBrainTests {
         )
 
         #expect(first == second)
+    }
+
+    /// Phase-3-Fairnessgrenze: Die Observation enthält nur legale eigene Karten
+    /// und öffentliche Tischwerte. Fremde Resthände sind kein darstellbares Feld.
+    @Test func ausspielObservationSchliesstFremdhaendeStrukturellAus() throws {
+        let phase = PlayoutPhase(
+            hands: [
+                [Card(suit: .clubs, rank: .seven)],
+                [Card(suit: .hearts, rank: .ace)],
+                [Card(suit: .spades, rank: .king)],
+            ],
+            upcard: Card(suit: .diamonds, rank: .jack),
+            firstLeader: 0
+        )
+        let observation = try #require(phase.botObservation(for: 0))
+        let fields = Set(Mirror(reflecting: observation).children.compactMap(\.label))
+
+        #expect(fields == ["legalLeads", "upcard", "playedCards", "remainingCounts"])
+        #expect(phase.botObservation(for: 1) == nil)
+    }
+
+    /// Zwei Welten mit verschiedenen gegnerischen Karten ergeben bei identischer
+    /// öffentlicher Observation exakt dieselbe reine Baseline-Entscheidung.
+    @Test func ausspielEntscheidungIstVonFremdhaendenUnabhaengig() throws {
+        let ownCards = [
+            Card(suit: .hearts, rank: .nine),
+            Card(suit: .clubs, rank: .seven),
+        ]
+        let upcard = Card(suit: .diamonds, rank: .jack)
+        let firstWorld = PlayoutPhase(
+            hands: [
+                ownCards,
+                [Card(suit: .spades, rank: .seven)],
+                [Card(suit: .diamonds, rank: .seven)],
+            ],
+            upcard: upcard,
+            firstLeader: 0
+        )
+        let secondWorld = PlayoutPhase(
+            hands: [
+                ownCards,
+                [Card(suit: .spades, rank: .king)],
+                [Card(suit: .diamonds, rank: .ace)],
+            ],
+            upcard: upcard,
+            firstLeader: 0
+        )
+
+        let firstObservation = try #require(firstWorld.botObservation(for: 0))
+        let secondObservation = try #require(secondWorld.botObservation(for: 0))
+
+        #expect(firstObservation == secondObservation)
+        #expect(BotBrain.lead(observation: firstObservation)
+                == BotBrain.lead(observation: secondObservation))
+        #expect(BotBrain.lead(observation: firstObservation)
+                == Card(suit: .clubs, rank: .seven))
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Jewel-Farbwelt + Layout-Konstanten (konzept §5). Matte, satte Juwelen-Töne auf
-/// fast-schwarzem Grund - NIE Neon.
+/// fast-schwarzem Grund.
 enum Tokens {
     static let bgDark        = Color(hex: 0x0B0E14)
     // Material-Tiefe (Review-Konsens: warmes Tinten-Schwarz + Vignette statt Flat-#000).
@@ -18,13 +18,6 @@ enum Tokens {
     // bewusst tief; UI-Typografie braucht dagegen verlässlichen Kontrast.
     static let amethystText  = Color(hex: 0xA98BD0)
     static let smaragdText   = Color(hex: 0x58A58C)
-
-    // Vivid-Varianten (Neon/Vivid-Electronic §7): dieselben Hue-Familien, aber
-    // gesättigt-leuchtend statt matt - für das strahlende Theme.
-    static let goldVivid     = Color(hex: 0xF0CE7A)
-    static let roseVivid     = Color(hex: 0xE24E7B)
-    static let smaragdVivid  = Color(hex: 0x2CD4A8)
-    static let amethystVivid = Color(hex: 0xA06BE0)
 
     // Geführte Runde: Kontext bleibt sichtbar, konkurriert aber nicht mit dem Lernschritt.
     static let guidedFocusBlur: CGFloat = 0.8

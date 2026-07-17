@@ -613,13 +613,31 @@ enum R1Colorway: CaseIterable, Sendable {
 /// Track-A-Spielstein R1. `tint` bleibt vorerst als quellkompatibler Parameter
 /// bestehen, bezeichnet aber ausdrücklich weder Pool noch Besitzer: Innerhalb
 /// einer Partie verwenden alle Steine dieselbe keramische Farbwelt.
-struct TableChip: View {
-    var tint: Color = Tokens.jewelGold
-    var size: CGFloat = 11
-    var colorway: R1Colorway = .naturalWhite
+struct R1Token: View {
+    var size: CGFloat
+    var colorway: R1Colorway
+
+    init(tint: Color = Tokens.jewelGold,
+         size: CGFloat = 11,
+         colorway: R1Colorway = .naturalWhite) {
+        // Legacy-Aufrufer übergeben weiterhin Pool-/Spielerfarben. R1 ignoriert
+        // diese absichtlich, bis die zentralen Bühnen auf `R1Token` migriert sind.
+        _ = tint
+        self.size = size
+        self.colorway = colorway
+    }
 
     var body: some View {
         ZStack {
+            // Weicher Höhenschatten: zeigt die 3-mm-Stärke, ohne den trockenen
+            // Materialkontakt darunter aufzuweichen.
+            Ellipse()
+                .fill(Color.black.opacity(0.28))
+                .frame(width: size * 0.94, height: max(1, size * 0.18))
+                .blur(radius: size * 0.065)
+                .offset(y: size * 0.43)
+
+            // Harter Kontaktschatten: bleibt eng an der unteren Kante.
             Ellipse()
                 .fill(Color.black.opacity(0.76))
                 .frame(width: size * 0.84, height: max(1, size * 0.10))
@@ -689,6 +707,10 @@ struct TableChip: View {
     }
 }
 
+/// Übergangsname für noch nicht migrierte Bühnen. Neue Materialdarstellung
+/// verwendet `R1Token`; der Alias verändert weder Farbe noch Physik.
+typealias TableChip = R1Token
+
 /// Tonale Blindprägung des rotationssymmetrischen Kartenrücken-Signets.
 private struct R1BlindEmboss: Shape {
     func path(in rect: CGRect) -> Path {
@@ -750,7 +772,8 @@ enum R1TokenSlots {
     }
 
     static func layout(for count: Int) -> [R1TokenRestingPose] {
-        Array(poses.prefix(min(max(count, 1), poses.count)))
+        guard count > 0 else { return [] }
+        return Array(poses.prefix(min(count, poses.count)))
     }
 }
 
@@ -768,7 +791,7 @@ struct TableTokenPile: View {
         ZStack {
             ForEach(poses.indices, id: \.self) { index in
                 let pose = poses[index]
-                TableChip(tint: tint, size: tokenDiameter)
+                R1Token(tint: tint, size: tokenDiameter)
                     .offset(x: pose.offset.width * tokenDiameter,
                             y: pose.offset.height * tokenDiameter
                                 - CGFloat(index) * tokenDiameter * 0.012)
@@ -887,8 +910,8 @@ struct PocketTile: View {
                 .overlay(Circle().strokeBorder(Color.black.opacity(0.72), lineWidth: max(1, diameter * 0.05)))
                 .overlay(Circle().strokeBorder(
                     LinearGradient(colors: [
-                        tint.opacity(theme.isNeon ? 0.95 : 0.72),
-                        tint.opacity(theme.isNeon ? 0.70 : 0.22)
+                        tint.opacity(theme.isTravelTable ? 0.78 : 0.72),
+                        tint.opacity(theme.isTravelTable ? 0.30 : 0.22)
                     ], startPoint: .top, endPoint: .bottom),
                     lineWidth: max(1, diameter * 0.045))
                     .padding(diameter * 0.075))
@@ -904,7 +927,7 @@ struct PocketTile: View {
                 chipCluster(count: chips, tint: tint)
             } else if showLabel {
                 Circle()
-                    .fill(tint.opacity(theme.isNeon ? 0.72 : 0.42))
+                    .fill(tint.opacity(theme.isTravelTable ? 0.50 : 0.42))
                     .frame(width: diameter * 0.08, height: diameter * 0.08)
             }
         }

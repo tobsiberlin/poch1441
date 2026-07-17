@@ -29,9 +29,13 @@ EXPECTED_ZONE_RESOLVER_SHA256 = (
 FIRST_RUN_KEYS = (
     "tutorial.firstTable.title",
     "firstRun.intro.body",
+    "firstRun.intro.board.accessibility",
     "firstRun.goal",
+    "firstRun.goal.compact",
     "firstRun.intro.primary",
+    "firstRun.intro.primary.compact",
     "firstRun.intro.secondary",
+    "firstRun.intro.secondary.compact",
     "firstRun.act.meld",
     "firstRun.act.bidding",
     "firstRun.act.playout",
@@ -228,6 +232,9 @@ def check_contracts(root: Path) -> list[tuple[str, bool, str]]:
     project = (root / "project.yml").read_text(encoding="utf-8")
     opening_interaction = method_body(content, "private func guidedOpeningInteraction")
     opening = method_body(content, "private func settleGuidedOpeningToken")
+    opening_impact = method_body(content, "private func completeGuidedOpeningImpact")
+    coach_viewport = method_body(content, "private func guidedCoachViewport")
+    accessibility_stage = method_body(content, "private func guidedMeldAccessibilityStage")
     funding = method_body(content, "private func runGuidedTableFundingImpact")
     resolver_signature = (
         "    static func resolve(in size: CGSize, safeArea: EdgeInsets) "
@@ -264,8 +271,9 @@ def check_contracts(root: Path) -> list[tuple[str, bool, str]]:
     opening_completion = (
         "completionCriteria: .logicallyComplete" in opening
         and "} completion:" in opening
-        and opening.find("markGuidedOpeningTokenLanded")
-        > opening.find("} completion:")
+        and opening.count("completeGuidedOpeningImpact()") >= 2
+        and "markGuidedOpeningTokenLanded" in opening_impact
+        and "guidedAntePoolCounts[.center] = 1" in opening_impact
     )
     reduce_motion_funding = (
         "reduceMotion ? 0.16" in funding
@@ -276,9 +284,18 @@ def check_contracts(root: Path) -> list[tuple[str, bool, str]]:
         and "recordR1Impact(groupSize: groupSize" in game_state
     )
     voiceover_effect = (
-        "guidedCoachFocused = true" in opening
+        "guidedCoachFocused = true" in opening_impact
         and "tutorial.meld.ante.title" in content
         and "tutorial.meld.ante.body" in content
+    )
+    bounded_accessibility_coach = (
+        "ScrollView(.vertical)" in accessibility_stage
+        and 'accessibilityIdentifier("firstRun.learningScroll")' in accessibility_stage
+        and 'accessibilityIdentifier("firstRun.learningBoard")' in accessibility_stage
+        and 'accessibilityIdentifier("firstRun.learningHand")' in accessibility_stage
+        and 'accessibilityIdentifier("firstRun.coachAction")' in content
+        and "height: zones.decision.height" in coach_viewport
+        and "usesCompactGuidedCoachCopy" in content
     )
     voiceover_opening_action = (
         "Button {" in opening_interaction
@@ -353,6 +370,15 @@ def check_contracts(root: Path) -> list[tuple[str, bool, str]]:
                 "semantische Textstile ohne Drei-Zeilen-Limit"
                 if not (".lineLimit(3)" in content and ".font(.system(size: 11.8" in content)
                 else "feste 11,8-pt-Schrift mit lineLimit(3) braucht Ersatz oder Layoutbeleg"
+            ),
+        ),
+        (
+            "Accessibility-Coach bleibt innerhalb der Entscheidungszone",
+            bounded_accessibility_coach,
+            (
+                "begrenzter Scrollpfad, kompakte Sichtcopy ab AX3 und volle VoiceOver-Werte"
+                if bounded_accessibility_coach
+                else "Coach braucht einen an die Decision-Zone gebundenen Accessibility-Scrollpfad"
             ),
         ),
     ]

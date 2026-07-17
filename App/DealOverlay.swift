@@ -129,7 +129,7 @@ private struct MeldPayoutTarget: View {
                 Circle()
                     .fill(Color(hex: 0x0B0910).opacity(0.92))
                     .overlay(Circle().strokeBorder(tint.opacity(0.42), lineWidth: 1))
-                TableChip(tint: tint, size: 18)
+                R1Token(tint: tint, size: 18)
             }
             .frame(width: 30, height: 30)
 
@@ -301,7 +301,7 @@ private struct CoinStream: View {
             ZStack {
                 ForEach(0..<count, id: \.self) { index in
                     let pose = R1TokenSlots.pose(for: index)
-                    TableChip(tint: tint, size: 22)
+                    R1Token(tint: tint, size: 22)
                         .rotationEffect(.degrees(pose.rotation))
                         .offset(R1TokenSlots.offset(for: index,
                                                     tokenDiameter: 22))

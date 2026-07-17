@@ -42,11 +42,35 @@ public struct BotObservation: Equatable, Sendable {
     public let currentBet: Int
     public let ownCommitted: Int
 
-    public init(ownHand: [Card], trump: Suit, currentBet: Int, ownCommitted: Int) {
+    /// Nur PochKit erzeugt diese Sicht aus der laufenden Bietphase. So kann ein
+    /// App-Aufrufer keine fremde Hand als scheinbar eigene Bot-Hand einschleusen.
+    init(ownHand: [Card], trump: Suit, currentBet: Int, ownCommitted: Int) {
         self.ownHand = ownHand
         self.trump = trump
         self.currentBet = currentBet
         self.ownCommitted = ownCommitted
+    }
+}
+
+/// Vollständige Informationsgrenze für ein Bot-Anspiel in Phase 3. Die Engine
+/// übergibt ausschließlich die eigenen legalen Anspielkarten und am Tisch bereits
+/// öffentliche Informationen. Fremde Resthände sind strukturell nicht darstellbar.
+public struct PlayoutBotObservation: Equatable, Sendable {
+    public let legalLeads: [Card]
+    public let upcard: Card
+    public let playedCards: [Card]
+    public let remainingCounts: [Int]
+
+    /// Nur PochKit darf die Observation erzeugen; App- und Bot-Code können dadurch
+    /// keine beliebige Kartenmenge als scheinbar legale Sicht einschleusen.
+    init(legalLeads: [Card],
+         upcard: Card,
+         playedCards: [Card],
+         remainingCounts: [Int]) {
+        self.legalLeads = legalLeads
+        self.upcard = upcard
+        self.playedCards = playedCards
+        self.remainingCounts = remainingCounts
     }
 }
 
@@ -107,6 +131,13 @@ public enum BotBrain {
         let low = min(profile.thinkSecondsMin, profile.thinkSecondsMax)
         let high = max(profile.thinkSecondsMin, profile.thinkSecondsMax)
         return rng.nextDouble(in: low...high)
+    }
+
+    /// Bestehende Phase-3-Baseline als reine Entscheidung: niedrigste legale Karte.
+    /// Die Strategie bleibt bewusst unverändert; insbesondere erhält sie keinen
+    /// `PlayoutPhase` und damit keine gegnerischen Resthände.
+    public static func lead(observation: PlayoutBotObservation) -> Card? {
+        observation.legalLeads.min { $0.rank.rawValue < $1.rank.rawValue }
     }
 }
 

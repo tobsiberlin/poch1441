@@ -34,10 +34,13 @@ func runKollapsCalibration(matches: Int) {
                     guard round.betting.legalActions(for: player) != nil else { break }
                     try? round.applyBet(.pass, by: player)
                 case .playout:
-                    guard let phase = round.playout else { break }
-                    let hand = phase.hands[phase.leader]
-                    guard !hand.isEmpty else { break }
-                    try? round.applyLead(hand[rng.nextInt(in: 0..<hand.count)])
+                    guard let phase = round.playout,
+                          let observation = phase.botObservation(for: phase.leader),
+                          !observation.legalLeads.isEmpty else { break }
+                    let card = observation.legalLeads[
+                        rng.nextInt(in: 0..<observation.legalLeads.count)
+                    ]
+                    try? round.applyLead(card)
                 case .finished:
                     break
                 }

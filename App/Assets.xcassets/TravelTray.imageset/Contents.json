@@ -1,8 +1,9 @@
 {
   "images" : [
     {
-      "filename" : "PM100_PM68_sim.png",
-      "idiom" : "universal"
+      "filename" : "travel-tray.png",
+      "idiom" : "universal",
+      "scale" : "1x"
     }
   ],
   "info" : {

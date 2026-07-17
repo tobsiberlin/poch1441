@@ -13,17 +13,6 @@ extension Pool {
         }
     }
 
-    /// Vivid-Variante der Kategorie-Farbe (Neon-Theme §7): dieselbe Hue, strahlend.
-    var jewelVivid: Color {
-        switch self {
-        case .ace, .king, .queen, .jack, .ten: return Tokens.goldVivid
-        case .mariage:  return Tokens.roseVivid
-        case .sequence: return Tokens.smaragdVivid
-        case .poch:     return Tokens.amethystVivid
-        case .center:   return Tokens.jewelPlatin
-        }
-    }
-
     /// Index-Label international (A/K/Q/J/10, konzept §5).
     var indexLabel: String {
         switch self {

@@ -78,6 +78,22 @@ public struct Round: Equatable, Sendable {
         self.pochWinner = nil
     }
 
+    /// Engste erlaubte Sicht für die Botentscheidung des aktuell handelnden Sitzes.
+    /// Fremde Hände bleiben in `Round`; Aufrufer erhalten nur eigene Karten und
+    /// öffentlichen Bietzustand.
+    public func botObservation(for player: Int) -> BotObservation? {
+        guard stage == .betting,
+              player == betting.turn,
+              deal.hands.indices.contains(player),
+              betting.seats.indices.contains(player) else { return nil }
+        return BotObservation(
+            ownHand: deal.hands[player],
+            trump: deal.trump,
+            currentBet: betting.currentBet,
+            ownCommitted: betting.seats[player].committed
+        )
+    }
+
     /// Poch-Aktion des Spielers am Zug; bei Phasenende wird automatisch aufgelöst und
     /// ins Ausspielen gewechselt.
     public mutating func applyBet(_ action: BettingPhase.Action, by player: Int) throws {

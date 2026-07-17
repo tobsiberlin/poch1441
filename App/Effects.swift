@@ -50,6 +50,45 @@ enum R1ContactSurface: Sendable {
     case centerWell
 }
 
+enum R1HapticStrength: Equatable, Sendable {
+    case light
+    case medium
+    case heavy
+}
+
+/// Ein einziger deterministischer Kontaktvertrag für Ton und Haptik. Das
+/// Zielfeld prägt die Resonanz, die Gruppengröße nur die Intensität des ersten
+/// gebündelten Kontakts - weitere Steine lösen keine Feedbacksalve aus.
+struct R1ContactDynamics: Equatable, Sendable {
+    let hapticStrength: R1HapticStrength
+    let audioVolume: Float
+
+    static func resolve(surface: R1ContactSurface,
+                        groupSize: Int) -> R1ContactDynamics {
+        let bundledCount = max(1, groupSize)
+        switch (surface, bundledCount) {
+        case (.outerWell, 1):
+            return R1ContactDynamics(hapticStrength: .light,
+                                     audioVolume: 0.48)
+        case (.outerWell, 2...3):
+            return R1ContactDynamics(hapticStrength: .medium,
+                                     audioVolume: 0.52)
+        case (.outerWell, _):
+            return R1ContactDynamics(hapticStrength: .medium,
+                                     audioVolume: 0.56)
+        case (.centerWell, 1):
+            return R1ContactDynamics(hapticStrength: .medium,
+                                     audioVolume: 0.54)
+        case (.centerWell, 2...3):
+            return R1ContactDynamics(hapticStrength: .medium,
+                                     audioVolume: 0.58)
+        case (.centerWell, _):
+            return R1ContactDynamics(hapticStrength: .heavy,
+                                     audioVolume: 0.60)
+        }
+    }
+}
+
 /// Kontaktfeedback für R1. Der aufrufende Presentation Director ändert den
 /// Trigger ausschließlich in `ImpactFlight.onImpact`; dieses Modul besitzt
 /// weder Timeline noch Timer und mutiert keinen sichtbaren Spielzustand.
@@ -65,7 +104,16 @@ struct R1ContactFeedback: ViewModifier {
         content
             .sensoryFeedback(trigger: trigger) { previous, current in
                 guard hapticsEnabled, previous != current else { return nil }
-                return .impact(weight: groupSize > 1 ? .medium : .light)
+                let dynamics = R1ContactDynamics.resolve(surface: surface,
+                                                         groupSize: groupSize)
+                switch dynamics.hapticStrength {
+                case .light:
+                    return .impact(weight: .light)
+                case .medium:
+                    return .impact(weight: .medium)
+                case .heavy:
+                    return .impact(weight: .heavy)
+                }
             }
             .onAppear {
                 guard soundEnabled else { return }
@@ -78,6 +126,7 @@ struct R1ContactFeedback: ViewModifier {
             .onChange(of: trigger) { previous, current in
                 guard soundEnabled, previous != current else { return }
                 R1ContactAudio.shared.play(surface: surface,
+                                           groupSize: groupSize,
                                            variantSeed: current)
             }
     }
@@ -120,7 +169,9 @@ private final class R1ContactAudio {
         }
     }
 
-    func play(surface: R1ContactSurface, variantSeed: Int) {
+    func play(surface: R1ContactSurface,
+              groupSize: Int,
+              variantSeed: Int) {
         let now = ProcessInfo.processInfo.systemUptime
         guard now - lastContactTime >= 0.12 else { return }
 
@@ -128,10 +179,12 @@ private final class R1ContactAudio {
         let index = Int(UInt(bitPattern: variantSeed) % UInt(variants.count))
         let name = variants[index]
         guard let player = player(named: name) else { return }
+        let dynamics = R1ContactDynamics.resolve(surface: surface,
+                                                 groupSize: groupSize)
 
         lastContactTime = now
         player.currentTime = 0
-        player.volume = surface == .centerWell ? 0.58 : 0.52
+        player.volume = dynamics.audioVolume
         player.play()
     }
 

@@ -520,12 +520,7 @@ final class GameState {
             try? await Task.sleep(for: .seconds(pause))
             guard !Task.isCancelled, stage == .betting, betting.turn == seat,
                   let legal = betting.legalActions(for: seat) else { return }
-            let observation = BotObservation(
-                ownHand: round.deal.hands[seat],
-                trump: round.deal.trump,
-                currentBet: round.betting.currentBet,
-                ownCommitted: round.betting.seats[seat].committed
-            )
+            guard let observation = round.botObservation(for: seat) else { return }
             let action = BotBrain.action(profile: profile,
                                          observation: observation,
                                          legal: legal,
@@ -775,8 +770,8 @@ final class GameState {
                 try? await Task.sleep(for: .seconds(pause))
                 guard !Task.isCancelled, stage == .playout, cascadeIdle,
                       let current = round.playout, current.leader != humanRoundSeat,
-                      let card = current.hands[current.leader]
-                          .min(by: { $0.rank.rawValue < $1.rank.rawValue })
+                      let observation = current.botObservation(for: current.leader),
+                      let card = BotBrain.lead(observation: observation)
                 else { continue }
                 do {
                     try round.applyLead(card)

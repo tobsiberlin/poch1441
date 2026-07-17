@@ -47,22 +47,20 @@ public enum MatchSimulator {
                     let player = round.betting.turn
                     guard let legal = round.betting.legalActions(for: player) else { break }
                     decisions += 1
-                    let observation = BotObservation(
-                        ownHand: round.deal.hands[player],
-                        trump: round.deal.trump,
-                        currentBet: round.betting.currentBet,
-                        ownCommitted: round.betting.seats[player].committed
-                    )
+                    guard let observation = round.botObservation(for: player) else { break }
                     try? round.applyBet(
                         baselineAction(policy: policy, observation: observation, legal: legal, rng: &rng),
                         by: player
                     )
                 case .playout:
-                    guard let phase = round.playout else { break }
-                    let hand = phase.hands[phase.leader]
-                    guard !hand.isEmpty else { break }
+                    guard let phase = round.playout,
+                          let observation = phase.botObservation(for: phase.leader),
+                          !observation.legalLeads.isEmpty else { break }
                     decisions += 1
-                    let card = policy == .random ? hand[rng.nextInt(in: 0..<hand.count)] : hand[0]
+                    let card = policy == .random
+                        ? observation.legalLeads[rng.nextInt(in: 0..<observation.legalLeads.count)]
+                        : BotBrain.lead(observation: observation)
+                    guard let card else { break }
                     try? round.applyLead(card)
                 case .finished:
                     break

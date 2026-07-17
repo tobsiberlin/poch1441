@@ -104,12 +104,7 @@ func runBalanceAnalysis(seeds: UInt64) {
                 case .betting:
                     let player = round.betting.turn
                     guard let legal = round.betting.legalActions(for: player) else { break }
-                    let observation = BotObservation(
-                        ownHand: round.deal.hands[player],
-                        trump: round.deal.trump,
-                        currentBet: round.betting.currentBet,
-                        ownCommitted: round.betting.seats[player].committed
-                    )
+                    guard let observation = round.botObservation(for: player) else { break }
                     let action = MatchSimulator.baselineAction(
                         policy: .cautious,
                         observation: observation,
@@ -118,7 +113,9 @@ func runBalanceAnalysis(seeds: UInt64) {
                     )
                     try? round.applyBet(action, by: player)
                 case .playout:
-                    guard let phase = round.playout, let card = phase.hands[phase.leader].first else { break }
+                    guard let phase = round.playout,
+                          let observation = phase.botObservation(for: phase.leader),
+                          let card = BotBrain.lead(observation: observation) else { break }
                     try? round.applyLead(card)
                 case .finished:
                     break

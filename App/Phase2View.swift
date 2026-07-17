@@ -190,7 +190,7 @@ struct Phase2View: View {
     }
 
     private var pochAccent: Color {
-        theme.isNeon ? Tokens.amethystVivid : Tokens.amethystText
+        theme.isTravelTable ? Tokens.jewelAmethyst : Tokens.amethystText
     }
 
     private func scheduleGuidedPrelude() {
@@ -230,7 +230,7 @@ struct Phase2View: View {
             Circle()
                 .fill(status.tint.opacity(0.86))
                 .frame(width: 7, height: 7)
-                .shadow(color: status.tint.opacity(theme.isNeon ? 0.36 : 0.18), radius: 4)
+                .shadow(color: status.tint.opacity(theme.isTravelTable ? 0.22 : 0.18), radius: 4)
             Text(status.title)
                 .font(.system(size: 18, weight: .heavy))
                 .tracking(0.2)
@@ -320,7 +320,7 @@ struct Phase2View: View {
                     pressureMetric("EINSATZ", "\(Int(bid))", pochAccent)
                     pressureMetric("MULDE", "+\(game.pochPool)", Tokens.jewelGold)
                     pressureMetric("LIMIT", cap, Tokens.slate, muted: true)
-                    pressureMetric("DU", "\(committed)", theme.isNeon ? Tokens.smaragdVivid : Tokens.smaragdText)
+                    pressureMetric("DU", "\(committed)", theme.isTravelTable ? Tokens.jewelSmaragd : Tokens.smaragdText)
                 }
 
                 if isGuidedRound, guidedPreludeStep < 2,
@@ -627,24 +627,32 @@ struct Phase2View: View {
                 .scaledToFill()
                 .frame(width: d, height: d)
                 .clipShape(Circle())
-                .opacity(theme.isNeon ? 0.96 : 0.88)
+                .opacity(0.88)
                 .shadow(color: .black.opacity(0.62), radius: 10, y: 6)
                 .position(x: d / 2, y: d / 2)
-            pochPotMini.position(PM49Geometry.wellCenter(for: .center, in: d))
+            pochPotMini.position(TableWorldBoardGeometry.wellCenter(for: .center,
+                                                                    in: d,
+                                                                    world: theme))
             ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
                 miniTile(anchor.pool, dia: tileDia)
                     .matchedGeometryEffect(id: "tile-\(anchor.pool.rawValue)", in: morph)
-                    .position(PM49Geometry.wellCenter(for: anchor.pool, in: d))
+                    .position(TableWorldBoardGeometry.wellCenter(for: anchor.pool,
+                                                                 in: d,
+                                                                 world: theme))
             }
-            PM49FrontLipOverlay(size: d)
-                .position(x: d / 2, y: d / 2)
+            if !theme.isTravelTable {
+                PM49FrontLipOverlay(size: d)
+                    .position(x: d / 2, y: d / 2)
+            }
             ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
                 PocketValueMarker(pool: anchor.pool,
                                   chips: game.chips(in: anchor.pool),
                                   tint: theme.tint(anchor.pool),
                                   compact: true,
                                   showChipCount: false)
-                    .position(PM49Geometry.notationCenter(for: anchor.pool, in: d))
+                    .position(TableWorldBoardGeometry.notationCenter(for: anchor.pool,
+                                                                     in: d,
+                                                                     world: theme))
             }
         }
         .frame(width: d, height: d)
@@ -694,11 +702,11 @@ struct Phase2View: View {
                     startPoint: .top, endPoint: .bottom))
                 .overlay(Circle().strokeBorder(
                     LinearGradient(
-                        colors: [pochAccent.opacity(theme.isNeon ? 1 : 0.68),
+                        colors: [pochAccent.opacity(theme.isTravelTable ? 0.76 : 0.68),
                                  pochAccent.opacity(0.26)],
                         startPoint: .top, endPoint: .bottom),
                     lineWidth: 0.75))
-                .shadow(color: pochAccent.opacity(theme.isNeon ? 0.5 : 0.08), radius: 5)
+                .shadow(color: pochAccent.opacity(theme.isTravelTable ? 0.14 : 0.08), radius: 5)
         )
         .matchedGeometryEffect(id: "pochPot", in: morph)
         .scaleEffect(reduceMotion ? 1 : growth)
@@ -715,7 +723,7 @@ struct Phase2View: View {
                                   showCount: false)
             } else {
                 Circle()
-                    .fill(theme.tint(pool).opacity(theme.isNeon ? 0.70 : 0.36))
+                    .fill(theme.tint(pool).opacity(theme.isTravelTable ? 0.44 : 0.36))
                     .frame(width: 2.2, height: 2.2)
             }
         }
@@ -956,7 +964,7 @@ struct Phase2View: View {
         VStack(spacing: 10) {
             if let r = game.pochResult {
                 HStack(spacing: 10) {
-                    TableChip(tint: pochAccent, size: 28)
+                    R1Token(tint: pochAccent, size: 28)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(game.name(of: r.winner)) nimmt den Poch")
                             .font(.system(size: 14, weight: .heavy))
@@ -970,7 +978,7 @@ struct Phase2View: View {
                 }
             } else {
                 HStack(spacing: 10) {
-                    TableChip(tint: Tokens.jewelAmethyst, size: 28)
+                    R1Token(tint: Tokens.jewelAmethyst, size: 28)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Niemand pocht")
                             .font(.system(size: 14, weight: .heavy))
@@ -1122,7 +1130,7 @@ private struct PochBetFlight: View {
                             onImpact()
                         }
                     ) { progress in
-                        TableChip(tint: i == 0 ? Tokens.jewelGold : tint,
+                        R1Token(tint: i == 0 ? Tokens.jewelGold : tint,
                                   size: kind.isPoch ? 22 : 21)
                             .rotationEffect(.degrees(Double(i - 1) * 2 + Double(progress) * 3))
                             .rotation3DEffect(.degrees(sin(Double(progress) * .pi) * 2.2),

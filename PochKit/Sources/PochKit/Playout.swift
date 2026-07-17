@@ -36,6 +36,19 @@ public struct PlayoutPhase: Equatable, Sendable {
         hands.map(\.count)
     }
 
+    /// Erzeugt die engste erlaubte Sicht für das aktuelle Bot-Anspiel. Nur der
+    /// tatsächlich führende Sitz kann eine Observation erhalten; alle fremden
+    /// Karten bleiben innerhalb der Regel-Engine.
+    public func botObservation(for player: Int) -> PlayoutBotObservation? {
+        guard winner == nil, player == leader, hands.indices.contains(player) else { return nil }
+        return PlayoutBotObservation(
+            legalLeads: hands[player],
+            upcard: upcard,
+            playedCards: plays.map(\.card),
+            remainingCounts: remainingCounts
+        )
+    }
+
     /// Der Führende eröffnet mit einer beliebigen Handkarte; die Zwangszug-Kette läuft danach
     /// automatisch ab.
     public mutating func lead(_ card: Card) throws {
