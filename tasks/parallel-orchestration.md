@@ -318,6 +318,58 @@ deterministische Slots und die kleine Durchmesserübergabe begrenzt; PochKit,
 Noch offen für den nächsten Integrationspunkt: Die R1-Oberfläche braucht eine echte
 Build-Time-Mikrotextur statt weiterer prozeduraler Effekte. Der erste KI-Assetlauf
 wurde wegen eingebranntem Checkerboard und fehlendem Alpha verworfen und nicht ins
-Repo übernommen. Außerdem bleibt die ruhige linke Fläche in Phase-1-Landscape der
-stärkste Kompositionskandidat; sie wird ohne neue Designrichtung gegen Handherkunft,
-Disc und Meldungsfokus geprüft.
+Repo übernommen. Die zuvor offene linke Fläche in Phase-1-Landscape wird im sechsten
+Integrationspunkt als feste Gegnerachse aufgelöst.
+
+## Sechster Integrationspunkt - räumliche Track-A-Disc
+
+**Ziel:** Die kanonische Disc übernimmt Materialität, Feinheit und leichte Bauhöhe
+der bestätigten Nahreferenz, bleibt aber als orthografische 8+1-Basis exakt genug
+für kontaktgenaue Overlays. Der Gameplay-Grund bleibt ruhiges Graphit; Sichtbeton
+bleibt der emotionalen Produktinszenierung vorbehalten.
+
+### Dateihoheit, Abhängigkeiten und Status
+
+| Spur | Dateien | Abhängigkeit | Status |
+| --- | --- | --- | --- |
+| Lead | `App/ContentView.swift`, `App/Phase2View.swift`, `App/DesignTokens.swift`, `tasks/reviews/track-a-current-state-2026-07-18.html`, dieses Dokument | zentrale Board-Komposition, gemeinsame räumliche Kamera, Gegnerachse | Integriert |
+| Material | `App/PlayComponents.swift`, `App/Assets.xcassets/PochDisc2026.imageset/poch-disc-2026.png` | gesperrte 8+1-Geometrie und Referenz `SCR-20260718-iilg.png` | Integriert: RGBA-Disc mit satinierter Deckkante, dunkler Unterkante und lokaler Mulden-AO |
+| QA | `Tests/Poch1441UITests/TableWorldStageUITests.swift`, `Tests/TableWorldMaterialSeamContractTests.swift`, `tools/qa/audit_visual_contracts.py` | stabile Accessibility-Identifier und Material-Seam | Grün: Phase 1/2 in Portrait und echtem `667 x 375` Landscape |
+| Gegner | keine zentrale Dateiänderung | öffentliche Namen und Stapelstände aus bestehender Präsentation | Integriert: feste linke Phase-1-Landscape-Achse |
+| Regel | keine Änderung | unveränderte Pool-Anker und Zählstände | Unberührt |
+
+### Abnahmekriterien und Nachweis
+
+- Das Rasterasset ist `1254 x 1254` RGBA mit transparenten Ecken, acht leeren
+  Außenmulden, leerer Mitte und zwei feinen konzentrischen Führungslinien. Es trägt
+  weder Text noch Spielsteine; Semantik und Zustand bleiben in der UI-Ebene.
+- Der äußere satinierte Aluminiumring besitzt eine sichtbare geschichtete Unterkante
+  auf dem unteren Bogen. Muldenringe erhalten lokales Kantenlicht und
+  Kontaktverschattung statt Neon-Glow oder pauschalem Schlagschatten.
+- Eine gemeinsame `TableWorldSpatialPresentation` kippt Asset, Gravuren und Steine
+  zusammen um `5,2°`. Dadurch bleiben Kontaktpunkte deckungsgleich; Track B erhält
+  diese Track-A-Kamera nicht.
+- Die Muldenzentren der finalen Materialbasis weichen gegenüber der gesperrten
+  1254-px-Basis im Median um `3 px`, maximal um `5,83 px` ab. Der visuelle
+  300-px-Vergleich bestätigt, dass Unterkante und Materialtiefe erhalten bleiben.
+- Phase 1 besitzt in Landscape eine stabile linke Gegnerachse, eine getrennte
+  Kartenherkunft und die Disc rechts. Der UI-Vertrag prüft alle drei Zonen auf
+  Existenz und paarweise Trennung.
+- Der vollständige vierteilige Simulatorlauf besteht in `34,363 s` ohne Fehler.
+  `audit_visual_contracts.py` meldet `14 PASS`, `3 WARN`, `0 FAIL`; die Warnungen
+  verlangen weiterhin menschliche Dynamic-Type-, Kontrast- und Größenabnahme und
+  behaupten keine automatische Ästhetiknote.
+
+### Integrationsreihenfolge
+
+1. Materialbasis gegen die Nahreferenz erzeugen und Geometrie sowie Alpha prüfen.
+2. Lead bindet die gemeinsame physische Kamera und die zurückgenommenen
+   gravurartigen Labels in First Run, Phase 1 und Phase 2 ein.
+3. QA prüft Phase 1/2 in Portrait und Landscape, einschließlich Gegner-, Hand- und
+   Board-Zonen, und exportiert die echten Simulatorbilder.
+4. HTML-Abnahme synchronisieren, vollständige relevante Checks ausführen, danach
+   committen und auf `main` pushen.
+
+Als nächster priorisierter Materialpunkt bleibt die R1-Mikrooberfläche samt echter
+Hardware-Abnahme für Keramikklang und Taptic-Charakter. Sie darf die nun gesperrte
+Disc-Geometrie und die ruhige Track-A-Komposition nicht erneut verändern.

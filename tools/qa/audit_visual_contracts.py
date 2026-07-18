@@ -34,12 +34,13 @@ def section(source: str, start: str, end: str) -> str:
     return source[start_index:] if end_index < 0 else source[start_index:end_index]
 
 
-def png_size(path: Path) -> tuple[int, int]:
+def png_metadata(path: Path) -> tuple[int, int, int]:
     with path.open("rb") as handle:
-        signature = handle.read(24)
-    if len(signature) != 24 or signature[:8] != b"\x89PNG\r\n\x1a\n":
+        signature = handle.read(26)
+    if len(signature) != 26 or signature[:8] != b"\x89PNG\r\n\x1a\n":
         raise ValueError(f"Kein lesbares PNG: {path}")
-    return struct.unpack(">II", signature[16:24])
+    width, height = struct.unpack(">II", signature[16:24])
+    return width, height, signature[25]
 
 
 def count_terms(source: str, terms: tuple[str, ...]) -> int:
@@ -129,13 +130,35 @@ def audit(root: Path) -> list[Finding]:
 
     board_asset = app / "Assets.xcassets/PochDisc2026.imageset/poch-disc-2026.png"
     try:
-        width, height = png_size(board_asset)
-        asset_ok = width == height and width >= max(READABILITY_GATES) * 2
-        asset_detail = f"Track-A-Asset {width}x{height} px; 2x-Basis für 360 px {'erfüllt' if asset_ok else 'nicht erfüllt'}."
+        width, height, color_type = png_metadata(board_asset)
+        has_alpha = color_type in (4, 6)
+        asset_ok = width == height and width >= max(READABILITY_GATES) * 2 and has_alpha
+        asset_detail = (
+            f"Track-A-Asset {width}x{height} px; 2x-Basis für 360 px "
+            f"{'erfüllt' if width == height and width >= max(READABILITY_GATES) * 2 else 'nicht erfüllt'}, "
+            f"Alpha {'vorhanden' if has_alpha else 'fehlt'}."
+        )
     except (OSError, ValueError) as error:
         asset_ok = False
         asset_detail = str(error)
     findings.append(Finding("PASS" if asset_ok else "FAIL", "TRACK-A-ASSET", asset_detail))
+
+    spatial_camera = (
+        "struct TableWorldSpatialPresentation" in components
+        and "rotation3DEffect" in components
+        and "tableWorldSpatialPresentation(world:" in components
+        and ".tableWorldSpatialPresentation(world: theme" in content
+        and ".tableWorldSpatialPresentation(world: theme" in (app / "Phase2View.swift").read_text(encoding="utf-8")
+    )
+    findings.append(
+        Finding(
+            "PASS" if spatial_camera else "FAIL",
+            "TRACK-A-DEPTH",
+            "First Run, Melden und Pochen teilen eine materialgerechte räumliche Disc-Kamera."
+            if spatial_camera
+            else "Die räumliche Track-A-Präsentation ist nicht durchgängig nachweisbar.",
+        )
+    )
 
     real_board_in_first_run = (
         'TableWorldBoardBase(world: .pochDisc' in section(content, "private var firstRunIntro", "private func startGuidedRound")

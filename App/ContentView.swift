@@ -618,7 +618,6 @@ struct ContentView: View {
                         TableWorldBoardBase(world: .pochDisc, diameter: boardSize)
                             .frame(width: boardSize, height: boardSize)
                             .saturation(theme.isTravelTable ? 0.96 : 0.88)
-                            .shadow(color: .black.opacity(0.65), radius: 28, y: 18)
 
                         TableTokenPile(count: playerCount,
                                        tint: Tokens.jewelGold,
@@ -627,6 +626,8 @@ struct ContentView: View {
                             .offset(y: -boardSize * 0.015)
                     }
                     .frame(width: boardSize, height: boardSize)
+                    .tableWorldSpatialPresentation(world: .pochDisc,
+                                                   diameter: boardSize)
                     .padding(.top, compactHeight ? 5 : 10)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel(firstRunBoardAccessibilityLabel)
@@ -811,7 +812,6 @@ struct ContentView: View {
             ZStack {
                 TableWorldBoardBase(world: .pochDisc, diameter: introBoardSide)
                     .saturation(theme.isTravelTable ? 0.96 : 0.88)
-                    .shadow(color: .black.opacity(0.65), radius: 22, y: 12)
 
                 TableTokenPile(count: playerCount,
                                tint: Tokens.jewelGold,
@@ -819,6 +819,8 @@ struct ContentView: View {
                                showCount: false)
             }
             .frame(width: introBoardSide, height: introBoardSide)
+            .tableWorldSpatialPresentation(world: .pochDisc,
+                                           diameter: introBoardSide)
             .position(x: zones.board.midX - 4, y: size.height / 2)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(firstRunBoardAccessibilityLabel)
@@ -2982,8 +2984,8 @@ struct ContentView: View {
 
     // MARK: - Der Poch-Ring
 
-    /// Phase 1 folgt dem Mockup: Brett als Hauptdarsteller, keine Gegnerleiste im
-    /// ersten Blick, Kartenfächer als unterer Bleed.
+    /// Phase 1 folgt dem aktuellen Kanon: Brett als Hauptdarsteller, Kartenfächer
+    /// als unterer Bleed und in Landscape eine stabile linke Gegnerachse.
     @ViewBuilder private var phase1Stage: some View {
         if isGuidedOpeningBeat {
             guidedOpeningStage
@@ -3085,6 +3087,12 @@ struct ContentView: View {
                                 proxy.size.width * 0.42,
                                 300)
             ZStack {
+                phase1LandscapeOpponentAxis
+                    .frame(width: min(92, proxy.size.width * 0.15),
+                           height: proxy.size.height * 0.78)
+                    .position(x: proxy.size.width * 0.095,
+                              y: proxy.size.height * 0.48)
+
                 ringView
                     .frame(width: ringDiameter, height: ringDiameter)
                     .scaleEffect(boardSide / ringDiameter)
@@ -3105,8 +3113,28 @@ struct ContentView: View {
                            alignment: .bottom)
                     .position(x: proxy.size.width * 0.24,
                               y: proxy.size.height - 26)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("table.world.phase1.hand")
             }
         }
+    }
+
+    private var phase1LandscapeOpponentAxis: some View {
+        VStack(spacing: 7) {
+            ForEach(1..<game.playerCount, id: \.self) { seat in
+                OpponentPortrait(seat: seat,
+                                 name: game.name(of: seat),
+                                 stack: game.displayedStack(of: seat),
+                                 isActive: true,
+                                 isFocus: false,
+                                 size: 38,
+                                 morph: morph)
+                    .contentTransition(.numericText())
+                    .animation(.easeOut(duration: 0.3), value: game.meldShown)
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("table.world.phase1.opponents")
     }
 
     /// Geführtes Melden besitzt eine eigene, kollisionsfreie Lernbühne. Das
@@ -3390,7 +3418,8 @@ struct ContentView: View {
             }
             ForEach(PochRing.anchors) { anchor in
                 if !guidedRoundActive || guidedMeldBeat >= 5 {
-                    PocketValueMarker(pool: anchor.pool,
+                    PocketValueMarker(world: theme,
+                                      pool: anchor.pool,
                                       chips: guidedRoundActive && guidedMeldBeat == 0
                                         ? 0 : game.displayedChips(in: anchor.pool),
                                       tint: theme.tint(anchor.pool),
@@ -3409,6 +3438,7 @@ struct ContentView: View {
             }
         }
         .frame(width: d, height: d)
+        .tableWorldSpatialPresentation(world: theme, diameter: d)
         .accessibilityIdentifier("table.world.phase1.board")
     }
 

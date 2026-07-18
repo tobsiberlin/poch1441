@@ -2,6 +2,39 @@ import XCTest
 
 final class TableWorldStageUITests: XCTestCase {
     @MainActor
+    func testPhase1PortraitMaterialPresentation() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = localizedArguments([
+            "-dealDone",
+            "-coachOff",
+            "-players=4"
+        ])
+        app.launch()
+
+        assertWindowOrientation(.portrait, in: app)
+        assertBoard("table.world.phase1.board", in: app)
+        attachScreenshot(of: app, named: "poch-disc-phase1-portrait-material")
+    }
+
+    @MainActor
+    func testPhase1LandscapeMaterialAndSeatAxis() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let app = XCUIApplication()
+        app.launchArguments = localizedArguments([
+            "-dealDone",
+            "-coachOff",
+            "-players=4"
+        ])
+        app.launch()
+
+        assertWindowOrientation(.landscapeLeft, in: app)
+        assertBoard("table.world.phase1.board", in: app)
+        assertPhase1LandscapeZones(in: app)
+        attachScreenshot(of: app, named: "poch-disc-phase1-landscape-material")
+    }
+
+    @MainActor
     func testPochDiscCompositionInPortraitAndLandscape() {
         let app = XCUIApplication()
         for phase in ["phase1", "phase2"] {
@@ -11,17 +44,40 @@ final class TableWorldStageUITests: XCTestCase {
                     "-coachOff",
                     "-players=4"
                 ])
-                app.launch()
                 XCUIDevice.shared.orientation = orientation
+                app.launch()
                 assertWindowOrientation(orientation, in: app)
 
                 let identifier = "table.world.\(phase).board"
                 assertBoard(identifier, in: app)
+                if phase == "phase1", orientation == .landscapeLeft {
+                    assertPhase1LandscapeZones(in: app)
+                }
                 let suffix = orientation == .portrait ? "portrait" : "landscape"
                 attachScreenshot(of: app, named: "poch-disc-\(phase)-\(suffix)")
                 app.terminate()
             }
         }
+    }
+
+    @MainActor
+    private func assertPhase1LandscapeZones(in app: XCUIApplication) {
+        let board = app.images.matching(identifier: "table.world.phase1.board").firstMatch
+        let opponents = app.descendants(matching: .any)
+            .matching(identifier: "table.world.phase1.opponents").firstMatch
+        let hand = app.descendants(matching: .any)
+            .matching(identifier: "table.world.phase1.hand").firstMatch
+
+        XCTAssertTrue(opponents.waitForExistence(timeout: 3),
+                      "Melden braucht in Landscape eine stabile linke Gegnerachse.")
+        XCTAssertTrue(hand.waitForExistence(timeout: 3),
+                      "Die eigene Hand muss in Landscape eine eigene untere Zone behalten.")
+        XCTAssertFalse(opponents.frame.intersects(board.frame),
+                       "Gegnerachse und Disc dürfen sich nicht überlagern.")
+        XCTAssertFalse(hand.frame.intersects(board.frame),
+                       "Hand und Disc dürfen sich nicht überlagern.")
+        XCTAssertLessThan(opponents.frame.midX, hand.frame.midX,
+                          "Die Gegnerachse muss links von der Handherkunft stabil bleiben.")
     }
 
     @MainActor
@@ -93,6 +149,11 @@ final class TableWorldStageUITests: XCTestCase {
     }
 
     private func localizedArguments(_ arguments: [String]) -> [String] {
-        arguments + ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        arguments + [
+            "-sound", "false",
+            "-haptics", "false",
+            "-AppleLanguages", "(de)",
+            "-AppleLocale", "de_DE"
+        ]
     }
 }

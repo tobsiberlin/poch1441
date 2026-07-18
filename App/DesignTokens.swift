@@ -78,6 +78,14 @@ enum Tokens {
     static let tableTokenOverlap: CGFloat = 0.40
     static let outerWellFloorRatio: CGFloat = 0.68
 
+    // Track-A-Kamera. Der gesamte physische Stack wird gemeinsam gekippt, damit
+    // Asset, Gravuren und ruhende Steine dieselbe Perspektive behalten.
+    static let pochDiscPitch: Double = 5.2
+    static let pochDiscPerspective: CGFloat = 0.24
+    static let pochDiscShadowRadiusRatio: CGFloat = 0.050
+    static let pochDiscShadowYOffsetRatio: CGFloat = 0.044
+    static let pochDiscAmbientLiftRatio: CGFloat = 0.018
+
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
     static let p2PotSpring: Double = 0.48

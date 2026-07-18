@@ -879,10 +879,6 @@ struct TableWorldBoardBase: View {
                 .interpolation(.high)
                 .scaledToFill()
                 .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-                .shadow(color: .black.opacity(0.62),
-                        radius: diameter * 0.04,
-                        y: diameter * 0.024)
                 .accessibilityHidden(true)
         case .unterwegs:
             Image("TravelTray")
@@ -895,6 +891,46 @@ struct TableWorldBoardBase: View {
                         y: diameter * 0.035)
                 .accessibilityHidden(true)
         }
+    }
+}
+
+/// Gemeinsame physische Kamera für Track A. Der Effekt sitzt absichtlich über
+/// Board, Gravuren und Spielsteinen statt nur auf dem Rasterasset; dadurch
+/// bleiben Muldenkontakt und Flugziele in derselben Perspektive.
+private struct TableWorldSpatialPresentation: ViewModifier {
+    let world: TableWorld
+    let diameter: CGFloat
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        switch world {
+        case .pochDisc:
+            content
+                .compositingGroup()
+                .rotation3DEffect(
+                    .degrees(Tokens.pochDiscPitch),
+                    axis: (x: 1, y: 0, z: 0),
+                    anchor: .center,
+                    perspective: Tokens.pochDiscPerspective
+                )
+                .shadow(color: Color.black.opacity(0.70),
+                        radius: diameter * Tokens.pochDiscShadowRadiusRatio,
+                        x: diameter * 0.010,
+                        y: diameter * Tokens.pochDiscShadowYOffsetRatio)
+                .shadow(color: Tokens.jewelPlatin.opacity(0.035),
+                        radius: diameter * Tokens.pochDiscAmbientLiftRatio,
+                        x: -diameter * 0.010,
+                        y: -diameter * 0.008)
+        case .unterwegs:
+            content
+        }
+    }
+}
+
+extension View {
+    func tableWorldSpatialPresentation(world: TableWorld,
+                                       diameter: CGFloat) -> some View {
+        modifier(TableWorldSpatialPresentation(world: world, diameter: diameter))
     }
 }
 
@@ -974,18 +1010,23 @@ struct TableWorldPiecePile: View {
 /// Engraved board notation placed on the inner guide ring, never on the coin floor.
 /// The mark remains readable when a well fills and keeps the physical bowl unobstructed.
 struct PocketValueMarker: View {
+    let world: TableWorld
     let pool: Pool
     let chips: Int
     let tint: Color
     var compact = false
     var showChipCount = true
 
+    private var engraved: Bool { world == .pochDisc }
+
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: compact ? 1.5 : 3) {
             Text(pool.indexLabel)
-                .foregroundStyle(pool.indexLabel.count > 2
-                    ? Tokens.jewelPlatin.opacity(compact ? 0.84 : 0.96)
-                    : tint.opacity(compact ? 0.90 : 1))
+                .foregroundStyle(engraved
+                    ? Tokens.jewelPlatin.opacity(compact ? 0.52 : 0.58)
+                    : (pool.indexLabel.count > 2
+                        ? Tokens.jewelPlatin.opacity(compact ? 0.84 : 0.96)
+                        : tint.opacity(compact ? 0.90 : 1)))
             if showChipCount, chips > 0 {
                 Text("·")
                     .foregroundStyle(Tokens.jewelGold.opacity(0.68))
@@ -994,11 +1035,17 @@ struct PocketValueMarker: View {
                     .contentTransition(.numericText())
             }
         }
-        .font(.system(size: compact ? 6.2 : 9.6,
-                      weight: .heavy,
-                      design: .rounded))
-        .tracking(pool.indexLabel.count > 2 ? (compact ? 0 : 0.25) : (compact ? 0.25 : 0.55))
-        .shadow(color: .black.opacity(0.95), radius: compact ? 1.5 : 2.5, y: 1)
+        .font(.system(size: engraved
+            ? (compact ? 5.5 : 7.4)
+            : (compact ? 6.2 : 9.6),
+            weight: engraved ? .semibold : .heavy,
+            design: engraved ? .default : .rounded))
+        .tracking(engraved
+            ? (pool.indexLabel.count > 2 ? 0.18 : 0.48)
+            : (pool.indexLabel.count > 2 ? (compact ? 0 : 0.25) : (compact ? 0.25 : 0.55)))
+        .shadow(color: .black.opacity(engraved ? 0.55 : 0.95),
+                radius: engraved ? 0.7 : (compact ? 1.5 : 2.5),
+                y: engraved ? 0.4 : 1)
         .accessibilityLabel("\(pool.indexLabel), \(chips)")
     }
 }

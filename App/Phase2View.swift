@@ -703,7 +703,8 @@ struct Phase2View: View {
                     .position(x: d / 2, y: d / 2)
             }
             ForEach(PochRing.anchors.filter { $0.pool != .poch }) { anchor in
-                PocketValueMarker(pool: anchor.pool,
+                PocketValueMarker(world: theme,
+                                  pool: anchor.pool,
                                   chips: game.chips(in: anchor.pool),
                                   tint: theme.tint(anchor.pool),
                                   compact: true,
@@ -714,6 +715,7 @@ struct Phase2View: View {
             }
         }
         .frame(width: d, height: d)
+        .tableWorldSpatialPresentation(world: theme, diameter: d)
         .accessibilityIdentifier("table.world.phase2.board")
     }
 

@@ -38,6 +38,10 @@ struct TableWorldMaterialSeamContractTests {
         expect(board.components(separatedBy: ".accessibilityHidden(true)").count - 1 == 2,
                "Both bare board assets must stay decorative below semantic pool overlays")
         expect(!board.contains("default:"), "A new table world must not silently inherit a material")
+        expect(source.contains("struct TableWorldSpatialPresentation: ViewModifier"),
+               "Track A needs one shared physical camera for board and pieces")
+        expect(source.contains("rotation3DEffect("),
+               "The Poch Disc must read as a spatial object instead of a flat sprite")
     }
 
     private static func individualPieceSwitchesWithoutFallback(_ source: String) throws {
@@ -89,6 +93,8 @@ struct TableWorldMaterialSeamContractTests {
                                       through: "private var guidedIntroPool")
         expect(phase1Board.contains("TableWorldBoardBase(world: theme"),
                "Phase 1 must switch the complete board basis through TableWorld")
+        expect(phase1Board.contains("tableWorldSpatialPresentation(world: theme"),
+               "Phase 1 must apply the shared physical camera to the complete board stack")
         let phase1Piles = try section(in: content,
                                       from: "private func pm49PoolOverlay",
                                       through: "private func presentedChips")
@@ -102,6 +108,8 @@ struct TableWorldMaterialSeamContractTests {
                "Phase 2 must switch the compact board basis through TableWorld")
         expect(compactBoard.contains("TableWorldPiecePile(world: theme"),
                "Phase 2 pools must switch through the shared pile seam")
+        expect(compactBoard.contains("tableWorldSpatialPresentation(world: theme"),
+               "Phase 2 must keep the same physical camera on the compact board stack")
 
         let betFlight = try section(in: phase2,
                                     from: "private struct PochBetFlight: View",
