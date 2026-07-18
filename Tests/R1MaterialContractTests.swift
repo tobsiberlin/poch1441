@@ -11,6 +11,7 @@ struct R1MaterialContractTests {
         let effects = try source(at: "App/Effects.swift")
 
         try r1RendererKeepsOneSharedColorway(components)
+        try r1ScaleAndLightingStayPhysical(components)
         try restingPosesAreStableAndVaried(layout)
         try contactFeedbackIsImpactBoundAndBundled(effects)
         try ceramicAudioVariantsMeetTheRuntimeContract(effects)
@@ -33,6 +34,30 @@ struct R1MaterialContractTests {
                "R1 must not render values or currency on the token")
         expect(renderer.contains("R1BlindEmboss()"),
                "R1 must carry the tonal card-back emboss")
+    }
+
+    private static func r1ScaleAndLightingStayPhysical(_ source: String) throws {
+        let renderer = try section(in: source,
+                                   from: "struct R1Token: View",
+                                   through: "typealias TableChip = R1Token")
+        expect(renderer.contains(".rotationEffect(.degrees(markRotation))"),
+               "Only the token-bound emboss may rotate")
+
+        let pile = try section(in: source,
+                               from: "struct TableTokenPile: View",
+                               through: "struct RecessedTokenPile: View")
+        expect(!pile.contains(".rotationEffect(.degrees(pose.rotation))"),
+               "World light and contact shadow must not rotate with the token")
+
+        let recessed = try section(in: source,
+                                   from: "struct RecessedTokenPile: View",
+                                   through: "private struct R1WellFrontLip: Shape")
+        expect(recessed.contains("tokenDiameterOverride"),
+               "Compact and regular discs need an explicit shared physical token scale")
+        expect(recessed.contains("R1WellFrontLip()"),
+               "The well may occlude tokens only with its local front lip")
+        expect(!recessed.contains(".frame(width: diameter * 0.58, height: diameter * 0.14)"),
+               "A broad synthetic group-shadow oval must not return")
     }
 
     private static func restingPosesAreStableAndVaried(_ source: String) throws {

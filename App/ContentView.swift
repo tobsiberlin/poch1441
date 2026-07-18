@@ -3453,7 +3453,8 @@ struct ContentView: View {
                                     count: chips,
                                     diameter: 58,
                                     compartment: TravelCompartment(pool: pool),
-                                    placement: .well)
+                                    placement: .well,
+                                    pieceDiameterOverride: Tokens.tableTokenDiameter)
                     .contentTransition(.numericText())
             } else {
                 Circle()
@@ -3511,7 +3512,8 @@ struct ContentView: View {
                                     count: chips,
                                     diameter: 88,
                                     compartment: .center,
-                                    placement: .well)
+                                    placement: .well,
+                                    pieceDiameterOverride: Tokens.tableTokenDiameter)
             } else {
                 Circle()
                     .fill(Tokens.jewelPlatin.opacity(0.30))

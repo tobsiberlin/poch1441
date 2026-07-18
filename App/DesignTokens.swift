@@ -71,7 +71,10 @@ enum Tokens {
 
     // Physische Spielsteine. Außenmulden und Mitte verwenden denselben
     // gedachten Durchmesser; nur der verfügbare Ablageraum unterscheidet sich.
-    static let tableTokenDiameter: CGFloat = 24
+    /// R1 füllt rund 41 % der 56-pt-Außenmulde. Derselbe physische
+    /// Durchmesser gilt auch in der größeren Mitte.
+    static let tableTokenDiameter: CGFloat = 23
+    static let tableTokenToFloorRatio: CGFloat = 0.60
     static let tableTokenOverlap: CGFloat = 0.40
     static let outerWellFloorRatio: CGFloat = 0.68
 

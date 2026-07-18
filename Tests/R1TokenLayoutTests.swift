@@ -8,6 +8,7 @@ struct R1TokenLayoutTests {
         posesStayInsideTheUsableFloor()
         fourTokensRemainVisuallyDistinct()
         compartmentsDoNotCloneOnePile()
+        occupiedWellsUseAtLeastThreeNonCongruentSilhouettes()
         FileHandle.standardOutput.write(Data("R1TokenLayoutTests: PASS\n".utf8))
     }
 
@@ -36,7 +37,7 @@ struct R1TokenLayoutTests {
     }
 
     private static func posesStayInsideTheUsableFloor() {
-        let tokenToFloorRatio = 0.38
+        let tokenToFloorRatio = 0.60
         for compartment in TravelCompartment.allCases {
             for seed: UInt64 in [1, 1_441, 1_444, .max] {
                 for pose in R1TokenSlots.layout(for: 12,
@@ -61,12 +62,32 @@ struct R1TokenLayoutTests {
                     for right in poses.indices where right > left {
                         let distance = hypot(poses[left].offset.width - poses[right].offset.width,
                                              poses[left].offset.height - poses[right].offset.height)
-                        expect(distance >= 0.49,
+                        expect(distance >= 0.24,
                                "four-token groups need four distinguishable silhouettes")
                     }
                 }
             }
         }
+    }
+
+    private static func occupiedWellsUseAtLeastThreeNonCongruentSilhouettes() {
+        let occupied: [TravelCompartment] = [.poch, .mariage, .sequence, .jack]
+        let fingerprints = Set(occupied.map { compartment in
+            let poses = R1TokenSlots.layout(for: 3,
+                                            seed: 1_441,
+                                            compartment: compartment)
+            var distances: [Int] = []
+            for left in poses.indices {
+                for right in poses.indices where right > left {
+                    let distance = hypot(poses[left].offset.width - poses[right].offset.width,
+                                         poses[left].offset.height - poses[right].offset.height)
+                    distances.append(Int((distance * 1_000).rounded()))
+                }
+            }
+            return distances.sorted().map(String.init).joined(separator: ",")
+        })
+        expect(fingerprints.count >= 3,
+               "the four occupied opening wells need at least three non-congruent silhouettes")
     }
 
     private static func compartmentsDoNotCloneOnePile() {

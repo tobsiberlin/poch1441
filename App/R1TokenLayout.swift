@@ -10,33 +10,55 @@ struct R1TokenRestingPose: Equatable, Sendable {
 
 /// Deterministische, muldenspezifische Endlagen für die keramischen R1-Steine.
 ///
-/// Die ersten vier Slots bilden keine Rosette: Ein Stein ruht in der Mitte, drei
-/// weitere setzen sich mit ausreichend Abstand an seinen Rand. Die gesamte Gruppe
-/// erhält je Mulde eine stabile Drehung, Spiegelung und kleine Setzabweichungen.
-/// Bereits gelandete Steine behalten dadurch ihre Position, wenn der Zähler wächst,
-/// ohne dass neun sichtbar geklonte Haufen entstehen.
+/// Vier vorbereitete, kompakte Haufentypen verhindern die geklonte Rosette. Die
+/// gesamte Gruppe erhält je Mulde eine stabile Drehung, Spiegelung und kleine
+/// Setzabweichungen. Bereits gelandete Steine behalten dadurch ihre Position,
+/// wenn der Zähler wächst.
 enum R1TokenSlots {
     static let capacity = 12
 
-    private static let slots: [(x: Double, y: Double, angle: Double, elevation: Double)] = [
-        ( 0.00,  0.00,  -2, 0.00),
-        (-0.49,  0.28,   4, 0.02),
-        ( 0.49,  0.28,  -5, 0.04),
-        ( 0.00, -0.56,   6, 0.06),
-        (-0.51, -0.29,  -3, 0.08),
-        ( 0.51, -0.29,   3, 0.10),
-        ( 0.00,  0.58,  -6, 0.12),
-        (-0.61,  0.00,   5, 0.14),
-        ( 0.61,  0.00,  -4, 0.16),
-        (-0.35,  0.52,   2, 0.18),
-        ( 0.36,  0.52,  -5, 0.20),
-        ( 0.34, -0.52,   4, 0.22)
+    private typealias Slot = (x: Double, y: Double, angle: Double, elevation: Double)
+
+    private static let templates: [[Slot]] = [
+        [
+            ( 0.00,  0.00,  -2, 0.00), (-0.28,  0.14,   4, 0.02),
+            ( 0.26,  0.16,  -5, 0.04), ( 0.04, -0.29,   6, 0.06),
+            (-0.18, -0.20,  -3, 0.08), ( 0.21, -0.18,   3, 0.10),
+            (-0.05,  0.28,  -6, 0.12), (-0.30, -0.04,   5, 0.14),
+            ( 0.30, -0.04,  -4, 0.16), (-0.20,  0.22,   2, 0.18),
+            ( 0.19,  0.24,  -5, 0.20), ( 0.03, -0.31,   4, 0.22)
+        ],
+        [
+            (-0.28,  0.12,  -4, 0.00), ( 0.00,  0.02,   3, 0.02),
+            ( 0.27, -0.12,   6, 0.04), (-0.10, -0.26,  -5, 0.06),
+            ( 0.17,  0.24,   2, 0.08), (-0.29, -0.08,   5, 0.10),
+            ( 0.29,  0.06,  -3, 0.12), ( 0.05,  0.30,   4, 0.14),
+            ( 0.12, -0.28,  -6, 0.16), (-0.16,  0.25,   3, 0.18),
+            ( 0.30, -0.03,  -4, 0.20), (-0.03, -0.31,   5, 0.22)
+        ],
+        [
+            ( 0.02, -0.03,   3, 0.00), ( 0.27,  0.08,  -5, 0.02),
+            (-0.12,  0.25,   4, 0.04), (-0.25, -0.12,  -2, 0.06),
+            ( 0.10, -0.28,   6, 0.08), ( 0.29, -0.06,  -4, 0.10),
+            (-0.29,  0.05,   5, 0.12), ( 0.08,  0.29,  -6, 0.14),
+            (-0.13, -0.27,   2, 0.16), ( 0.22,  0.21,  -3, 0.18),
+            (-0.24,  0.18,   4, 0.20), ( 0.24, -0.19,  -5, 0.22)
+        ],
+        [
+            ( 0.00, -0.28,  -5, 0.00), ( 0.23, -0.04,   2, 0.02),
+            ( 0.00,  0.25,   5, 0.04), (-0.27,  0.04,  -3, 0.06),
+            ( 0.18,  0.20,   4, 0.08), (-0.19, -0.19,  -6, 0.10),
+            ( 0.29,  0.07,   3, 0.12), (-0.07,  0.30,  -4, 0.14),
+            (-0.30, -0.03,   6, 0.16), ( 0.12, -0.28,  -2, 0.18),
+            (-0.21,  0.21,   5, 0.20), ( 0.27, -0.14,  -5, 0.22)
+        ]
     ]
 
     static func pose(for index: Int,
                      seed: UInt64 = 1_441,
                      compartment: TravelCompartment = .center) -> R1TokenRestingPose {
         let safeIndex = min(max(index, 0), capacity - 1)
+        let slots = template(for: compartment)
         return resolvedPose(slot: slots[safeIndex],
                             index: safeIndex,
                             seed: seed,
@@ -56,6 +78,7 @@ enum R1TokenSlots {
                        seed: UInt64 = 1_441,
                        compartment: TravelCompartment = .center) -> [R1TokenRestingPose] {
         guard count > 0 else { return [] }
+        let slots = template(for: compartment)
         return slots.prefix(min(count, capacity)).enumerated().map { index, slot in
             resolvedPose(slot: slot,
                          index: index,
@@ -74,8 +97,8 @@ enum R1TokenSlots {
         let mirrored = pileSeed & 1 == 1
         let groupAngle = Double((pileSeed >> 8) % 3_600) / 10
         let itemSeed = mixed(pileSeed ^ UInt64(truncatingIfNeeded: index &* 0x45D9F3B))
-        let jitterX = unit(itemSeed, shift: 12, in: -0.024...0.024)
-        let jitterY = unit(itemSeed, shift: 33, in: -0.024...0.024)
+        let jitterX = unit(itemSeed, shift: 12, in: -0.006...0.006)
+        let jitterY = unit(itemSeed, shift: 33, in: -0.006...0.006)
         let rotationJitter = unit(itemSeed, shift: 45, in: -4.5...4.5)
 
         let sourceX = (mirrored ? -slot.x : slot.x) + jitterX
@@ -89,6 +112,17 @@ enum R1TokenSlots {
             rotation: (mirrored ? -slot.angle : slot.angle) + groupAngle + rotationJitter,
             elevation: slot.elevation
         )
+    }
+
+    private static func template(for compartment: TravelCompartment) -> [Slot] {
+        let index: Int
+        switch compartment {
+        case .king, .ten, .center: index = 0
+        case .queen, .sequence: index = 1
+        case .mariage, .ace: index = 2
+        case .jack, .poch: index = 3
+        }
+        return templates[index]
     }
 
     private static func mixed(_ input: UInt64) -> UInt64 {

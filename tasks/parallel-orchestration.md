@@ -102,11 +102,11 @@ kleine Schnittstellen an Lead übergeben; keine Spur führt dort eigenständig E
   Mapping, Lautstärkegrenze und gemeinsamer Impact-Trigger sind im Build integriert.
 - Cockpit-Gate: 7-KB-Gegenwartsansicht aus fünf aktuellen Quellen; kein Treffer für
   verworfene Liga-, Gilden-, Prestige- oder alte Gegnerbegriffe.
-- Accessibility-XXXL-Gate: Der frühere Landscape-Pass ist widerrufen. Obwohl Xcode
-  zeitweise ein `667 x 375`-Window meldete, war die Coach-Aktion `311,5 pt` hoch
-  und der einzige Anhang ein `750 x 1334`-Portrait-PNG. Der gehärtete Gate verlangt
-  nun initiales Viewport-Containment, Obergrenzen, vollständiges Reveal und echte
-  Landscape-Pixelgeometrie. Er bleibt bis zu einem neuen grünen Lauf offen.
+- Accessibility-XXXL-Gate: Der frühere falsche Landscape-Pass wurde widerrufen und
+  durch einen gehärteten Gate ersetzt. Der aktuelle Lauf belegt ein echtes
+  `667 x 375`-Fenster, initiales Viewport-Containment, eine auf `68 pt` begrenzte
+  Coach-Aktion sowie vollständiges Reveal. Der direkte Simulator-Framebuffer wird
+  während des laufenden Tests erfasst und nur um die Metadrehung normalisiert.
 
 ## Zweiter Integrationspunkt - Tischwelten und Materialproben
 
@@ -278,3 +278,46 @@ vollständigen Gegner-/Disc-Frame, eine auf `68 pt` begrenzte Coach-Aktion und d
 vollständig revealbare Hand. Der direkte Simulator-Framebuffer wird während des
 laufenden Tests aufgenommen und nur um die Simulator-Metadrehung normalisiert.
 Die Tischwahl ist weiterhin absichtlich nicht produktiv sichtbar.
+
+## Fünfter Integrationspunkt - R1-Maßstab und natürliche Endlagen
+
+**Ziel:** Die R1-Steine lesen sich auf großer und kompakter Track-A-Disc als dasselbe
+physische 36-mm-Objekt. Kein Stein wird durch Muldenmasken abgeschnitten; Licht,
+Kontakt und Haufenform bleiben materiell plausibel statt wie ein UI-Overlay.
+
+### Dateihoheit und Abhängigkeiten
+
+| Spur | Dateien | Abhängigkeit | Status |
+| --- | --- | --- | --- |
+| Lead | `App/ContentView.swift`, `App/Phase2View.swift`, `App/DesignTokens.swift`, dieses Dokument | übergibt denselben Disc-Maßstab an Außenmulden und Mitte | Integriert |
+| Material | `App/PlayComponents.swift`, `App/R1TokenLayout.swift` | kanonische R1-Geometrie und bestehende 8+1-Topologie | Integriert |
+| QA | `Tests/R1MaterialContractTests.swift`, `Tests/R1TokenLayoutTests.swift`, Track-A-UI-Test | vier echte Phase-1/2-Simulatorzustände | Grün |
+
+Nur Lead änderte die zentralen Phase-Views. Material blieb auf Darstellung,
+deterministische Slots und die kleine Durchmesserübergabe begrenzt; PochKit,
+`GameState` und der Presentation Director blieben unverändert.
+
+### Abnahmekriterien und Nachweis
+
+- R1 misst rund 41 % der Außenmuldenöffnung und skaliert in Phase 2 mit der Disc.
+  Außenmulden und Mitte verwenden innerhalb derselben Disc denselben Durchmesser.
+- Vier vorbereitete kompakte Haufentypen liefern unter den vier belegten
+  Startmulden mindestens drei nicht-kongruente Silhouetten. Bereits gelandete
+  Positionen bleiben bei `n -> n+1` unverändert und vollständig im Boden.
+- Signet und materialgebundene Details rotieren, Weltlicht und Kontaktschatten nicht.
+  Das breite Gruppenschatten-Oval ist entfernt; die vordere Muldenlippe bleibt lokal.
+- Der unabhängige P0-Bildvergleich besteht relative Größe, Phase-2-Clipping,
+  Schattenoval, Lippe und Haufenvariation in Portrait. Die finalen Landscape-Bilder
+  wurden zusätzlich menschlich auf dieselben Kriterien geprüft.
+- `R1TokenLayoutTests`, `R1MaterialContractTests`, Swift-Parse und `git diff --check`
+  sind grün. Der echte Phase-1/2-UI-Test besteht Portrait und `667 x 375` Landscape
+  mit vier Screenshots. Ein XCTest-Leerlaufproblem verlängerte den finalen Lauf auf
+  1.250 Sekunden, ohne Assertion-, Layout- oder Buildfehler; das bleibt als
+  Infrastruktur-Risiko sichtbar.
+
+Noch offen für den nächsten Integrationspunkt: Die R1-Oberfläche braucht eine echte
+Build-Time-Mikrotextur statt weiterer prozeduraler Effekte. Der erste KI-Assetlauf
+wurde wegen eingebranntem Checkerboard und fehlendem Alpha verworfen und nicht ins
+Repo übernommen. Außerdem bleibt die ruhige linke Fläche in Phase-1-Landscape der
+stärkste Kompositionskandidat; sie wird ohne neue Designrichtung gegen Handherkunft,
+Disc und Meldungsfokus geprüft.

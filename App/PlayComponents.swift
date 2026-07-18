@@ -616,31 +616,46 @@ enum R1Colorway: CaseIterable, Sendable {
 struct R1Token: View {
     var size: CGFloat
     var colorway: R1Colorway
+    var markRotation: Double
+    var surfaceVariant: Int
+    var elevation: Double
 
     init(tint: Color = Tokens.jewelGold,
          size: CGFloat = 11,
-         colorway: R1Colorway = .naturalWhite) {
+         colorway: R1Colorway = .naturalWhite,
+         markRotation: Double = 0,
+         surfaceVariant: Int = 0,
+         elevation: Double = 0) {
         // Legacy-Aufrufer übergeben weiterhin Pool-/Spielerfarben. R1 ignoriert
         // diese absichtlich, bis die zentralen Bühnen auf `R1Token` migriert sind.
         _ = tint
         self.size = size
         self.colorway = colorway
+        self.markRotation = markRotation
+        self.surfaceVariant = surfaceVariant
+        self.elevation = min(max(elevation, 0), 1)
     }
 
     var body: some View {
+        let surfaceCenter = UnitPoint(
+            x: 0.40 + CGFloat(surfaceVariant % 3) * 0.07,
+            y: 0.34 + CGFloat((surfaceVariant / 3) % 3) * 0.06
+        )
         ZStack {
             // Weicher Höhenschatten: zeigt die 3-mm-Stärke, ohne den trockenen
             // Materialkontakt darunter aufzuweichen.
             Ellipse()
-                .fill(Color.black.opacity(0.28))
-                .frame(width: size * 0.94, height: max(1, size * 0.18))
+                .fill(Color.black.opacity(0.28 - elevation * 0.06))
+                .frame(width: size * (0.94 + elevation * 0.05),
+                       height: max(1, size * (0.18 + elevation * 0.025)))
                 .blur(radius: size * 0.065)
                 .offset(y: size * 0.43)
 
             // Harter Kontaktschatten: bleibt eng an der unteren Kante.
             Ellipse()
-                .fill(Color.black.opacity(0.76))
-                .frame(width: size * 0.84, height: max(1, size * 0.10))
+                .fill(Color.black.opacity(0.76 - elevation * 0.13))
+                .frame(width: size * (0.84 + elevation * 0.04),
+                       height: max(1, size * (0.10 + elevation * 0.018)))
                 .blur(radius: size * 0.018)
                 .offset(y: size * 0.40)
 
@@ -681,11 +696,13 @@ struct R1Token: View {
                 .overlay {
                     Circle()
                         .fill(
-                            LinearGradient(colors: [
-                                Color.white.opacity(0.07),
+                            RadialGradient(colors: [
+                                Color.white.opacity(0.075),
                                 .clear,
-                                Color.black.opacity(0.065)
-                            ], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                Color.black.opacity(0.055)
+                            ], center: surfaceCenter,
+                               startRadius: size * 0.05,
+                               endRadius: size * 0.62)
                         )
                 }
                 .overlay {
@@ -693,6 +710,7 @@ struct R1Token: View {
                         .stroke(colorway.edge.opacity(0.30),
                                 lineWidth: max(0.42, size * 0.025))
                         .padding(size * 0.20)
+                        .rotationEffect(.degrees(markRotation))
                         .shadow(color: Color.white.opacity(0.08),
                                 radius: 0,
                                 x: -max(0.2, size * 0.01),
@@ -744,21 +762,27 @@ struct TableTokenPile: View {
     var showCount = true
     var seed: UInt64 = 1_441
     var compartment: TravelCompartment = .center
+    var tokenDiameterOverride: CGFloat?
 
     var body: some View {
         let poses = R1TokenSlots.layout(for: count,
                                         seed: seed,
                                         compartment: compartment)
-        let tokenDiameter = min(Tokens.tableTokenDiameter, diameter * 0.38)
+        let tokenDiameter = tokenDiameterOverride
+            ?? min(Tokens.tableTokenDiameter,
+                   diameter * Tokens.tableTokenToFloorRatio)
         ZStack {
             ForEach(poses.indices, id: \.self) { index in
                 let pose = poses[index]
-                R1Token(tint: tint, size: tokenDiameter)
+                R1Token(tint: tint,
+                        size: tokenDiameter,
+                        markRotation: pose.rotation,
+                        surfaceVariant: index,
+                        elevation: pose.elevation / 0.22)
                     .offset(x: pose.offset.width * tokenDiameter,
                             y: pose.offset.height * tokenDiameter
                                 - pose.elevation * tokenDiameter * 0.06)
-                    .rotationEffect(.degrees(pose.rotation))
-                    .zIndex(Double(index))
+                    .zIndex(pose.elevation * 100 + Double(index) * 0.01)
             }
 
             if showCount {
@@ -786,41 +810,56 @@ struct RecessedTokenPile: View {
     var showCount = false
     var seed: UInt64 = 1_441
     var compartment: TravelCompartment = .center
+    var tokenDiameterOverride: CGFloat?
 
     var body: some View {
         let floorDiameter = diameter * Tokens.outerWellFloorRatio
+        let physicalTokenDiameter = tokenDiameterOverride ?? min(
+            Tokens.tableTokenDiameter,
+            floorDiameter * Tokens.tableTokenToFloorRatio
+        )
         ZStack {
-            Ellipse()
-                .fill(Color.black.opacity(0.34))
-                .frame(width: diameter * 0.58, height: diameter * 0.14)
-                .blur(radius: diameter * 0.012)
-                .offset(y: diameter * 0.11)
-
             TableTokenPile(count: count,
                            tint: tint,
                            diameter: floorDiameter,
                            showCount: showCount,
                            seed: seed,
-                           compartment: compartment)
+                           compartment: compartment,
+                           tokenDiameterOverride: physicalTokenDiameter)
                 .offset(y: diameter * 0.025)
                 .frame(width: floorDiameter, height: floorDiameter)
                 .clipShape(Circle())
 
-            Circle()
-                .fill(
+            R1WellFrontLip()
+                .stroke(
                     LinearGradient(colors: [
-                        .clear,
-                        Color.black.opacity(0.06),
-                        Color.black.opacity(0.34)
-                    ], startPoint: .top, endPoint: .bottom)
+                        Color.black.opacity(0.03),
+                        Color.black.opacity(0.18)
+                    ], startPoint: .top, endPoint: .bottom),
+                    style: StrokeStyle(lineWidth: max(0.55, diameter * 0.025),
+                                       lineCap: .round)
                 )
-                .frame(width: diameter * 0.79, height: diameter * 0.79)
-                .offset(y: diameter * 0.025)
+                .frame(width: diameter * 0.70, height: diameter * 0.70)
+                .offset(y: diameter * 0.028)
                 .allowsHitTesting(false)
 
         }
         .frame(width: diameter, height: diameter)
         .accessibilityHidden(true)
+    }
+}
+
+/// Nur die vordere Wand der Mulde liegt vor den Steinen. Der textile Boden
+/// bleibt frei von der früheren kreisförmigen Abdunklung.
+private struct R1WellFrontLip: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY),
+                    radius: min(rect.width, rect.height) * 0.5,
+                    startAngle: .degrees(18),
+                    endAngle: .degrees(162),
+                    clockwise: false)
+        return path
     }
 }
 
@@ -899,6 +938,7 @@ struct TableWorldPiecePile: View {
     var seed: UInt64 = 1_441
     var compartment: TravelCompartment = .center
     var placement: TableWorldPiecePlacement = .free
+    var pieceDiameterOverride: CGFloat?
 
     @ViewBuilder
     var body: some View {
@@ -911,14 +951,16 @@ struct TableWorldPiecePile: View {
                                diameter: diameter,
                                showCount: false,
                                seed: seed,
-                               compartment: compartment)
+                               compartment: compartment,
+                               tokenDiameterOverride: pieceDiameterOverride)
             case .well:
                 RecessedTokenPile(count: count,
                                   tint: Tokens.jewelGold,
                                   diameter: diameter,
                                   showCount: false,
                                   seed: seed,
-                                  compartment: compartment)
+                                  compartment: compartment,
+                                  tokenDiameterOverride: pieceDiameterOverride)
             }
         case .unterwegs:
             TravelCoinPile(count: count,

@@ -736,7 +736,8 @@ struct Phase2View: View {
                                     count: presentedPot,
                                     diameter: Tokens.centerDiameter * 0.42,
                                     compartment: .poch,
-                                    placement: .well)
+                                    placement: .well,
+                                    pieceDiameterOverride: Tokens.tableTokenDiameter * Tokens.phase2BoardScale)
                     .offset(y: 1.5)
                     .transition(.scale(scale: 0.72).combined(with: .opacity))
             }
@@ -781,7 +782,8 @@ struct Phase2View: View {
                                     count: chips,
                                     diameter: dia,
                                     compartment: TravelCompartment(pool: pool),
-                                    placement: .well)
+                                    placement: .well,
+                                    pieceDiameterOverride: Tokens.tableTokenDiameter * Tokens.phase2BoardScale)
             } else {
                 Circle()
                     .fill(theme.tint(pool).opacity(theme.isTravelTable ? 0.44 : 0.36))
