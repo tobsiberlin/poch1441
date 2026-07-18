@@ -148,6 +148,23 @@ read-only QA-Session darf den Integrationsworktree beobachten.
   Gegnerdaten und öffentliche Tendenzen;
 - keine visuellen Material- oder zentralen Viewänderungen.
 
+### `poch-status`
+
+- eigene dauerhafte cmux-Session mit genau einem wiederverwendeten Browserfenster;
+- zeigt `tasks/reviews/goty-2026-live-status.html`, zusätzlich als Ansichtskopie
+  unter `/Users/tobsi/Library/Mobile Documents/com~apple~CloudDocs/TEMP/`;
+- die Lead-Session aktualisiert die HTML nach jedem belastbaren Integrationspunkt
+  und bei einer wesentlichen neuen P0-/P1-Erkenntnis;
+- sichtbar bleiben: alle Spuren mit Branch/Worktree, aktueller Status, letzter
+  Commit/Push, echte Belege und Screenshotpfade, offene Risiken, nächste
+  Integrationsreihenfolge und Punkte, die eine Nutzerentscheidung brauchen;
+- für Soll-Ist-Entscheidungen immer direkte Bilder oder Links einbetten, nicht nur
+  Chatbehauptungen;
+- Browserfenster nicht für jede Aktualisierung neu öffnen. Dieselbe Statusansicht
+  aktualisieren und im bestehenden cmux-Fenster neu laden;
+- die Status-Session ist read-only gegenüber Produktcode und blockiert die
+  Arbeits-Sessions nicht.
+
 ### Integrationsprotokoll
 
 1. Jede Session startet mit `git status`, nennt Branch/Worktree und Dateihoheit.
@@ -167,3 +184,10 @@ Die neue Session soll deshalb praktisch weiterarbeiten und das Goal erst bei ech
 Gesamterfüllung als abgeschlossen markieren. Ein bestandener Einzelcommit ist kein
 Endpunkt. Der aktuelle Nutzerwunsch ist jedoch ein bewusster Stopp für Kontextreset;
 erst in der neuen Session fortfahren.
+
+Das Goal bleibt ausdrücklich das vollständige GOTY-2026-Ziel: First Run und
+Tutorialregie, adaptive Portrait-/Landscape-Komposition, Track A und Track B,
+Gegner und öffentliche Tendenzen, PochKit-Regeltreue und Informationsgrenzen,
+Sound/Haptik, Lokalisierung, Accessibility, Geräte-/Overlap-QA, echte Builds,
+Screenshots und menschliche Ästhetikabnahme. Der aktuelle Disc-/R1-Checkpoint ist
+nur der nächste priorisierte Integrationspunkt innerhalb dieses Gesamtziels.
