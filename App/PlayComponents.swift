@@ -282,6 +282,7 @@ struct OpponentPanel: View {
     let isFocus: Bool
     var mood: OpponentMood = .neutral
     var width: CGFloat = 110
+    var tendencyTitle: String?
     let morph: Namespace.ID?
 
     private var role: String {
@@ -339,11 +340,15 @@ struct OpponentPanel: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
 
-                Text(role.uppercased())
+                Text((tendencyTitle ?? role).uppercased())
                     .font(.system(size: 6.7, weight: .heavy))
                     .tracking(1.18)
-                    .foregroundStyle((isFocus ? actionTint : Tokens.slate).opacity(isActive ? 0.70 : 0.25))
+                    .foregroundStyle((tendencyTitle == nil
+                                      ? (isFocus ? actionTint : Tokens.slate)
+                                      : Tokens.jewelGold)
+                        .opacity(isActive ? 0.70 : 0.25))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.72)
             }
 
             if reactionIsQuiet {
@@ -364,6 +369,10 @@ struct OpponentPanel: View {
                                   defaultValue: "%@, %d Karten, %d Chips, %@"),
                    name, cards, stack, actionText)
         )
+        .accessibilityValue(tendencyTitle.map {
+            let label = String(localized: "opponent.tendency.label", defaultValue: "Tendenz")
+            return "\(label): \($0)"
+        } ?? "")
     }
 
     private var seatBase: some View {
@@ -613,21 +622,21 @@ enum R1Colorway: CaseIterable, Sendable {
 
     fileprivate var face: Color {
         switch self {
-        case .naturalWhite: Color(hex: 0xCEC7B8)
-        case .terracotta: Color(hex: 0x9B5D48)
-        case .sage: Color(hex: 0x758071)
-        case .slate: Color(hex: 0x62666A)
-        case .ochre: Color(hex: 0xA5793D)
+        case .naturalWhite: Tokens.r1NaturalFace
+        case .terracotta: Tokens.r1TerracottaFace
+        case .sage: Tokens.r1SageFace
+        case .slate: Tokens.r1SlateFace
+        case .ochre: Tokens.r1OchreFace
         }
     }
 
     fileprivate var edge: Color {
         switch self {
-        case .naturalWhite: Color(hex: 0x928B7D)
-        case .terracotta: Color(hex: 0x693D31)
-        case .sage: Color(hex: 0x4D564C)
-        case .slate: Color(hex: 0x3D4145)
-        case .ochre: Color(hex: 0x6F4D26)
+        case .naturalWhite: Tokens.r1NaturalEdge
+        case .terracotta: Tokens.r1TerracottaEdge
+        case .sage: Tokens.r1SageEdge
+        case .slate: Tokens.r1SlateEdge
+        case .ochre: Tokens.r1OchreEdge
         }
     }
 
@@ -670,46 +679,24 @@ struct R1Token: View {
 
     var body: some View {
         ZStack {
-            Ellipse()
-                .fill(Color.black.opacity(0.34 - elevation * 0.06))
-                .frame(width: size * (0.92 + elevation * 0.05),
-                       height: max(1, size * (0.19 + elevation * 0.025)))
-                .blur(radius: size * 0.060)
-                .offset(x: size * 0.035, y: size * 0.45)
-
-            Ellipse()
-                .fill(Color.black.opacity(0.80 - elevation * 0.14))
-                .frame(width: size * (0.82 + elevation * 0.04),
-                       height: max(1, size * (0.095 + elevation * 0.018)))
-                .blur(radius: size * 0.016)
-                .offset(x: size * 0.025, y: size * 0.425)
-
             Image(colorway.assetName)
                 .resizable()
                 .interpolation(.high)
                 .scaledToFit()
                 .frame(width: size, height: size)
-                .overlay {
-                    Circle()
-                        .stroke(colorway.edge.opacity(0.34),
-                                lineWidth: max(0.45, size * 0.018))
-                        .padding(size * 0.145)
-                        .shadow(color: Color.white.opacity(0.13),
-                                radius: 0,
-                                x: -max(0.25, size * 0.010),
-                                y: -max(0.25, size * 0.010))
-                }
-                .overlay {
-                    R1BlindEmboss()
-                        .stroke(colorway.edge.opacity(0.46),
-                                lineWidth: max(0.48, size * 0.022))
-                        .padding(size * 0.225)
-                        .rotationEffect(.degrees(markRotation))
-                        .shadow(color: Color.white.opacity(0.16),
-                                radius: 0,
-                                x: -max(0.2, size * 0.01),
-                                y: -max(0.2, size * 0.01))
-                }
+                .scaleEffect(Tokens.r1AssetScale)
+                .shadow(color: Color.black.opacity(0.72 - elevation * 0.10),
+                        radius: size * Tokens.r1ContactShadowRadiusRatio,
+                        x: size * Tokens.r1ContactShadowXRatio,
+                        y: size * Tokens.r1ContactShadowYRatio)
+                .shadow(color: Color.black.opacity(0.34 - elevation * 0.06),
+                        radius: size * Tokens.r1CastShadowRadiusRatio,
+                        x: size * Tokens.r1CastShadowXRatio,
+                        y: size * Tokens.r1CastShadowYRatio)
+
+            R1MintEmboss(colorway: colorway,
+                         size: size,
+                         markRotation: markRotation)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -720,25 +707,68 @@ struct R1Token: View {
 /// verwendet `R1Token`; der Alias verändert weder Farbe noch Physik.
 typealias TableChip = R1Token
 
-/// Tonale Blindprägung des rotationssymmetrischen Kartenrücken-Signets.
-private struct R1BlindEmboss: Shape {
-    func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let width = rect.width * 0.48
-        let height = rect.height * 0.48
-        var path = Path()
-        path.move(to: CGPoint(x: center.x, y: center.y - height))
-        path.addLine(to: CGPoint(x: center.x + width, y: center.y))
-        path.addLine(to: CGPoint(x: center.x, y: center.y + height))
-        path.addLine(to: CGPoint(x: center.x - width, y: center.y))
-        path.closeSubpath()
+/// Große W2-Blindprägung der verbindlichen Präzisionsscheiben-Referenz. Ring,
+/// Rändelung und Schulter liegen vollständig im Build-Time-Materialasset; die
+/// Laufzeit zeichnet ausschließlich die tiefe, materialfarbene Prägerille.
+private struct R1MintEmboss: View {
+    let colorway: R1Colorway
+    let size: CGFloat
+    let markRotation: Double
 
-        let coreWidth = width * 0.36
-        let coreHeight = height * 0.36
-        path.move(to: CGPoint(x: center.x, y: center.y - coreHeight))
-        path.addLine(to: CGPoint(x: center.x + coreWidth, y: center.y))
-        path.addLine(to: CGPoint(x: center.x, y: center.y + coreHeight))
-        path.addLine(to: CGPoint(x: center.x - coreWidth, y: center.y))
+    var body: some View {
+        R1FacetSignet()
+            .stroke(colorway.edge.opacity(0.88),
+                    style: StrokeStyle(lineWidth: max(0.34, size * 0.010),
+                                       lineCap: .round,
+                                       lineJoin: .round))
+        .frame(width: size * Tokens.r1SignetBBoxRatio,
+               height: size * Tokens.r1SignetBBoxRatio)
+        .offset(y: size * Tokens.r1SignetVerticalOffsetRatio)
+        .rotationEffect(.degrees(markRotation))
+        .shadow(color: colorway.face.opacity(0.46),
+                radius: 0,
+                x: -max(0.14, size * Tokens.r1EmbossLightOffsetRatio),
+                y: -max(0.14, size * Tokens.r1EmbossLightOffsetRatio))
+        .shadow(color: colorway.edge.opacity(0.68),
+                radius: 0,
+                x: max(0.18, size * Tokens.r1EmbossDarkOffsetRatio),
+                y: max(0.18, size * Tokens.r1EmbossDarkOffsetRatio))
+    }
+}
+
+private struct R1FacetSignet: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let outer = [
+            CGPoint(x: rect.midX, y: rect.minY),
+            CGPoint(x: rect.maxX, y: rect.midY),
+            CGPoint(x: rect.midX, y: rect.maxY),
+            CGPoint(x: rect.minX, y: rect.midY)
+        ]
+        let inner = outer.map {
+            CGPoint(x: center.x + ($0.x - center.x) * 0.56,
+                    y: center.y + ($0.y - center.y) * 0.56)
+        }
+        for index in outer.indices {
+            let next = (index + 1) % outer.count
+            path.move(to: outer[index])
+            path.addLine(to: outer[next])
+            path.move(to: inner[index])
+            path.addLine(to: inner[next])
+            path.move(to: outer[index])
+            path.addLine(to: inner[index])
+        }
+        path.move(to: inner[0])
+        path.addLine(to: inner[2])
+        path.move(to: inner[1])
+        path.addLine(to: inner[3])
+
+        let coreRadius = rect.width * 0.075
+        path.move(to: CGPoint(x: center.x, y: center.y - coreRadius))
+        path.addLine(to: CGPoint(x: center.x + coreRadius, y: center.y))
+        path.addLine(to: CGPoint(x: center.x, y: center.y + coreRadius))
+        path.addLine(to: CGPoint(x: center.x - coreRadius, y: center.y))
         path.closeSubpath()
         return path
     }
@@ -807,10 +837,14 @@ struct RecessedTokenPile: View {
 
     var body: some View {
         let floorDiameter = diameter * Tokens.outerWellFloorRatio
-        let physicalTokenDiameter = tokenDiameterOverride ?? min(
-            Tokens.tableTokenDiameter,
+        let requestedTokenDiameter = tokenDiameterOverride ?? Tokens.tableTokenDiameter
+        let physicalTokenDiameter = min(
+            requestedTokenDiameter,
             floorDiameter * Tokens.tableTokenToFloorRatio
         )
+        let verticalInsetRatio = compartment == .center
+            ? Tokens.r1CenterWellPileVerticalInsetRatio
+            : Tokens.r1WellPileVerticalInsetRatio
         ZStack {
             TableTokenPile(count: count,
                            tint: tint,
@@ -819,7 +853,7 @@ struct RecessedTokenPile: View {
                            seed: seed,
                            compartment: compartment,
                            tokenDiameterOverride: physicalTokenDiameter)
-                .offset(y: diameter * 0.025)
+                .offset(y: diameter * verticalInsetRatio)
                 .frame(width: floorDiameter, height: floorDiameter)
                 .clipShape(Circle())
 
@@ -867,12 +901,8 @@ struct TableWorldBoardBase: View {
     var body: some View {
         switch world {
         case .pochDisc:
-            Image("PochDisc2026")
-                .resizable()
-                .interpolation(.high)
-                .scaledToFill()
-                .frame(width: diameter, height: diameter)
-                .accessibilityHidden(true)
+            PochDiscMaterialImage(size: diameter)
+            .accessibilityHidden(true)
         case .unterwegs:
             Image("TravelTray")
                 .resizable()
@@ -884,6 +914,78 @@ struct TableWorldBoardBase: View {
                         y: diameter * 0.035)
                 .accessibilityHidden(true)
         }
+    }
+}
+
+/// Gemeinsame, normalisierte Materialquelle für Disc-Basis und Vorderlippen.
+/// Das transparente Build-Time-Grading dämpft Chrom und Blau und ersetzt den
+/// gleichförmigen Web-Look der Mulden durch unregelmäßigen Samtflor.
+struct PochDiscMaterialImage: View {
+    let size: CGFloat
+
+    var body: some View {
+        ZStack {
+            Image("PochDiscCleanBase")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .normalizedPochDiscAsset(diameter: size)
+                .saturation(0.35)
+                .brightness(-0.30)
+                .offset(y: size * Tokens.pochDiscSidewallExtensionRatio)
+
+            Image("PochDiscCleanBase")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .normalizedPochDiscAsset(diameter: size)
+
+            Image("PochDiscMaterialGrade")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFill()
+                .frame(width: size, height: size)
+
+            PochDiscSuitEngravingOverlay(size: size)
+        }
+        .frame(width: size, height: size)
+        .allowsHitTesting(false)
+    }
+}
+
+/// Dunkle, radial gesetzte Kartenfarbengravur im satinierten Außenrahmen.
+/// Die Zeichen bleiben Vektor-UI und werden nicht in Raster-Artwork eingebrannt.
+private struct PochDiscSuitEngravingOverlay: View {
+    let size: CGFloat
+
+    private let marks: [(symbol: String, angle: Double)] = [
+        ("♥", 0), ("♠", 45), ("♦", 90), ("♣", 135),
+        ("♥", 180), ("♠", 225), ("♦", 270), ("♣", 315)
+    ]
+
+    var body: some View {
+        ZStack {
+            ForEach(marks.indices, id: \.self) { index in
+                let mark = marks[index]
+                let radians = mark.angle * .pi / 180
+                Text(mark.symbol)
+                    .font(.system(size: size * 0.017,
+                                  weight: .semibold,
+                                  design: .serif))
+                    .foregroundStyle(Color(hex: 0x3A3E42).opacity(0.78))
+                    .shadow(color: .white.opacity(0.16),
+                            radius: 0,
+                            y: size * 0.0007)
+                    .rotationEffect(.degrees(mark.angle))
+                    .position(x: size * 0.5 + sin(radians) * size * 0.477,
+                              y: size * 0.5 - cos(radians) * size * 0.477)
+            }
+        }
+        .frame(width: size, height: size)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
@@ -907,28 +1009,11 @@ private struct TableWorldSpatialPresentation: ViewModifier {
                     perspective: Tokens.pochDiscPerspective
                 )
                 .scaleEffect(Tokens.pochDiscStageScale)
-                .background {
-                    Ellipse()
-                        .fill(
-                            RadialGradient(colors: [
-                                Color(hex: 0x35373B).opacity(0.44),
-                                Color(hex: 0x222329).opacity(0.18),
-                                .clear
-                            ], center: .center,
-                               startRadius: diameter * 0.10,
-                               endRadius: diameter * 0.62)
-                        )
-                        .frame(width: diameter * 1.16,
-                               height: diameter * 0.94)
-                        .blur(radius: diameter * Tokens.pochDiscAmbientLiftRatio)
-                        .offset(y: diameter * 0.045)
-                        .accessibilityHidden(true)
-                }
-                .shadow(color: Color.black.opacity(0.82),
+                .shadow(color: Color.black.opacity(0.88),
                         radius: diameter * Tokens.pochDiscContactShadowRadiusRatio,
                         x: diameter * Tokens.pochDiscContactShadowXRatio,
                         y: diameter * Tokens.pochDiscContactShadowYRatio)
-                .shadow(color: Color.black.opacity(0.58),
+                .shadow(color: Color.black.opacity(0.68),
                         radius: diameter * Tokens.pochDiscCastShadowRadiusRatio,
                         x: diameter * Tokens.pochDiscCastShadowXRatio,
                         y: diameter * Tokens.pochDiscCastShadowYRatio)
@@ -939,6 +1024,16 @@ private struct TableWorldSpatialPresentation: ViewModifier {
 }
 
 extension View {
+    /// Richtet den physischen Außenring des Build-Time-Assets auf den
+    /// semantischen Disc-Raum aus. Boardbasis und Frontlippenmaske müssen
+    /// denselben Transform verwenden, damit R1 und Muldenkontakt deckungsgleich
+    /// bleiben.
+    func normalizedPochDiscAsset(diameter: CGFloat) -> some View {
+        scaleEffect(Tokens.pochDiscAssetScale)
+            .offset(x: diameter * Tokens.pochDiscAssetOffsetXRatio,
+                    y: diameter * Tokens.pochDiscAssetOffsetYRatio)
+    }
+
     func tableWorldSpatialPresentation(world: TableWorld,
                                        diameter: CGFloat) -> some View {
         modifier(TableWorldSpatialPresentation(world: world, diameter: diameter))
@@ -962,7 +1057,8 @@ struct TableWorldPiece: View {
             R1Token(size: size,
                     colorway: R1Colorway.resolve(compartment: compartment,
                                                  index: index),
-                    markRotation: Double((index * 17) % 31) - 15)
+                    markRotation: Double((index * 17) % 31) - 15,
+                    surfaceVariant: index)
         case .unterwegs:
             TravelCentPiece(seed: seed,
                             index: index,
@@ -1029,9 +1125,14 @@ struct PocketValueMarker: View {
     let chips: Int
     let tint: Color
     var compact = false
-    var showChipCount = true
 
     private var engraved: Bool { world == .pochDisc }
+    private var visiblePileCapacity: Int {
+        switch world {
+        case .pochDisc: R1TokenSlots.capacity
+        case .unterwegs: TravelCoinLayout.capacity
+        }
+    }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: compact ? 1.5 : 3) {
@@ -1041,7 +1142,7 @@ struct PocketValueMarker: View {
                     : (pool.indexLabel.count > 2
                         ? Tokens.jewelPlatin.opacity(compact ? 0.84 : 0.96)
                         : tint.opacity(compact ? 0.90 : 1)))
-            if showChipCount, chips > 0 {
+            if chips > visiblePileCapacity {
                 Text("·")
                     .foregroundStyle(Tokens.jewelGold.opacity(0.68))
                 Text("\(chips)")
@@ -1060,6 +1161,7 @@ struct PocketValueMarker: View {
         .shadow(color: .black.opacity(engraved ? 0.55 : 0.95),
                 radius: engraved ? 0.7 : (compact ? 1.5 : 2.5),
                 y: engraved ? 0.4 : 1)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(pool.indexLabel), \(chips)")
     }
 }

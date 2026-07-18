@@ -135,11 +135,12 @@ struct ImpactFlight<Content: View>: View {
 
     var body: some View {
         content(progress)
-            .position(PhysicalMotion.quadraticPoint(progress: progress,
-                                                    from: from,
-                                                    to: to,
-                                                    arcHeight: arcHeight,
-                                                    lateralBias: lateralBias))
+            .position(from)
+            .modifier(FlightPathEffect(progress: progress,
+                                       from: from,
+                                       to: to,
+                                       arcHeight: arcHeight,
+                                       lateralBias: lateralBias))
             .onAppear {
                 withAnimation(PhysicalMotion.travel(duration: duration).delay(delay),
                               completionCriteria: .logicallyComplete) {
@@ -154,5 +155,30 @@ struct ImpactFlight<Content: View>: View {
         guard !impacted else { return }
         impacted = true
         onImpact()
+    }
+}
+
+private struct FlightPathEffect: GeometryEffect {
+    var progress: CGFloat
+    let from: CGPoint
+    let to: CGPoint
+    let arcHeight: CGFloat
+    let lateralBias: CGFloat
+
+    var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let point = PhysicalMotion.quadraticPoint(progress: progress,
+                                                  from: from,
+                                                  to: to,
+                                                  arcHeight: arcHeight,
+                                                  lateralBias: lateralBias)
+        return ProjectionTransform(CGAffineTransform(
+            translationX: point.x - from.x,
+            y: point.y - from.y
+        ))
     }
 }

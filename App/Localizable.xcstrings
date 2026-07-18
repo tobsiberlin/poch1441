@@ -80,6 +80,105 @@
         "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pauza" } }
       }
     },
+    "opponent.tendency.caveat" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Eine Tendenz, kein Versprechen." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A tendency, not a promise." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Una tendencia, no una promesa." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Une tendance, pas une certitude." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Una tendenza, non una promessa." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Een neiging, geen belofte." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "To skłonność, nie obietnica." } }
+      }
+    },
+    "opponent.tendency.close" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Details schließen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Close details" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cerrar detalles" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fermer les détails" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Chiudi dettagli" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Details sluiten" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Zamknij szczegóły" } }
+      }
+    },
+    "opponent.tendency.earlyInitiative.summary" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Steigt in offenen Bietrunden vergleichsweise oft zuerst ein." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Often acts first in an unopened bidding round." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Interviene primero con bastante frecuencia cuando nadie ha apostado aún." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intervient assez souvent en premier quand personne n’a encore misé." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Interviene abbastanza spesso per primo quando nessuno ha ancora puntato." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Neemt vrij vaak als eerste actie wanneer er nog niet is ingezet." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Dość często działa jako pierwszy, gdy nikt jeszcze nie postawił." } }
+      }
+    },
+    "opponent.tendency.earlyInitiative.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Frühe Initiative" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Early initiative" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Iniciativa temprana" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Prise d’initiative" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Iniziativa iniziale" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Vroeg initiatief" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Wczesna inicjatywa" } }
+      }
+    },
+    "opponent.tendency.label" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Tendenz" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tendency" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tendencia" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Tendance" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tendenza" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Tendens" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Tendencja" } }
+      }
+    },
+    "opponent.tendency.measuredPace.summary" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nimmt sich bei Entscheidungen meist etwas mehr Zeit." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Usually takes a little more time over decisions." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suele tomarse algo más de tiempo para decidir." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Prend généralement un peu plus de temps pour décider." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Di solito si prende un po’ più di tempo per decidere." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Neemt meestal wat meer tijd voor beslissingen." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Zwykle poświęca decyzjom trochę więcej czasu." } }
+      }
+    },
+    "opponent.tendency.measuredPace.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bedachtes Tempo" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Measured pace" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ritmo pausado" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Rythme posé" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ritmo misurato" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Bedacht tempo" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Spokojne tempo" } }
+      }
+    },
+    "opponent.tendency.variablePace.summary" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Entscheidet mal zügig, mal mit etwas mehr Zeit." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sometimes decides quickly, sometimes takes a little longer." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "A veces decide rápido y otras se toma algo más de tiempo." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Décide parfois vite, parfois en prenant un peu plus de temps." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "A volte decide in fretta, altre si prende un po’ più di tempo." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Beslist soms snel en neemt soms wat meer tijd." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Czasem decyduje szybko, a czasem potrzebuje nieco więcej czasu." } }
+      }
+    },
+    "opponent.tendency.variablePace.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wechselndes Tempo" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Variable pace" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ritmo variable" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Rythme variable" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ritmo variabile" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Wisselend tempo" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Zmienne tempo" } }
+      }
+    },
     "phase2.transfer.reply" : {
       "extractionState" : "stale",
       "localizations" : {

@@ -70,21 +70,22 @@ enum PochRing {
     ]
 }
 
-/// Calibrated overlay geometry for the canonical 2026 Poch Disc.
-/// The production asset is orthographic and intentionally symmetric.
+/// Calibrated overlay geometry for the canonical 2026 Poch Disc. The source
+/// centers were measured on the 1254-px asset after the shared 1.26 canvas
+/// normalization; overlays, flights and the asset-rim occlusion use one map.
 enum PochDiscGeometry {
     static func wellCenter(for pool: Pool, in size: CGFloat) -> CGPoint {
         let normalized: CGPoint
         switch pool {
-        case .king:     normalized = CGPoint(x: 0.500, y: 0.146)
-        case .queen:    normalized = CGPoint(x: 0.731, y: 0.242)
-        case .mariage:  normalized = CGPoint(x: 0.838, y: 0.432)
-        case .jack:     normalized = CGPoint(x: 0.733, y: 0.672)
-        case .ten:      normalized = CGPoint(x: 0.500, y: 0.798)
-        case .sequence: normalized = CGPoint(x: 0.267, y: 0.672)
-        case .poch:     normalized = CGPoint(x: 0.162, y: 0.432)
-        case .ace:      normalized = CGPoint(x: 0.269, y: 0.242)
-        case .center:   normalized = CGPoint(x: 0.500, y: 0.476)
+        case .king:     normalized = CGPoint(x: 0.5000, y: 0.1463)
+        case .queen:    normalized = CGPoint(x: 0.7311, y: 0.2358)
+        case .mariage:  normalized = CGPoint(x: 0.8426, y: 0.4639)
+        case .jack:     normalized = CGPoint(x: 0.7462, y: 0.7080)
+        case .ten:      normalized = CGPoint(x: 0.4990, y: 0.8135)
+        case .sequence: normalized = CGPoint(x: 0.2498, y: 0.7100)
+        case .poch:     normalized = CGPoint(x: 0.1564, y: 0.4649)
+        case .ace:      normalized = CGPoint(x: 0.2679, y: 0.2358)
+        case .center:   normalized = CGPoint(x: 0.5000, y: 0.5000)
         }
         return CGPoint(x: normalized.x * size, y: normalized.y * size)
     }
@@ -95,51 +96,6 @@ enum PochDiscGeometry {
         let progress: CGFloat = 0.61
         return CGPoint(x: center.x + (well.x - center.x) * progress,
                        y: center.y + (well.y - center.y) * progress)
-    }
-}
-
-/// Reuses the canonical Disc material as the foreground wall of every well.
-/// Tokens therefore disappear behind the real graphite and inlay edge instead
-/// of receiving a synthetic UI border.
-struct PochDiscFrontLipOverlay: View {
-    let size: CGFloat
-    var includesCenter = false
-
-    var body: some View {
-        Image("PochDisc2026")
-            .resizable()
-            .interpolation(.high)
-            .scaledToFill()
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-            .mask {
-                Canvas { context, _ in
-                    var path = Path()
-                    for pool in Pool.allCases where pool != .center {
-                        addLip(for: pool, radius: size * 0.083, to: &path)
-                    }
-                    if includesCenter {
-                        addLip(for: .center, radius: size * 0.125, to: &path)
-                    }
-                    context.stroke(path,
-                                   with: .color(.white),
-                                   style: StrokeStyle(lineWidth: size * 0.018,
-                                                      lineCap: .round))
-                }
-            }
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
-    }
-
-    private func addLip(for pool: Pool, radius: CGFloat, to path: inout Path) {
-        let center = PochDiscGeometry.wellCenter(for: pool, in: size)
-        path.move(to: CGPoint(x: center.x - radius * 0.96,
-                              y: center.y + radius * 0.14))
-        path.addQuadCurve(
-            to: CGPoint(x: center.x + radius * 0.96,
-                        y: center.y + radius * 0.14),
-            control: CGPoint(x: center.x, y: center.y + radius * 1.92)
-        )
     }
 }
 

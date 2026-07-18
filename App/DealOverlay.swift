@@ -9,13 +9,14 @@ struct DealOverlay: View {
     let game: GameState
     let theme: Theme
     let poolPositions: [Pool: CGPoint]
+    let reduceMotion: Bool
     var showsSeatTargets = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
+            let tokenDiameter = payoutTokenDiameter
             let boardCenter = CGPoint(x: w / 2, y: h * 0.46)
             // Eigener Kartenanker: Die zentrale Gewinnmulde bleibt jederzeit lesbar.
             // The PM49 board nearly fills the width. Keep the dealing stack in
@@ -57,21 +58,37 @@ struct DealOverlay: View {
                    game.meldShown < game.startedMelds,
                    game.meldShown < game.meldEvents.count {
                     let meld = game.meldEvents[game.meldShown]
+                    let sequence = game.meldShown
+                    let generation = game.meldPresentationGeneration
                     let from = poolPosition(pool, deck: boardCenter)
                     let to = playerTarget(meld.player, w: w, h: h)
                     MeldPayoutTarget(name: game.name(of: meld.player),
                                      amount: meld.chips,
-                                     tint: theme.tint(pool))
+                                     world: theme,
+                                     pool: pool,
+                                     tokenDiameter: tokenDiameter)
                         .position(to)
                         .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        .accessibilityIdentifier("phase1.meld.target")
                     CoinStream(from: from,
                                to: to,
-                               tint: theme.tint(pool),
+                               world: theme,
+                               pool: pool,
+                               tokenDiameter: tokenDiameter,
                                amount: meld.chips,
-                               onImpact: { game.markMeldLanded(game.meldShown) })
-                        .id("meld\(game.meldShown)")
+                               onImpact: {
+                                   game.markMeldLanded(sequence,
+                                                       generation: generation)
+                               })
+                        .id("meld-\(generation)-\(sequence)")
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityValue("\(meld.chips)")
+                        .accessibilityIdentifier("phase1.meld.flight")
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("phase1.presentation")
+            .accessibilityValue("\(game.meldShown)/\(game.meldEvents.count)")
         }
         .allowsHitTesting(false)
     }
@@ -114,6 +131,21 @@ struct DealOverlay: View {
         }
         return deck  // .center
     }
+
+    private var payoutTokenDiameter: CGFloat {
+        let outerPositions = poolPositions.filter { $0.key != .center }.map(\.value)
+        guard let minimumX = outerPositions.map(\.x).min(),
+              let maximumX = outerPositions.map(\.x).max(),
+              maximumX > minimumX else {
+            return Tokens.p1MeldTokenDiameter
+        }
+        let canonicalDiameter = Tokens.ringRadius * 2 + Tokens.tileDiameter
+        let canonicalSpan = canonicalDiameter * Tokens.p1MeldOuterAnchorSpanRatio
+        let renderedScale = (maximumX - minimumX) / canonicalSpan
+        return min(Tokens.p1MeldTokenMaximumDiameter,
+                   max(Tokens.p1MeldTokenMinimumDiameter,
+                       Tokens.tableTokenDiameter * renderedScale))
+    }
 }
 
 /// Sichtbares Ziel eines Meldegewinns. Der Transfer endet nie im leeren Raum:
@@ -121,7 +153,11 @@ struct DealOverlay: View {
 private struct MeldPayoutTarget: View {
     let name: String
     let amount: Int
-    let tint: Color
+    let world: TableWorld
+    let pool: Pool
+    let tokenDiameter: CGFloat
+
+    private var tint: Color { world.tint(pool) }
 
     var body: some View {
         HStack(spacing: 7) {
@@ -129,7 +165,14 @@ private struct MeldPayoutTarget: View {
                 Circle()
                     .fill(Color(hex: 0x0B0910).opacity(0.92))
                     .overlay(Circle().strokeBorder(tint.opacity(0.42), lineWidth: 1))
-                R1Token(tint: tint, size: 18)
+                Circle()
+                    .strokeBorder(tint.opacity(0.52), lineWidth: 1.4)
+                    .frame(width: tokenDiameter * 0.62,
+                           height: tokenDiameter * 0.62)
+                Circle()
+                    .strokeBorder(Tokens.jewelPlatin.opacity(0.24), lineWidth: 0.8)
+                    .frame(width: tokenDiameter * 0.34,
+                           height: tokenDiameter * 0.34)
             }
             .frame(width: 30, height: 30)
 
@@ -281,38 +324,53 @@ private struct DealDeckAnchor: View {
 private struct CoinStream: View {
     let from: CGPoint
     let to: CGPoint
-    let tint: Color
+    let world: TableWorld
+    let pool: Pool
+    let tokenDiameter: CGFloat
     let amount: Int
     let onImpact: () -> Void
 
     var body: some View {
-        ImpactFlight(from: from,
-                     to: to,
-                     duration: Tokens.p1CoinFlight,
-                     arcHeight: PhysicalMotion.shallowArcHeight(from: from,
-                                                                to: to,
-                                                                minimum: 7,
-                                                                maximum: 12),
-                     onImpact: onImpact) { progress in
-            let count = min(max(amount, 1), 4)
-            let compression = progress > 0.90
-                ? 1 - (progress - 0.90) / 0.10 * 0.055
-                : 1
-            ZStack {
-                ForEach(0..<count, id: \.self) { index in
-                    let pose = R1TokenSlots.pose(for: index)
-                    R1Token(tint: tint, size: 22)
-                        .rotationEffect(.degrees(pose.rotation))
-                        .offset(R1TokenSlots.offset(for: index,
-                                                    tokenDiameter: 22))
+        let count = min(max(amount, 1), Tokens.p1MeldPhysicalLimit)
+        ZStack {
+            ForEach(0..<count, id: \.self) { index in
+                let destination = CGPoint(x: to.x + landingOffset(index).width,
+                                          y: to.y + landingOffset(index).height)
+                ImpactFlight(
+                    from: from,
+                    to: destination,
+                    duration: Tokens.p1CoinFlight,
+                    delay: Double(index) * Tokens.p1MeldTokenStagger,
+                    arcHeight: PhysicalMotion.shallowArcHeight(from: from,
+                                                               to: destination,
+                                                               minimum: 9,
+                                                               maximum: 18),
+                    lateralBias: CGFloat(index - count / 2) * 8.5,
+                    onImpact: {
+                        guard index == count - 1 else { return }
+                        onImpact()
+                    }
+                ) { _ in
+                    TableWorldPiece(world: world,
+                                    size: tokenDiameter,
+                                    seed: UInt64(max(amount, 0)) + 14_410,
+                                    index: index,
+                                    compartment: TravelCompartment(pool: pool))
+                        .shadow(color: .black.opacity(0.48), radius: 6, y: 4)
                 }
             }
-            .scaleEffect(compression)
-            .rotationEffect(.degrees(Double(progress) * 2.8))
-            .shadow(color: .black.opacity(0.42),
-                    radius: progress > 0.86 ? 3 : 8,
-                    y: progress > 0.86 ? 2 : 5)
         }
+    }
+
+    private func landingOffset(_ index: Int) -> CGSize {
+        let offsets = [
+            CGSize(width: -7, height: 2),
+            CGSize(width: 6, height: 4),
+            CGSize(width: -2, height: -5),
+            CGSize(width: 8, height: -2),
+            CGSize(width: 1, height: 7)
+        ]
+        return offsets[index % offsets.count]
     }
 }
 

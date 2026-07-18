@@ -33,6 +33,24 @@ enum PublicTendencyBasis: String, Codable, Sendable {
     case observedUnopenedRoundInitiative
 }
 
+/// The finite set of public observations for which localized, player-facing copy exists.
+/// Keeping this registry separate from bot parameters prevents a profile from publishing an
+/// arbitrary internal metric by adding a JSON string.
+enum PublicTendencyID: String, CaseIterable, Sendable {
+    case measuredPace
+    case variablePace
+    case earlyInitiative
+
+    var requiredBasis: PublicTendencyBasis {
+        switch self {
+        case .measuredPace, .variablePace:
+            return .observedDecisionTempo
+        case .earlyInitiative:
+            return .observedUnopenedRoundInitiative
+        }
+    }
+}
+
 /// A tendency is deliberately an aggregate observation, never a promise about the next
 /// action. Copy lives in the localization catalog and must preserve that probabilistic tone.
 struct PublicOpponentTendency: Codable, Equatable, Sendable {
@@ -55,6 +73,60 @@ struct PublicOpponentTendency: Codable, Equatable, Sendable {
 
     var summaryLocalizationKey: String {
         "opponent.tendency.\(id).summary"
+    }
+}
+
+/// Presentation payload for the optional `Gegner lesen` beat. It contains only stable identity
+/// and localization keys derived from approved public metadata - never bot parameters or cards.
+struct PublicOpponentTendencyDisclosure: Equatable, Sendable {
+    let opponentID: OpponentID
+    let opponentDisplayName: String
+    let tendency: PublicOpponentTendency
+
+    var titleLocalizationKey: String { tendency.titleLocalizationKey }
+    var summaryLocalizationKey: String { tendency.summaryLocalizationKey }
+    var caveatLocalizationKey: String { "opponent.tendency.caveat" }
+}
+
+/// One-shot session state for the optional opponent-reading learning beat. The caller invokes
+/// `discloseAfterUnderstandingFirstPochDecision` only after the Presentation Director has
+/// confirmed that milestone. The actor ID is public event data and determines the contextual
+/// opponent; subsequent decisions cannot replace the first disclosed observation.
+struct OpponentTendencyDisclosureSession: Equatable, Sendable {
+    private(set) var disclosedOpponentID: OpponentID?
+
+    mutating func discloseAfterUnderstandingFirstPochDecision(
+        madeBy opponentID: OpponentID,
+        in lineup: OpponentLineup
+    ) -> PublicOpponentTendencyDisclosure? {
+        guard disclosedOpponentID == nil,
+              let opponent = lineup.seats.first(where: { $0.opponent.id == opponentID })?.opponent,
+              opponent.publicTendency.disclosure == .afterFirstUnderstoodPochDecision else {
+            return nil
+        }
+
+        disclosedOpponentID = opponentID
+        return Self.makeDisclosure(for: opponent)
+    }
+
+    func currentDisclosure(in lineup: OpponentLineup) -> PublicOpponentTendencyDisclosure? {
+        guard let disclosedOpponentID,
+              let opponent = lineup.seats.first(where: {
+                  $0.opponent.id == disclosedOpponentID
+              })?.opponent else {
+            return nil
+        }
+        return Self.makeDisclosure(for: opponent)
+    }
+
+    private static func makeDisclosure(
+        for opponent: OpponentDescriptor
+    ) -> PublicOpponentTendencyDisclosure {
+        PublicOpponentTendencyDisclosure(
+            opponentID: opponent.id,
+            opponentDisplayName: opponent.displayName,
+            tendency: opponent.publicTendency
+        )
     }
 }
 
@@ -96,6 +168,12 @@ enum OpponentRosterError: Error, Equatable {
     case emptyDisplayName(OpponentID)
     case emptyPortraitAssetPrefix(OpponentID)
     case emptyPublicTendencyID(OpponentID)
+    case unsupportedPublicTendencyID(OpponentID, String)
+    case inconsistentPublicTendencyBasis(
+        OpponentID,
+        expected: PublicTendencyBasis,
+        actual: PublicTendencyBasis
+    )
     case duplicateOpponent(OpponentID)
     case duplicateDisplayName(String)
     case duplicatePortraitAssetPrefix(String)
@@ -157,6 +235,19 @@ struct OpponentRosterCatalog: Sendable {
             }
             guard !profile.publicTendency.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 throw OpponentRosterError.emptyPublicTendencyID(profile.id)
+            }
+            guard let tendencyID = PublicTendencyID(rawValue: profile.publicTendency.id) else {
+                throw OpponentRosterError.unsupportedPublicTendencyID(
+                    profile.id,
+                    profile.publicTendency.id
+                )
+            }
+            guard profile.publicTendency.basis == tendencyID.requiredBasis else {
+                throw OpponentRosterError.inconsistentPublicTendencyBasis(
+                    profile.id,
+                    expected: tendencyID.requiredBasis,
+                    actual: profile.publicTendency.basis
+                )
             }
             guard descriptorsByID[profile.id] == nil else {
                 throw OpponentRosterError.duplicateOpponent(profile.id)

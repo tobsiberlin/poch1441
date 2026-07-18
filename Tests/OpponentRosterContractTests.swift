@@ -12,6 +12,9 @@ struct OpponentRosterContractTests {
         try malformedTutorialDataFailsClosed(data)
         try invalidPresentationMetadataFailsClosed(data)
         try legacyBotProfileShapeStillDecodes(data)
+        try publicTendencyIDsRemainFiniteAndConsistent(data)
+        try firstUnderstoodDecisionDisclosesExactlyOneTendency(catalog)
+        try unknownDecisionActorFailsClosed(catalog)
         presentationDescriptorsExcludeHiddenState(catalog)
         automaticSelectionInputExcludesGameState()
 
@@ -141,6 +144,91 @@ struct OpponentRosterContractTests {
         }
         insufficientCandidates["profiles"] = profiles
         expectRosterError(.insufficientAutomaticCandidates, payload: insufficientCandidates)
+    }
+
+    private static func publicTendencyIDsRemainFiniteAndConsistent(_ data: Data) throws {
+        let payload = try jsonObject(data)
+        var profiles = payload["profiles"] as? [[String: Any]] ?? []
+        guard !profiles.isEmpty else { fail("Fixture must contain public tendencies") }
+
+        var unsupported = payload
+        var unsupportedProfiles = profiles
+        var tendency = unsupportedProfiles[0]["publicTendency"] as? [String: Any] ?? [:]
+        tendency["id"] = "hiddenConfidence"
+        unsupportedProfiles[0]["publicTendency"] = tendency
+        unsupported["profiles"] = unsupportedProfiles
+        expectRosterError(
+            .unsupportedPublicTendencyID(OpponentID(rawValue: "liv"), "hiddenConfidence"),
+            payload: unsupported
+        )
+
+        var inconsistent = payload
+        tendency = profiles[0]["publicTendency"] as? [String: Any] ?? [:]
+        tendency["basis"] = PublicTendencyBasis.observedUnopenedRoundInitiative.rawValue
+        profiles[0]["publicTendency"] = tendency
+        inconsistent["profiles"] = profiles
+        expectRosterError(
+            .inconsistentPublicTendencyBasis(
+                OpponentID(rawValue: "liv"),
+                expected: .observedDecisionTempo,
+                actual: .observedUnopenedRoundInitiative
+            ),
+            payload: inconsistent
+        )
+    }
+
+    private static func firstUnderstoodDecisionDisclosesExactlyOneTendency(
+        _ catalog: OpponentRosterCatalog
+    ) throws {
+        let lineup = try catalog.curatedTutorialLineup()
+        let noahID = OpponentID(rawValue: "noah")
+        let jonasID = OpponentID(rawValue: "jonas")
+        var session = OpponentTendencyDisclosureSession()
+
+        expect(session.currentDisclosure(in: lineup) == nil,
+               "A tendency must be absent before the understood-decision milestone")
+
+        let first = session.discloseAfterUnderstandingFirstPochDecision(
+            madeBy: noahID,
+            in: lineup
+        )
+        expect(first?.opponentID == noahID,
+               "The learning beat must explain the publicly observed actor")
+        expect(first?.titleLocalizationKey == "opponent.tendency.variablePace.title",
+               "Disclosure must use the approved tendency title key")
+        expect(first?.summaryLocalizationKey == "opponent.tendency.variablePace.summary",
+               "Disclosure must use the approved tendency summary key")
+        expect(first?.caveatLocalizationKey == "opponent.tendency.caveat",
+               "Every disclosure must carry the non-promise caveat")
+
+        let repeated = session.discloseAfterUnderstandingFirstPochDecision(
+            madeBy: jonasID,
+            in: lineup
+        )
+        expect(repeated == nil,
+               "A later decision must not replace the one optional learning beat")
+        expect(session.currentDisclosure(in: lineup) == first,
+               "The disclosed tendency must remain stable across rerenders")
+
+        guard let first else { fail("The first understood decision must disclose a tendency") }
+        let disclosureLabels = Set(Mirror(reflecting: first).children.compactMap(\.label))
+        expect(disclosureLabels == ["opponentID", "opponentDisplayName", "tendency"],
+               "Disclosure payload must contain only approved public presentation data")
+    }
+
+    private static func unknownDecisionActorFailsClosed(
+        _ catalog: OpponentRosterCatalog
+    ) throws {
+        let lineup = try catalog.curatedTutorialLineup()
+        var session = OpponentTendencyDisclosureSession()
+        let disclosure = session.discloseAfterUnderstandingFirstPochDecision(
+            madeBy: OpponentID(rawValue: "unknown"),
+            in: lineup
+        )
+
+        expect(disclosure == nil, "An unknown public actor must not disclose metadata")
+        expect(session.disclosedOpponentID == nil,
+               "A rejected actor must not consume the one-shot disclosure")
     }
 
     private static func presentationDescriptorsExcludeHiddenState(_ catalog: OpponentRosterCatalog) {

@@ -201,7 +201,7 @@ def audit(root: Path) -> list[Finding]:
         )
     )
 
-    r1_ready = all(term in components for term in ("enum R1Colorway", "struct R1Token", "R1BlindEmboss", "R1TokenSlots"))
+    r1_ready = all(term in components for term in ("enum R1Colorway", "struct R1Token", "R1MintEmboss", "R1TokenSlots"))
     first_run_uses_r1 = "TableTokenPile" in section(content, "private var firstRunIntro", "private func startGuidedRound")
     findings.append(
         Finding(

@@ -236,6 +236,8 @@ def check_contracts(root: Path) -> list[tuple[str, bool, str]]:
     coach_viewport = method_body(content, "private func guidedCoachViewport")
     accessibility_stage = method_body(content, "private func guidedMeldAccessibilityStage")
     funding = method_body(content, "private func runGuidedTableFundingImpact")
+    ante_sequence = method_body(content, "private func runGuidedAnteSequence")
+    land_ante = method_body(content, "private func landGuidedAnte")
     resolver_signature = (
         "    static func resolve(in size: CGSize, safeArea: EdgeInsets) "
         "-> FirstRunStageZones {"
@@ -276,11 +278,11 @@ def check_contracts(root: Path) -> list[tuple[str, bool, str]]:
         and "guidedAntePoolCounts[.center] = 1" in opening_impact
     )
     reduce_motion_funding = (
-        "reduceMotion ? 0.16" in funding
-        and "guidedTableFundingTargeted = true" in funding
-        and "} completion:" in funding
-        and funding.find("markGuidedTableFundingLanded") > funding.find("} completion:")
-        and funding.find("guidedAntePoolCounts =") > funding.find("} completion:")
+        "await runGuidedAnteSequence(generation: generation)" in funding
+        and "if guidedReduceMotion" in ante_sequence
+        and ante_sequence.find("landGuidedAnte(") > ante_sequence.find("if guidedReduceMotion")
+        and "guidedAntePoolCounts[pool, default: 0] += 1" in land_ante
+        and "game.markGuidedTableFundingLanded(groupSize: game.playerCount)" in land_ante
         and "recordR1Impact(groupSize: groupSize" in game_state
     )
     voiceover_effect = (

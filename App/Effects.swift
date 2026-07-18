@@ -5,11 +5,13 @@ import SwiftUI
 /// Gemeinsame, deterministische Tischphysik. Die Funktionen liefern nur
 /// Präsentationswerte; Regeln und Spielzustand bleiben vollständig in PochKit.
 enum PhysicalMotion {
-    static let materialSettle = Animation.timingCurve(0.22, 0.72, 0.18, 1,
-                                                      duration: 0.34)
+    static let materialSettle = Animation.easeOut(duration: 0.24)
 
     static func travel(duration: Double) -> Animation {
-        .timingCurve(0.22, 0.72, 0.18, 1.0, duration: duration)
+        // Bei linearem Fortschritt bleibt die x-Geschwindigkeit konstant;
+        // die quadratische y-Bahn darunter liefert bereits die Schwerkraft.
+        // Eine zusätzliche Ease-out-Kurve würde den Stein vor Kontakt bremsen.
+        .linear(duration: duration)
     }
 
     static func duration(from: CGPoint,
@@ -48,6 +50,7 @@ enum PhysicalMotion {
 enum R1ContactSurface: Sendable {
     case outerWell
     case centerWell
+    case playerStack
 }
 
 enum R1HapticStrength: Equatable, Sendable {
@@ -85,6 +88,15 @@ struct R1ContactDynamics: Equatable, Sendable {
         case (.centerWell, _):
             return R1ContactDynamics(hapticStrength: .heavy,
                                      audioVolume: 0.60)
+        case (.playerStack, 1):
+            return R1ContactDynamics(hapticStrength: .light,
+                                     audioVolume: 0.46)
+        case (.playerStack, 2...3):
+            return R1ContactDynamics(hapticStrength: .medium,
+                                     audioVolume: 0.51)
+        case (.playerStack, _):
+            return R1ContactDynamics(hapticStrength: .heavy,
+                                     audioVolume: 0.55)
         }
     }
 }

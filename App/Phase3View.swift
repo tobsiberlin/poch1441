@@ -76,6 +76,7 @@ struct Phase3View: View {
             }
         }
         .frame(maxHeight: .infinity, alignment: .top)
+        .accessibilityIdentifier("table.world.phase3")
         // Straf-Strom (§6c c): Chips fliegen PARALLEL von jedem Verlierer zum Sieger
         .overlay {
             if game.endPhase == .punishing, let result = game.roundResult, !reduceMotion {

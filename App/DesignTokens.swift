@@ -39,6 +39,7 @@ enum Tokens {
     static let phase2OpponentGapCompact: CGFloat = 8
     static let phase2OpponentGapRegular: CGFloat = 18
     static let phase2HandReservedHeight: CGFloat = 176
+    static let phase2ResultHandReservedHeight: CGFloat = 154
 
     // Gefuehrte Melde-Runde: eigene Komposition statt der tieferen Position des
     // regulaeren Austeilrituals. Brett, Spotlight und Coach verwenden dieselbe Geometrie.
@@ -61,6 +62,9 @@ enum Tokens {
     static let guidedAnteFlight: Double = 0.34
     static let guidedAnteStagger: Double = 0.045
     static let guidedAnteWaveRest: Double = 0.18
+    /// Reagiert während einer laufenden Welle zeitnah auf einen Wechsel der
+    /// systemweiten Einstellung "Bewegung reduzieren".
+    static let guidedAnteMotionPreferencePoll: Double = 0.05
     /// DEBUG motion-review pauses. They keep each cause/effect state readable
     /// in simulator recordings without affecting the interactive tutorial.
     static let guidedQAStateHold: Double = 0.86
@@ -76,20 +80,64 @@ enum Tokens {
     static let tableTokenDiameter: CGFloat = 39
     static let tableTokenToFloorRatio: CGFloat = 0.74
     static let tableTokenOverlap: CGFloat = 0.40
+    static let phase1OuterWellDiameter: CGFloat = 58
+    static let phase1CenterWellDiameter: CGFloat = 88
+    /// Die R1-PNGs besitzen einen 340er Produktionsrahmen; die maximale
+    /// Alpha-Ausdehnung des Keramikkörpers misst rund 308 px. `size` bezeichnet
+    /// deshalb die vollständige sichtbare Hüllkurve und bleibt im Mulden-Fit.
+    static let r1AssetScale: CGFloat = 1.085
+    /// Größter gemessener Abstand eines sichtbaren Alpha-Pixels vom
+    /// Produktionsmittelpunkt, normiert auf den 340-px-Canvas.
+    static let r1MeasuredAlphaRadiusRatio: CGFloat = 157.678 / 340.0
+    /// Nur die textile Innenöffnung ist Ablagefläche. Der äußere Metallring
+    /// gehört nicht zur Mulde und darf nie R1-Alpha zeigen.
     static let outerWellFloorRatio: CGFloat = 0.95
-
+    /// Matte R1-Keramik. Die Materialbasis wird in `build_r1_ceramic_assets.py`
+    /// gebacken; zur Laufzeit bleiben nur weltfeste Relief- und Kontakthinweise.
+    static let r1NaturalFace = Color(hex: 0xDEDAD6)
+    static let r1TerracottaFace = Color(hex: 0xB3775F)
+    static let r1SageFace = Color(hex: 0x828776)
+    static let r1SlateFace = Color(hex: 0x6F7074)
+    static let r1OchreFace = Color(hex: 0xB58742)
+    static let r1NaturalEdge = Color(hex: 0x9B9996)
+    static let r1TerracottaEdge = Color(hex: 0x7D5342)
+    static let r1SageEdge = Color(hex: 0x5B5F53)
+    static let r1SlateEdge = Color(hex: 0x4E4E51)
+    static let r1OchreEdge = Color(hex: 0x7F5F2E)
+    static let r1SignetBBoxRatio: CGFloat = 0.385
+    static let r1SignetVerticalOffsetRatio: CGFloat = -0.019
+    static let r1EmbossLightOffsetRatio: CGFloat = 0.005
+    static let r1EmbossDarkOffsetRatio: CGFloat = 0.007
+    static let r1ContactShadowRadiusRatio: CGFloat = 0.010
+    static let r1ContactShadowXRatio: CGFloat = 0.012
+    static let r1ContactShadowYRatio: CGFloat = 0.014
+    static let r1CastShadowRadiusRatio: CGFloat = 0.042
+    static let r1CastShadowXRatio: CGFloat = 0.024
+    static let r1CastShadowYRatio: CGFloat = 0.060
+    /// Kleine Setzabweichung zur optischen Mitte des Textilbodens. Die räumliche
+    /// Einfassung übernimmt der echte Asset-Metallring, nicht ein harter Offset.
+    static let r1WellPileVerticalInsetRatio: CGFloat = 0.025
+    /// Die große Innenmulde besitzt bereits eine gerichtete obere Wand. Ihr
+    /// Stapel sitzt deshalb geometrisch exakt im gemeinsamen Mittelpunkt.
+    static let r1CenterWellPileVerticalInsetRatio: CGFloat = 0
     // Track-A-Kamera. Der gesamte physische Stack wird gemeinsam gekippt, damit
     // Asset, Gravuren und ruhende Steine dieselbe Perspektive behalten.
-    static let pochDiscPitch: Double = 17.5
+    static let pochDiscPitch: Double = 16.0
     static let pochDiscPerspective: CGFloat = 0.24
-    static let pochDiscStageScale: CGFloat = 1.06
-    static let pochDiscContactShadowRadiusRatio: CGFloat = 0.018
-    static let pochDiscContactShadowXRatio: CGFloat = 0.008
-    static let pochDiscContactShadowYRatio: CGFloat = 0.027
-    static let pochDiscCastShadowRadiusRatio: CGFloat = 0.066
-    static let pochDiscCastShadowXRatio: CGFloat = 0.018
-    static let pochDiscCastShadowYRatio: CGFloat = 0.072
-    static let pochDiscAmbientLiftRatio: CGFloat = 0.105
+    static let pochDiscStageScale: CGFloat = 1.052
+    /// Das akzeptierte 1254er Asset enthält einen großen transparenten
+    /// Produktionsrand. Der physische Außenring liegt bei (626, 590) mit
+    /// Radius 489 px und wird hier auf den semantischen Disc-Raum normalisiert.
+    static let pochDiscAssetScale: CGFloat = 1.26
+    static let pochDiscAssetOffsetXRatio: CGFloat = 0.0010
+    static let pochDiscAssetOffsetYRatio: CGFloat = 0.0372
+    static let pochDiscSidewallExtensionRatio: CGFloat = 0.011
+    static let pochDiscContactShadowRadiusRatio: CGFloat = 0.014
+    static let pochDiscContactShadowXRatio: CGFloat = 0.006
+    static let pochDiscContactShadowYRatio: CGFloat = 0.024
+    static let pochDiscCastShadowRadiusRatio: CGFloat = 0.042
+    static let pochDiscCastShadowXRatio: CGFloat = 0.025
+    static let pochDiscCastShadowYRatio: CGFloat = 0.085
 
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.
@@ -98,6 +146,10 @@ enum Tokens {
     static let p2PochFlight: Double = 0.72
     /// Materialkontakt liegt exakt nach der ersten vollständig angekommenen Münze.
     static let p2PochImpactDelay: Double = 0.72
+    /// Gebündelte Auszahlung vom Poch-Pott zum Gewinner. Das Ergebnis steht
+    /// bereits fest, daher bleibt dieser Weg knapper als der Einsatzflug.
+    static let p2PayoutFlight: Double = 0.62
+    static let p2PayoutStagger: Double = 0.05
     /// Reaktion bleibt bis nach Materialkontakt und Mimikausschlag lesbar stehen.
     static let p2ReactionHold: Double = 0.92
 
@@ -121,6 +173,14 @@ enum Tokens {
     static let hapticCadence: Double = 0.11
     /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
     static let p1MeldStep: Double = 1.08
+    /// Einzelne schwere R1 verlassen die Mulde leicht versetzt. Der letzte
+    /// tatsächliche Kontakt schaltet erst danach den sichtbaren Gewinnerstack frei.
+    static let p1MeldTokenDiameter: CGFloat = 31
+    static let p1MeldTokenMinimumDiameter: CGFloat = 26
+    static let p1MeldTokenMaximumDiameter: CGFloat = 39
+    static let p1MeldOuterAnchorSpanRatio: CGFloat = 0.676
+    static let p1MeldTokenStagger: Double = 0.12
+    static let p1MeldPhysicalLimit = 5
 
     /// Große Auszahlungen bleiben selten, werden aber ausschließlich über Gewicht,
     /// Kontakt und Materialkante betont - nie über Partikel, Shake oder Screen-Flash.

@@ -12,6 +12,7 @@ struct ContentView: View {
     private struct GuidedAnteWaveState: Equatable {
         let contributor: Int
         let pools: [Pool]
+        let generation: Int
     }
 
     @State private var game = GameState()
@@ -54,12 +55,19 @@ struct ContentView: View {
     @State private var completedTutorialLesson: TutorialLesson?
     @State private var tutorialMilestoneLesson: TutorialLesson?
     @State private var guidedMeldBusy = false
+    @State private var guidedMeldTask: Task<Void, Never>?
+    @State private var guidedMeldInterruptionTask: Task<Void, Never>?
+    @State private var guidedMeldGeneration = 0
     @State private var guidedOpeningDrag: CGSize = .zero
     @State private var guidedOpeningSettled = false
-    @State private var guidedTableFundingTargeted = false
+    @State private var guidedFundingTask: Task<Void, Never>?
+    @State private var guidedFundingGeneration = 0
     @State private var guidedAntePoolCounts: [Pool: Int] = [:]
     @State private var guidedAnteLandedEvents: Set<Int> = []
     @State private var guidedAnteWave: GuidedAnteWaveState?
+    #if DEBUG
+    @State private var debugReduceMotionOverride = false
+    #endif
     @State private var showFirstRunIntro = false
     @State private var matchEndResult: Match.MatchResult?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -79,6 +87,20 @@ struct ContentView: View {
         game.presentation.discLearningState
     }
 
+    private var guidedReduceMotion: Bool {
+        #if DEBUG
+        reduceMotion
+            || debugReduceMotionOverride
+            || ProcessInfo.processInfo.arguments.contains("-reduceMotionQA")
+        #else
+        reduceMotion
+        #endif
+    }
+
+    private var phase1SettlesImmediately: Bool {
+        guidedReduceMotion || !tableEffects
+    }
+
     var body: some View {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-travelTableProbe") {
@@ -93,11 +115,10 @@ struct ContentView: View {
 
     private var mainGameView: some View {
         ZStack {
-            // Material-Tiefe: warmes Bühnenlicht hinter dem Ring, Vignette zum Rand (kein Flat-Void).
-            RadialGradient(gradient: Gradient(colors: [Tokens.bgLift, Tokens.bgDeep]),
-                           center: UnitPoint(x: 0.5, y: 0.42), startRadius: 6, endRadius: 540)
-                .ignoresSafeArea()
-            phaseAtmosphere
+            tableBackground
+            if showsPhysicalTableSurface {
+                phaseAtmosphere
+            }
             VStack(spacing: 0) {
                 if isGuidedOpeningBeat {
                     guidedOpeningHeader
@@ -137,6 +158,7 @@ struct ContentView: View {
                             game: game,
                             theme: theme,
                             poolPositions: anchors.mapValues { proxy[$0] },
+                            reduceMotion: phase1SettlesImmediately,
                             showsSeatTargets: !guidedRoundActive
                         )
                     }
@@ -186,6 +208,7 @@ struct ContentView: View {
                 || args.contains("-tutorialMotionQA")
                 || args.contains("-tutorialBidding")
                 || args.contains("-tutorialPlayout")
+                || args.contains("-meldPayoutQA")
                 || args.contains(where: { $0.hasPrefix("-tutorialMeldStep=") })
             if args.contains("-firstRun") {
                 showFirstRunIntro = true
@@ -194,7 +217,7 @@ struct ContentView: View {
             } else if args.dropFirst().isEmpty {
                 activeOverlay = .menu
             } else if akt == .melden, !startsGuidedQA {
-                game.runDealPresentation(reduceMotion: reduceMotion)
+                game.runDealPresentation(reduceMotion: phase1SettlesImmediately)
             }
             #else
             if !didStartFirstTable {
@@ -212,6 +235,14 @@ struct ContentView: View {
             guard phase == .done, guidedRoundActive else { return }
             completeTutorialRound()
         }
+        .onChange(of: guidedReduceMotion) { _, isReduced in
+            guard isReduced, akt == .melden else { return }
+            game.settlePhase1Presentation()
+        }
+        .onChange(of: tableEffects) { _, effectsEnabled in
+            guard !effectsEnabled, akt == .melden else { return }
+            game.settlePhase1Presentation()
+        }
         #if DEBUG
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
@@ -222,6 +253,15 @@ struct ContentView: View {
             }
             if args.contains("-pochenStart") {
                 transition(to: .pochen)
+            }
+            if args.contains("-pochPayoutQA") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(2))
+                    game.debugResolvePochPayout()
+                }
+            }
+            if args.contains("-boardOverflowQA") {
+                game.debugPrimeSaturatedPile()
             }
             if args.contains("-ausspielStart") {
                 game.debugSkipToPlayout()
@@ -291,6 +331,11 @@ struct ContentView: View {
             } else if args.contains("-tutorialSeed") {
                 startGuidedRound()
             }
+            if args.contains("-meldPayoutQA") {
+                selectedTutorialLesson = .meld
+                startGuidedRound(.meld)
+                game.debugStartMeldPayout()
+            }
             if args.contains("-tutorialBidding") {
                 selectedTutorialLesson = .bidding
                 startGuidedRound(.bidding)
@@ -336,7 +381,7 @@ struct ContentView: View {
     }
 
     private var phaseAtmosphere: some View {
-        let opacity = theme.isTravelTable ? 0.16 : 0.12
+        let opacity = theme.isTravelTable ? 0.10 : 0.07
         return ZStack {
             switch akt {
             case .melden:
@@ -375,7 +420,33 @@ struct ContentView: View {
         .animation(.easeInOut(duration: reduceMotion ? 0 : 0.22), value: theme)
     }
 
+    private var showsPhysicalTableSurface: Bool {
+        activeOverlay == nil && !showFirstRunIntro
+    }
+
+    @ViewBuilder
+    private var tableBackground: some View {
+        if showsPhysicalTableSurface {
+            Image("PochTableConcrete")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+                .ignoresSafeArea()
+                .accessibilityHidden(true)
+        } else {
+            RadialGradient(gradient: Gradient(colors: [Tokens.bgLift, Tokens.bgDeep]),
+                           center: UnitPoint(x: 0.5, y: 0.42),
+                           startRadius: 6,
+                           endRadius: 540)
+                .ignoresSafeArea()
+        }
+    }
+
     private func startNewRound() {
+        cancelGuidedFunding()
+        cancelGuidedMeldFlow()
         guidedRoundActive = false
         activeTutorialLesson = nil
         completedTutorialLesson = nil
@@ -385,14 +456,16 @@ struct ContentView: View {
             return
         }
         transition(to: .melden)
-        game.runDealPresentation(reduceMotion: reduceMotion)
+        game.runDealPresentation(reduceMotion: phase1SettlesImmediately)
     }
 
     private func startNewMatch() {
+        cancelGuidedFunding()
+        cancelGuidedMeldFlow()
         game.restartMatch()
         matchEndResult = nil
         transition(to: .melden)
-        game.runDealPresentation(reduceMotion: reduceMotion)
+        game.runDealPresentation(reduceMotion: phase1SettlesImmediately)
     }
 
     private func matchEndOverlay(_ result: Match.MatchResult) -> some View {
@@ -503,7 +576,7 @@ struct ContentView: View {
                 game.configurePlayerCount(playerCount)
                 game.newRound()
                 transition(to: .melden)
-                game.runDealPresentation(reduceMotion: reduceMotion)
+                game.runDealPresentation(reduceMotion: phase1SettlesImmediately)
             }
         }
     }
@@ -899,6 +972,8 @@ struct ContentView: View {
     }
 
     private func startGuidedRound(_ lesson: TutorialLesson = .meld) {
+        cancelGuidedFunding()
+        cancelGuidedMeldFlow()
         game.configurePlayerCount(4)
         guard game.startTutorialRound(lesson) else {
             guidedRoundActive = false
@@ -921,19 +996,30 @@ struct ContentView: View {
             transition(to: .melden)
             game.prepareGuidedDeal()
         case .bidding:
+            game.settlePhase1Presentation()
             transition(to: .pochen)
         case .playout:
+            game.settlePhase1Presentation()
             transition(to: .ausspielen)
             game.beginPlayoutPresentation()
         }
     }
 
     private func transition(to next: Akt) {
+        if akt == .melden, next != .melden {
+            cancelGuidedFunding()
+            cancelGuidedMeldFlow()
+            game.settlePhase1Presentation()
+        }
         recordTutorialTransition(from: akt, to: next)
         if guidedRoundActive {
             // Im Tutorial ist der Aktwechsel eine klare Übergabe. Ein animierter
             // Switch hält sonst alten und neuen Screen kurz gleichzeitig im
             // View-Tree und erzeugt doppelte Header, Bretter und Kartenfächer.
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) { akt = next }
+        } else if reduceMotion {
             var transaction = Transaction()
             transaction.disablesAnimations = true
             withTransaction(transaction) { akt = next }
@@ -958,6 +1044,8 @@ struct ContentView: View {
     }
 
     private func completeTutorialRound() {
+        cancelGuidedFunding()
+        cancelGuidedMeldFlow()
         let lesson = activeTutorialLesson ?? .playout
         markTutorialComplete(lesson)
         activeTutorialLesson = nil
@@ -1376,6 +1464,9 @@ struct ContentView: View {
             .accessibilityFocused($guidedCoachFocused)
             Spacer(minLength: 0)
             Button {
+                cancelGuidedFunding()
+                cancelGuidedMeldFlow()
+                game.settlePhase1Presentation()
                 withAnimation(.easeOut(duration: 0.16)) {
                     guidedRoundActive = false
                     moveCoach = false
@@ -1459,17 +1550,20 @@ struct ContentView: View {
             return
         }
         guidedMeldBusy = true
-        Task { @MainActor in
+        let generation = guidedMeldGeneration
+        guidedMeldTask = Task { @MainActor in
             switch guidedMeldBeat {
             case 0:
                 game.presentation.setFirstRunBeat(.fundTable)
             case 1:
                 break
             case 2:
-                await game.revealGuidedDealRound(reduceMotion: reduceMotion)
+                await game.revealGuidedDealRound(reduceMotion: phase1SettlesImmediately)
+                guard guidedMeldFlowIsCurrent(generation) else { return }
                 game.presentation.setFirstRunBeat(.completeHand)
             case 3:
-                await game.finishGuidedDeal(reduceMotion: reduceMotion)
+                await game.finishGuidedDeal(reduceMotion: phase1SettlesImmediately)
+                guard guidedMeldFlowIsCurrent(generation) else { return }
                 game.presentation.setFirstRunBeat(.revealTrump)
             case 4:
                 game.revealGuidedTrumpf()
@@ -1477,35 +1571,92 @@ struct ContentView: View {
             case 5:
                 game.presentation.setFirstRunBeat(.proveMeld)
             case 6:
-                await game.revealAllGuidedMelds(reduceMotion: reduceMotion)
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("-meldPayoutFastTransitionQA") {
+                    game.debugBeginNextMeldPayout()
+                    try? await Task.sleep(for: .milliseconds(240))
+                    guard generation == guidedMeldGeneration,
+                          guidedRoundActive,
+                          akt == .melden else { return }
+                    transition(to: .pochen)
+                    return
+                }
+                #endif
+                scheduleMeldPayoutQAInterruptionIfNeeded(generation: generation)
+                await game.revealAllGuidedMelds(reduceMotion: phase1SettlesImmediately)
+                guard guidedMeldFlowIsCurrent(generation) else { return }
                 game.presentation.setFirstRunBeat(.release)
             case 7:
                 transition(to: .pochen)
             default:
                 break
             }
+            guard guidedMeldFlowIsCurrent(generation) else { return }
+            guidedMeldTask = nil
             guidedMeldBusy = false
             guidedCoachFocused = true
         }
     }
 
+    private func guidedMeldFlowIsCurrent(_ generation: Int) -> Bool {
+        !Task.isCancelled
+            && generation == guidedMeldGeneration
+            && guidedRoundActive
+            && akt == .melden
+    }
+
+    private func scheduleMeldPayoutQAInterruptionIfNeeded(generation: Int) {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-meldPayoutLiveReduceMotionQA") {
+            guidedMeldInterruptionTask = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(240))
+                guard guidedMeldFlowIsCurrent(generation), akt == .melden else { return }
+                guidedMeldInterruptionTask = nil
+                debugReduceMotionOverride = true
+            }
+        }
+        #endif
+    }
+
     private func runGuidedTableFundingImpact() {
+        cancelGuidedFunding()
+        let generation = guidedFundingGeneration
         guidedMeldBusy = true
-        guidedTableFundingTargeted = false
         game.beginGuidedTableFunding()
-        withAnimation(.easeInOut(duration: reduceMotion ? 0.16 : 0.30),
-                      completionCriteria: .logicallyComplete) {
-            guidedTableFundingTargeted = true
-        } completion: {
-            game.markGuidedTableFundingLanded(groupSize: game.playerCount)
-            guidedAntePoolCounts = Dictionary(
-                uniqueKeysWithValues: Pool.allCases.map { ($0, game.playerCount) }
-            )
-            guidedTableFundingTargeted = false
+        guidedFundingTask = Task { @MainActor in
+            let completed = await runGuidedAnteSequence(generation: generation)
+            guard generation == guidedFundingGeneration else { return }
+            guard completed,
+                  guidedRoundActive,
+                  akt == .melden,
+                  guidedMeldBeat == FirstRunBeat.fundTable.rawValue else {
+                guidedAnteWave = nil
+                guidedMeldBusy = false
+                return
+            }
             game.presentation.setFirstRunBeat(.firstCard)
+            guidedFundingTask = nil
             guidedMeldBusy = false
             guidedCoachFocused = true
         }
+    }
+
+    private func cancelGuidedFunding() {
+        guidedFundingGeneration += 1
+        guidedFundingTask?.cancel()
+        guidedFundingTask = nil
+        guidedAnteWave = nil
+        guidedMeldBusy = false
+    }
+
+    private func cancelGuidedMeldFlow() {
+        guidedMeldGeneration += 1
+        guidedMeldTask?.cancel()
+        guidedMeldTask = nil
+        guidedMeldInterruptionTask?.cancel()
+        guidedMeldInterruptionTask = nil
+        guidedMeldBusy = false
     }
 
     #if DEBUG
@@ -1516,17 +1667,17 @@ struct ContentView: View {
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
             guidedMeldBusy = true
-            await runGuidedAnteSequence()
+            await runGuidedAnteSequence(generation: guidedFundingGeneration)
             game.presentation.setFirstRunBeat(.firstCard)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
             guidedMeldBusy = true
-            await game.revealGuidedDealRound(reduceMotion: reduceMotion)
+            await game.revealGuidedDealRound(reduceMotion: phase1SettlesImmediately)
             game.presentation.setFirstRunBeat(.completeHand)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAOutcomeHold))
             guidedMeldBusy = true
-            await game.finishGuidedDeal(reduceMotion: reduceMotion)
+            await game.finishGuidedDeal(reduceMotion: phase1SettlesImmediately)
             game.presentation.setFirstRunBeat(.revealTrump)
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
@@ -1540,7 +1691,7 @@ struct ContentView: View {
             guidedMeldBusy = false
             try? await Task.sleep(for: .seconds(Tokens.guidedQAStateHold))
             guidedMeldBusy = true
-            await game.revealAllGuidedMelds(reduceMotion: reduceMotion)
+            await game.revealAllGuidedMelds(reduceMotion: phase1SettlesImmediately)
             game.presentation.setFirstRunBeat(.release)
             guidedMeldBusy = false
         }
@@ -1620,36 +1771,76 @@ struct ContentView: View {
         PochRing.anchors.map(\.pool) + [.center]
     }
 
-    private func runGuidedAnteSequence() async {
+    @discardableResult
+    private func runGuidedAnteSequence(generation: Int) async -> Bool {
         let allPools = guidedAntePoolOrder
         for contributor in 0..<game.playerCount {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, generation == guidedFundingGeneration else {
+                if generation == guidedFundingGeneration { guidedAnteWave = nil }
+                return false
+            }
             let pools = contributor == 0
                 ? allPools.filter { $0 != .center }
                 : allPools
-            guidedAnteWave = GuidedAnteWaveState(contributor: contributor, pools: pools)
-            if reduceMotion {
+            guidedAnteWave = GuidedAnteWaveState(contributor: contributor,
+                                                 pools: pools,
+                                                 generation: generation)
+            if guidedReduceMotion {
                 for pool in pools {
-                    landGuidedAnte(contributor: contributor, pool: pool)
+                    landGuidedAnte(contributor: contributor,
+                                   pool: pool,
+                                   generation: generation)
                 }
             } else {
                 let duration = Tokens.guidedAnteFlight
                     + Double(max(0, pools.count - 1)) * Tokens.guidedAnteStagger
                     + Tokens.guidedAnteWaveRest
-                try? await Task.sleep(for: .seconds(duration))
+                guard await waitForGuidedAnteImpact(duration: duration,
+                                                    generation: generation) else {
+                    if generation == guidedFundingGeneration { guidedAnteWave = nil }
+                    return false
+                }
                 for pool in pools {
-                    landGuidedAnte(contributor: contributor, pool: pool)
+                    landGuidedAnte(contributor: contributor,
+                                   pool: pool,
+                                   generation: generation)
                 }
             }
         }
-        guidedAnteWave = nil
+        if generation == guidedFundingGeneration { guidedAnteWave = nil }
+        return true
     }
 
-    private func landGuidedAnte(contributor: Int, pool: Pool) {
+    private func waitForGuidedAnteImpact(duration: Double,
+                                         generation: Int) async -> Bool {
+        var remaining = duration
+        while remaining > 0, !guidedReduceMotion {
+            guard !Task.isCancelled, generation == guidedFundingGeneration else { return false }
+            let interval = min(remaining, Tokens.guidedAnteMotionPreferencePoll)
+            do {
+                try await Task.sleep(for: .seconds(interval))
+            } catch {
+                return false
+            }
+            remaining -= interval
+        }
+        return !Task.isCancelled && generation == guidedFundingGeneration
+    }
+
+    private func landGuidedAnte(contributor: Int,
+                                pool: Pool,
+                                generation: Int) {
+        guard generation == guidedFundingGeneration,
+              guidedRoundActive,
+              akt == .melden,
+              guidedMeldBeat == FirstRunBeat.fundTable.rawValue else { return }
         guard let poolIndex = guidedAntePoolOrder.firstIndex(of: pool) else { return }
         let eventID = contributor * Pool.allCases.count + poolIndex
         guard guidedAnteLandedEvents.insert(eventID).inserted else { return }
         guidedAntePoolCounts[pool, default: 0] += 1
+        if contributor == game.playerCount - 1, pool == .center {
+            game.markGuidedTableFundingLanded(groupSize: game.playerCount)
+        }
     }
 
     private var guidedCopy: (step: String, title: String, text: String) {
@@ -1827,9 +2018,14 @@ struct ContentView: View {
                         .shadow(color: .black.opacity(0.65), radius: 28, y: 16)
                 )
                 .padding(.horizontal, 18)
-                .transition(.scale(scale: 0.96).combined(with: .opacity))
+                .transition(reduceMotion
+                            ? .opacity
+                            : .scale(scale: 0.96).combined(with: .opacity))
             }
-            .animation(.spring(duration: 0.28), value: self.activeOverlay != nil)
+            .animation(reduceMotion
+                       ? .linear(duration: 0.12)
+                       : .spring(duration: 0.28),
+                       value: self.activeOverlay != nil)
         }
     }
 
@@ -2607,10 +2803,14 @@ struct ContentView: View {
     private func playerCountButton(_ count: Int) -> some View {
         let selected = playerCount == count
         return Button {
+            cancelGuidedFunding()
+            cancelGuidedMeldFlow()
+            guidedRoundActive = false
+            activeTutorialLesson = nil
             playerCount = count
             game.configurePlayerCount(count)
             transition(to: .melden)
-            game.runDealPresentation(reduceMotion: reduceMotion)
+            game.runDealPresentation(reduceMotion: phase1SettlesImmediately)
         } label: {
             Text("\(count)")
                 .font(.system(size: 13, weight: .heavy))
@@ -3009,19 +3209,6 @@ struct ContentView: View {
             ZStack {
                 guidedOpponentAxis(in: zones)
 
-                if guidedTableFundingTargeted {
-                    Path { path in
-                        path.move(to: CGPoint(x: zones.opponents.midX,
-                                              y: zones.opponents.midY))
-                        path.addLine(to: CGPoint(x: zones.board.midX,
-                                                y: zones.board.midY))
-                    }
-                    .stroke(Tokens.jewelGold.opacity(0.74),
-                            style: StrokeStyle(lineWidth: 1, lineCap: .round))
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-                }
-
                 ringView
                     .scaleEffect(boardScale)
                     .frame(width: ringDiameter, height: ringDiameter)
@@ -3228,19 +3415,6 @@ struct ContentView: View {
         return ZStack {
             guidedOpponentAxis(in: zones)
 
-            if guidedTableFundingTargeted {
-                Path { path in
-                    path.move(to: CGPoint(x: zones.opponents.midX,
-                                          y: zones.opponents.midY))
-                    path.addLine(to: CGPoint(x: zones.board.midX,
-                                            y: zones.board.midY))
-                }
-                .stroke(Tokens.jewelGold.opacity(0.74),
-                        style: StrokeStyle(lineWidth: 1, lineCap: .round))
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-            }
-
             ringView
                 .scaleEffect(boardScale)
                 .frame(width: ringDiameter, height: ringDiameter)
@@ -3251,7 +3425,8 @@ struct ContentView: View {
                 .accessibilityIdentifier("firstRun.learningBoard")
 
             if guidedMeldBeat == FirstRunBeat.connectMeld.rawValue
-                || guidedMeldBeat == FirstRunBeat.proveMeld.rawValue {
+                || (guidedMeldBeat == FirstRunBeat.proveMeld.rawValue
+                    && game.startedMelds == game.meldShown) {
                 guidedMeldConnection(in: zones, ringDiameter: ringDiameter)
             }
 
@@ -3379,17 +3554,18 @@ struct ContentView: View {
                     .allowsHitTesting(false)
             }
             if guidedRoundActive, guidedMeldBeat == 1,
-               let guidedAnteWave, !reduceMotion {
+               let guidedAnteWave, !guidedReduceMotion {
                 GuidedAnteWave(
                     contributor: guidedAnteWave.contributor,
                     pools: guidedAnteWave.pools,
                     size: d,
                     onImpact: { pool in
                         landGuidedAnte(contributor: guidedAnteWave.contributor,
-                                       pool: pool)
+                                       pool: pool,
+                                       generation: guidedAnteWave.generation)
                     }
                 )
-                .id("ante-wave-\(guidedAnteWave.contributor)")
+                .id("ante-wave-\(guidedAnteWave.generation)-\(guidedAnteWave.contributor)")
                 .position(x: d / 2, y: d / 2)
             }
             if !guidedRoundActive || guidedMeldBeat > 0 {
@@ -3413,20 +3589,13 @@ struct ContentView: View {
                                           value: .center) { [anchor.pool: $0] }
                 }
             }
-            if !guidedRoundActive || guidedMeldBeat > 0 {
-                if !theme.isTravelTable {
-                    PochDiscFrontLipOverlay(size: d, includesCenter: true)
-                        .position(x: d / 2, y: d / 2)
-                }
-            }
             ForEach(PochRing.anchors) { anchor in
                 if !guidedRoundActive || guidedMeldBeat >= 5 {
                     PocketValueMarker(world: theme,
                                       pool: anchor.pool,
                                       chips: guidedRoundActive && guidedMeldBeat == 0
                                         ? 0 : game.displayedChips(in: anchor.pool),
-                                      tint: theme.tint(anchor.pool),
-                                      showChipCount: false)
+                                      tint: theme.tint(anchor.pool))
                         .position(TableWorldBoardGeometry.notationCenter(for: anchor.pool,
                                                                          in: d,
                                                                          world: theme))
@@ -3484,18 +3653,15 @@ struct ContentView: View {
             if chips > 0 {
                 TableWorldPiecePile(world: theme,
                                     count: chips,
-                                    diameter: 58,
+                                    diameter: Tokens.phase1OuterWellDiameter,
                                     compartment: TravelCompartment(pool: pool),
                                     placement: .well,
                                     pieceDiameterOverride: Tokens.tableTokenDiameter)
                     .contentTransition(.numericText())
-            } else {
-                Circle()
-                    .fill(tint.opacity(theme.isTravelTable ? 0.48 : 0.38))
-                    .frame(width: 3.5, height: 3.5)
             }
         }
-        .frame(width: 58, height: 58)
+        .frame(width: Tokens.phase1OuterWellDiameter,
+               height: Tokens.phase1OuterWellDiameter)
         .scaleEffect(pulsing ? 1.12 : 1)
         .animation(.spring(duration: 0.25), value: pulsing)
         .animation(.easeOut(duration: 0.3), value: game.meldShown)
@@ -3513,11 +3679,11 @@ struct ContentView: View {
                     .trim(from: 0.06, to: 0.44)
                     .stroke(
                         LinearGradient(colors: [
-                            tint.opacity(fired ? 0.08 : 0.72),
-                            Tokens.jewelPlatin.opacity(fired ? 0.03 : 0.34),
-                            tint.opacity(fired ? 0.04 : 0.42)
+                            tint.opacity(0.72),
+                            Tokens.jewelPlatin.opacity(0.34),
+                            tint.opacity(0.42)
                         ], startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: fired ? 0.8 : 2.2,
+                        style: StrokeStyle(lineWidth: 2.2,
                                            lineCap: .round))
                     .frame(width: 50, height: 50)
                     .rotationEffect(.degrees(12))
@@ -3525,11 +3691,13 @@ struct ContentView: View {
                     .opacity(fired ? 0 : 1)
 
                 Circle()
-                    .fill(tint.opacity(fired ? 0 : 0.075))
+                    .fill(tint.opacity(0.075))
                     .frame(width: 42, height: 42)
                     .scaleEffect(fired ? 1.03 : 0.97)
+                    .opacity(fired ? 0 : 1)
             }
-            .frame(width: 58, height: 58)
+            .frame(width: Tokens.phase1OuterWellDiameter,
+                   height: Tokens.phase1OuterWellDiameter)
             .onAppear {
                 fired = false
                 withAnimation(PhysicalMotion.materialSettle) { fired = true }
@@ -3543,14 +3711,10 @@ struct ContentView: View {
             if chips > 0 {
                 TableWorldPiecePile(world: theme,
                                     count: chips,
-                                    diameter: 88,
+                                    diameter: Tokens.phase1CenterWellDiameter,
                                     compartment: .center,
                                     placement: .well,
                                     pieceDiameterOverride: Tokens.tableTokenDiameter)
-            } else {
-                Circle()
-                    .fill(Tokens.jewelPlatin.opacity(0.30))
-                    .frame(width: 4, height: 4)
             }
 
             Text(String(localized: "board.center", defaultValue: "MITTE"))
@@ -3604,15 +3768,15 @@ struct ContentView: View {
                         ),
                         lateralBias: CGFloat(index - pools.count / 2) * 0.7,
                         onImpact: { onImpact(pool) }
-                    ) { progress in
+                    ) { _ in
                         R1Token(size: Tokens.tableTokenDiameter,
                                 colorway: R1Colorway.resolve(
                                     compartment: TravelCompartment(pool: pool),
                                     index: contributor
-                                ))
-                            .rotationEffect(.degrees(Double(index - 4) * 1.2
-                                                     + Double(progress) * 7))
-                            .scaleEffect(1 + sin(progress * .pi) * 0.018)
+                                ),
+                                markRotation: Double(index - 4) * 1.2,
+                                surfaceVariant: contributor)
+                            .shadow(color: .black.opacity(0.48), radius: 5, y: 4)
                     }
                 }
             }

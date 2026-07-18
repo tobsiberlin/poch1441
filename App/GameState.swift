@@ -179,6 +179,9 @@ final class GameState {
     /// Beobachtbare Spiegelung der aktuellen Runde - die Runde ist ein Wert, GameState
     /// führt die lebende Kopie (Aktionen mutieren hier, source liefert nur frische Runden).
     private(set) var round: Round
+    #if DEBUG
+    private var debugBoardPresentation: [Pool: Int] = [:]
+    #endif
     /// Letzter sichtbarer Auftritt pro Sitz (Action-Bubble in Phase 2).
     private(set) var seatActions: [SeatAction]
 
@@ -191,6 +194,9 @@ final class GameState {
     private(set) var opponentNames: [String]
     private let botProfiles: [String: BotProfile]
     private let opponentCatalog: OpponentRosterCatalog?
+    private var tutorialOpponentLineup: OpponentLineup?
+    private var opponentTendencySession = OpponentTendencyDisclosureSession()
+    private(set) var opponentTendencyDisclosure: PublicOpponentTendencyDisclosure?
 
     init(source: MatchSource = BotMatchSource()) {
         let opponentCatalog = Self.loadOpponentRosterCatalog()
@@ -208,7 +214,12 @@ final class GameState {
 
     // MARK: - Gemeinsame Werte
 
-    func chips(in pool: Pool) -> Int { round.board[pool] }
+    func chips(in pool: Pool) -> Int {
+        #if DEBUG
+        if let value = debugBoardPresentation[pool] { return value }
+        #endif
+        return round.board[pool]
+    }
     var trump: Suit { round.deal.trump }
     var upcard: Card { round.deal.upcard }
     /// Menschen-Hand. UI-Sitz 0 bleibt der Mensch; sein Rundensitz rotiert mit dem Geber.
@@ -244,6 +255,25 @@ final class GameState {
     func name(of seat: Int) -> String {
         guard seat > 0, !opponentNames.isEmpty else { return "Du" }
         return opponentNames[(seat - 1) % opponentNames.count]
+    }
+
+    /// Opens the optional opponent-reading beat only after the guided UI has observed a
+    /// completed, public Poch decision. The lookup uses the curated public lineup rather
+    /// than bot parameters or round-private state.
+    func markFirstPochDecisionUnderstood(by uiSeat: Int) {
+        guard uiSeat > 0,
+              let tutorialOpponentLineup,
+              let opponent = tutorialOpponentLineup.seats.first(where: {
+                  $0.uiSeatIndex == uiSeat
+              })?.opponent,
+              let disclosure = opponentTendencySession
+                  .discloseAfterUnderstandingFirstPochDecision(
+                      madeBy: opponent.id,
+                      in: tutorialOpponentLineup
+                  ) else {
+            return
+        }
+        opponentTendencyDisclosure = disclosure
     }
 
     private func botProfile(for uiSeat: Int) -> BotProfile {
@@ -284,6 +314,7 @@ final class GameState {
 
     @discardableResult
     func newRound() -> Bool {
+        guard stage == .finished else { return false }
         botTask?.cancel()
         cascadeTask?.cancel()
         dealTask?.cancel()
@@ -293,6 +324,7 @@ final class GameState {
             return false
         }
         round = source.round
+        resetOpponentTendencyPresentation()
         resetPresentationState()
         return true
     }
@@ -307,6 +339,7 @@ final class GameState {
             opponentCount: max(0, playerCount - 1),
             excluding: opponentNames
         )
+        resetOpponentTendencyPresentation()
         completedMatchResult = nil
         resetPresentationState()
     }
@@ -323,6 +356,7 @@ final class GameState {
             opponentCount: max(0, safeCount - 1),
             excluding: opponentNames
         )
+        resetOpponentTendencyPresentation()
         completedMatchResult = nil
         resetPresentationState()
     }
@@ -330,6 +364,7 @@ final class GameState {
     /// Startet eine reproduzierbare, regelkonforme Lernszene. Die Seeds liegen als
     /// Build-Time-Daten vor; die Engine bleibt für alle Karten und Ergebnisse die Wahrheit.
     func startTutorialRound(_ lesson: TutorialLesson = .meld) -> Bool {
+        resetOpponentTendencyPresentation()
         guard applyCuratedTutorialLineup() else { return false }
         adoptRound(seed: tutorialSeed(for: lesson))
         if lesson == .playout {
@@ -345,6 +380,7 @@ final class GameState {
         }
         do {
             let lineup = try opponentCatalog.curatedTutorialLineup()
+            tutorialOpponentLineup = lineup
             opponentNames = lineup.seats
                 .sorted { $0.uiSeatIndex < $1.uiSeatIndex }
                 .map(\.opponent.displayName)
@@ -353,6 +389,12 @@ final class GameState {
             Self.profileLog.error("Tutorialbesetzung konnte nicht geladen werden: \(error.localizedDescription, privacy: .public)")
             return false
         }
+    }
+
+    private func resetOpponentTendencyPresentation() {
+        tutorialOpponentLineup = nil
+        opponentTendencySession = OpponentTendencyDisclosureSession()
+        opponentTendencyDisclosure = nil
     }
 
     private func adoptRound(seed: UInt64) {
@@ -373,9 +415,7 @@ final class GameState {
         presentation.reset()
         trumpRevealed = false
         lightPulse = 0
-        startedMelds = 0
-        meldShown = 0
-        pulsingPool = nil
+        resetMeldPresentation()
         revealedPlays = 0
         landedPlays = 0
         betTransfer = 0
@@ -484,6 +524,13 @@ final class GameState {
     func humanOpen(_ amount: Int) { applyHuman(.open(amount)) }
     func humanCall() { applyHuman(.call) }
     func humanRaise(to amount: Int) { applyHuman(.raise(to: amount)) }
+
+    /// Phase-2-Einstieg ist idempotent. Nach Geberrotation kann der erste
+    /// Rundensitz einem Bot gehören; dann darf die Bietrunde nicht auf einen
+    /// menschlichen Impuls warten.
+    func resumeBettingIfNeeded() {
+        runBotsIfNeeded()
+    }
 
     /// "Der Poch" (§6b): jeder Tischschlag (Eröffnen/Erhöhen, Mensch wie Bot)
     /// triggert Zittern der Tisch-Welt + .heavy-Haptik.
@@ -857,6 +904,44 @@ final class GameState {
         }
     }
 
+    /// QA-Helfer für die physische Poch-Auszahlung. Die Runde wird ausschließlich
+    /// mit legalen Engine-Aktionen beendet: Der erste bietberechtigte Sitz eröffnet,
+    /// weitere Berechtigte gehen mit, alle anderen passen.
+    func debugResolvePochPayout() {
+        var guardCount = 0
+        while stage == .betting, guardCount < 40 {
+            guardCount += 1
+            let seat = betting.turn
+            guard let legal = betting.legalActions(for: seat) else { return }
+            let action: BettingPhase.Action
+            if let openRange = legal.openRange {
+                action = .open(min(2, openRange.upperBound))
+            } else if legal.canCall {
+                action = .call
+            } else {
+                action = .pass
+            }
+            do {
+                let committedBefore = betting.seats[seat].committed
+                try round.applyBet(action, by: seat)
+                let uiSeat = uiSeat(forRoundSeat: seat)
+                seatActions[uiSeat] = Self.display(action)
+                registerTransfer(actor: uiSeat,
+                                 amount: betting.seats[seat].committed - committedBefore,
+                                 action: action)
+            } catch {
+                log.error("Poch-Auszahlungs-QA konnte die Bietrunde nicht beenden: \(String(describing: error), privacy: .public)")
+                return
+            }
+        }
+    }
+
+    /// QA-only öffentlicher Boardzustand für die visuelle Kapazitätsgrenze.
+    /// Der produktive MatchSource und die Regelpfade bleiben unverändert.
+    func debugPrimeSaturatedPile() {
+        debugBoardPresentation[.sequence] = R1TokenSlots.capacity + 1
+    }
+
     /// QA-Helfer: spielt Phase 3 deterministisch zu Ende und springt direkt auf den
     /// finalen Banner. Nur fuer Screenshots/Design-Audit, nie Release.
     func debugFinishPlayout() {
@@ -999,6 +1084,10 @@ final class GameState {
     private(set) var meldShown = 0
     /// Gestartete Meldetransfers. Sichtbare Konten folgen weiterhin nur `meldShown`.
     private(set) var startedMelds = 0
+    /// Monotone Identität einer Phase-1-Präsentation. Alte SwiftUI-Completions
+    /// dürfen nach Rundentausch oder erneutem Tutorialstart keinen neuen Transfer
+    /// mit demselben Sequenzindex treffen.
+    private(set) var meldPresentationGeneration = 0
     /// Mulde, die gerade pulst (aktive Meldung).
     private(set) var pulsingPool: Pool?
 
@@ -1006,7 +1095,10 @@ final class GameState {
     /// die Mulde und wird zum Flugobjekt. Das Gewinnerkonto wächst weiterhin
     /// erst beim Kontakt (`meldShown`), sodass kein Stein doppelt sichtbar ist.
     func displayedChips(in pool: Pool) -> Int {
-        round.board[pool] + meldEvents.dropFirst(startedMelds)
+        #if DEBUG
+        if let value = debugBoardPresentation[pool] { return value }
+        #endif
+        return round.board[pool] + meldEvents.dropFirst(startedMelds)
             .filter { $0.pool == pool }
             .reduce(0) { $0 + $1.chips }
     }
@@ -1032,9 +1124,7 @@ final class GameState {
         landedDealIndices.removeAll(keepingCapacity: true)
         presentation.reset()
         trumpRevealed = false
-        startedMelds = 0
-        meldShown = 0
-        pulsingPool = nil
+        resetMeldPresentation()
         guard !reduceMotion else {
             // Safe-Mode (§6 Auflage 2): keine Flüge, sanfter Dissolve statt Puls -
             // Belohnung wandert in Haptik (ein einzelner Tick).
@@ -1058,9 +1148,7 @@ final class GameState {
         landedDealIndices.removeAll(keepingCapacity: true)
         presentation.reset()
         trumpRevealed = false
-        startedMelds = 0
-        meldShown = 0
-        pulsingPool = nil
+        resetMeldPresentation()
     }
 
     func revealGuidedDealRound(reduceMotion: Bool) async {
@@ -1102,8 +1190,11 @@ final class GameState {
 
     func revealNextGuidedMeld(reduceMotion: Bool) async {
         guard startedMelds < meldEvents.count else { return }
+        let generation = meldPresentationGeneration
         let sequence = startNextMeld()
-        if reduceMotion { markMeldLanded(sequence) }
+        if reduceMotion {
+            markMeldLanded(sequence, generation: generation)
+        }
         await waitForMeldToLand(sequence)
     }
 
@@ -1135,6 +1226,13 @@ final class GameState {
         meldShown = meldEvents.count
         pulsingPool = nil
         hapticTick += 1
+    }
+
+    /// Settles every still pending Phase-1 presentation atomically. This is the
+    /// product path for a live Reduce Motion change and for leaving Phase 1 while
+    /// a material transfer is still in flight.
+    func settlePhase1Presentation() {
+        skipDeal()
     }
 
     private func dealLoop() async {
@@ -1202,16 +1300,18 @@ final class GameState {
         }
     }
 
-    func markMeldLanded(_ sequence: Int) {
-        guard sequence == meldShown, sequence < startedMelds else { return }
-        let eventID = meldEventID(sequence)
+    func markMeldLanded(_ sequence: Int, generation: Int) {
+        guard generation == meldPresentationGeneration,
+              sequence == meldShown,
+              sequence < startedMelds else { return }
+        let eventID = meldEventID(sequence, generation: generation)
         guard presentation.impact(id: eventID) else { return }
         meldShown += 1
         pulsingPool = nil
         let groupSize = meldEvents.indices.contains(sequence)
             ? meldEvents[sequence].chips
             : 1
-        recordR1Impact(groupSize: groupSize, surface: .outerWell)
+        recordR1Impact(groupSize: groupSize, surface: .playerStack)
         presentation.complete(id: eventID)
     }
 
@@ -1220,7 +1320,8 @@ final class GameState {
         guard startedMelds < meldEvents.count else { return meldEvents.count }
         let sequence = startedMelds
         let meld = meldEvents[sequence]
-        presentation.begin(id: meldEventID(sequence),
+        presentation.begin(id: meldEventID(sequence,
+                                            generation: meldPresentationGeneration),
                            kind: .meldToken,
                            source: "pool-\(meld.pool.rawValue)",
                            target: "seat-\(meld.player)")
@@ -1229,8 +1330,8 @@ final class GameState {
         return sequence
     }
 
-    private func meldEventID(_ sequence: Int) -> String {
-        "meld-\(round.deal.upcard.rank.rawValue)-\(sequence)"
+    private func meldEventID(_ sequence: Int, generation: Int) -> String {
+        "meld-\(generation)-\(round.deal.upcard.rank.rawValue)-\(sequence)"
     }
 
     private func waitForMeldToLand(_ sequence: Int) async {
@@ -1238,4 +1339,30 @@ final class GameState {
             try? await Task.sleep(for: .milliseconds(20))
         }
     }
+
+    private func resetMeldPresentation() {
+        meldPresentationGeneration &+= 1
+        startedMelds = 0
+        meldShown = 0
+        pulsingPool = nil
+    }
+
+    #if DEBUG
+    /// Deterministic product presentation for the Phase-1 payout UI tests. The
+    /// underlying meld event still comes from the curated PochKit tutorial round.
+    func debugStartMeldPayout() {
+        dealTask?.cancel()
+        startedDeals = totalDeals
+        landedDeals = totalDeals
+        landedDealIndices.removeAll(keepingCapacity: true)
+        trumpRevealed = true
+        presentation.setFirstRunBeat(.proveMeld)
+    }
+
+    /// Begins one real material transfer without awaiting its contact so the UI
+    /// test can exercise a phase handoff while that transfer is visibly active.
+    func debugBeginNextMeldPayout() {
+        _ = startNextMeld()
+    }
+    #endif
 }

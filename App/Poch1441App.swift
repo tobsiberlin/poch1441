@@ -20,29 +20,48 @@ final class PochOrientationDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-        window?.traitCollection.userInterfaceIdiom == .pad ? .all : .allButUpsideDown
+        if window?.traitCollection.userInterfaceIdiom == .pad {
+            return .all
+        }
+        return requestedOrientationMask ?? .allButUpsideDown
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        deviceOrientationDidChange()
     }
 
     @objc private func deviceOrientationDidChange() {
-        let mask: UIInterfaceOrientationMask
-        switch UIDevice.current.orientation {
-        case .portrait:
-            mask = .portrait
-        case .portraitUpsideDown:
-            mask = .portraitUpsideDown
-        case .landscapeLeft:
-            mask = .landscapeRight
-        case .landscapeRight:
-            mask = .landscapeLeft
-        default:
-            return
-        }
+        guard let mask = requestedOrientationMask else { return }
 
         for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
             scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
             scene.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { [logger] error in
                 logger.error("Orientierungswechsel abgelehnt: \(error.localizedDescription, privacy: .public)")
             }
+        }
+    }
+
+    private var requestedOrientationMask: UIInterfaceOrientationMask? {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-landscapeQA") {
+            return .landscapeLeft
+        }
+        if ProcessInfo.processInfo.arguments.contains("-portraitQA") {
+            return .portrait
+        }
+        #endif
+
+        switch UIDevice.current.orientation {
+        case .portrait:
+            return .portrait
+        case .portraitUpsideDown:
+            return .portraitUpsideDown
+        case .landscapeLeft:
+            return .landscapeRight
+        case .landscapeRight:
+            return .landscapeLeft
+        default:
+            return nil
         }
     }
 }
