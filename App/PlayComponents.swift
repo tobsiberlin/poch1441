@@ -590,6 +590,26 @@ enum R1Colorway: CaseIterable, Sendable {
     case terracotta
     case sage
     case slate
+    case ochre
+
+    /// Rein materielle Referenzpalette. Die Zuordnung ist deterministisch und
+    /// codiert weder Besitzer noch Wert; sie bildet ausschließlich die
+    /// bestätigte physische Produktbestückung ab.
+    static func resolve(compartment: TravelCompartment, index: Int) -> Self {
+        let palette: [Self]
+        switch compartment {
+        case .king: palette = [.terracotta, .slate]
+        case .queen: palette = [.slate, .naturalWhite]
+        case .mariage: palette = [.sage]
+        case .jack: palette = [.ochre]
+        case .ten: palette = [.terracotta, .naturalWhite]
+        case .sequence: palette = [.slate, .naturalWhite]
+        case .poch: palette = [.slate, .naturalWhite]
+        case .ace: palette = [.slate, .terracotta]
+        case .center: palette = [.terracotta, .slate, .naturalWhite, .sage, .ochre]
+        }
+        return palette[index % palette.count]
+    }
 
     fileprivate var face: Color {
         switch self {
@@ -597,6 +617,7 @@ enum R1Colorway: CaseIterable, Sendable {
         case .terracotta: Color(hex: 0x9B5D48)
         case .sage: Color(hex: 0x758071)
         case .slate: Color(hex: 0x62666A)
+        case .ochre: Color(hex: 0xA5793D)
         }
     }
 
@@ -606,6 +627,17 @@ enum R1Colorway: CaseIterable, Sendable {
         case .terracotta: Color(hex: 0x693D31)
         case .sage: Color(hex: 0x4D564C)
         case .slate: Color(hex: 0x3D4145)
+        case .ochre: Color(hex: 0x6F4D26)
+        }
+    }
+
+    fileprivate var assetName: String {
+        switch self {
+        case .naturalWhite: "R1NaturalWhite"
+        case .terracotta: "R1Terracotta"
+        case .sage: "R1Sage"
+        case .slate: "R1Slate"
+        case .ochre: "R1Ochre"
         }
     }
 }
@@ -637,88 +669,47 @@ struct R1Token: View {
     }
 
     var body: some View {
-        let surfaceCenter = UnitPoint(
-            x: 0.40 + CGFloat(surfaceVariant % 3) * 0.07,
-            y: 0.34 + CGFloat((surfaceVariant / 3) % 3) * 0.06
-        )
         ZStack {
-            // Weicher Höhenschatten: zeigt die 3-mm-Stärke, ohne den trockenen
-            // Materialkontakt darunter aufzuweichen.
             Ellipse()
-                .fill(Color.black.opacity(0.28 - elevation * 0.06))
-                .frame(width: size * (0.94 + elevation * 0.05),
-                       height: max(1, size * (0.18 + elevation * 0.025)))
-                .blur(radius: size * 0.065)
-                .offset(y: size * 0.43)
+                .fill(Color.black.opacity(0.34 - elevation * 0.06))
+                .frame(width: size * (0.92 + elevation * 0.05),
+                       height: max(1, size * (0.19 + elevation * 0.025)))
+                .blur(radius: size * 0.060)
+                .offset(x: size * 0.035, y: size * 0.45)
 
-            // Harter Kontaktschatten: bleibt eng an der unteren Kante.
             Ellipse()
-                .fill(Color.black.opacity(0.76 - elevation * 0.13))
-                .frame(width: size * (0.84 + elevation * 0.04),
-                       height: max(1, size * (0.10 + elevation * 0.018)))
-                .blur(radius: size * 0.018)
-                .offset(y: size * 0.40)
+                .fill(Color.black.opacity(0.80 - elevation * 0.14))
+                .frame(width: size * (0.82 + elevation * 0.04),
+                       height: max(1, size * (0.095 + elevation * 0.018)))
+                .blur(radius: size * 0.016)
+                .offset(x: size * 0.025, y: size * 0.425)
 
-            // Sichtbare 3-mm-Kante mit feiner Rändelung. Die Kante ist bewusst
-            // flach und trocken statt transparent, hochglänzend oder metallisch.
-            Circle()
-                .fill(colorway.edge)
-                .frame(width: size * 0.97, height: size * 0.97)
-                .offset(y: size * 0.045)
+            Image(colorway.assetName)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: size, height: size)
                 .overlay {
                     Circle()
-                        .strokeBorder(
-                            AngularGradient(colors: [
-                                Color.black.opacity(0.30),
-                                Color.white.opacity(0.07),
-                                Color.black.opacity(0.22),
-                                Color.white.opacity(0.06),
-                                Color.black.opacity(0.30)
-                            ], center: .center),
-                            lineWidth: max(0.55, size * 0.055)
-                        )
-                }
-                .overlay {
-                    Circle()
-                        .strokeBorder(
-                            Color.black.opacity(0.18),
-                            style: StrokeStyle(
-                                lineWidth: max(0.3, size * 0.014),
-                                dash: [max(0.35, size * 0.016),
-                                       max(0.5, size * 0.024)]
-                            )
-                        )
-                        .padding(size * 0.01)
-                }
-
-            Circle()
-                .fill(colorway.face)
-                .overlay {
-                    Circle()
-                        .fill(
-                            RadialGradient(colors: [
-                                Color.white.opacity(0.075),
-                                .clear,
-                                Color.black.opacity(0.055)
-                            ], center: surfaceCenter,
-                               startRadius: size * 0.05,
-                               endRadius: size * 0.62)
-                        )
+                        .stroke(colorway.edge.opacity(0.34),
+                                lineWidth: max(0.45, size * 0.018))
+                        .padding(size * 0.145)
+                        .shadow(color: Color.white.opacity(0.13),
+                                radius: 0,
+                                x: -max(0.25, size * 0.010),
+                                y: -max(0.25, size * 0.010))
                 }
                 .overlay {
                     R1BlindEmboss()
-                        .stroke(colorway.edge.opacity(0.30),
-                                lineWidth: max(0.42, size * 0.025))
-                        .padding(size * 0.20)
+                        .stroke(colorway.edge.opacity(0.46),
+                                lineWidth: max(0.48, size * 0.022))
+                        .padding(size * 0.225)
                         .rotationEffect(.degrees(markRotation))
-                        .shadow(color: Color.white.opacity(0.08),
+                        .shadow(color: Color.white.opacity(0.16),
                                 radius: 0,
                                 x: -max(0.2, size * 0.01),
                                 y: -max(0.2, size * 0.01))
                 }
-                .overlay(Circle().strokeBorder(Color.white.opacity(0.075),
-                                               lineWidth: max(0.35, size * 0.016)))
-                .padding(size * 0.055)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -776,6 +767,8 @@ struct TableTokenPile: View {
                 let pose = poses[index]
                 R1Token(tint: tint,
                         size: tokenDiameter,
+                        colorway: R1Colorway.resolve(compartment: compartment,
+                                                     index: index),
                         markRotation: pose.rotation,
                         surfaceVariant: index,
                         elevation: pose.elevation / 0.22)
@@ -913,14 +906,32 @@ private struct TableWorldSpatialPresentation: ViewModifier {
                     anchor: .center,
                     perspective: Tokens.pochDiscPerspective
                 )
-                .shadow(color: Color.black.opacity(0.70),
-                        radius: diameter * Tokens.pochDiscShadowRadiusRatio,
-                        x: diameter * 0.010,
-                        y: diameter * Tokens.pochDiscShadowYOffsetRatio)
-                .shadow(color: Tokens.jewelPlatin.opacity(0.035),
-                        radius: diameter * Tokens.pochDiscAmbientLiftRatio,
-                        x: -diameter * 0.010,
-                        y: -diameter * 0.008)
+                .scaleEffect(Tokens.pochDiscStageScale)
+                .background {
+                    Ellipse()
+                        .fill(
+                            RadialGradient(colors: [
+                                Color(hex: 0x35373B).opacity(0.44),
+                                Color(hex: 0x222329).opacity(0.18),
+                                .clear
+                            ], center: .center,
+                               startRadius: diameter * 0.10,
+                               endRadius: diameter * 0.62)
+                        )
+                        .frame(width: diameter * 1.16,
+                               height: diameter * 0.94)
+                        .blur(radius: diameter * Tokens.pochDiscAmbientLiftRatio)
+                        .offset(y: diameter * 0.045)
+                        .accessibilityHidden(true)
+                }
+                .shadow(color: Color.black.opacity(0.82),
+                        radius: diameter * Tokens.pochDiscContactShadowRadiusRatio,
+                        x: diameter * Tokens.pochDiscContactShadowXRatio,
+                        y: diameter * Tokens.pochDiscContactShadowYRatio)
+                .shadow(color: Color.black.opacity(0.58),
+                        radius: diameter * Tokens.pochDiscCastShadowRadiusRatio,
+                        x: diameter * Tokens.pochDiscCastShadowXRatio,
+                        y: diameter * Tokens.pochDiscCastShadowYRatio)
         case .unterwegs:
             content
         }
@@ -934,8 +945,8 @@ extension View {
     }
 }
 
-/// Ein einzelner regelneutraler Spielstein. Track A bleibt in einer Partie
-/// durchgehend R1-Naturweiß; Track B wählt reproduzierbar eine der sechs
+/// Ein einzelner regelneutraler Spielstein. Track A verwendet die deterministische
+/// Referenzpalette der physischen Disc; Track B wählt reproduzierbar eine der sechs
 /// freigegebenen 1-Cent-Oberflächen.
 struct TableWorldPiece: View {
     let world: TableWorld
@@ -948,7 +959,10 @@ struct TableWorldPiece: View {
     var body: some View {
         switch world {
         case .pochDisc:
-            R1Token(size: size, colorway: .naturalWhite)
+            R1Token(size: size,
+                    colorway: R1Colorway.resolve(compartment: compartment,
+                                                 index: index),
+                    markRotation: Double((index * 17) % 31) - 15)
         case .unterwegs:
             TravelCentPiece(seed: seed,
                             index: index,

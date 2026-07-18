@@ -1202,8 +1202,9 @@ struct ContentView: View {
             Button {
                 settleGuidedOpeningToken(from: source, to: target)
             } label: {
-                R1Token(tint: Tokens.jewelGold,
-                          size: Tokens.guidedOpeningTokenSize)
+                R1Token(size: Tokens.guidedOpeningTokenSize,
+                        colorway: R1Colorway.resolve(compartment: .center,
+                                                     index: 0))
                     .scaleEffect(distance < Tokens.guidedOpeningSnapRadius ? 0.94 : 1)
                     .frame(width: 44, height: 44)
                     .opacity(reduceMotion && guidedOpeningSettled ? 0 : 1)
@@ -2490,7 +2491,9 @@ struct ContentView: View {
                 .offset(x: -24, y: 7)
                 HStack(spacing: -2) {
                     ForEach(0..<3, id: \.self) { i in
-                        R1Token(tint: tint, size: 8.5)
+                        R1Token(size: 8.5,
+                                colorway: R1Colorway.resolve(compartment: .center,
+                                                             index: i))
                             .offset(y: CGFloat(i) * -2)
                     }
                 }
@@ -3602,8 +3605,11 @@ struct ContentView: View {
                         lateralBias: CGFloat(index - pools.count / 2) * 0.7,
                         onImpact: { onImpact(pool) }
                     ) { progress in
-                        R1Token(tint: pool == .center ? Tokens.jewelGold : pool.jewel,
-                                  size: 20)
+                        R1Token(size: Tokens.tableTokenDiameter,
+                                colorway: R1Colorway.resolve(
+                                    compartment: TravelCompartment(pool: pool),
+                                    index: contributor
+                                ))
                             .rotationEffect(.degrees(Double(index - 4) * 1.2
                                                      + Double(progress) * 7))
                             .scaleEffect(1 + sin(progress * .pi) * 0.018)

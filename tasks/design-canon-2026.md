@@ -134,10 +134,11 @@ Gegenständen entstehen kann, ohne trashig oder nostalgisch verkleidet zu wirken
 - Mattes Clay-Composite oder durchgefärbte Keramik mit warmer, steiniger Haptik.
 - Große tonale Blindprägung des geometrischen Kartenrücken-Signets.
 - Feine umlaufende Präzisionsrändelung.
-- Palette: Naturweiß, Terrakotta, Salbeigrün und Schiefergrau als wählbare
-  gemeinsame Tisch-Farbwelten beziehungsweise Materialeditionen.
-- Innerhalb einer Partie verwenden alle Spieler dieselbe R1-Farbwelt. Die Farbe
-  bezeichnet niemals Besitzer, Wert oder verdeckte Information.
+- Palette: Naturweiß, Terrakotta, Salbeigrün, Schiefergrau und gedecktes Ocker als
+  gemeinsame materielle Board-Palette der bestätigten Produktreferenz.
+- Die Farben liegen innerhalb derselben Partie gemeinsam auf der Disc. Ihre
+  deterministische Verteilung bezeichnet niemals Besitzer, Wert oder verdeckte
+  Information und verändert weder Zähler noch Regeln.
 - Herkunft wird während einer Bewegung kurz über Sitz, Flugbahn und einen
   nichtfarbigen Fokusindikator gezeigt. Der ruhende Stein bleibt neutral zur Person.
 - Es gibt kein Umfärben oder Morphen gewonnener Steine. Digitales Verhalten und

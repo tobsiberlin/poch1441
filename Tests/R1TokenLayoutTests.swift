@@ -6,7 +6,9 @@ struct R1TokenLayoutTests {
         emptyAndCapacityAreExact()
         landedTokensKeepTheirPose()
         posesStayInsideTheUsableFloor()
+        twoTokensMatchTheReferenceOverlap()
         fourTokensRemainVisuallyDistinct()
+        openingGroupsAvoidCenterRosettes()
         compartmentsDoNotCloneOnePile()
         occupiedWellsUseAtLeastThreeNonCongruentSilhouettes()
         FileHandle.standardOutput.write(Data("R1TokenLayoutTests: PASS\n".utf8))
@@ -37,7 +39,7 @@ struct R1TokenLayoutTests {
     }
 
     private static func posesStayInsideTheUsableFloor() {
-        let tokenToFloorRatio = 0.60
+        let tokenToFloorRatio = 0.74
         for compartment in TravelCompartment.allCases {
             for seed: UInt64 in [1, 1_441, 1_444, .max] {
                 for pose in R1TokenSlots.layout(for: 12,
@@ -52,6 +54,18 @@ struct R1TokenLayoutTests {
         }
     }
 
+    private static func twoTokensMatchTheReferenceOverlap() {
+        for compartment in TravelCompartment.allCases {
+            let pair = R1TokenSlots.layout(for: 2,
+                                           seed: 1_441,
+                                           compartment: compartment)
+            let distance = hypot(pair[0].offset.width - pair[1].offset.width,
+                                 pair[0].offset.height - pair[1].offset.height)
+            expect((0.28...0.40).contains(distance),
+                   "two R1 tokens need the dense directional overlap of the product reference")
+        }
+    }
+
     private static func fourTokensRemainVisuallyDistinct() {
         for compartment in TravelCompartment.allCases {
             for seed: UInt64 in [1, 1_441, 1_444, .max] {
@@ -62,11 +76,21 @@ struct R1TokenLayoutTests {
                     for right in poses.indices where right > left {
                         let distance = hypot(poses[left].offset.width - poses[right].offset.width,
                                              poses[left].offset.height - poses[right].offset.height)
-                        expect(distance >= 0.24,
+                        expect(distance >= 0.15,
                                "four-token groups need four distinguishable silhouettes")
                     }
                 }
             }
+        }
+    }
+
+    private static func openingGroupsAvoidCenterRosettes() {
+        for compartment in TravelCompartment.allCases {
+            let opening = R1TokenSlots.layout(for: 4,
+                                              seed: 1_441,
+                                              compartment: compartment)
+            expect(opening.allSatisfy { hypot($0.offset.width, $0.offset.height) >= 0.11 },
+                   "the first four tokens must form a directed stack without a center rosette")
         }
     }
 

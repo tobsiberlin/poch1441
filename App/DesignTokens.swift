@@ -71,20 +71,25 @@ enum Tokens {
 
     // Physische Spielsteine. Außenmulden und Mitte verwenden denselben
     // gedachten Durchmesser; nur der verfügbare Ablageraum unterscheidet sich.
-    /// R1 füllt rund 41 % der 56-pt-Außenmulde. Derselbe physische
-    /// Durchmesser gilt auch in der größeren Mitte.
-    static let tableTokenDiameter: CGFloat = 23
-    static let tableTokenToFloorRatio: CGFloat = 0.60
+    /// Die bestätigte Produktreferenz zeigt R1 mit rund 70-74 % der sichtbaren
+    /// Muldenöffnung. Derselbe physische Durchmesser gilt auch in der Mitte.
+    static let tableTokenDiameter: CGFloat = 39
+    static let tableTokenToFloorRatio: CGFloat = 0.74
     static let tableTokenOverlap: CGFloat = 0.40
-    static let outerWellFloorRatio: CGFloat = 0.68
+    static let outerWellFloorRatio: CGFloat = 0.95
 
     // Track-A-Kamera. Der gesamte physische Stack wird gemeinsam gekippt, damit
     // Asset, Gravuren und ruhende Steine dieselbe Perspektive behalten.
-    static let pochDiscPitch: Double = 5.2
+    static let pochDiscPitch: Double = 17.5
     static let pochDiscPerspective: CGFloat = 0.24
-    static let pochDiscShadowRadiusRatio: CGFloat = 0.050
-    static let pochDiscShadowYOffsetRatio: CGFloat = 0.044
-    static let pochDiscAmbientLiftRatio: CGFloat = 0.018
+    static let pochDiscStageScale: CGFloat = 1.06
+    static let pochDiscContactShadowRadiusRatio: CGFloat = 0.018
+    static let pochDiscContactShadowXRatio: CGFloat = 0.008
+    static let pochDiscContactShadowYRatio: CGFloat = 0.027
+    static let pochDiscCastShadowRadiusRatio: CGFloat = 0.066
+    static let pochDiscCastShadowXRatio: CGFloat = 0.018
+    static let pochDiscCastShadowYRatio: CGFloat = 0.072
+    static let pochDiscAmbientLiftRatio: CGFloat = 0.105
 
     // Phase-2-Timing (Parameter-Lock §4: Änderung nur nach Vorher/Nachher-Vergleich).
     /// Feder des wachsenden Poch-Potts bei neuen Einsätzen.

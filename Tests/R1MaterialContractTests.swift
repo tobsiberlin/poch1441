@@ -10,7 +10,7 @@ struct R1MaterialContractTests {
         let layout = try source(at: "App/R1TokenLayout.swift")
         let effects = try source(at: "App/Effects.swift")
 
-        try r1RendererKeepsOneSharedColorway(components)
+        try r1RendererUsesTheReferencePalette(components)
         try r1ScaleAndLightingStayPhysical(components)
         try restingPosesAreStableAndVaried(layout)
         try contactFeedbackIsImpactBoundAndBundled(effects)
@@ -19,10 +19,17 @@ struct R1MaterialContractTests {
         FileHandle.standardOutput.write(Data("R1MaterialContractTests: PASS\n".utf8))
     }
 
-    private static func r1RendererKeepsOneSharedColorway(_ source: String) throws {
-        for colorway in ["naturalWhite", "terracotta", "sage", "slate"] {
+    private static func r1RendererUsesTheReferencePalette(_ source: String) throws {
+        for colorway in ["naturalWhite", "terracotta", "sage", "slate", "ochre"] {
             expect(source.contains("case \(colorway)"),
                    "R1 colorway \(colorway) is missing")
+        }
+        for asset in ["R1NaturalWhite", "R1Terracotta", "R1Sage", "R1Slate", "R1Ochre"] {
+            expect(source.contains("\"\(asset)\""),
+                   "R1 material asset \(asset) is missing from the renderer")
+            let imageset = root.appendingPathComponent("App/Assets.xcassets/\(asset).imageset")
+            expect(FileManager.default.fileExists(atPath: imageset.path),
+                   "R1 imageset \(asset) is missing")
         }
 
         let renderer = try section(in: source,
@@ -34,6 +41,10 @@ struct R1MaterialContractTests {
                "R1 must not render values or currency on the token")
         expect(renderer.contains("R1BlindEmboss()"),
                "R1 must carry the tonal card-back emboss")
+        expect(source.contains("static func resolve(compartment: TravelCompartment, index: Int)"),
+               "R1 needs a deterministic material resolver tied to the physical well")
+        expect(source.contains("case .jack: palette = [.ochre]"),
+               "The reference ochre material must reach the jack well")
     }
 
     private static func r1ScaleAndLightingStayPhysical(_ source: String) throws {
@@ -42,6 +53,8 @@ struct R1MaterialContractTests {
                                    through: "typealias TableChip = R1Token")
         expect(renderer.contains(".rotationEffect(.degrees(markRotation))"),
                "Only the token-bound emboss may rotate")
+        expect(renderer.contains("Image(colorway.assetName)"),
+               "R1 must use the build-time material basis instead of flat circles")
 
         let pile = try section(in: source,
                                from: "struct TableTokenPile: View",

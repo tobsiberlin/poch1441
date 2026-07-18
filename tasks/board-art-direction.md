@@ -99,8 +99,9 @@ unmittelbar und menschlich, aber weder trashig noch nostalgisch kostümiert.
 - Mattes Clay-Composite oder durchgefärbte Keramik.
 - Große tonale Blindprägung des geometrischen Kartenrücken-Signets.
 - Feine umlaufende Präzisionsrändelung.
-- Naturweiß, Terrakotta, Salbeigrün und Schiefergrau sind gemeinsame
-  Tisch-Farbwelten, keine Spielerfarben. Pro Partie ist genau eine R1-Farbwelt aktiv.
+- Naturweiß, Terrakotta, Salbeigrün, Schiefergrau und gedecktes Ocker bilden
+  gemeinsam die feste materielle Referenzpalette der Poch Disc. Sie sind keine
+  Spieler-, Besitzer- oder Wertfarben und tragen keine verdeckte Information.
 - Herkunft wird nur während Quelle-Ziel-Bewegung und am stabilen Sitz gezeigt.
 - Kein Stein morpht nach einem Gewinn seine Farbe.
 - Ein Wert pro Stein; keine Ziffern, Währungszeichen oder Poker-Edge-Spots.
