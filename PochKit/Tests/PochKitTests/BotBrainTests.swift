@@ -228,7 +228,8 @@ struct BotBrainTests {
         let observation = try #require(phase.botObservation(for: 0))
         let fields = Set(Mirror(reflecting: observation).children.compactMap(\.label))
 
-        #expect(fields == ["legalLeads", "upcard", "playedCards", "remainingCounts"])
+        #expect(fields == ["ownSeat", "legalLeads", "upcard", "playedCards", "remainingCounts"])
+        #expect(observation.ownSeat == 0)
         #expect(phase.botObservation(for: 1) == nil)
     }
 

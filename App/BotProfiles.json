@@ -7,7 +7,7 @@
       "portraitAssetPrefix": "OpponentLiv",
       "automaticEligible": true,
       "publicTendency": { "id": "measuredPace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.38, "bluffFrequency": 0.08, "riskTolerance": 0.43, "raiseAggression": 0.40, "thinkSecondsMin": 0.58, "thinkSecondsMax": 1.08 }
+      "profile": { "openAggression": 0.38, "bluffFrequency": 0.08, "riskTolerance": 0.43, "raiseAggression": 0.40, "thinkSecondsMin": 0.58, "thinkSecondsMax": 1.08, "playoutStyle": "anchor" }
     },
     {
       "id": "mara",
@@ -15,7 +15,7 @@
       "portraitAssetPrefix": "OpponentMara",
       "automaticEligible": true,
       "publicTendency": { "id": "variablePace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.54, "bluffFrequency": 0.16, "riskTolerance": 0.56, "raiseAggression": 0.58, "thinkSecondsMin": 0.48, "thinkSecondsMax": 0.94 }
+      "profile": { "openAggression": 0.54, "bluffFrequency": 0.16, "riskTolerance": 0.56, "raiseAggression": 0.58, "thinkSecondsMin": 0.48, "thinkSecondsMax": 0.94, "playoutStyle": "opportunist" }
     },
     {
       "id": "nina",
@@ -23,7 +23,7 @@
       "portraitAssetPrefix": "OpponentNina",
       "automaticEligible": true,
       "publicTendency": { "id": "measuredPace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.29, "bluffFrequency": 0.04, "riskTolerance": 0.36, "raiseAggression": 0.34, "thinkSecondsMin": 0.72, "thinkSecondsMax": 1.20 }
+      "profile": { "openAggression": 0.29, "bluffFrequency": 0.04, "riskTolerance": 0.36, "raiseAggression": 0.34, "thinkSecondsMin": 0.72, "thinkSecondsMax": 1.20, "playoutStyle": "anchor" }
     },
     {
       "id": "thomas",
@@ -31,7 +31,7 @@
       "portraitAssetPrefix": "OpponentThomas",
       "automaticEligible": true,
       "publicTendency": { "id": "measuredPace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.33, "bluffFrequency": 0.05, "riskTolerance": 0.48, "raiseAggression": 0.42, "thinkSecondsMin": 0.62, "thinkSecondsMax": 1.14 }
+      "profile": { "openAggression": 0.33, "bluffFrequency": 0.05, "riskTolerance": 0.48, "raiseAggression": 0.42, "thinkSecondsMin": 0.62, "thinkSecondsMax": 1.14, "playoutStyle": "hunter" }
     },
     {
       "id": "jonas",
@@ -39,7 +39,7 @@
       "portraitAssetPrefix": "OpponentJonas",
       "automaticEligible": true,
       "publicTendency": { "id": "earlyInitiative", "basis": "observedUnopenedRoundInitiative", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.70, "bluffFrequency": 0.22, "riskTolerance": 0.66, "raiseAggression": 0.72, "thinkSecondsMin": 0.34, "thinkSecondsMax": 0.78 }
+      "profile": { "openAggression": 0.70, "bluffFrequency": 0.22, "riskTolerance": 0.66, "raiseAggression": 0.72, "thinkSecondsMin": 0.34, "thinkSecondsMax": 0.78, "playoutStyle": "runner" }
     },
     {
       "id": "leon",
@@ -47,7 +47,7 @@
       "portraitAssetPrefix": "OpponentLeon",
       "automaticEligible": true,
       "publicTendency": { "id": "variablePace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.59, "bluffFrequency": 0.12, "riskTolerance": 0.58, "raiseAggression": 0.64, "thinkSecondsMin": 0.44, "thinkSecondsMax": 0.88 }
+      "profile": { "openAggression": 0.59, "bluffFrequency": 0.12, "riskTolerance": 0.58, "raiseAggression": 0.64, "thinkSecondsMin": 0.44, "thinkSecondsMax": 0.88, "playoutStyle": "opportunist" }
     },
     {
       "id": "noah",
@@ -55,7 +55,7 @@
       "portraitAssetPrefix": "OpponentNoah",
       "automaticEligible": true,
       "publicTendency": { "id": "variablePace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.47, "bluffFrequency": 0.18, "riskTolerance": 0.50, "raiseAggression": 0.48, "thinkSecondsMin": 0.52, "thinkSecondsMax": 1.02 }
+      "profile": { "openAggression": 0.47, "bluffFrequency": 0.18, "riskTolerance": 0.50, "raiseAggression": 0.48, "thinkSecondsMin": 0.52, "thinkSecondsMax": 1.02, "playoutStyle": "hunter" }
     },
     {
       "id": "finn",
@@ -63,7 +63,7 @@
       "portraitAssetPrefix": "OpponentFinn",
       "automaticEligible": true,
       "publicTendency": { "id": "earlyInitiative", "basis": "observedUnopenedRoundInitiative", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.76, "bluffFrequency": 0.28, "riskTolerance": 0.72, "raiseAggression": 0.78, "thinkSecondsMin": 0.30, "thinkSecondsMax": 0.70 }
+      "profile": { "openAggression": 0.76, "bluffFrequency": 0.28, "riskTolerance": 0.72, "raiseAggression": 0.78, "thinkSecondsMin": 0.30, "thinkSecondsMax": 0.70, "playoutStyle": "runner" }
     },
     {
       "id": "hana",
@@ -71,7 +71,7 @@
       "portraitAssetPrefix": "OpponentHana",
       "automaticEligible": true,
       "publicTendency": { "id": "measuredPace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.42, "bluffFrequency": 0.07, "riskTolerance": 0.54, "raiseAggression": 0.52, "thinkSecondsMin": 0.64, "thinkSecondsMax": 1.16 }
+      "profile": { "openAggression": 0.42, "bluffFrequency": 0.07, "riskTolerance": 0.54, "raiseAggression": 0.52, "thinkSecondsMin": 0.64, "thinkSecondsMax": 1.16, "playoutStyle": "opportunist" }
     },
     {
       "id": "darius",
@@ -79,7 +79,7 @@
       "portraitAssetPrefix": "OpponentDarius",
       "automaticEligible": true,
       "publicTendency": { "id": "earlyInitiative", "basis": "observedUnopenedRoundInitiative", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.63, "bluffFrequency": 0.20, "riskTolerance": 0.61, "raiseAggression": 0.68, "thinkSecondsMin": 0.40, "thinkSecondsMax": 0.84 }
+      "profile": { "openAggression": 0.63, "bluffFrequency": 0.20, "riskTolerance": 0.61, "raiseAggression": 0.68, "thinkSecondsMin": 0.40, "thinkSecondsMax": 0.84, "playoutStyle": "hunter" }
     },
     {
       "id": "samir",
@@ -87,7 +87,7 @@
       "portraitAssetPrefix": "OpponentSamir",
       "automaticEligible": true,
       "publicTendency": { "id": "measuredPace", "basis": "observedDecisionTempo", "disclosure": "afterFirstUnderstoodPochDecision", "semantics": "aggregateObservation" },
-      "profile": { "openAggression": 0.36, "bluffFrequency": 0.10, "riskTolerance": 0.46, "raiseAggression": 0.38, "thinkSecondsMin": 0.70, "thinkSecondsMax": 1.22 }
+      "profile": { "openAggression": 0.36, "bluffFrequency": 0.10, "riskTolerance": 0.46, "raiseAggression": 0.38, "thinkSecondsMin": 0.70, "thinkSecondsMax": 1.22, "playoutStyle": "anchor" }
     }
   ],
   "tutorialLineup": [

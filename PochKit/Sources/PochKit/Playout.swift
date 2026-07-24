@@ -42,6 +42,7 @@ public struct PlayoutPhase: Equatable, Sendable {
     public func botObservation(for player: Int) -> PlayoutBotObservation? {
         guard winner == nil, player == leader, hands.indices.contains(player) else { return nil }
         return PlayoutBotObservation(
+            ownSeat: player,
             legalLeads: hands[player],
             upcard: upcard,
             playedCards: plays.map(\.card),

@@ -1051,16 +1051,19 @@ final class GameState {
                 await runEndSequence()
                 return
             } else if phase.leader != humanRoundSeat {
-                // Bot spielt an: kurze Denkpause, dann niedrigste Karte
-                // (Platzhalter-Heuristik; echte Anspiel-Taktik kommt mit den Bot-Profilen)
+                // Bot spielt an: kurze Denkpause, dann die aus öffentlichen Tischdaten
+                // abgeleitete Entscheidung seines wiedererkennbaren Ausspielstils.
                 let leaderUISeat = uiSeat(forRoundSeat: phase.leader)
-                let pause = BotBrain.thinkSeconds(profile: botProfile(for: leaderUISeat),
+                let profile = botProfile(for: leaderUISeat)
+                let pause = BotBrain.thinkSeconds(profile: profile,
                                                   rng: &botRNG)
                 try? await Task.sleep(for: .seconds(pause))
                 guard !Task.isCancelled, stage == .playout, cascadeIdle,
                       let current = round.playout, current.leader != humanRoundSeat,
                       let observation = current.botObservation(for: current.leader),
-                      let card = BotBrain.lead(observation: observation)
+                      let card = BotBrain.lead(profile: profile,
+                                               observation: observation,
+                                               rng: &botRNG)
                 else { continue }
                 do {
                     try round.applyLead(card)
