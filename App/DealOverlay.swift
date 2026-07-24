@@ -1,4 +1,5 @@
 import PochKit
+import QuartzCore
 import SwiftUI
 
 /// Trumpf-Beat-Inszenierung (§6a): Kartenrücken fliegen sichtbar vom Stapel
@@ -11,6 +12,7 @@ struct DealOverlay: View {
     let poolPositions: [Pool: CGPoint]
     let reduceMotion: Bool
     var showsSeatTargets = true
+    var showsSeatIdentities = true
 
     var body: some View {
         GeometryReader { geo in
@@ -22,13 +24,18 @@ struct DealOverlay: View {
             // The PM49 board nearly fills the width. Keep the dealing stack in
             // the quiet band below it instead of covering the right-hand well.
             let deck = CGPoint(x: w * 0.78, y: h * 0.66)
+            let dealSource = DealCardPose.sourcePoint(deck)
+            let transcriptMode = CertifiedDealTranscript.requestedDebugMode
             ZStack {
+                if showsSeatTargets, (game.startedDeals > 0 || game.landedDeals > 0) {
+                    DealSeatTargets(game: game,
+                                    w: w,
+                                    h: h,
+                                    showsIdentities: showsSeatIdentities)
+                }
                 if game.landedDeals < game.totalDeals && !game.trumpRevealed {
-                    if showsSeatTargets {
-                        DealSeatTargets(game: game, w: w, h: h)
-                    }
                     if game.startedDeals > game.landedDeals {
-                        DealDeckAnchor(at: deck)
+                        DealDeckAnchor(at: deck, game: game)
                     }
                 }
 
@@ -36,15 +43,25 @@ struct DealOverlay: View {
                 // die Runde als schneller Zaehlerwechsel wirkt.
                 if !reduceMotion, game.landedDeals < game.totalDeals {
                     let order = game.dealOrder
-                    let window = game.landedDeals..<min(game.startedDeals, order.count)
+                    let generation = game.meldPresentationGeneration
+                    let windowStart = transcriptMode == nil
+                        ? game.landedDeals
+                        : max(0, game.landedDeals - 2)
+                    let window = windowStart..<min(game.startedDeals, order.count)
                     ForEach(Array(window), id: \.self) { i in
-                        FlyingBack(from: deck,
+                        FlyingBack(from: dealSource,
                                    to: target(order[i], w: w, h: h),
                                    seat: order[i].seat,
                                    slot: order[i].slot,
+                                   totalSlots: totalSlots(for: order[i].seat),
                                    sequence: i,
+                                   generation: generation,
+                                   currentGeneration: {
+                                       game.meldPresentationGeneration
+                                   },
+                                   transcriptMode: transcriptMode,
                                    onImpact: { game.markDealLanded(i) })
-                            .id("fly\(i)-\(game.round.deal.upcard.rank.rawValue)")
+                            .id("fly-\(generation)-\(i)-slot-\(order[i].slot)")
                     }
                 }
                 // Radialer Lichtpuls in Trumpffarbe (Belohnungs-Akzent, kein Dauer-Glow)
@@ -88,7 +105,11 @@ struct DealOverlay: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("phase1.presentation")
-            .accessibilityValue("\(game.meldShown)/\(game.meldEvents.count)")
+            .accessibilityValue(
+                transcriptMode == nil
+                    ? "\(game.meldShown)/\(game.meldEvents.count)"
+                    : "deal \(game.landedDeals)/\(game.totalDeals)"
+            )
         }
         .allowsHitTesting(false)
     }
@@ -100,15 +121,31 @@ struct DealOverlay: View {
 
     private func target(_ entry: (seat: Int, slot: Int), w: CGFloat, h: CGFloat) -> CGPoint {
         if entry.seat == 0 {
-            let x = w / 2 + (CGFloat(entry.slot) - 3.5) * 34
-            return CGPoint(x: x, y: h - 116)
+            let pose = DealTableauLayout.humanPose(
+                slot: entry.slot,
+                totalSlots: game.humanHand.count,
+                cardScale: 1.62
+            )
+            return CGPoint(x: w / 2 + pose.offset.width, y: h - 116)
         }
-        return opponentTarget(entry.seat, w: w, h: h)
+        let target = opponentTarget(entry.seat, w: w, h: h)
+        let offset = DealCardPose.opponentOffset(
+            slot: entry.slot,
+            totalSlots: totalSlots(for: entry.seat),
+            seat: entry.seat,
+            generation: game.meldPresentationGeneration
+        )
+        return CGPoint(x: target.x + offset.width,
+                       y: target.y + offset.height)
     }
 
     private func playerTarget(_ seat: Int, w: CGFloat, h: CGFloat) -> CGPoint {
         seat == 0 ? CGPoint(x: w / 2, y: h - 158)
                   : opponentTarget(seat, w: w, h: h)
+    }
+
+    private func totalSlots(for seat: Int) -> Int {
+        max(1, game.dealOrder.lazy.filter { $0.seat == seat }.count)
     }
 
     private func opponentTarget(_ seat: Int, w: CGFloat, h: CGFloat) -> CGPoint {
@@ -206,6 +243,7 @@ private struct DealSeatTargets: View {
     let game: GameState
     let w: CGFloat
     let h: CGFloat
+    let showsIdentities: Bool
 
     var body: some View {
         ZStack {
@@ -220,65 +258,105 @@ private struct DealSeatTargets: View {
     private func opponentSeat(_ seat: Int) -> some View {
         let point = opponentPoint(seat)
         let dealt = dealtCount(for: seat)
+        let total = totalCount(for: seat)
         return ZStack {
-            ZStack {
-                ForEach(0..<min(max(dealt, 1), 4), id: \.self) { i in
-                    CardBack(scale: 0.82)
-                        .rotationEffect(.degrees(Double(i - 1) * 8))
-                        .offset(x: CGFloat(i - 1) * 14,
-                                y: 19 + CGFloat(i) * 1.5)
-                        .opacity(dealt == 0 ? 0.04 : 0.78)
+            if dealt > 0 {
+                ZStack {
+                    ForEach(0..<dealt, id: \.self) { i in
+                    CardBack(
+                        materialVariant: materialVariant(seat: seat, slot: i),
+                        scale: DealCardPose.opponentTargetScale
+                    )
+                        .rotationEffect(.degrees(DealCardPose.opponentRotation(
+                            slot: i,
+                            totalSlots: total,
+                            seat: seat,
+                            generation: game.meldPresentationGeneration
+                        )))
+                        .offset(DealCardPose.opponentOffset(slot: i,
+                                                           totalSlots: total,
+                                                           seat: seat,
+                                                           generation: game.meldPresentationGeneration))
                         .shadow(color: .black.opacity(0.62), radius: 8, y: 5)
+                    }
                 }
+            } else {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .strokeBorder(Tokens.jewelPlatin.opacity(0.12),
+                                  style: StrokeStyle(lineWidth: 1, dash: [3, 4]))
+                    .frame(width: 43, height: 61)
             }
 
-            OpponentPortrait(seat: seat,
-                             name: game.name(of: seat),
-                             isActive: true,
-                             isFocus: dealt > 0,
-                             mood: dealt > 0 ? .thinking : .neutral,
-                             size: 44,
-                             showsText: false,
-                             morph: nil)
+            if showsIdentities {
+                OpponentPortrait(seat: seat,
+                                 name: game.name(of: seat),
+                                 isActive: true,
+                                 isFocus: dealt > 0,
+                                 mood: dealt > 0 ? .thinking : .neutral,
+                                 size: 44,
+                                 showsText: false,
+                                 morph: nil)
 
-            Text(game.name(of: seat).uppercased())
-                .font(.system(size: 7.5, weight: .heavy))
-                .tracking(1.0)
-                .foregroundStyle(Tokens.jewelPlatin.opacity(dealt > 0 ? 0.76 : 0.38))
-                .padding(.horizontal, 7)
-                .padding(.vertical, 3)
-                .background(Capsule().fill(Color.black.opacity(0.46)))
-                .offset(y: 47)
+                Text(game.name(of: seat).uppercased())
+                    .font(.system(size: 7.5, weight: .heavy))
+                    .tracking(1.0)
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(dealt > 0 ? 0.76 : 0.38))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Color.black.opacity(0.46)))
+                    .offset(y: 47)
+            }
         }
         .frame(width: 108, height: 94)
         .position(point)
-        .opacity(dealt == 0 ? 0.48 : 0.96)
+        .opacity(dealt == 0 ? 0.48 : 1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(game.name(of: seat))
+        .accessibilityValue("\(dealt)")
+        .accessibilityIdentifier("phase1.deal.seat.\(seat)")
     }
 
+    @ViewBuilder
     private var humanSeat: some View {
-        let dealt = dealtCount(for: 0)
-        return ZStack {
-            ForEach(0..<min(max(dealt, 1), 5), id: \.self) { i in
-                CardBack(scale: 1.08)
-                    .rotationEffect(.degrees(Double(i - 2) * 6))
-                    .offset(x: CGFloat(i - 2) * 27,
-                            y: abs(CGFloat(i - 2)) * 3.6)
-                    .opacity(humanSeatOpacity(dealt: dealt))
-                    .shadow(color: .black.opacity(0.62), radius: 11, y: 7)
-            }
+        if humanCardAwaitingContact != nil {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Tokens.jewelPlatin.opacity(0.12),
+                              style: StrokeStyle(lineWidth: 1, dash: [3, 4]))
+                .frame(width: 52 * DealCardPose.humanTargetScale,
+                       height: 74 * DealCardPose.humanTargetScale)
+                .position(x: w / 2, y: h - 82)
+                .accessibilityHidden(true)
         }
-        .position(x: w / 2, y: h - 82)
-        .opacity(0.76)
     }
 
-    private func humanSeatOpacity(dealt: Int) -> Double {
-        if dealt == 0 { return 0.04 }
-        if dealt < 4 { return 0.78 }
-        return 0.68
+    private var humanCardAwaitingContact: (sequence: Int, seat: Int, slot: Int)? {
+        let order = game.dealOrder
+        let lowerBound = min(game.landedDeals, order.count)
+        let upperBound = min(max(game.startedDeals, lowerBound), order.count)
+        guard let sequence = order[lowerBound..<upperBound]
+            .firstIndex(where: { $0.seat == 0 }) else { return nil }
+        let entry = order[sequence]
+        return (sequence, entry.seat, entry.slot)
+    }
+
+    private func materialVariant(seat: Int, slot: Int) -> Int {
+        let sequence = game.dealOrder.firstIndex {
+            $0.seat == seat && $0.slot == slot
+        } ?? slot
+        return DealBackMaterial.variant(
+            roundGeneration: game.meldPresentationGeneration,
+            dealSequence: sequence,
+            seat: seat,
+            slot: slot
+        )
     }
 
     private func dealtCount(for seat: Int) -> Int {
         game.dealOrder.prefix(game.landedDeals).filter { $0.seat == seat }.count
+    }
+
+    private func totalCount(for seat: Int) -> Int {
+        max(1, game.dealOrder.lazy.filter { $0.seat == seat }.count)
     }
 
     private func opponentPoint(_ seat: Int) -> CGPoint {
@@ -294,6 +372,7 @@ private struct DealSeatTargets: View {
 
 private struct DealDeckAnchor: View {
     let at: CGPoint
+    let game: GameState
 
     var body: some View {
         ZStack {
@@ -304,9 +383,9 @@ private struct DealDeckAnchor: View {
                 ], center: .center, startRadius: 4, endRadius: 56))
                 .frame(width: 116, height: 116)
             ForEach(0..<3, id: \.self) { i in
-                CardBack(scale: 0.96)
-                    .rotationEffect(.degrees(Double(i - 1) * 4))
-                    .offset(x: CGFloat(i - 1) * 3, y: CGFloat(i) * -2)
+                deckBack(index: i)
+                    .rotationEffect(.degrees(DealCardPose.deckRotation(index: i)))
+                    .offset(DealCardPose.deckOffset(index: i))
                     .shadow(color: .black.opacity(0.50), radius: 11, y: 6)
             }
             Circle()
@@ -316,6 +395,107 @@ private struct DealDeckAnchor: View {
         .position(at)
         .opacity(0.92)
         .transition(.scale(scale: 0.96).combined(with: .opacity))
+    }
+
+    @ViewBuilder
+    private func deckBack(index: Int) -> some View {
+        let order = game.dealOrder
+        let sequence = min(
+            game.startedDeals + max(2 - index, 0),
+            max(order.count - 1, 0)
+        )
+        if order.indices.contains(sequence) {
+            let entry = order[sequence]
+            CardBack(
+                materialVariant: DealBackMaterial.variant(
+                    roundGeneration: game.meldPresentationGeneration,
+                    dealSequence: sequence,
+                    seat: entry.seat,
+                    slot: entry.slot
+                ),
+                scale: DealCardPose.sourceScale
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+/// Single identity-neutral route shared by source, flight, and landed backs.
+private enum DealBackMaterial {
+    static func variant(
+        roundGeneration: Int,
+        dealSequence: Int,
+        seat: Int,
+        slot: Int
+    ) -> Int {
+        CardBackMaterialPlan.variantIndex(
+            roundGeneration: roundGeneration,
+            dealSequence: dealSequence,
+            seat: seat,
+            slot: slot
+        )
+    }
+}
+
+/// Gemeinsame Ruheposen für Quelle und Ziele. Die Flugkarte beginnt und endet
+/// exakt in diesen Maßen, damit der Kontakt keinen zweiten Skalensprung erzeugt.
+private enum DealCardPose {
+    static let sourceScale: CGFloat = 0.96
+    static let humanTargetScale: CGFloat = 1.08
+    static let opponentTargetScale: CGFloat = 0.82
+    static let shadowSettleStart: CGFloat = 0.62
+
+    private static let sourceIndex = 2
+    static func sourcePoint(_ deck: CGPoint) -> CGPoint {
+        let offset = deckOffset(index: sourceIndex)
+        return CGPoint(x: deck.x + offset.width, y: deck.y + offset.height)
+    }
+
+    static func deckRotation(index: Int) -> Double {
+        Double(index - 1) * 4
+    }
+
+    static var sourceRotation: Double {
+        deckRotation(index: sourceIndex)
+    }
+
+    static func deckOffset(index: Int) -> CGSize {
+        CGSize(width: CGFloat(index - 1) * 3, height: CGFloat(index) * -2)
+    }
+
+    static func targetScale(seat: Int) -> CGFloat {
+        seat == 0 ? humanTargetScale : opponentTargetScale
+    }
+
+    static func opponentRotation(
+        slot: Int,
+        totalSlots: Int,
+        seat: Int,
+        generation: Int
+    ) -> Double {
+        DealTableauLayout.opponentPose(slot: slot,
+                                       totalSlots: totalSlots,
+                                       seat: seat,
+                                       roundGeneration: generation).rotationDegrees
+    }
+
+    static func opponentOffset(
+        slot: Int,
+        totalSlots: Int,
+        seat: Int,
+        generation: Int
+    ) -> CGSize {
+        DealTableauLayout.opponentPose(slot: slot,
+                                       totalSlots: totalSlots,
+                                       seat: seat,
+                                       roundGeneration: generation).offset
+    }
+
+    static func shadowSettlement(progress: CGFloat) -> CGFloat {
+        let span = 1 - shadowSettleStart
+        let linear = min(max((progress - shadowSettleStart) / span, 0), 1)
+        return linear * linear * (3 - 2 * linear)
     }
 }
 
@@ -374,49 +554,315 @@ private struct CoinStream: View {
     }
 }
 
-/// Ein einzelner fliegender Rücken. Der sichtbare Zielstapel wächst erst im
-/// Kontakt-Frame, sodass die Karte nie gleichzeitig fliegt und gelandet ist.
+/// Ein einzelner fliegender Rücken. Im Kontakt-Frame wächst nur der gegnerische
+/// Zielstapel; beim Menschen übernimmt danach ausschließlich die echte Handfront.
 private struct FlyingBack: View {
     let from: CGPoint
     let to: CGPoint
     let seat: Int
     let slot: Int
+    let totalSlots: Int
     let sequence: Int
+    let generation: Int
+    let currentGeneration: () -> Int
+    let transcriptMode: TranscriptPlaybackMode?
     let onImpact: () -> Void
+    @State private var transaction: CardFlightTransaction
 
+    init(from: CGPoint,
+         to: CGPoint,
+         seat: Int,
+         slot: Int,
+         totalSlots: Int,
+         sequence: Int,
+         generation: Int,
+         currentGeneration: @escaping () -> Int,
+         transcriptMode: TranscriptPlaybackMode?,
+         onImpact: @escaping () -> Void) {
+        self.from = from
+        self.to = to
+        self.seat = seat
+        self.slot = slot
+        self.totalSlots = totalSlots
+        self.sequence = sequence
+        self.generation = generation
+        self.currentGeneration = currentGeneration
+        self.transcriptMode = transcriptMode
+        self.onImpact = onImpact
+        _transaction = State(initialValue: CardFlightTransaction(
+            eventID: Self.eventID(sequence: sequence),
+            generation: generation,
+            source: CardPose(x: Double(from.x),
+                             y: Double(from.y),
+                             depth: 1,
+                             rotationDegrees: DealCardPose.sourceRotation,
+                             scale: Double(DealCardPose.sourceScale)),
+            target: CardPose(x: Double(to.x),
+                             y: Double(to.y),
+                             rotationDegrees: Self.landingAngle(seat: seat,
+                                                                slot: slot,
+                                                                totalSlots: totalSlots,
+                                                                generation: generation),
+                             scale: Double(DealCardPose.targetScale(seat: seat))),
+            motionPreference: .standard
+        ))
+    }
+
+    @ViewBuilder
     var body: some View {
+        if let transcriptMode {
+            TranscriptFlyingBack(
+                from: from,
+                to: to,
+                seat: seat,
+                slot: slot,
+                totalSlots: totalSlots,
+                sequence: sequence,
+                generation: generation,
+                mode: transcriptMode,
+                onContact: registerTranscriptContact,
+                onRest: registerTranscriptRest
+            )
+        } else {
+            impactFlight
+        }
+    }
+
+    private var impactFlight: some View {
+        let profile = DealTableauLayout.flightProfile(
+            roundGeneration: generation,
+            sequence: sequence,
+            seat: seat,
+            slot: slot
+        )
         let duration = PhysicalMotion.duration(from: from,
                                                to: to,
-                                               pointsPerSecond: 640,
+                                               pointsPerSecond: profile.pointsPerSecond,
                                                minimum: Tokens.p1Flight,
                                                maximum: Tokens.p1Flight + 0.16)
-        ImpactFlight(from: from,
+        return ImpactFlight(from: from,
                      to: to,
                      duration: duration,
+                     delay: profile.launchDelay,
                      arcHeight: PhysicalMotion.shallowArcHeight(from: from,
                                                                 to: to,
                                                                 minimum: 18,
-                                                                maximum: 34),
-                     lateralBias: CGFloat((sequence % 3) - 1) * 6,
-                     onImpact: onImpact) { progress in
-            CardBack(scale: seat == 0 ? 1.24 : 1.14)
+                                                                maximum: 34)
+                        + profile.arcLift,
+                     lateralBias: profile.lateralBias,
+                     onImpact: registerImpact,
+                     onCancel: cancelTransaction) { progress in
+            let pose = transaction.source.interpolated(to: transaction.target,
+                                                       progress: Double(progress))
+            let settlement = DealCardPose.shadowSettlement(progress: progress)
+            CardBack(
+                materialVariant: DealBackMaterial.variant(
+                    roundGeneration: generation,
+                    dealSequence: sequence,
+                    seat: seat,
+                    slot: slot
+                ),
+                scale: DealCardPose.sourceScale
+            )
                 .shadow(color: .black.opacity(0.56),
-                        radius: progress > 0.82 ? 4 : 12,
-                        y: progress > 0.82 ? 3 : 8)
+                        radius: 12 + (4 - 12) * settlement,
+                        y: 8 + (3 - 8) * settlement)
                 .rotationEffect(.degrees(
-                    launchAngle + (landingAngle - launchAngle) * Double(progress)
+                    pose.rotationDegrees
+                        + sin(Double(progress) * .pi) * profile.midflightTwistDegrees
                 ))
-                .scaleEffect(1.02 + ((seat == 0 ? 0.90 : 0.82) - 1.02) * progress)
+                .scaleEffect(CGFloat(pose.scale) / DealCardPose.sourceScale)
             }
     }
 
-    private var launchAngle: Double {
-        Double((sequence % 5) - 2) * 1.6
+    private static func eventID(sequence: Int) -> String {
+        "deal-card-\(sequence)"
     }
 
-    private var landingAngle: Double {
-        if seat == 0 { return Double(slot - 3) * 4.5 }
-        return Double((slot % 3) - 1) * 5.5
+    private func registerImpact() {
+        let eventID = Self.eventID(sequence: sequence)
+        guard transaction.registerContact(
+            eventID: eventID,
+            generation: currentGeneration()
+        ) == .accepted else { return }
+        onImpact()
+        _ = transaction.complete(eventID: eventID, generation: generation)
+    }
+
+    private func registerTranscriptContact() {
+        let eventID = Self.eventID(sequence: sequence)
+        guard transaction.registerContact(
+            eventID: eventID,
+            generation: currentGeneration()
+        ) == .accepted else { return }
+        onImpact()
+    }
+
+    private func registerTranscriptRest() {
+        let eventID = Self.eventID(sequence: sequence)
+        _ = transaction.complete(eventID: eventID, generation: generation)
+    }
+
+    private func cancelTransaction() {
+        transaction.cancel()
+    }
+
+    fileprivate static func landingAngle(
+        seat: Int,
+        slot: Int,
+        totalSlots: Int,
+        generation: Int
+    ) -> Double {
+        if seat == 0 {
+            return DealTableauLayout.humanPose(slot: slot,
+                                               totalSlots: totalSlots,
+                                               cardScale: 1.62).rotationDegrees
+        }
+        return DealCardPose.opponentRotation(slot: slot,
+                                             totalSlots: totalSlots,
+                                             seat: seat,
+                                             generation: generation)
+    }
+}
+
+/// The only Stage-3 consumer. It samples the admitted plan from a monotone host
+/// clock and keeps contact and rest as separate lifecycle edges.
+private struct TranscriptFlyingBack: View {
+    let from: CGPoint
+    let to: CGPoint
+    let seat: Int
+    let slot: Int
+    let totalSlots: Int
+    let sequence: Int
+    let generation: Int
+    let mode: TranscriptPlaybackMode
+    let onContact: @MainActor () -> Void
+    let onRest: @MainActor () -> Void
+
+    @State private var player: TranscriptMotionPlayer
+    @State private var snapshot: TranscriptPlaybackSnapshot
+
+    init(
+        from: CGPoint,
+        to: CGPoint,
+        seat: Int,
+        slot: Int,
+        totalSlots: Int,
+        sequence: Int,
+        generation: Int,
+        mode: TranscriptPlaybackMode,
+        onContact: @escaping @MainActor () -> Void,
+        onRest: @escaping @MainActor () -> Void
+    ) {
+        self.from = from
+        self.to = to
+        self.seat = seat
+        self.slot = slot
+        self.totalSlots = totalSlots
+        self.sequence = sequence
+        self.generation = generation
+        self.mode = mode
+        self.onContact = onContact
+        self.onRest = onRest
+
+        guard let player = TranscriptMotionPlayer(
+            plan: CertifiedDealTranscript.plan,
+            mode: mode,
+            onContact: onContact,
+            onRest: onRest,
+            onCancelBeforeRelease: {}
+        ) else {
+            preconditionFailure("The admitted Stage-2 transcript must remain valid")
+        }
+        _player = State(initialValue: player)
+        _snapshot = State(initialValue: player.currentSnapshot)
+    }
+
+    var body: some View {
+        CardBack(
+            materialVariant: DealBackMaterial.variant(
+                roundGeneration: generation,
+                dealSequence: sequence,
+                seat: seat,
+                slot: slot
+            ),
+            scale: DealCardPose.sourceScale
+        )
+            .shadow(
+                color: .black.opacity(snapshot.sample.shadow.opacity),
+                radius: snapshot.sample.shadow.blurRadius,
+                x: snapshot.sample.shadow.offset.x,
+                y: snapshot.sample.shadow.offset.y
+            )
+            .rotation3DEffect(
+                .degrees(snapshot.sample.curlMillimeters * 1.25),
+                axis: (x: 1, y: 0, z: 0),
+                perspective: 0.68
+            )
+            .rotationEffect(.degrees(rotationDegrees))
+            .scaleEffect(scale / DealCardPose.sourceScale)
+            .position(position)
+            .opacity(snapshot.phase == .resting ? 0 : 1)
+            .accessibilityElement(children: .ignore)
+            .accessibilityIdentifier("phase1.deal.transcript.flight.\(sequence)")
+            .accessibilityValue(
+                "\(snapshot.phase.rawValue), contact \(snapshot.contactDelivered ? 1 : 0), rest \(snapshot.restDelivered ? 1 : 0)"
+            )
+            .task { await play() }
+    }
+
+    private var normalizedPosition: CGPoint {
+        let sample = snapshot.sample.position
+        let x = (sample.x - 0.18) / (0.90 - 0.18)
+        let y = (sample.y - 0.15) / (0.86 - 0.15)
+        return CGPoint(x: min(max(x, 0), 1), y: min(max(y, 0), 1))
+    }
+
+    private var pathProgress: CGFloat {
+        (normalizedPosition.x + normalizedPosition.y) / 2
+    }
+
+    private var position: CGPoint {
+        CGPoint(
+            x: from.x + (to.x - from.x) * normalizedPosition.x,
+            y: from.y + (to.y - from.y) * normalizedPosition.y
+                - CGFloat(snapshot.sample.depth) * 30
+        )
+    }
+
+    private var scale: CGFloat {
+        let target = DealCardPose.targetScale(seat: seat)
+        return DealCardPose.sourceScale
+            + (target - DealCardPose.sourceScale) * pathProgress
+            + CGFloat(snapshot.sample.depth) * 0.025
+    }
+
+    private var rotationDegrees: Double {
+        let target = FlyingBack.landingAngle(seat: seat,
+                                             slot: slot,
+                                             totalSlots: totalSlots,
+                                             generation: generation)
+        let progress = Double(pathProgress)
+        let runtimeBaseline = DealCardPose.sourceRotation
+            + (target - DealCardPose.sourceRotation) * progress
+        let certifiedBaseline = -5.2 + 5.2 * progress
+        return runtimeBaseline + snapshot.sample.rotationDegrees - certifiedBaseline
+    }
+
+    @MainActor
+    private func play() async {
+        snapshot = player.release(at: CACurrentMediaTime())
+        while snapshot.isMoving {
+            do {
+                try await Task.sleep(for: .milliseconds(4))
+            } catch {
+                // Removal, skip, or generation replacement owns final state. Do
+                // not emit a callback after SwiftUI has cancelled this task.
+                return
+            }
+            guard !Task.isCancelled else { return }
+            snapshot = player.advance(to: CACurrentMediaTime())
+        }
     }
 }
 

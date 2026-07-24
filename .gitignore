@@ -1,5 +1,7 @@
 .DS_Store
 DerivedData/
+.derived-time-swipe/
+.derived/
 xcuserdata/
 *.xcodeproj
 .build/
@@ -15,8 +17,10 @@ fastlane/README.md
 build/
 *.xcarchive
 *.ipa
+*.xcresult
 # Generierte Cockpits, Sichtungen, Screenshots und Videos bleiben lokal.
 artifacts/
 *.mp4
 *.wav
+!App/Audio/cent-copper-polycarbonate-01.wav
 .poch-simulator-udid

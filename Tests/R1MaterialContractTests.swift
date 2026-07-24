@@ -16,13 +16,14 @@ struct R1MaterialContractTests {
         let impactFlight = try source(at: "App/ImpactFlight.swift")
         let dealOverlay = try source(at: "App/DealOverlay.swift")
         let tokens = try source(at: "App/DesignTokens.swift")
+        let generator = try source(at: "tools/build_r1_ceramic_assets.py")
 
-        try r1RendererUsesTheReferencePalette(components)
-        try r1AssetsShareTheCanonicalSilhouette(tokens: tokens)
+        try r1RendererUsesTheReferencePalette(components, generator: generator)
+        try r1AssetsShareTheCanonicalSilhouette(tokens: tokens, generator: generator)
         try pochDiscAssetNormalizationStaysShared(components, ring: ring)
         try pochDiscMaterialGradeStaysShared(components, ring: ring)
         try saturatedPilesRevealTheirPublicValue(components)
-        try r1ScaleAndLightingStayPhysical(components)
+        try r1ScaleAndLightingStayPhysical(components, generator: generator)
         try restingPosesAreStableAndVaried(layout)
         try contactFeedbackIsImpactBoundAndBundled(effects)
         try fundingMotionRemainsPhysicalAndInterruptible(content: content,
@@ -55,7 +56,10 @@ struct R1MaterialContractTests {
                "The satin outer frame needs the dark vector suit engravings")
     }
 
-    private static func r1RendererUsesTheReferencePalette(_ source: String) throws {
+    private static func r1RendererUsesTheReferencePalette(
+        _ source: String,
+        generator: String
+    ) throws {
         for colorway in ["naturalWhite", "terracotta", "sage", "slate", "ochre"] {
             expect(source.contains("case \(colorway)"),
                    "R1 colorway \(colorway) is missing")
@@ -75,10 +79,11 @@ struct R1MaterialContractTests {
                "Legacy pool/player tint must remain explicitly ignored")
         expect(!renderer.contains("Text("),
                "R1 must not render values or currency on the token")
-        expect(renderer.contains("R1MintEmboss(colorway: colorway"),
-               "R1 must carry the agreed large W2 blind emboss")
-        expect(source.contains("R1FacetSignet()"),
-               "R1 must carry the shared faceted W2 product signet")
+        expect(!renderer.contains("stroke("),
+               "R1 must not draw the W2 signet as runtime line art")
+        expect(generator.contains("def signet_relief_fields()")
+               && generator.contains("relief_highlight_px"),
+               "R1 must bake the faceted W2 blind emboss into its ceramic material")
         expect(!source.contains("R1CenterMark"),
                "R1 must not substitute arbitrary chevron, square, or diamond marks")
         expect(source.contains("static func resolve(compartment: TravelCompartment, index: Int)"),
@@ -87,13 +92,18 @@ struct R1MaterialContractTests {
                "The reference ochre material must reach the jack well")
     }
 
-    private static func r1AssetsShareTheCanonicalSilhouette(tokens: String) throws {
+    private static func r1AssetsShareTheCanonicalSilhouette(
+        tokens: String,
+        generator: String
+    ) throws {
         expect(FileManager.default.fileExists(atPath: root
             .appendingPathComponent("tools/build_r1_ceramic_assets.py").path),
                "R1 needs a reproducible build-time ceramic material generator")
         expect(FileManager.default.fileExists(atPath: root
             .appendingPathComponent("tools/r1-material/r1-alpha-mask.png").path),
                "R1 needs a locked source alpha hull")
+        expect(generator.contains("def taller_alpha(source: Image.Image)"),
+               "R1 height must extend only the projected ceramic wall")
         let assets = [
             (name: "R1NaturalWhite", filename: "r1-natural-white.png",
              nativeVariation: 0.006...0.015, compactMinimum: 0.005),
@@ -133,8 +143,8 @@ struct R1MaterialContractTests {
             expect(Set(alpha).count >= 16,
                    "\(asset.name) needs a continuous antialias edge, not a quantized fringe")
             let bounds = alphaBounds(alpha, width: width, height: height)
-            expect(bounds.width == 294 && bounds.height == 308,
-                   "\(asset.name) must retain the measured 294 x 308 alpha hull")
+            expect(bounds.width == 294 && bounds.height == 318,
+                   "\(asset.name) must retain the measured 294 x 318 elevated alpha hull")
             if let referenceAlpha {
                 expect(alpha == referenceAlpha,
                        "\(asset.name) must share the exact R1 silhouette")
@@ -145,8 +155,8 @@ struct R1MaterialContractTests {
             let nativePixels = try rasterizedPixels(at: url, width: width, height: height)
             let nativeFace = luminances(in: nativePixels,
                                         canvasWidth: width,
-                                        xRange: 130..<210,
-                                        yRange: 110..<190)
+                                        xRange: 140..<200,
+                                        yRange: 240..<270)
             let nativeMean = nativeFace.reduce(0, +) / Double(nativeFace.count)
             let nativeVariation = standardDeviation(nativeFace) / nativeMean
             expect(asset.nativeVariation.contains(nativeVariation),
@@ -157,8 +167,8 @@ struct R1MaterialContractTests {
             let compactPixels = try rasterizedPixels(at: url, width: 39, height: 39)
             let compactFace = luminances(in: compactPixels,
                                          canvasWidth: 39,
-                                         xRange: 14..<25,
-                                         yRange: 12..<23)
+                                         xRange: 10..<16,
+                                         yRange: 24..<30)
             let compactMean = compactFace.reduce(0, +) / Double(compactFace.count)
             expect(standardDeviation(compactFace) / compactMean >= asset.compactMinimum,
                    "\(asset.name) mineral grain must survive at the 39 pt product size")
@@ -343,34 +353,24 @@ struct R1MaterialContractTests {
                "A saturated physical pile must reveal its public semantic value")
     }
 
-    private static func r1ScaleAndLightingStayPhysical(_ source: String) throws {
+    private static func r1ScaleAndLightingStayPhysical(
+        _ source: String,
+        generator: String
+    ) throws {
         let renderer = try section(in: source,
                                    from: "struct R1Token: View",
                                    through: "typealias TableChip = R1Token")
-        expect(renderer.contains("markRotation: markRotation"),
-               "R1 must pass rotation into the token-bound emboss")
         expect(!renderer.contains("Ellipse()"),
                "R1 shadows must follow the real alpha silhouette, not detached ovals")
         expect(renderer.contains("Image(colorway.assetName)"),
                "R1 must use the build-time material basis instead of flat circles")
         expect(renderer.contains(".scaleEffect(Tokens.r1AssetScale)"),
                "R1 must normalize the visible ceramic body inside the PNG canvas")
-
-        let emboss = try section(in: source,
-                                 from: "private struct R1MintEmboss: View",
-                                 through: "struct TableTokenPile: View")
-        expect(!emboss.contains("Circle()"),
-               "Precision rändelung and shoulder belong to the material asset, not runtime circles")
-        expect(emboss.contains("Tokens.r1SignetBBoxRatio"),
-               "The W2 blind emboss needs the measured 0.385-size bounding box")
-        expect(emboss.contains(".rotationEffect(.degrees(markRotation))"),
-               "Only the token-bound emboss geometry may rotate")
-        guard let rotationRange = emboss.range(of: ".rotationEffect(.degrees(markRotation))"),
-              let lightRange = emboss.range(of: ".shadow(color: colorway.face.opacity") else {
-            fail("R1 emboss needs a world-fixed relief-light contract")
-        }
-        expect(rotationRange.lowerBound < lightRange.lowerBound,
-               "Emboss geometry must rotate before its world-fixed light is applied")
+        expect(renderer.contains(".interpolation(.medium)"),
+               "R1 precision teeth must survive the 39-pt product projection")
+        expect(generator.contains("SIGNET_STROKE")
+               && generator.contains("relief_dark_wall_px"),
+               "R1 emboss needs a narrow trench and paired material light edge")
 
         let pile = try section(in: source,
                                from: "struct TableTokenPile: View",
@@ -391,8 +391,19 @@ struct R1MaterialContractTests {
                "the centre pile must use the exact geometric midpoint")
         expect(recessed.contains("R1WellFrontLip()"),
                "The well may occlude tokens only with its local front lip")
+        expect(recessed.contains("if compartment != .center"),
+               "The raised center bezel must not receive a second compact catch arc")
         expect(!recessed.contains(".frame(width: diameter * 0.58, height: diameter * 0.14)"),
                "A broad synthetic group-shadow oval must not return")
+
+        expect(renderer.contains("Tokens.r1CastShadowElevationRadiusRatio")
+               && renderer.contains("Tokens.r1CastShadowElevationYRatio"),
+               "stack elevation must widen and displace the physical cast shadow")
+        expect(pile.contains("Tokens.r1PileElevationLiftRatio"),
+               "overlapping R1 need a visible height lift instead of a flat rosette")
+        expect(pile.contains("Tokens.r1CenterPileSpread")
+               && pile.contains("Tokens.r1OuterPileSpread"),
+               "R1 piles must expose their sidewalls and shadows within each physical floor")
 
     }
 
@@ -478,15 +489,19 @@ struct R1MaterialContractTests {
 
     private static func ceramicAudioVariantsMeetTheRuntimeContract(_ source: String) throws {
         let expression = try NSRegularExpression(
-            pattern: #"r1-ceramic-(?:outer|center)-0[1-3]"#
+            pattern: #"r1-ceramic-(?:outer|center|stack)-0[1-3]"#
         )
         let range = NSRange(source.startIndex..<source.endIndex, in: source)
         let names = Set(expression.matches(in: source, range: range).compactMap { match -> String? in
             guard let swiftRange = Range(match.range, in: source) else { return nil }
             return String(source[swiftRange])
         })
-        expect(names.count == 6,
-               "R1 requires three outer-well and three center-well variants")
+        expect(names.count == 9,
+               "R1 requires three variants for outer well, center well, and player stack")
+
+        expect(source.contains("case .playerStack:")
+               && source.contains("variants = stackVariants"),
+               "Player-stack contacts need their own softer ceramic-on-ceramic family")
 
         for name in names {
             let url = root.appendingPathComponent("App/Audio/\(name).caf")

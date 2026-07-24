@@ -1,0 +1,16 @@
+"internal.coinQA.body" = "Comprueba que la imagen, el sonido del cobre y la vibración coincidan al impactar.";
+"internal.coinQA.close" = "Cerrar";
+"internal.coinQA.eyebrow" = "PRUEBA INTERNA DEL DISPOSITIVO";
+"internal.coinQA.haptics" = "Vibración";
+"internal.coinQA.mode" = "Movimiento";
+"internal.coinQA.mode.reduced" = "Reducido";
+"internal.coinQA.mode.standard" = "Estándar";
+"internal.coinQA.note" = "Prueba sin cable. Para aprobar, repite una vez con Reducir movimiento.";
+"internal.coinQA.open" = "Probar el contacto de la moneda en este iPhone";
+"internal.coinQA.play" = "Reproducir prueba";
+"internal.coinQA.sound" = "Sonido";
+"internal.coinQA.state.contact" = "Contacto detectado";
+"internal.coinQA.state.flying" = "Moneda en movimiento";
+"internal.coinQA.state.ready" = "Listo";
+"internal.coinQA.state.resting" = "Moneda en reposo";
+"internal.coinQA.title" = "Contacto de la moneda";

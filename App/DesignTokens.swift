@@ -32,13 +32,13 @@ enum Tokens {
     static let tileCorner: CGFloat = 16
     // Der kompakte Phase-2-Auftritt folgt dem freigegebenen Mockup: Die Disc ist
     // ein präziser Tischanker, aber nicht die dominante Vollbildfläche aus Phase 1.
-    static let phase2BoardScale: CGFloat = 0.45
-    static let phase2StageHeight: CGFloat = 246
+    static let phase2BoardScale: CGFloat = 0.54
+    static let phase2StageHeight: CGFloat = 260
     static let phase2CompactHeight: CGFloat = 760
     static let phase2OpponentRowHeight: CGFloat = 116
     static let phase2OpponentGapCompact: CGFloat = 8
     static let phase2OpponentGapRegular: CGFloat = 18
-    static let phase2HandReservedHeight: CGFloat = 176
+    static let phase2HandReservedHeight: CGFloat = 210
     static let phase2ResultHandReservedHeight: CGFloat = 154
 
     // Gefuehrte Melde-Runde: eigene Komposition statt der tieferen Position des
@@ -56,12 +56,12 @@ enum Tokens {
     static let guidedOpeningTokenSize: CGFloat = 38
     static let guidedOpeningSourceGap: CGFloat = 66
     static let guidedOpeningSnapRadius: CGFloat = 58
-    /// One player's nine antes arrive as a compact radial wave. The short
-    /// stagger preserves source-to-target causality without turning 36 tokens
-    /// into a long unskippable cutscene.
-    static let guidedAnteFlight: Double = 0.34
-    static let guidedAnteStagger: Double = 0.045
-    static let guidedAnteWaveRest: Double = 0.18
+    /// Im ersten Spiel setzt immer genau eine Person ein. Der größere Abstand
+    /// hält höchstens drei Chips gleichzeitig in Bewegung; Quelle, Ziel und
+    /// Spieler bleiben dadurch lesbar statt als radiale Salve zu erscheinen.
+    static let guidedAnteFlight: Double = 0.32
+    static let guidedAnteStagger: Double = 0.105
+    static let guidedAnteWaveRest: Double = 0.22
     /// Reagiert während einer laufenden Welle zeitnah auf einen Wechsel der
     /// systemweiten Einstellung "Bewegung reduzieren".
     static let guidedAnteMotionPreferencePoll: Double = 0.05
@@ -77,7 +77,8 @@ enum Tokens {
     // gedachten Durchmesser; nur der verfügbare Ablageraum unterscheidet sich.
     /// Die bestätigte Produktreferenz zeigt R1 mit rund 70-74 % der sichtbaren
     /// Muldenöffnung. Derselbe physische Durchmesser gilt auch in der Mitte.
-    static let tableTokenDiameter: CGFloat = 39
+    static let tableTokenDiameter: CGFloat = 40.5
+    static let r1CompactTokenScale: CGFloat = 0.950
     static let tableTokenToFloorRatio: CGFloat = 0.74
     static let tableTokenOverlap: CGFloat = 0.40
     static let phase1OuterWellDiameter: CGFloat = 58
@@ -86,9 +87,10 @@ enum Tokens {
     /// Alpha-Ausdehnung des Keramikkörpers misst rund 308 px. `size` bezeichnet
     /// deshalb die vollständige sichtbare Hüllkurve und bleibt im Mulden-Fit.
     static let r1AssetScale: CGFloat = 1.085
+    static let r1MeasuredAlphaWidthRatio: CGFloat = 294.0 / 340.0
     /// Größter gemessener Abstand eines sichtbaren Alpha-Pixels vom
     /// Produktionsmittelpunkt, normiert auf den 340-px-Canvas.
-    static let r1MeasuredAlphaRadiusRatio: CGFloat = 157.678 / 340.0
+    static let r1MeasuredAlphaRadiusRatio: CGFloat = 168.870 / 340.0
     /// Nur die textile Innenöffnung ist Ablagefläche. Der äußere Metallring
     /// gehört nicht zur Mulde und darf nie R1-Alpha zeigen.
     static let outerWellFloorRatio: CGFloat = 0.95
@@ -99,21 +101,31 @@ enum Tokens {
     static let r1SageFace = Color(hex: 0x828776)
     static let r1SlateFace = Color(hex: 0x6F7074)
     static let r1OchreFace = Color(hex: 0xB58742)
-    static let r1NaturalEdge = Color(hex: 0x9B9996)
-    static let r1TerracottaEdge = Color(hex: 0x7D5342)
-    static let r1SageEdge = Color(hex: 0x5B5F53)
-    static let r1SlateEdge = Color(hex: 0x4E4E51)
-    static let r1OchreEdge = Color(hex: 0x7F5F2E)
-    static let r1SignetBBoxRatio: CGFloat = 0.385
-    static let r1SignetVerticalOffsetRatio: CGFloat = -0.019
-    static let r1EmbossLightOffsetRatio: CGFloat = 0.005
-    static let r1EmbossDarkOffsetRatio: CGFloat = 0.007
-    static let r1ContactShadowRadiusRatio: CGFloat = 0.010
-    static let r1ContactShadowXRatio: CGFloat = 0.012
-    static let r1ContactShadowYRatio: CGFloat = 0.014
-    static let r1CastShadowRadiusRatio: CGFloat = 0.042
-    static let r1CastShadowXRatio: CGFloat = 0.024
-    static let r1CastShadowYRatio: CGFloat = 0.060
+    static let r1ContactShadowOpacity: Double = 0.86
+    static let r1ContactShadowElevationFade: Double = 0.15
+    static let r1ContactShadowRadiusRatio: CGFloat = 0.012
+    static let r1ContactShadowXRatio: CGFloat = 0.014
+    static let r1ContactShadowYRatio: CGFloat = 0.018
+    static let r1CastShadowOpacity: Double = 0.62
+    static let r1CastShadowElevationFade: Double = 0.05
+    static let r1CastShadowRadiusRatio: CGFloat = 0.035
+    static let r1CastShadowXRatio: CGFloat = 0.028
+    static let r1CastShadowYRatio: CGFloat = 0.070
+    /// Höher liegende R1 werfen einen weicheren, weiter versetzten Schatten auf
+    /// die darunterliegende Scheibe; der Kontaktschatten bleibt lokal hart.
+    static let r1CastShadowElevationRadiusRatio: CGFloat = 0.025
+    static let r1CastShadowElevationXRatio: CGFloat = 0.014
+    static let r1CastShadowElevationYRatio: CGFloat = 0.045
+    /// Der maximale Viererstapel braucht bei 39 pt rund 1,45 pt sichtbaren Hub.
+    /// Zusammen mit der gebackenen Seitenwand entsteht so eine lesbare Lage,
+    /// ohne dass die Scheiben über den textilen Muldenboden hinauswandern.
+    static let r1PileElevationLiftRatio: CGFloat = 0.310
+    /// Außenmulden nutzen die textile Öffnung nahezu vollständig; die größere
+    /// Mittelmulde darf den gleichen physischen Stapel weiter auffächern.
+    /// Beide Werte bleiben innerhalb des aus Alpha-Hülle und Bodenradius
+    /// berechneten Fits, sodass kein Stein über dem Metallring erscheint.
+    static let r1OuterPileSpread: CGFloat = 0.82
+    static let r1CenterPileSpread: CGFloat = 1.50
     /// Kleine Setzabweichung zur optischen Mitte des Textilbodens. Die räumliche
     /// Einfassung übernimmt der echte Asset-Metallring, nicht ein harter Offset.
     static let r1WellPileVerticalInsetRatio: CGFloat = 0.025
@@ -131,7 +143,7 @@ enum Tokens {
     static let pochDiscAssetScale: CGFloat = 1.26
     static let pochDiscAssetOffsetXRatio: CGFloat = 0.0010
     static let pochDiscAssetOffsetYRatio: CGFloat = 0.0372
-    static let pochDiscSidewallExtensionRatio: CGFloat = 0.011
+    static let pochDiscSidewallExtensionRatio: CGFloat = 0.019
     static let pochDiscContactShadowRadiusRatio: CGFloat = 0.014
     static let pochDiscContactShadowXRatio: CGFloat = 0.006
     static let pochDiscContactShadowYRatio: CGFloat = 0.024
@@ -160,8 +172,20 @@ enum Tokens {
     /// Kaskaden-Takt des Austeilens: bewusst sichtbar, damit Kartenruecken als
     /// Deal-Ritual wirken statt als technischer Zaehlersprung.
     static let p1DealStep: Double = 0.32
-    static let p1GuidedDealStep: Double = 0.62
-    static let p1GuidedDealFinishStep: Double = 0.24
+    /// Ein kurzer, wiederholbarer Rhythmus ersetzt das metronomische Austeilen.
+    /// Der Mittelwert bleibt nahe am bisherigen 320-ms-Takt; nur Akzente und
+    /// kleine Atempausen variieren, ohne die deterministische Regelrunde anzurühren.
+    static let p1DealCadence: [Double] = [0.27, 0.31, 0.29, 0.38, 0.26, 0.33, 0.30, 0.36]
+    static let p1GuidedDealStep: Double = 0.34
+    static let p1GuidedDealFinishStep: Double = 0.09
+    static let p1GuidedDealConcurrency = 4
+    /// SwiftUI can occasionally suppress an animation-completion callback while
+    /// UI automation snapshots a busy scene. A guided group still reaches its
+    /// physical contact state after this bounded presentation deadline.
+    static let p1GuidedDealRecoveryDeadline: Double = 0.86
+    /// The opening montage earns attention, but never holds the first human
+    /// decision hostage to a full-deck presentation.
+    static let p1GuidedOpeningMontageMaximum: Double = 9.5
     /// Flugdauer einer einzelnen Karte vom Stapel in die Hand.
     static let p1Flight: Double = 0.42
     /// Freeze vor dem Trumpf-Flip: 150 ms.
@@ -173,6 +197,7 @@ enum Tokens {
     static let hapticCadence: Double = 0.11
     /// Melde-Strom (§6a b): Takt pro Meldung (Mulde pulst, Münzen fliegen, Zähler rollt).
     static let p1MeldStep: Double = 1.08
+    static let p1GuidedMeldRecoveryDeadline: Double = 1.45
     /// Einzelne schwere R1 verlassen die Mulde leicht versetzt. Der letzte
     /// tatsächliche Kontakt schaltet erst danach den sichtbaren Gewinnerstack frei.
     static let p1MeldTokenDiameter: CGFloat = 31

@@ -112,7 +112,7 @@ enum R1TokenSlots {
 
         return R1TokenRestingPose(
             offset: CGSize(width: x, height: y),
-            rotation: (mirrored ? -slot.angle : slot.angle) + groupAngle + rotationJitter,
+            rotation: (mirrored ? -slot.angle : slot.angle) + rotationJitter,
             elevation: slot.elevation
         )
     }

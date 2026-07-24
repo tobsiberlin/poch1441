@@ -10,7 +10,6 @@ final class Phase2DynamicTypeUITests: XCTestCase {
         let window: CGRect
         let board: CGRect
         let result: CGRect
-        let newRound: CGRect
         let continueButton: CGRect
         let hand: CGRect
         let opponents: [CGRect]
@@ -45,10 +44,10 @@ final class Phase2DynamicTypeUITests: XCTestCase {
             "Accessibility XXXL muss die Phase-2-Ergebnisaktion sichtbar reflowen; " +
             "ein identischer fester 64-pt-Container ist kein Dynamic-Type-Beleg."
         )
-        XCTAssertTrue(
-            accessibility.newRound.height > standard.newRound.height + 1 ||
-                accessibility.continueButton.height > standard.continueButton.height + 1,
-            "Mindestens eine Aktion muss für Accessibility XXXL mehr vertikalen Raum erhalten."
+        XCTAssertGreaterThan(
+            accessibility.continueButton.height,
+            standard.continueButton.height + 1,
+            "Die verbleibende Aktion muss für Accessibility XXXL mehr vertikalen Raum erhalten."
         )
     }
 
@@ -118,8 +117,10 @@ final class Phase2DynamicTypeUITests: XCTestCase {
         XCTAssertTrue(window.waitForExistence(timeout: 4), "\(context): Hauptfenster fehlt.")
 
         let board = app.images.matching(identifier: "table.world.phase2.board").firstMatch
-        let result = app.otherElements.matching(identifier: "phase2.result").firstMatch
-        let newRound = app.buttons["phase2.newRound"]
+        // SwiftUI exposes the outer action zone as the stable accessibility
+        // container in both betting and result states. The inner result banner
+        // is intentionally merged into that container.
+        let result = app.otherElements.matching(identifier: "phase2.actions").firstMatch
         let continueButton = app.buttons["phase2.continue"]
         let hand = app.otherElements.matching(identifier: "phase2.hand").firstMatch
         let opponentQuery = app.descendants(matching: .any).matching(
@@ -128,8 +129,9 @@ final class Phase2DynamicTypeUITests: XCTestCase {
 
         XCTAssertTrue(board.waitForExistence(timeout: 6), "\(context): Poch-Scheibe fehlt.")
         XCTAssertTrue(result.waitForExistence(timeout: 6), "\(context): Ergebnisbereich fehlt.")
-        XCTAssertTrue(newRound.waitForExistence(timeout: 2), "\(context): Neue Runde fehlt.")
         XCTAssertTrue(continueButton.waitForExistence(timeout: 2), "\(context): Weiter fehlt.")
+        XCTAssertFalse(app.buttons["phase2.newRound"].exists,
+                       "\(context): Phase 2 darf keine regelwidrige neue Runde anbieten.")
         XCTAssertTrue(hand.waitForExistence(timeout: 2), "\(context): Handbereich fehlt.")
         XCTAssertGreaterThan(opponentQuery.count, 0, "\(context): Gegnerbereiche fehlen.")
 
@@ -144,7 +146,6 @@ final class Phase2DynamicTypeUITests: XCTestCase {
             window: window.frame,
             board: board.frame,
             result: result.frame,
-            newRound: newRound.frame,
             continueButton: continueButton.frame,
             hand: hand.frame,
             opponents: (0..<opponentQuery.count).map { opponentQuery.element(boundBy: $0).frame }
@@ -158,7 +159,6 @@ final class Phase2DynamicTypeUITests: XCTestCase {
         let visibleWindow = snapshot.window.insetBy(dx: -0.5, dy: -0.5)
         for (name, frame) in [
             ("Ergebnis", snapshot.result),
-            ("Neue Runde", snapshot.newRound),
             ("Weiter", snapshot.continueButton)
         ] {
             XCTAssertTrue(visibleWindow.contains(frame),
@@ -166,31 +166,29 @@ final class Phase2DynamicTypeUITests: XCTestCase {
         }
 
         XCTAssertGreaterThan(visibleAreaRatio(of: snapshot.board, in: snapshot.window), 0.8,
-                             "\(context): Die Poch-Scheibe muss substanziell sichtbar bleiben.")
+                             "\(context): Die Poch-Scheibe \(snapshot.board) muss in " +
+                             "\(snapshot.window) substanziell sichtbar bleiben.")
         XCTAssertGreaterThan(visibleAreaRatio(of: snapshot.hand, in: snapshot.window), 0.2,
-                             "\(context): Der bewusst einlaufende Kartenfächer muss lesbar bleiben.")
+                             "\(context): Der bewusst einlaufende Kartenfächer " +
+                             "\(snapshot.hand) muss in \(snapshot.window) lesbar bleiben.")
 
         XCTAssertFalse(snapshot.result.intersects(snapshot.hand),
                        "\(context): Ergebnis und Hand dürfen sich nicht überlagern.")
-        XCTAssertGreaterThanOrEqual(snapshot.newRound.height, 44,
-                                    "\(context): Neue Runde braucht mindestens 44 pt Touchhöhe.")
         XCTAssertGreaterThanOrEqual(snapshot.continueButton.height, 44,
                                     "\(context): Weiter braucht mindestens 44 pt Touchhöhe.")
 
         for opponent in snapshot.opponents {
             XCTAssertFalse(snapshot.result.intersects(opponent),
-                           "\(context): Ergebnis und Gegner benötigen getrennte Zonen.")
+                           "\(context): Ergebnis \(snapshot.result) und Gegner \(opponent) " +
+                           "benötigen getrennte Zonen.")
             XCTAssertFalse(snapshot.hand.intersects(opponent),
-                           "\(context): Hand und Gegner benötigen getrennte Zonen.")
+                           "\(context): Hand \(snapshot.hand) und Gegner \(opponent) " +
+                           "benötigen getrennte Zonen.")
         }
 
-        let newRound = app.buttons["phase2.newRound"]
         let continueButton = app.buttons["phase2.continue"]
-        XCTAssertEqual(newRound.label, "Neue Runde",
+        XCTAssertEqual(continueButton.label, "Weiter zum Ausspielen",
                        "\(context): Das VoiceOver-Label darf nicht gekürzt werden.")
-        XCTAssertEqual(continueButton.label, "Weiter · Ausspielen",
-                       "\(context): Das VoiceOver-Label darf nicht gekürzt werden.")
-        XCTAssertTrue(newRound.isHittable, "\(context): Neue Runde muss erreichbar sein.")
         XCTAssertTrue(continueButton.isHittable, "\(context): Weiter muss erreichbar sein.")
     }
 
@@ -236,7 +234,6 @@ final class Phase2DynamicTypeUITests: XCTestCase {
         viewport: \(snapshot.window)
         board: \(snapshot.board)
         result: \(snapshot.result)
-        newRound: \(snapshot.newRound)
         continue: \(snapshot.continueButton)
         hand: \(snapshot.hand)
         opponents: \(snapshot.opponents)

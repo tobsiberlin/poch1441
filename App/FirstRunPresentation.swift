@@ -88,6 +88,8 @@ enum FirstRunScript {
 }
 
 struct FirstRunStageZones: Equatable {
+    private static let minimumLandscapeAspectRatio: CGFloat = 4.0 / 3.0
+
     let header: CGRect
     let opponents: CGRect
     let decision: CGRect
@@ -96,7 +98,9 @@ struct FirstRunStageZones: Equatable {
     let isLandscape: Bool
 
     static func resolve(in size: CGSize, safeArea: EdgeInsets) -> FirstRunStageZones {
-        let landscape = size.width > size.height
+        let usableWidth = max(0, size.width - safeArea.leading - safeArea.trailing)
+        let usableHeight = max(1, size.height - safeArea.top - safeArea.bottom)
+        let landscape = usableWidth / usableHeight >= minimumLandscapeAspectRatio
         if landscape {
             let top = safeArea.top + 8
             let bottom = size.height - safeArea.bottom - 8
@@ -136,15 +140,14 @@ struct FirstRunStageZones: Equatable {
         }
 
         let top = safeArea.top + 8
-        let usableWidth = size.width - safeArea.leading - safeArea.trailing
         let handTop = size.height - safeArea.bottom - 126
         let boardY = top + 142
         let boardSide = min(usableWidth - 32,
-                            max(180, handTop - boardY - 154),
+                            max(180, handTop - boardY - 202),
                             max(216, size.height * 0.36))
         let boardX = safeArea.leading + (usableWidth - boardSide) / 2
         let decisionY = boardY + boardSide + 10
-        let decisionHeight = max(112, min(142, handTop - decisionY - 6))
+        let decisionHeight = max(152, min(190, handTop - decisionY - 6))
         return FirstRunStageZones(
             header: CGRect(x: safeArea.leading + 18,
                            y: top,

@@ -22,7 +22,7 @@ extension Pool {
         case .jack: return "J"
         case .ten: return "10"
         case .mariage: return "MAR"
-        case .sequence: return "SEQ"
+        case .sequence: return "FOLGE"
         case .poch: return "POCH"
         case .center: return "MITTE"
         }

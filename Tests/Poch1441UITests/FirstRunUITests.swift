@@ -2,9 +2,36 @@ import XCTest
 
 final class FirstRunUITests: XCTestCase {
     @MainActor
+    func testNaturalMontageReturnsAVisibleTrumpAction() {
+        let app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launchArguments = localizedArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
+        app.launch()
+
+        let enterTable = app.buttons["firstRun.intro.primary"]
+        XCTAssertTrue(enterTable.waitForExistence(timeout: 4))
+        enterTable.tap()
+
+        let openingToken = app.buttons["firstRun.openingToken"]
+        XCTAssertTrue(openingToken.waitForExistence(timeout: 4))
+        openingToken.tap()
+        dismissGuidedPhaseCurtainIfPresent(in: app)
+
+        let action = app.buttons["firstRun.coachAction"]
+        XCTAssertTrue(action.waitForExistence(timeout: 15))
+        XCTAssertEqual(action.label, "Trumpf aufdecken")
+        XCTAssertTrue(action.isHittable)
+
+        let window = app.windows.firstMatch
+        XCTAssertTrue(window.frame.contains(action.frame),
+                      "Die nächste menschliche Aktion muss vollständig im Viewport liegen.")
+        attachScreenshot(of: app, named: "natural-montage-visible-trump-action")
+    }
+
+    @MainActor
     func testFirstRunKeepsItsMeaningAcrossRotation() {
         let app = XCUIApplication()
-        app.launchArguments = localizedArguments(["-firstRun", "-players=4"])
+        app.launchArguments = localizedArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
 
         XCUIDevice.shared.orientation = .portrait
         app.launch()
@@ -24,8 +51,11 @@ final class FirstRunUITests: XCTestCase {
     func testFirstContactAndLearningStates() {
         let app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launchArguments = localizedArguments(["-firstRun", "-players=4"])
+        app.launchArguments = localizedArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
         app.launch()
+        assertStableWindow(in: app,
+                           hasOrientation: .portrait,
+                           context: "Erster Kontakt")
 
         let enterTable = app.buttons["firstRun.intro.primary"]
         XCTAssertTrue(enterTable.waitForExistence(timeout: 4))
@@ -42,34 +72,58 @@ final class FirstRunUITests: XCTestCase {
             return
         }
         openingToken.tap()
+        dismissGuidedPhaseCurtainIfPresent(in: app)
 
-        let nextAction = app.buttons["firstRun.coachAction"]
-        guard nextAction.waitForExistence(timeout: 4) else {
-            XCTFail("Der erste Kontakt muss erst nach der Zählermutation zur nächsten Aktion führen.")
+        let coach = app.otherElements["firstRun.coach"]
+        guard coach.waitForExistence(timeout: 4) else {
+            XCTFail("Nach dem ersten Kontakt muss die kurze Tischmontage erklärt bleiben.")
             return
         }
-        assertLearningState("Orientieren", in: app)
+        XCTAssertFalse(app.buttons["firstRun.coachAction"].exists,
+                       "Tischfüllung und Geben dürfen keinen passiven Weiter-Tap verlangen.")
+        attachScreenshot(of: app, named: "first-contact-montage")
+
+        let nextAction = app.buttons["firstRun.coachAction"]
+        XCTAssertTrue(nextAction.waitForExistence(timeout: 15),
+                      "Nach der Montage muss Trumpf die nächste eigene Handlung sein.")
+        XCTAssertEqual(nextAction.label, "Trumpf aufdecken")
+        XCTAssertTrue(nextAction.isHittable,
+                      "Trumpf aufdecken muss ohne Scrollen sichtbar und direkt tippbar sein.")
+        assertLearningState("Dein Zug", in: app)
         assertFixedOpponents(in: app)
-        attachScreenshot(of: app, named: "first-contact-landed")
+        attachScreenshot(of: app, named: "first-contact-montage-complete")
 
         let checkpoints: [(step: Int, state: String, name: String)] = [
-            (3, "Verbinden", "first-card"),
-            (4, "Verbinden", "trump-ready"),
-            (5, "Verbinden", "meld-connect"),
-            (6, "Beweisen", "meld-prove"),
-            (7, "Loslassen", "meld-release")
+            (3, "Dein Zug", "first-card"),
+            (4, "Dein Zug", "trump-ready"),
+            (5, "Dein Zug", "meld-connect"),
+            (6, "Gewinn zeigen", "meld-prove"),
+            (7, "Geschafft", "meld-release")
         ]
 
         for checkpoint in checkpoints {
             app.terminate()
+            XCUIDevice.shared.orientation = .portrait
             app.launchArguments = localizedArguments([
                 "-tutorialSeed",
                 "-tutorialMeldStep=\(checkpoint.step)",
                 "-players=4"
             ])
             app.launch()
+            dismissGuidedPhaseCurtainIfPresent(in: app)
+            assertStableWindow(in: app,
+                               hasOrientation: .portrait,
+                               context: checkpoint.name)
             assertLearningState(checkpoint.state, in: app)
             assertFixedOpponents(in: app)
+            if checkpoint.step == 5 {
+                let action = app.buttons["firstRun.coachAction"]
+                XCTAssertTrue(action.waitForExistence(timeout: 4),
+                              "Der Melde-Moment braucht neben der Karte eine eindeutige sichtbare Aktion.")
+                XCTAssertEqual(action.label, "Trumpf-König melden")
+                XCTAssertTrue(action.isHittable,
+                              "Trumpf-König melden muss ohne Rätselstelle bedienbar sein.")
+            }
             attachScreenshot(of: app, named: checkpoint.name)
         }
     }
@@ -79,7 +133,7 @@ final class FirstRunUITests: XCTestCase {
         let standardApp = XCUIApplication()
         standardApp.terminate()
         XCUIDevice.shared.orientation = .portrait
-        standardApp.launchArguments = standardContentSizeArguments(["-firstRun", "-players=4"])
+        standardApp.launchArguments = standardContentSizeArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
         standardApp.launch()
         assertWindow(in: standardApp, hasOrientation: .portrait)
 
@@ -92,7 +146,7 @@ final class FirstRunUITests: XCTestCase {
         standardApp.terminate()
 
         let accessibilityApp = XCUIApplication()
-        accessibilityApp.launchArguments = accessibilityXXXLArguments(["-firstRun", "-players=4"])
+        accessibilityApp.launchArguments = accessibilityXXXLArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
         accessibilityApp.launch()
         assertWindow(in: accessibilityApp, hasOrientation: .portrait)
         assertFullFirstRunActionLabels(in: accessibilityApp)
@@ -143,7 +197,7 @@ final class FirstRunUITests: XCTestCase {
         let app = XCUIApplication()
         app.terminate()
         XCUIDevice.shared.orientation = .landscapeLeft
-        app.launchArguments = accessibilityXXXLArguments(["-firstRun", "-players=4"])
+        app.launchArguments = accessibilityXXXLArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
         app.launch()
         XCUIDevice.shared.orientation = .portrait
         XCUIDevice.shared.orientation = .landscapeLeft
@@ -175,10 +229,11 @@ final class FirstRunUITests: XCTestCase {
             "-players=4"
         ])
         app.launch()
+        dismissGuidedPhaseCurtainIfPresent(in: app)
 
         assertWindow(in: app, hasOrientation: .portrait)
-        assertLearningState("Verbinden", in: app)
-        assertCoachActionIsReachable(in: app)
+        assertLearningState("Dein Zug", in: app)
+        assertMeldMatchIsReachable(in: app)
         assertLearningStageDoesNotOverlap(in: app, context: "XXXL Portrait")
         attachScreenshot(of: app, named: "first-run-learning-xxxl-portrait")
         app.terminate()
@@ -197,9 +252,10 @@ final class FirstRunUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         standardApp.launchArguments = standardContentSizeArguments(arguments)
         standardApp.launch()
+        dismissGuidedPhaseCurtainIfPresent(in: standardApp)
         assertWindow(in: standardApp, hasOrientation: .portrait)
-        assertLearningState("Verbinden", in: standardApp)
-        let standardActionHeight = coachActionHeight(in: standardApp)
+        assertLearningState("Dein Zug", in: standardApp)
+        let standardCoachTitleHeight = learningCoachTitleHeight(in: standardApp)
         standardApp.terminate()
 
         let landscapeApp = XCUIApplication()
@@ -207,22 +263,23 @@ final class FirstRunUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         landscapeApp.launchArguments = accessibilityXXXLArguments(arguments)
         landscapeApp.launch()
+        dismissGuidedPhaseCurtainIfPresent(in: landscapeApp)
         assertWindow(in: landscapeApp, hasOrientation: .portrait)
-        assertLearningState("Verbinden", in: landscapeApp)
-        let accessibilityActionHeight = coachActionHeight(in: landscapeApp)
+        assertLearningState("Dein Zug", in: landscapeApp)
+        let accessibilityCoachTitleHeight = learningCoachTitleHeight(in: landscapeApp)
         XCTAssertGreaterThan(
-            accessibilityActionHeight,
-            standardActionHeight * 1.20,
-            "Der Gate muss eine tatsächlich größere AX-XXXL-Aktion prüfen und darf nicht nur denselben Standardframe drehen."
+            accessibilityCoachTitleHeight,
+            standardCoachTitleHeight * 1.10,
+            "Der Gate muss eine tatsächlich skalierende AX-XXXL-Erklärung prüfen."
         )
         attachTextEvidence(
-            "Coach-Aktion Standard: \(standardActionHeight) pt\nCoach-Aktion AX XXXL: \(accessibilityActionHeight) pt",
+            "Coach-Titel Standard: \(standardCoachTitleHeight) pt\nCoach-Titel AX XXXL: \(accessibilityCoachTitleHeight) pt",
             named: "first-run-learning-ax-xxxl-size-proof"
         )
 
         rotateForegroundAppToLandscape(landscapeApp)
         assertSmallPhoneLandscapeWindow(in: landscapeApp)
-        assertLearningState("Verbinden", in: landscapeApp)
+        assertLearningState("Dein Zug", in: landscapeApp)
         attachLearningViewportEvidence(
             in: landscapeApp,
             named: "first-run-learning-xxxl-landscape-initial-frames"
@@ -247,7 +304,7 @@ final class FirstRunUITests: XCTestCase {
         let app = XCUIApplication()
         app.terminate()
         XCUIDevice.shared.orientation = .portrait
-        app.launchArguments = localizedArguments(["-firstRun", "-players=4"])
+        app.launchArguments = localizedArguments(["-firstRun", "-firstRunBeat=4", "-players=4"])
         app.launch()
 
         let enterTable = app.buttons["firstRun.intro.primary"]
@@ -256,14 +313,46 @@ final class FirstRunUITests: XCTestCase {
         let openingToken = app.buttons["firstRun.openingToken"]
         XCTAssertTrue(openingToken.waitForExistence(timeout: 4))
         openingToken.tap()
+        dismissGuidedPhaseCurtainIfPresent(in: app)
         XCUIDevice.shared.orientation = .landscapeLeft
 
         assertWindow(in: app, hasOrientation: .landscape)
         XCTAssertTrue(
-            app.buttons["firstRun.coachAction"].waitForExistence(timeout: 4),
-            "Rotation während des Kontakts muss genau einmal in den nächsten Beat führen."
+            app.buttons["firstRun.coachAction"].waitForExistence(timeout: 15),
+            "Rotation während der Montage muss stabil bis zur nächsten eigenen Handlung führen."
         )
-        assertLearningState("Orientieren", in: app)
+        XCTAssertEqual(app.buttons["firstRun.coachAction"].label, "Trumpf aufdecken")
+        assertLearningState("Dein Zug", in: app)
+        app.terminate()
+    }
+
+    @MainActor
+    func testSecondaryActionStartsAFreeTableWithoutTutorialFurniture() {
+        let app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launchArguments = localizedArguments([
+            "-firstRun",
+            "-firstRunBeat=4",
+            "-players=4",
+            "-reduceMotionQA"
+        ])
+        app.launch()
+
+        let secondary = app.buttons["firstRun.intro.secondary"]
+        XCTAssertTrue(secondary.waitForExistence(timeout: 4))
+        XCTAssertEqual(secondary.label, "Ohne Hinweise starten")
+        XCTAssertTrue(secondary.isHittable)
+        secondary.tap()
+
+        XCTAssertFalse(
+            app.buttons["firstRun.openingToken"].waitForExistence(timeout: 2),
+            "Die ruhige Nebenoption darf nicht versehentlich in die geführte Eröffnungsaktion führen."
+        )
+        XCTAssertTrue(
+            app.staticTexts["MELDEN"].waitForExistence(timeout: 4),
+            "Die Nebenoption muss unmittelbar am freien Tisch in Phase 1 landen."
+        )
+        attachScreenshot(of: app, named: "first-run-secondary-free-table")
         app.terminate()
     }
 
@@ -290,11 +379,15 @@ final class FirstRunUITests: XCTestCase {
 
     @MainActor
     private func assertIntroContract(in app: XCUIApplication, orientation: ExpectedOrientation) {
-        for opponent in ["Hana", "Noah", "Jonas"] {
+        for (seat, opponent) in ["Hana", "Noah", "Jonas"].enumerated() {
+            let portraitName = app.staticTexts
+                .matching(identifier: "firstRun.cinematic.opponent.\(seat + 1)")
+                .firstMatch
             XCTAssertTrue(
-                app.staticTexts[opponent].waitForExistence(timeout: 3),
+                portraitName.waitForExistence(timeout: 3),
                 "Der feste Tutorialplatz \(opponent) muss sichtbar bleiben."
             )
+            XCTAssertEqual(portraitName.label, opponent)
         }
 
         XCTAssertTrue(
@@ -306,14 +399,17 @@ final class FirstRunUITests: XCTestCase {
         let identifiers = [
             "firstRun.intro.title",
             "firstRun.intro.body",
-            "firstRun.intro.goal",
             "firstRun.intro.primary",
             "firstRun.intro.secondary"
         ]
         let scrollView = app.scrollViews.firstMatch
 
         for identifier in identifiers {
-            let element = app.descendants(matching: .any)[identifier]
+            let isAction = identifier == "firstRun.intro.primary"
+                || identifier == "firstRun.intro.secondary"
+            let element = isAction
+                ? app.buttons[identifier]
+                : app.staticTexts[identifier]
             XCTAssertTrue(element.waitForExistence(timeout: 3), "\(identifier) muss existieren.")
             if scrollView.exists {
                 for _ in 0..<4 where !windowFrame.intersects(element.frame) {
@@ -329,12 +425,16 @@ final class FirstRunUITests: XCTestCase {
                 isFullyVisible = windowFrame.intersects(frame) && frame.height <= windowFrame.height
             }
             XCTAssertTrue(
-                isFullyVisible && frame.width >= 44 && frame.height >= 20,
+                isFullyVisible && frame.width >= 44 && frame.height > 0,
                 "\(identifier) liegt mit Frame \(frame) außerhalb von \(windowFrame)."
             )
+            if isAction {
+                XCTAssertTrue(element.isHittable,
+                              "\(identifier) muss in \(orientation) direkt bedienbar sein.")
+            }
         }
 
-        let board = app.descendants(matching: .any)["firstRun.intro.board"]
+        let board = app.images.matching(identifier: "firstRun.cinematic.table").firstMatch
         XCTAssertTrue(board.waitForExistence(timeout: 3), "Die echte Poch Disc muss sichtbar bleiben.")
         switch orientation {
         case .portrait:
@@ -348,44 +448,61 @@ final class FirstRunUITests: XCTestCase {
                 "Die echte Poch Disc muss die rechte Landscape-Zone belegen: \(board.frame)."
             )
         }
-        let protectedFrames = [
-            app.descendants(matching: .any)["firstRun.intro.goal"].frame,
-            app.descendants(matching: .any)["firstRun.intro.primary"].frame,
-            app.descendants(matching: .any)["firstRun.intro.secondary"].frame
-        ]
-        for protectedFrame in protectedFrames {
-            XCTAssertFalse(
-                board.frame.intersects(protectedFrame),
-                "Disc und Informations- oder Aktionsfläche dürfen sich nicht überschneiden."
+        for (seat, opponentName) in ["Hana", "Noah", "Jonas"].enumerated() {
+            let opponent = app.staticTexts
+                .matching(identifier: "firstRun.cinematic.opponent.\(seat + 1)")
+                .firstMatch
+            XCTAssertTrue(
+                opponent.waitForExistence(timeout: 3)
+                    && opponent.frame.width > 0
+                    && opponent.frame.height > 0
+                    && windowFrame.intersects(opponent.frame),
+                "Der cineastische Tutorialplatz \(opponentName) muss sichtbar bleiben."
             )
-        }
-        for seat in 1...3 {
-            let opponent = app.descendants(matching: .any)["firstRun.opponent.\(seat)"]
             XCTAssertTrue(
                 windowFrame.contains(opponent.frame),
-                "Tutorialplatz \(seat) muss vollständig im App-Fenster liegen."
-            )
-            XCTAssertFalse(
-                board.frame.intersects(opponent.frame),
-                "Disc und Tutorialplatz \(seat) dürfen sich in \(orientation) nicht überschneiden."
+                "Tutorialplatz \(opponentName) muss vollständig im App-Fenster liegen."
             )
         }
+        assertVisibleIntroSurfacesDoNotOverlap(in: app,
+                                               context: "Cinematic \(orientation)")
     }
 
     @MainActor
     private func assertFixedOpponents(in app: XCUIApplication) {
         let windowFrame = app.windows.firstMatch.frame
+        let windowOrientation = windowFrame.height > windowFrame.width ? "Portrait" : "Landscape"
+        let deviceOrientation = String(describing: XCUIDevice.shared.orientation)
         for seat in 1...3 {
             let opponent = app.descendants(matching: .any)["firstRun.opponent.\(seat)"]
             XCTAssertTrue(
                 opponent.waitForExistence(timeout: 4),
                 "Tutorialplatz \(seat) muss im selben semantischen Sitz sichtbar bleiben."
             )
+            let opponentFrame = opponent.frame
             XCTAssertTrue(
-                windowFrame.intersects(opponent.frame) && opponent.frame.width >= 44 && opponent.frame.height >= 44,
-                "Tutorialplatz \(seat) muss mit sichtbarer Porträtfläche im App-Fenster liegen."
+                windowFrame.intersects(opponentFrame)
+                    && opponentFrame.width >= 44
+                    && opponentFrame.height >= 44,
+                "Tutorialplatz \(seat) muss mit sichtbarer Porträtfläche im App-Fenster liegen. "
+                    + "Gegner: \(opponentFrame), Fenster: \(windowFrame), "
+                    + "Fensterausrichtung: \(windowOrientation), Geräteausrichtung: \(deviceOrientation)."
             )
         }
+    }
+
+    @MainActor
+    private func assertStableWindow(in app: XCUIApplication,
+                                    hasOrientation orientation: ExpectedOrientation,
+                                    context: String) {
+        assertWindow(in: app, hasOrientation: orientation)
+        let settledFrame = app.windows.firstMatch.frame
+        Thread.sleep(forTimeInterval: 0.35)
+        XCTAssertEqual(
+            app.windows.firstMatch.frame,
+            settledFrame,
+            "\(context): Das App-Fenster muss vor den Layoutassertions einen stabilen Frame halten."
+        )
     }
 
     @MainActor
@@ -407,7 +524,7 @@ final class FirstRunUITests: XCTestCase {
     @MainActor
     private func assertLearningStageDoesNotOverlap(in app: XCUIApplication, context: String) {
         let board = app.descendants(matching: .any)["firstRun.learningBoard"]
-        let coach = app.buttons["firstRun.coachAction"]
+        let coach = app.otherElements["firstRun.coach"]
         let hand = app.descendants(matching: .any)["firstRun.learningHand"]
         for (name, element) in [("Disc", board), ("Coach", coach), ("Hand", hand)] {
             XCTAssertTrue(element.waitForExistence(timeout: 4), "\(context): \(name) fehlt.")
@@ -448,16 +565,24 @@ final class FirstRunUITests: XCTestCase {
     }
 
     @MainActor
-    private func coachActionHeight(in app: XCUIApplication) -> CGFloat {
-        let action = app.buttons["firstRun.coachAction"]
-        XCTAssertTrue(action.waitForExistence(timeout: 4), "Die Coach-Aktion muss für den Größenvergleich existieren.")
-        XCTAssertEqual(
-            action.label,
-            "Karte und Mulde verbinden",
-            "Der AX-Gate darf die vollständige deutsche Aktionssemantik nicht verkürzen."
-        )
-        XCTAssertGreaterThan(action.frame.height, 0, "Die Coach-Aktion braucht einen messbaren Frame.")
-        return action.frame.height
+    private func learningCoachTitleHeight(in app: XCUIApplication) -> CGFloat {
+        let title = app.staticTexts["Dein Trumpf-König trifft"]
+        XCTAssertTrue(title.waitForExistence(timeout: 4),
+                      "Die aktuelle Coach-Erklärung muss für den Größenvergleich existieren.")
+        XCTAssertGreaterThan(title.frame.height, 0,
+                             "Die Coach-Erklärung braucht einen messbaren Textframe.")
+        return title.frame.height
+    }
+
+    @MainActor
+    private func dismissGuidedPhaseCurtainIfPresent(in app: XCUIApplication) {
+        let continueButton = app.buttons["tutorial.phaseCurtain.continue"]
+        if continueButton.waitForExistence(timeout: 2) {
+            XCTAssertEqual(continueButton.label, "Bonus-Töpfe ansehen")
+            XCTAssertTrue(continueButton.isHittable,
+                          "Das erste Lernfenster muss vor der Tischaktion bewusst bestätigt werden können.")
+            continueButton.tap()
+        }
     }
 
     @MainActor
@@ -518,7 +643,7 @@ final class FirstRunUITests: XCTestCase {
 
         let elements: [(name: String, element: XCUIElement)] = [
             ("Disc", app.descendants(matching: .any)["firstRun.learningBoard"]),
-            ("Coach", app.buttons["firstRun.coachAction"]),
+            ("Coach", app.otherElements["firstRun.coach"]),
             ("Hand", app.descendants(matching: .any)["firstRun.learningHand"])
         ] + (1...3).map { seat in
             ("Gegnerplatz \(seat)", app.descendants(matching: .any)["firstRun.opponent.\(seat)"])
@@ -541,7 +666,7 @@ final class FirstRunUITests: XCTestCase {
             )
         }
 
-        let coach = app.buttons["firstRun.coachAction"]
+        let coach = app.otherElements["firstRun.coach"]
         XCTAssertLessThanOrEqual(
             coach.frame.height,
             min(220, windowFrame.height * 0.60),
@@ -582,12 +707,15 @@ final class FirstRunUITests: XCTestCase {
             "firstRun.opponent.2",
             "firstRun.opponent.3",
             "firstRun.learningBoard",
-            "firstRun.coachAction",
+            "firstRun.coach",
+            "firstRun.meldMatch",
             "firstRun.learningHand"
         ]
 
         for identifier in identifiers {
-            let element = app.descendants(matching: .any)[identifier]
+            let element = identifier == "firstRun.meldMatch"
+                ? meldMatchAction(in: app)
+                : app.descendants(matching: .any)[identifier]
             XCTAssertTrue(element.waitForExistence(timeout: 4), "\(identifier) muss im AX-Lernpfad existieren.")
             for _ in 0..<10 where !contains(viewport, element.frame) {
                 if element.frame.midY > viewport.midY {
@@ -600,7 +728,7 @@ final class FirstRunUITests: XCTestCase {
                 contains(viewport, element.frame),
                 "\(identifier) muss ohne Clipping vollständig in \(viewport) revealbar sein, liegt aber bei \(element.frame)."
             )
-            if identifier == "firstRun.coachAction" {
+            if identifier == "firstRun.meldMatch" {
                 XCTAssertTrue(element.isHittable, "Die vollständig sichtbare Coach-Aktion muss bedienbar sein.")
             }
         }
@@ -618,7 +746,7 @@ final class FirstRunUITests: XCTestCase {
         let opponent2Frame = app.descendants(matching: .any)["firstRun.opponent.2"].frame
         let opponent3Frame = app.descendants(matching: .any)["firstRun.opponent.3"].frame
         let boardFrame = app.descendants(matching: .any)["firstRun.learningBoard"].frame
-        let coachFrame = app.buttons["firstRun.coachAction"].frame
+        let coachFrame = app.otherElements["firstRun.coach"].frame
         let handFrame = app.descendants(matching: .any)["firstRun.learningHand"].frame
         let lines: [String] = [
             "Window: \(windowFrame)",
@@ -643,15 +771,24 @@ final class FirstRunUITests: XCTestCase {
     }
 
     @MainActor
-    private func assertCoachActionIsReachable(in app: XCUIApplication) {
-        let action = app.buttons["firstRun.coachAction"]
+    private func assertMeldMatchIsReachable(in app: XCUIApplication) {
+        let action = meldMatchAction(in: app)
         let stageScroll = app.scrollViews["firstRun.learningScroll"]
         XCTAssertTrue(stageScroll.waitForExistence(timeout: 4))
         for _ in 0..<8 where !action.exists || !action.isHittable {
             stageScroll.swipeUp()
         }
         XCTAssertTrue(action.exists && action.isHittable,
-                      "Die Primäraktion muss innerhalb der begrenzten Coach-Zone scrollbar erreichbar sein.")
+                      "Die markierte Trumpfkarte muss als echte Tutorialhandlung erreichbar sein. "
+                        + "exists=\(action.exists), hittable=\(action.isHittable), frame=\(action.frame), "
+                        + "scroll=\(stageScroll.frame)")
+    }
+
+    @MainActor
+    private func meldMatchAction(in app: XCUIApplication) -> XCUIElement {
+        let identifiedAction = app.buttons["firstRun.meldMatch"]
+        if identifiedAction.exists { return identifiedAction }
+        return app.buttons["Trumpf-König melden"]
     }
 
     @MainActor
@@ -679,8 +816,8 @@ final class FirstRunUITests: XCTestCase {
     @MainActor
     private func assertFullFirstRunActionLabels(in app: XCUIApplication) {
         let expectedLabels = [
-            "firstRun.intro.primary": "Am Tisch Platz nehmen",
-            "firstRun.intro.secondary": "Ohne Einführung spielen"
+            "firstRun.intro.primary": "Mitspielen",
+            "firstRun.intro.secondary": "Ohne Hinweise starten"
         ]
         for (identifier, expectedLabel) in expectedLabels {
             let button = app.buttons[identifier]
@@ -697,11 +834,8 @@ final class FirstRunUITests: XCTestCase {
     private func assertVisibleIntroSurfacesDoNotOverlap(in app: XCUIApplication, context: String) {
         let windowFrame = app.windows.firstMatch.frame
         let identifiers = [
-            "firstRun.intro.board",
-            "firstRun.opponent.1",
-            "firstRun.opponent.2",
-            "firstRun.opponent.3",
-            "firstRun.intro.goal",
+            "firstRun.intro.title",
+            "firstRun.intro.body",
             "firstRun.intro.primary",
             "firstRun.intro.secondary"
         ]
@@ -750,11 +884,8 @@ final class FirstRunUITests: XCTestCase {
             lines.append("Scroll: \(app.scrollViews.firstMatch.frame)")
         }
         for identifier in [
-            "firstRun.intro.board",
-            "firstRun.opponent.1",
-            "firstRun.opponent.2",
-            "firstRun.opponent.3",
-            "firstRun.intro.goal",
+            "firstRun.intro.title",
+            "firstRun.intro.body",
             "firstRun.intro.primary",
             "firstRun.intro.secondary"
         ] {

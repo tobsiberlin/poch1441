@@ -13,6 +13,8 @@ struct CardFace: View {
     var goldenStopper: Bool = false
     /// Größenfaktor (1 = Hand, ~0.62 = Deal-Animation, ~0.42 = Gegner-Fächer Phase 2).
     var scale: CGFloat = 1
+    /// Ein darüberliegendes, bedeutungsvolleres Lernziel übernimmt VoiceOver.
+    var isAccessibilityHidden: Bool = false
 
     private var accent: Color? {
         if goldenStopper { return Tokens.jewelGold }
@@ -56,45 +58,47 @@ struct CardFace: View {
     /// Transparenter Rand, in den die gehobenen Ecken hineinwölben (kein Clipping).
     private var bendPad: CGFloat { 3 * scale }
 
+    /// Zustandsringe liegen vollständig außerhalb der gebackenen Asset-Silhouette.
+    /// So bleiben Drucktextur, Handling-Rand und Alpha-Rundung der PNGs unverändert.
+    private var accentLineWidth: CGFloat { max(0.75, 2 * scale) }
+
     var body: some View {
-        ZStack {
-            // Alle 32 Karten als klassisches SVG-Asset
-            svgCard(named: assetName)
-        }
-        .frame(width: 52 * scale, height: 74 * scale)
-        .overlay(RoundedRectangle(cornerRadius: 8 * scale)
-            .strokeBorder(Color.black.opacity(0.42), lineWidth: max(0.65, 0.75 * scale)))
-        .overlay(RoundedRectangle(cornerRadius: 7.2 * scale)
-            .strokeBorder(Color.white.opacity(0.20), lineWidth: max(0.25, 0.35 * scale))
-            .padding(0.8 * scale))
-        .overlay(RoundedRectangle(cornerRadius: 8 * scale)
-            .strokeBorder(
-                accent?.opacity(0.85) ?? .clear,
-                lineWidth: accent != nil ? 2 : 0))
-        // Physische Wölbung als Render-Effekt (CardWarp.metal) - Layout bleibt
-        // durch das padding/-padding-Paar unverändert, der Schatten folgt der
-        // gewölbten Silhouette
-        .padding(bendPad)
-        .layerEffect(
-            ShaderLibrary.cardWarp(
-                .float2(52 * scale + 2 * bendPad, 74 * scale + 2 * bendPad),
-                .float(1.6 * scale),
-                .float(bendPhase)),
-            maxSampleOffset: CGSize(width: 0.56 * scale, height: 1.6 * scale))
-        .padding(-bendPad)
-        // Kontaktschatten zwischen überlappenden Karten (Fächer-Wette 8.7.:
-        // Schatten ist Render-Eigenschaft, nie im Asset)
-        .shadow(
-            color: accent?.opacity(0.6) ?? .black.opacity(0.5),
-            radius: accent != nil ? 8 : 4.8, x: -0.8 * scale, y: accent != nil ? 0 : 2.8)
-        // Zweite, weiche Schattenlage: macht den Luftspalt spürbar - beide
-        // Lagen folgen der gewölbten Silhouette, an den gehobenen Ecken
-        // wird die Penumbra dadurch breiter (physische Kartenebenen)
-        .shadow(
-            color: accent != nil ? .clear : .black.opacity(0.20),
-            radius: 8 * scale, x: -1.2 * scale, y: 3.8 * scale)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(card.rank.index) \(card.suit.symbol)")
+        // Alle 32 Karten als klassisches, vollständig materialisiertes Asset.
+        // Keine Runtime-Fläche und kein Clip dürfen dessen Patina übermalen.
+        svgCard(named: assetName)
+            .frame(width: 52 * scale, height: 74 * scale)
+            .overlay {
+                if let accent {
+                    RoundedRectangle(cornerRadius: 8 * scale + accentLineWidth)
+                        .strokeBorder(accent.opacity(0.85), lineWidth: accentLineWidth)
+                        .padding(-accentLineWidth)
+                }
+            }
+            // Physische Wölbung als Render-Effekt (CardWarp.metal) - Layout bleibt
+            // durch das padding/-padding-Paar unverändert, der Schatten folgt der
+            // gewölbten Silhouette
+            .padding(bendPad)
+            .layerEffect(
+                ShaderLibrary.cardWarp(
+                    .float2(52 * scale + 2 * bendPad, 74 * scale + 2 * bendPad),
+                    .float(1.6 * scale),
+                    .float(bendPhase)),
+                maxSampleOffset: CGSize(width: 0.56 * scale, height: 1.6 * scale))
+            .padding(-bendPad)
+            // Kontaktschatten zwischen überlappenden Karten (Fächer-Wette 8.7.:
+            // Schatten ist Render-Eigenschaft, nie im Asset)
+            .shadow(
+                color: accent?.opacity(0.6) ?? .black.opacity(0.5),
+                radius: accent != nil ? 8 : 4.8, x: -0.8 * scale, y: accent != nil ? 0 : 2.8)
+            // Zweite, weiche Schattenlage: macht den Luftspalt spürbar - beide
+            // Lagen folgen der gewölbten Silhouette, an den gehobenen Ecken
+            // wird die Penumbra dadurch breiter (physische Kartenebenen)
+            .shadow(
+                color: accent != nil ? .clear : .black.opacity(0.20),
+                radius: 8 * scale, x: -1.2 * scale, y: 3.8 * scale)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(card.rank.index) \(card.suit.symbol)")
+            .accessibilityHidden(isAccessibilityHidden)
     }
 
     // MARK: - SVG-Asset (Bildkarten + Asse)
@@ -104,7 +108,11 @@ struct CardFace: View {
             .resizable()
             .interpolation(.high)
             .aspectRatio(contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 8 * scale))
+            // Die historischen Druckassets bleiben unverändert. Auf dem dunklen
+            // Tisch erhalten rote Farben nur im Display-Compositing etwas mehr
+            // Farbdichte, damit Herz/Karo nicht verwaschen wirken.
+            .saturation(card.suit.isRed ? 1.55 : 1)
+            .contrast(card.suit.isRed ? 1.04 : 1)
     }
 
     // MARK: - Zahlkarten 7-10 (code-gerendert)

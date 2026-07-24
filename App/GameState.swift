@@ -100,6 +100,13 @@ enum TutorialLesson: String, CaseIterable, Codable, Identifiable {
     var id: String { rawValue }
 }
 
+struct PochShowdownSummary: Equatable {
+    let winner: Int
+    let winningCombo: Combo
+    let runnerUp: Int?
+    let runnerUpCombo: Combo?
+}
+
 private struct TutorialScenarioCatalog: Decodable {
     struct Lesson: Decodable {
         let id: TutorialLesson
@@ -416,8 +423,10 @@ final class GameState {
         trumpRevealed = false
         lightPulse = 0
         resetMeldPresentation()
+        playPresentationGeneration += 1
         revealedPlays = 0
         landedPlays = 0
+        guidedPlayoutPresentation = false
         betTransfer = 0
         lastBetActor = nil
         lastBetAmount = 0
@@ -426,8 +435,17 @@ final class GameState {
     }
 
     private func tutorialSeed(for lesson: TutorialLesson) -> UInt64 {
+        #if DEBUG
+        if lesson == .playout,
+           let override = ProcessInfo.processInfo.arguments.first(where: {
+               $0.hasPrefix("-guidedPlayoutSeedQA=")
+           }),
+           let seed = UInt64(override.split(separator: "=").last ?? "") {
+            return seed
+        }
+        #endif
         let fallback: [TutorialLesson: UInt64] = [
-            .meld: playerCount == 3 ? 1_444 : 19,
+            .meld: playerCount == 3 ? 1_444 : 20,
             .bidding: playerCount == 3 ? 1_441 : 7,
             .playout: 1_441
         ]
@@ -516,6 +534,33 @@ final class GameState {
             if case .bettingEnded(.allPassed) = $0 { return true }
             return false
         }
+    }
+
+    /// Erst nach dem öffentlichen Showdown verfügbar. Vorher bleiben alle gegnerischen
+    /// Karten hinter der GameState-Grenze verborgen.
+    var pochShowdownSummary: PochShowdownSummary? {
+        guard let result = pochResult, result.byShowdown else { return nil }
+        guard let showdownPlayers = round.events.compactMap({ event -> [Int]? in
+            guard case .bettingEnded(.showdown(let players)) = event else { return nil }
+            return players
+        }).last else { return nil }
+
+        let ranked = showdownPlayers.compactMap { roundSeat -> (Int, Combo)? in
+            guard round.deal.hands.indices.contains(roundSeat),
+                  let combo = ComboEvaluator.best(in: round.deal.hands[roundSeat], trump: trump)
+            else { return nil }
+            return (uiSeat(forRoundSeat: roundSeat), combo)
+        }.sorted { lhs, rhs in
+            lhs.1.beats(rhs.1)
+        }
+        guard let winner = ranked.first(where: { $0.0 == result.winner }) else { return nil }
+        let runnerUp = ranked.first(where: { $0.0 != result.winner })
+        return PochShowdownSummary(
+            winner: winner.0,
+            winningCombo: winner.1,
+            runnerUp: runnerUp?.0,
+            runnerUpCombo: runnerUp?.1
+        )
     }
 
     // MARK: - Phase 2 - Aktionen
@@ -647,17 +692,21 @@ final class GameState {
 
     // MARK: - §6b: dein qualifizierendes Kunststück leuchtet (nur eigene Hand)
 
-    var humanComboRank: Rank? {
-        ComboEvaluator.best(in: humanHand, trump: trump)?.rank
+    var humanCombo: Combo? {
+        ComboEvaluator.best(in: humanHand, trump: trump)
     }
+
+    var humanComboRank: Rank? { humanCombo?.rank }
 
     // MARK: - Phase 3 (Ausspielen) - Kaskaden-Präsentation (§6c)
 
     /// Die Engine löst Zwangsketten instant - die UI enthüllt die Plays im 180-ms-Takt
     /// (Parameter-Lock), mit 350-ms-Beat-Drop am Kettenriss. `revealedPlays` ist der
     /// Präsentations-Zeiger in den Play-Strom.
+    private(set) var playPresentationGeneration = 0
     private(set) var revealedPlays = 0
     private(set) var landedPlays = 0
+    private(set) var guidedPlayoutPresentation = false
     private var cascadeTask: Task<Void, Never>?
 
     var hasPlayout: Bool { round.playout != nil }
@@ -689,6 +738,78 @@ final class GameState {
     /// Kaskade eingeholt = alle Plays sichtbar, Tisch wartet aufs nächste Anspiel.
     var cascadeIdle: Bool {
         revealedPlays == (round.playout?.plays.count ?? 0)
+    }
+
+    /// Die erste Lernreihe bleibt eine echte Engine-Reihe. Wir wählen lediglich ein
+    /// didaktisch ergiebiges legales Anspiel: drei bis fünf sichtbare Karten, der Mensch
+    /// legt die letzte mögliche Karte und behält danach mindestens zwei freie Anspiele.
+    var guidedRecommendedOpeningCard: Card? {
+        guard guidedPlayoutPresentation,
+              revealedPlays == 0,
+              let phase = round.playout,
+              let humanRoundSeat,
+              phase.leader == humanRoundSeat else { return nil }
+
+        return phase.hands[humanRoundSeat]
+            .compactMap { card -> (card: Card, playCount: Int)? in
+                var candidate = phase
+                guard (try? candidate.lead(card)) != nil,
+                      candidate.winner == nil,
+                      (3...5).contains(candidate.plays.count),
+                      candidate.plays.last?.player == humanRoundSeat,
+                      candidate.hands[humanRoundSeat].count >= 2
+                else { return nil }
+                return (card, candidate.plays.count)
+            }
+            .sorted { lhs, rhs in
+                let lhsDistance = abs(lhs.playCount - 4)
+                let rhsDistance = abs(rhs.playCount - 4)
+                if lhsDistance != rhsDistance { return lhsDistance < rhsDistance }
+                return lhs.card.rank < rhs.card.rank
+            }
+            .first?.card
+    }
+
+    /// Während einer geführten Reihe bleibt eine eigene Zwangskarte in der Hand sichtbar,
+    /// bis sie wirklich angetippt wurde. Fremde verdeckte Karten werden nicht vorab geleakt.
+    var guidedRequiredHumanFollowCard: Card? {
+        guard guidedPlayoutPresentation,
+              let phase = round.playout,
+              phase.plays.indices.contains(revealedPlays),
+              let humanRoundSeat else { return nil }
+        let next = phase.plays[revealedPlays]
+        guard !next.isLead, next.player == humanRoundSeat else { return nil }
+        return next.card
+    }
+
+    var guidedPlayoutCanAdvance: Bool {
+        guard guidedPlayoutPresentation,
+              let phase = round.playout,
+              landedPlays == revealedPlays else { return false }
+        if phase.plays.indices.contains(revealedPlays) {
+            return phase.plays[revealedPlays].player != humanRoundSeat
+        }
+        return stage == .playout && cascadeIdle && phase.leader != humanRoundSeat
+    }
+
+    func canHumanPlay(_ card: Card, guided: Bool) -> Bool {
+        guard let phase = round.playout,
+              let humanRoundSeat else { return false }
+        if guided, guidedPlayoutPresentation {
+            guard landedPlays == revealedPlays else { return false }
+            if let required = guidedRequiredHumanFollowCard {
+                return card == required
+            }
+            guard stage == .playout else { return false }
+            guard cascadeIdle, phase.leader == humanRoundSeat else { return false }
+            if revealedPlays == 0, let opening = guidedRecommendedOpeningCard {
+                return card == opening
+            }
+            return phase.hands[humanRoundSeat].contains(card)
+        }
+        return cascadeIdle
+            && phase.leader == humanRoundSeat
+            && phase.hands[humanRoundSeat].contains(card)
     }
 
     /// Rundenende-Inszenierung (§6c c): Eiszeit-Vakuum -> Straf-Strom -> Banner.
@@ -789,13 +910,24 @@ final class GameState {
         runCascadeIfNeeded()
     }
 
+    func configureGuidedPlayoutPresentation(_ enabled: Bool) {
+        guidedPlayoutPresentation = enabled
+        cascadeTask?.cancel()
+        if !enabled {
+            runCascadeIfNeeded()
+        }
+    }
+
     /// Anspiel des Menschen - nur wenn er führt und die Kaskade eingeholt ist.
     private func startPlayPresentation() {
         guard let phase = round.playout,
               phase.plays.indices.contains(revealedPlays) else { return }
         let sequence = revealedPlays + 1
         let play = phase.plays[revealedPlays]
-        let eventID = "play-\(sequence)"
+        let eventID = playEventID(
+            sequence: sequence,
+            generation: playPresentationGeneration
+        )
         presentation.begin(id: eventID,
                            kind: .playedCard,
                            source: "seat-\(uiSeat(forRoundSeat: play.player))",
@@ -803,24 +935,97 @@ final class GameState {
         revealedPlays = sequence
     }
 
-    func markPlayLanded(sequence: Int) {
-        guard sequence > landedPlays,
-              presentation.impact(id: "play-\(sequence)") else { return }
+    @discardableResult
+    func markPlayLanded(sequence: Int, generation: Int) -> Bool {
+        guard generation == playPresentationGeneration,
+              sequence == landedPlays + 1,
+              presentation.impact(id: playEventID(
+                sequence: sequence,
+                generation: generation
+              )) else { return false }
         landedPlays = sequence
         hapticTick += 1
-        presentation.complete(id: "play-\(sequence)")
+        presentation.complete(id: playEventID(
+            sequence: sequence,
+            generation: generation
+        ))
+        return true
     }
 
-    func humanLead(_ card: Card) {
+    /// Reduced Motion settles the currently visible card at contact and then
+    /// invalidates every completion captured by the spatial flight it replaces.
+    func settlePlayPresentationForReducedMotion(sequence: Int, generation: Int) {
+        guard generation == playPresentationGeneration else { return }
+        _ = markPlayLanded(sequence: sequence, generation: generation)
+        playPresentationGeneration += 1
+    }
+
+    private func playEventID(sequence: Int, generation: Int) -> String {
+        "play-\(generation)-\(sequence)"
+    }
+
+    func humanLead(_ card: Card, guided: Bool = false) {
+        if guided {
+            guidedPlayoutPresentation = true
+            cascadeTask?.cancel()
+        }
+        guard canHumanPlay(card, guided: guided) else { return }
+
+        if guided, guidedRequiredHumanFollowCard == card {
+            startPlayPresentation()
+            finishGuidedPlayoutIfNeeded()
+            return
+        }
+
         guard stage == .playout, let phase = round.playout, let humanRoundSeat,
               phase.leader == humanRoundSeat, cascadeIdle else { return }
         do {
             try round.applyLead(card)
             startPlayPresentation()
-            runCascadeIfNeeded()
+            if guided {
+                finishGuidedPlayoutIfNeeded()
+            } else {
+                runCascadeIfNeeded()
+            }
         } catch {
             log.error("Illegales Anspiel: \(String(describing: error))")
         }
+    }
+
+    /// Bestätigung für den nächsten automatisch vorgeschriebenen Gegnerzug oder ein
+    /// gegnerisches Anspiel. Genau eine Karte wird öffentlich - danach wartet die Lernreise.
+    func advanceGuidedPlayoutPresentation() {
+        guard guidedPlayoutCanAdvance,
+              let phase = round.playout else { return }
+        cascadeTask?.cancel()
+
+        if phase.plays.indices.contains(revealedPlays) {
+            startPlayPresentation()
+            finishGuidedPlayoutIfNeeded()
+            return
+        }
+
+        guard stage == .playout else { return }
+        let leaderUISeat = uiSeat(forRoundSeat: phase.leader)
+        guard let observation = phase.botObservation(for: phase.leader),
+              let card = BotBrain.lead(observation: observation) else { return }
+        do {
+            try round.applyLead(card)
+            seatActions[leaderUISeat] = .none
+            startPlayPresentation()
+            finishGuidedPlayoutIfNeeded()
+        } catch {
+            log.error("Illegales geführtes Bot-Anspiel: \(String(describing: error))")
+        }
+    }
+
+    private func finishGuidedPlayoutIfNeeded() {
+        guard guidedPlayoutPresentation,
+              stage != .playout,
+              cascadeIdle,
+              endPhase == .none else { return }
+        cascadeTask?.cancel()
+        cascadeTask = Task { await runEndSequence() }
     }
 
     private func runCascadeIfNeeded() {
@@ -1168,17 +1373,20 @@ final class GameState {
     func finishGuidedDeal(reduceMotion: Bool) async {
         dealTask?.cancel()
         while startedDeals < totalDeals, !Task.isCancelled {
-            if !reduceMotion {
-                try? await Task.sleep(for: .seconds(Tokens.p1GuidedDealFinishStep))
+            let groupTarget = min(
+                totalDeals,
+                startedDeals + Tokens.p1GuidedDealConcurrency
+            )
+            while startedDeals < groupTarget, !Task.isCancelled {
+                if !reduceMotion {
+                    try? await Task.sleep(for: .seconds(Tokens.p1GuidedDealFinishStep))
+                }
+                guard !Task.isCancelled else { return }
+                startNextDeal()
+                if reduceMotion { markDealLanded(startedDeals - 1) }
             }
-            guard !Task.isCancelled else { return }
-            while startedDeals - landedDeals >= 2, !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(20))
-            }
-            startNextDeal()
-            if reduceMotion { markDealLanded(startedDeals - 1) }
+            await waitForDealsToLand(groupTarget)
         }
-        await waitForDealsToLand(totalDeals)
     }
 
     func revealGuidedTrumpf() {
@@ -1195,7 +1403,7 @@ final class GameState {
         if reduceMotion {
             markMeldLanded(sequence, generation: generation)
         }
-        await waitForMeldToLand(sequence)
+        await waitForMeldToLand(sequence, generation: generation)
     }
 
     func revealAllGuidedMelds(reduceMotion: Bool) async {
@@ -1241,7 +1449,13 @@ final class GameState {
             while startedDeals - landedDeals >= 2, !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(20))
             }
-            try? await Task.sleep(for: .seconds(Tokens.p1DealStep))
+            #if DEBUG || INTERNAL_QA
+            let cadence = Tokens.p1DealCadence
+            let delay = cadence[startedDeals % cadence.count]
+            #else
+            let delay = Tokens.p1DealStep
+            #endif
+            try? await Task.sleep(for: .seconds(delay))
             guard !Task.isCancelled else { break }
             startNextDeal()
         }
@@ -1258,8 +1472,9 @@ final class GameState {
         // Melde-Strom (§6a b): rhythmisch reihum, Mulde pulst, Münzen fliegen
         try? await Task.sleep(for: .seconds(0.35))
         while startedMelds < meldEvents.count, !Task.isCancelled {
+            let generation = meldPresentationGeneration
             let sequence = startNextMeld()
-            await waitForMeldToLand(sequence)
+            await waitForMeldToLand(sequence, generation: generation)
             guard !Task.isCancelled else { break }
             try? await Task.sleep(for: .milliseconds(280))
         }
@@ -1295,7 +1510,18 @@ final class GameState {
     }
 
     private func waitForDealsToLand(_ target: Int) async {
+        let deadline = ContinuousClock.now.advanced(
+            by: .seconds(Tokens.p1GuidedDealRecoveryDeadline)
+        )
         while landedDeals < target, !Task.isCancelled {
+            if ContinuousClock.now >= deadline {
+                let recoveryTarget = min(target, startedDeals)
+                for sequence in landedDeals..<recoveryTarget
+                where !landedDealIndices.contains(sequence) {
+                    markDealLanded(sequence)
+                }
+                return
+            }
             try? await Task.sleep(for: .milliseconds(20))
         }
     }
@@ -1334,8 +1560,15 @@ final class GameState {
         "meld-\(generation)-\(round.deal.upcard.rank.rawValue)-\(sequence)"
     }
 
-    private func waitForMeldToLand(_ sequence: Int) async {
+    private func waitForMeldToLand(_ sequence: Int, generation: Int) async {
+        let deadline = ContinuousClock.now.advanced(
+            by: .seconds(Tokens.p1GuidedMeldRecoveryDeadline)
+        )
         while meldShown <= sequence, !Task.isCancelled {
+            if ContinuousClock.now >= deadline {
+                markMeldLanded(sequence, generation: generation)
+                return
+            }
             try? await Task.sleep(for: .milliseconds(20))
         }
     }

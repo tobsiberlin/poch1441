@@ -1,0 +1,16 @@
+"internal.coinQA.body" = "Sprawdź, czy obraz, dźwięk miedzi i haptyka zbiegają się przy uderzeniu.";
+"internal.coinQA.close" = "Zamknij";
+"internal.coinQA.eyebrow" = "WEWNĘTRZNY TEST URZĄDZENIA";
+"internal.coinQA.haptics" = "Haptyka";
+"internal.coinQA.mode" = "Ruch";
+"internal.coinQA.mode.reduced" = "Ograniczony";
+"internal.coinQA.mode.standard" = "Standardowy";
+"internal.coinQA.note" = "Testuj bez kabla. Przed zatwierdzeniem powtórz raz z opcją Ogranicz ruch.";
+"internal.coinQA.open" = "Przetestuj kontakt monety na tym iPhonie";
+"internal.coinQA.play" = "Odtwórz test";
+"internal.coinQA.sound" = "Dźwięk";
+"internal.coinQA.state.contact" = "Wykryto kontakt";
+"internal.coinQA.state.flying" = "Moneta w ruchu";
+"internal.coinQA.state.ready" = "Gotowe";
+"internal.coinQA.state.resting" = "Moneta spoczywa";
+"internal.coinQA.title" = "Kontakt monety";

@@ -9,29 +9,33 @@ struct TravelSnackTray: View {
     let diameter: CGFloat
 
     var body: some View {
+        let layouts = projectedLayouts
         ZStack {
             TableWorldBoardBase(world: .unterwegs, diameter: diameter)
 
-            ForEach(TravelTableGeometry.compartments) { compartment in
+            ForEach(layouts) { layout in
                 TravelCoinPile(
-                    count: counts[compartment, default: 0],
+                    count: counts[layout.compartment, default: 0],
                     seed: seed,
-                    compartment: compartment,
-                    wellDiameter: diameter
-                        * CGFloat(TravelTableGeometry.normalizedWellDiameter(for: compartment))
+                    compartment: layout.compartment,
+                    wellDiameter: layout.wellDiameter,
+                    layoutSize: layout.contentSize,
+                    restSlotOffsets: layout.restSlotOffsets,
+                    hitTestOffsets: layout.floorOffsets
                 )
-                .position(point(for: compartment))
+                .position(layout.anchors.wellCenter)
             }
 
-            ForEach(TravelTableGeometry.compartments) { compartment in
-                Text(compartment.displayLabel)
+            ForEach(layouts) { layout in
+                Text(layout.compartment.displayLabel)
                     .font(.system(size: max(7, diameter * 0.025),
                                   weight: .heavy,
                                   design: .rounded))
                     .tracking(diameter * 0.0018)
                     .foregroundStyle(Color.white.opacity(0.78))
                     .shadow(color: .black.opacity(0.92), radius: 2, y: 1)
-                    .position(notationPoint(for: compartment))
+                    .position(layout.anchors.labelAnchor)
+                    .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
         }
@@ -41,32 +45,72 @@ struct TravelSnackTray: View {
                                    defaultValue: "Unterwegs-Tisch mit acht Feldern und Mitte"))
     }
 
-    private func point(for compartment: TravelCompartment) -> CGPoint {
-        let point = TravelTableGeometry.center(for: compartment)
-        return CGPoint(x: diameter * CGFloat(point.x),
-                       y: diameter * CGFloat(point.y))
+    private var projectedLayouts: [TravelTrayRenderLayout] {
+        guard diameter > 0 else { return [] }
+        do {
+            let projection = try BoardSpaceProjection(parameters: .init(
+                screen: BoardScreenQuadrilateral(
+                    topLeft: .zero,
+                    topRight: CGPoint(x: diameter, y: 0),
+                    bottomRight: CGPoint(x: diameter, y: diameter),
+                    bottomLeft: CGPoint(x: 0, y: diameter)
+                )
+            ))
+            let adapter = try TravelTableProjectionAdapter(
+                profile: .smokeClearSquare,
+                projection: projection
+            )
+            return try TravelTableGeometry.compartments.map { compartment in
+                TravelTrayRenderLayout(
+                    anchors: try adapter.anchors(for: compartment),
+                    well: try adapter.projectedWell(for: compartment)
+                )
+            }
+        } catch {
+            return []
+        }
+    }
+}
+
+private struct TravelTrayRenderLayout: Identifiable {
+    let anchors: TravelTableProjectedAnchors
+    let well: ProjectedWellProfile
+
+    var id: TravelCompartment { compartment }
+    var compartment: TravelCompartment { anchors.compartment }
+
+    var wellDiameter: CGFloat {
+        min(floorBounds.width, floorBounds.height)
     }
 
-    private func notationPoint(for compartment: TravelCompartment) -> CGPoint {
-        let center = TravelTableGeometry.center(for: compartment)
-        if compartment == .center {
-            let lift = TravelTableGeometry.normalizedFloorRadius(for: compartment) * 0.62
-            return CGPoint(x: diameter * CGFloat(center.x),
-                           y: diameter * CGFloat(center.y - lift))
-        }
+    var contentSize: CGSize {
+        let horizontalRadius = floorOffsets.map { abs($0.x) }.max() ?? 0
+        let verticalRadius = floorOffsets.map { abs($0.y) }.max() ?? 0
+        return CGSize(width: horizontalRadius * 2,
+                      height: verticalRadius * 2)
+    }
 
-        let tableCenter = TravelTableGeometry.center(for: .center)
-        let inward: Double
-        switch compartment {
-        case .mariage: inward = 0.34
-        case .sequence: inward = 0.30
-        case .poch: inward = 0.26
-        default: inward = 0.20
+    var restSlotOffsets: [CGSize] {
+        anchors.restSlots.map { point in
+            CGSize(width: point.x - anchors.wellCenter.x,
+                   height: point.y - anchors.wellCenter.y)
         }
-        return CGPoint(
-            x: diameter * CGFloat(center.x + (tableCenter.x - center.x) * inward),
-            y: diameter * CGFloat(center.y + (tableCenter.y - center.y) * inward)
-        )
+    }
+
+    var floorOffsets: [CGPoint] {
+        well.floorPath.map { point in
+            CGPoint(x: point.x - anchors.wellCenter.x,
+                    y: point.y - anchors.wellCenter.y)
+        }
+    }
+
+    private var floorBounds: CGRect {
+        guard let first = well.floorPath.first else { return .zero }
+        return well.floorPath.dropFirst().reduce(
+            CGRect(origin: first, size: .zero)
+        ) { bounds, point in
+            bounds.union(CGRect(origin: point, size: .zero))
+        }
     }
 }
 
@@ -75,6 +119,9 @@ struct TravelCoinPile: View {
     let seed: UInt64
     let compartment: TravelCompartment
     let wellDiameter: CGFloat
+    var layoutSize: CGSize? = nil
+    var restSlotOffsets: [CGSize]? = nil
+    var hitTestOffsets: [CGPoint]? = nil
 
     var body: some View {
         let poses = TravelCoinLayout.poses(count: count,
@@ -86,14 +133,28 @@ struct TravelCoinPile: View {
                 TravelCentCoin(assetIndex: assetIndex(for: index),
                                pose: pose,
                                size: coinSize)
-                    .offset(x: coinSize * 0.58 * CGFloat(pose.offset.x),
-                            y: coinSize * 0.58 * CGFloat(pose.offset.y))
+                    .offset(resolvedOffset(for: index,
+                                           pose: pose,
+                                           coinSize: coinSize))
                     .zIndex(pose.elevation)
             }
         }
-        .frame(width: wellDiameter, height: wellDiameter)
+        .frame(width: layoutSize?.width ?? wellDiameter,
+               height: layoutSize?.height ?? wellDiameter)
+        .contentShape(TravelWellHitShape(offsets: hitTestOffsets ?? []))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
+    }
+
+    private func resolvedOffset(for index: Int,
+                                pose: TravelCoinRestingPose,
+                                coinSize: CGFloat) -> CGSize {
+        if let restSlotOffsets,
+           restSlotOffsets.indices.contains(index) {
+            return restSlotOffsets[index]
+        }
+        return CGSize(width: coinSize * 0.58 * CGFloat(pose.offset.x),
+                      height: coinSize * 0.58 * CGFloat(pose.offset.y))
     }
 
     private func assetIndex(for index: Int) -> Int {
@@ -109,6 +170,25 @@ struct TravelCoinPile: View {
                       locale: Locale.current,
                       compartment.accessibilityLabel,
                       max(0, count))
+    }
+}
+
+private struct TravelWellHitShape: Shape {
+    let offsets: [CGPoint]
+
+    func path(in rect: CGRect) -> Path {
+        guard let first = offsets.first else {
+            return Path(rect)
+        }
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX + first.x,
+                              y: rect.midY + first.y))
+        for point in offsets.dropFirst() {
+            path.addLine(to: CGPoint(x: rect.midX + point.x,
+                                     y: rect.midY + point.y))
+        }
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -158,7 +238,7 @@ private extension TravelCompartment {
         case .queen:
             String(localized: "table.world.travel.field.queen", defaultValue: "Dame")
         case .mariage:
-            String(localized: "table.world.travel.field.mariage", defaultValue: "Ehe")
+            String(localized: "table.world.travel.field.mariage", defaultValue: "Mariage")
         case .jack:
             String(localized: "table.world.travel.field.jack", defaultValue: "Bube")
         case .ten:
@@ -199,7 +279,7 @@ extension TravelCompartment {
         switch self {
         case .king: "K"
         case .queen: "Q"
-        case .mariage: String(localized: "pool.mariage.short", defaultValue: "EHE")
+        case .mariage: String(localized: "pool.mariage.short", defaultValue: "MARIAGE")
         case .jack: "J"
         case .ten: "10"
         case .sequence: String(localized: "pool.sequence.short", defaultValue: "FOLGE")

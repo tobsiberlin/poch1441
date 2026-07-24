@@ -1,0 +1,16 @@
+"internal.coinQA.body" = "Prüfe, ob Bild, Kupferklang und Haptik beim Auftreffen zusammenpassen.";
+"internal.coinQA.close" = "Schließen";
+"internal.coinQA.eyebrow" = "INTERNER GERÄTETEST";
+"internal.coinQA.haptics" = "Haptik";
+"internal.coinQA.mode" = "Bewegung";
+"internal.coinQA.mode.reduced" = "Reduziert";
+"internal.coinQA.mode.standard" = "Standard";
+"internal.coinQA.note" = "Bitte ohne Kabel testen. Für die Freigabe zusätzlich einmal mit „Bewegung reduzieren“ wiederholen.";
+"internal.coinQA.open" = "Münzkontakt auf diesem iPhone testen";
+"internal.coinQA.play" = "Test abspielen";
+"internal.coinQA.sound" = "Sound";
+"internal.coinQA.state.contact" = "Kontakt erkannt";
+"internal.coinQA.state.flying" = "Münze unterwegs";
+"internal.coinQA.state.ready" = "Bereit";
+"internal.coinQA.state.resting" = "Münze liegt";
+"internal.coinQA.title" = "Münzkontakt";

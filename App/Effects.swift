@@ -172,11 +172,29 @@ private final class R1ContactAudio {
         "r1-ceramic-center-02",
         "r1-ceramic-center-03"
     ]
+    private let stackVariants = [
+        "r1-ceramic-stack-01",
+        "r1-ceramic-stack-02",
+        "r1-ceramic-stack-03"
+    ]
     private var players: [String: AVAudioPlayer] = [:]
+    private var lastVariantIndexByFamily: [String: Int] = [:]
     private var lastContactTime: TimeInterval = -.infinity
 
+    private static var isAvailableInCurrentRuntime: Bool {
+        #if targetEnvironment(simulator)
+        // CoreAudio can synchronously wait for a nonexistent simulator output
+        // device. Physical builds keep the exact shipping audio path; developers
+        // can still opt in when explicitly validating a working simulator host.
+        return ProcessInfo.processInfo.arguments.contains("-enableSimulatorContactAudio")
+        #else
+        return true
+        #endif
+    }
+
     func prepare() {
-        for name in outerVariants + centerVariants {
+        guard Self.isAvailableInCurrentRuntime else { return }
+        for name in outerVariants + centerVariants + stackVariants {
             _ = player(named: name)
         }
     }
@@ -184,17 +202,45 @@ private final class R1ContactAudio {
     func play(surface: R1ContactSurface,
               groupSize: Int,
               variantSeed: Int) {
+        guard Self.isAvailableInCurrentRuntime else { return }
         let now = ProcessInfo.processInfo.systemUptime
         guard now - lastContactTime >= 0.12 else { return }
 
-        let variants = surface == .centerWell ? centerVariants : outerVariants
-        let index = Int(UInt(bitPattern: variantSeed) % UInt(variants.count))
+        let variants: [String]
+        let family: String
+        let familySalt: UInt64
+        let semanticIndex: Int?
+        switch surface {
+        case .outerWell:
+            variants = outerVariants
+            family = "outer"
+            familySalt = 0xA17E_1441
+            semanticIndex = nil
+        case .centerWell:
+            variants = centerVariants
+            family = "center"
+            familySalt = 0xCE17_1441
+            semanticIndex = nil
+        case .playerStack:
+            variants = stackVariants
+            family = "stack"
+            familySalt = 0x57AC_1441
+            semanticIndex = groupSize > 1 ? min(groupSize - 1, 2) : nil
+        }
+        let index = R1ContactVariantResolver.resolve(
+            variantCount: variants.count,
+            seed: variantSeed,
+            familySalt: familySalt,
+            semanticIndex: semanticIndex,
+            previousIndex: lastVariantIndexByFamily[family]
+        )
         let name = variants[index]
         guard let player = player(named: name) else { return }
         let dynamics = R1ContactDynamics.resolve(surface: surface,
                                                  groupSize: groupSize)
 
         lastContactTime = now
+        lastVariantIndexByFamily[family] = index
         player.currentTime = 0
         player.volume = dynamics.audioVolume
         player.play()

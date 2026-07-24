@@ -1,0 +1,16 @@
+"internal.coinQA.body" = "Check whether the picture, copper sound, and haptics align at impact.";
+"internal.coinQA.close" = "Close";
+"internal.coinQA.eyebrow" = "INTERNAL DEVICE TEST";
+"internal.coinQA.haptics" = "Haptics";
+"internal.coinQA.mode" = "Motion";
+"internal.coinQA.mode.reduced" = "Reduced";
+"internal.coinQA.mode.standard" = "Standard";
+"internal.coinQA.note" = "Please test without a cable. For approval, repeat once with Reduce Motion.";
+"internal.coinQA.open" = "Test coin contact on this iPhone";
+"internal.coinQA.play" = "Play test";
+"internal.coinQA.sound" = "Sound";
+"internal.coinQA.state.contact" = "Contact detected";
+"internal.coinQA.state.flying" = "Coin in motion";
+"internal.coinQA.state.ready" = "Ready";
+"internal.coinQA.state.resting" = "Coin at rest";
+"internal.coinQA.title" = "Coin contact";

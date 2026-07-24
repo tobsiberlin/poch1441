@@ -1,0 +1,16 @@
+"internal.coinQA.body" = "Controleer of beeld, kopergeluid en haptiek samenvallen bij de impact.";
+"internal.coinQA.close" = "Sluiten";
+"internal.coinQA.eyebrow" = "INTERNE APPARAATTEST";
+"internal.coinQA.haptics" = "Haptiek";
+"internal.coinQA.mode" = "Beweging";
+"internal.coinQA.mode.reduced" = "Verminderd";
+"internal.coinQA.mode.standard" = "Standaard";
+"internal.coinQA.note" = "Test zonder kabel. Herhaal voor goedkeuring één keer met Verminder beweging.";
+"internal.coinQA.open" = "Muntcontact op deze iPhone testen";
+"internal.coinQA.play" = "Test afspelen";
+"internal.coinQA.sound" = "Geluid";
+"internal.coinQA.state.contact" = "Contact gedetecteerd";
+"internal.coinQA.state.flying" = "Munt in beweging";
+"internal.coinQA.state.ready" = "Gereed";
+"internal.coinQA.state.resting" = "Munt ligt stil";
+"internal.coinQA.title" = "Muntcontact";

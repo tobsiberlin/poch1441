@@ -38,6 +38,10 @@ WELL_METAL_TARGET_SRGB = (135, 138, 140)
 WELL_METAL_CONTRAST_GAMMA = 1.08
 CENTER_LIP_TARGET_SRGB = (40, 46, 57)
 CENTER_LIP_CONTRAST_GAMMA = 0.45
+CENTER_OUTER_RADIUS_RATIO = 0.164
+CENTER_VELVET_OUTER_RADIUS_RATIO = 0.140
+CENTER_WALL_START_RADIUS_RATIO = 0.118
+CENTER_LIP_INNER_RADIUS_RATIO = 0.138
 ASSET_SCALE = 1.26
 ASSET_OFFSET = (0.0010, 0.0372)
 
@@ -281,7 +285,7 @@ def smoothstep(edge0: float, edge1: float, values: np.ndarray) -> np.ndarray:
     return normalized * normalized * (3.0 - 2.0 * normalized)
 
 
-def build_velvet_texture() -> np.ndarray:
+def build_velvet_texture(*, center: bool = False) -> np.ndarray:
     """Return clustered velvet nap without radial or centre-dependent noise."""
     broad = np.asarray(noise_field(54, 14_410), dtype=np.float64) / 255.0 - 0.5
     pile = np.asarray(noise_field(172, 144_100), dtype=np.float64) / 255.0 - 0.5
@@ -291,7 +295,12 @@ def build_velvet_texture() -> np.ndarray:
     # irregular fibre clusters. Fine grain alone averaged into the rejected
     # smooth rubber surface, so the dominant variation intentionally lives at
     # 7-24 presentation pixels without becoming a marble vein.
-    delta = broad * 13.0 + pile * 11.0 + fine * 3.0
+    # The larger center bowl exposes more physical cloth area. Its reference
+    # resolves finer clustered nap without enlarging the same broad cloud field
+    # that is appropriate at the phone-sized outer wells.
+    delta = (broad * 5.0 + pile * 9.0 + fine * 2.5) if center else (
+        broad * 13.0 + pile * 11.0 + fine * 3.0
+    )
     for index, channel in enumerate((41.0, 48.0, 58.0)):
         base[..., index] = np.rint(np.clip(channel + delta, 0.0, 255.0)).astype(np.uint8)
     base[..., 3] = 255
@@ -306,13 +315,18 @@ def build_velvet_grade() -> Image.Image:
     flor underneath the lower wall also removes the source asset's false dark
     donut without painting over the physical metal lip.
     """
-    texture = build_velvet_texture()
+    outer_texture = build_velvet_texture()
+    center_texture = build_velvet_texture(center=True)
     result = np.zeros((SIZE, SIZE, 4), dtype=np.float64)
 
     for name, normalized in WELLS.items():
         is_center = name == "center"
-        outer_radius = SIZE * (0.152 if is_center else 0.074)
-        inner_wall_radius = SIZE * (0.102 if is_center else 0.061)
+        outer_radius = SIZE * (
+            CENTER_VELVET_OUTER_RADIUS_RATIO if is_center else 0.074
+        )
+        inner_wall_radius = SIZE * (
+            CENTER_WALL_START_RADIUS_RATIO if is_center else 0.061
+        )
         cx, cy = normalized_center(normalized)
         extent = int(math.ceil(outer_radius + 3.0))
         x0 = max(0, int(cx) - extent)
@@ -331,10 +345,11 @@ def build_velvet_grade() -> Image.Image:
         light_values = np.asarray(
             (0.07, 0.10, 0.15, 0.47, 0.75, 0.94, 1.05, 1.10, 1.28)
             if not is_center else
-            (0.62, 0.68, 0.72, 0.78, 0.82, 0.88, 0.93, 0.97, 0.98)
+            (0.11, 0.27, 0.57, 0.82, 0.89, 0.94, 0.97, 0.98, 0.98)
         )
         light = np.interp(ny, light_positions, light_values)
 
+        texture = center_texture if is_center else outer_texture
         rgb = texture[y0:y1, x0:x1, :3].copy()
         if is_center:
             rgb -= 2.0
@@ -346,7 +361,7 @@ def build_velvet_grade() -> Image.Image:
         wall = (smoothstep(wall_start - 0.035, wall_start + 0.015, radius)
                 * (1.0 - smoothstep(0.965, 1.0, radius)))
         wall_alpha = wall * (0.012 + (0.74 if is_center else 0.82) * topness)
-        wall_color = np.asarray((7.0, 10.0, 16.0) if is_center else (6.0, 9.0, 14.0))
+        wall_color = np.asarray((4.0, 6.0, 10.0) if is_center else (6.0, 9.0, 14.0))
         rgb = rgb * (1.0 - wall_alpha[..., None]) + wall_color * wall_alpha[..., None]
 
         target = result[y0:y1, x0:x1]
@@ -361,27 +376,39 @@ def build_center_lip_grade() -> Image.Image:
     mask = Image.new("L", (SIZE, SIZE), 0)
     draw = ImageDraw.Draw(mask)
     center = normalized_center(WELLS["center"])
-    ring(draw, center, SIZE * 0.164, SIZE * 0.151, 255)
-    return build_source_derived_grade(
+    ring(
+        draw,
+        center,
+        SIZE * CENTER_OUTER_RADIUS_RATIO,
+        SIZE * CENTER_LIP_INNER_RADIUS_RATIO,
+        255,
+    )
+    grade = build_source_derived_grade(
         mask.filter(ImageFilter.GaussianBlur(radius=1.4)),
         CENTER_LIP_TARGET_SRGB,
         CENTER_LIP_CONTRAST_GAMMA,
     )
+    # Retain the broad source bevel while suppressing its fine woven teeth,
+    # which belong to the rejected old textile and became a black comb after
+    # downsampling at the directional upper shadow.
+    softened = grade.filter(ImageFilter.GaussianBlur(radius=3.2))
+    softened.putalpha(mask.filter(ImageFilter.GaussianBlur(radius=1.4)))
+    return softened
 
 
 def build_center_upper_wall_cover() -> Image.Image:
-    """Hide only the obsolete woven source seam at twelve o'clock."""
+    """Hide the obsolete woven seam only on the directed upper inner wall."""
     result = np.zeros((SIZE, SIZE, 4), dtype=np.float64)
     cx, cy = normalized_center(WELLS["center"])
     yy, xx = np.mgrid[:SIZE, :SIZE]
     normalized_x = (xx - cx) / SIZE
     normalized_y = (yy - cy) / SIZE
     radius = np.hypot(normalized_x, normalized_y)
-    annulus = (smoothstep(0.149, 0.153, radius)
-               * (1.0 - smoothstep(0.158, 0.161, radius)))
-    topness = smoothstep(-0.12, 0.70, -normalized_y / 0.164)
-    alpha = annulus * topness * 0.94
-    result[..., :3] = np.asarray((6.0, 9.0, 14.0))
+    annulus = (smoothstep(0.115, 0.119, radius)
+               * (1.0 - smoothstep(0.138, 0.142, radius)))
+    topness = smoothstep(-0.12, 0.70, -normalized_y / CENTER_OUTER_RADIUS_RATIO)
+    alpha = annulus * topness * 0.92
+    result[..., :3] = np.asarray((4.0, 6.0, 10.0))
     result[..., 3] = np.rint(alpha * 255.0)
     return Image.fromarray(result.astype(np.uint8), mode="RGBA")
 

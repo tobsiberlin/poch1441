@@ -101,7 +101,8 @@ final class PresentationDirector {
 }
 
 /// A single source-to-target transaction. The target state is committed only by
-/// `onImpact`, which is guarded against duplicate animation completions.
+/// `onImpact`, which is guarded against duplicate animation completions. Callers
+/// may opt into `onCancel` to observe an active flight disappearing before contact.
 struct ImpactFlight<Content: View>: View {
     let from: CGPoint
     let to: CGPoint
@@ -111,9 +112,12 @@ struct ImpactFlight<Content: View>: View {
     let lateralBias: CGFloat
     private let content: (CGFloat) -> Content
     private let onImpact: () -> Void
+    private let onCancel: (() -> Void)?
 
     @State private var progress: CGFloat = 0
+    @State private var active = false
     @State private var impacted = false
+    @State private var cancelled = false
 
     init(from: CGPoint,
          to: CGPoint,
@@ -122,6 +126,7 @@ struct ImpactFlight<Content: View>: View {
          arcHeight: CGFloat = 0,
          lateralBias: CGFloat = 0,
          onImpact: @escaping () -> Void,
+         onCancel: (() -> Void)? = nil,
          @ViewBuilder content: @escaping (CGFloat) -> Content) {
         self.from = from
         self.to = to
@@ -130,6 +135,7 @@ struct ImpactFlight<Content: View>: View {
         self.arcHeight = arcHeight
         self.lateralBias = lateralBias
         self.onImpact = onImpact
+        self.onCancel = onCancel
         self.content = content
     }
 
@@ -142,6 +148,8 @@ struct ImpactFlight<Content: View>: View {
                                        arcHeight: arcHeight,
                                        lateralBias: lateralBias))
             .onAppear {
+                guard !cancelled else { return }
+                active = true
                 withAnimation(PhysicalMotion.travel(duration: duration).delay(delay),
                               completionCriteria: .logicallyComplete) {
                     progress = 1
@@ -149,12 +157,26 @@ struct ImpactFlight<Content: View>: View {
                     impactOnce()
                 }
             }
+            .onDisappear {
+                cancelOnce()
+            }
     }
 
     private func impactOnce() {
-        guard !impacted else { return }
+        guard active, !impacted, !cancelled else { return }
+        active = false
         impacted = true
         onImpact()
+    }
+
+    private func cancelOnce() {
+        guard let onCancel,
+              active,
+              !impacted,
+              !cancelled else { return }
+        active = false
+        cancelled = true
+        onCancel()
     }
 }
 

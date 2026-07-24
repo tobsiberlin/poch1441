@@ -8,16 +8,27 @@ import SwiftUI
 /// (Engine-Branding: Code = Source of Truth der Label-Farben); das P·1441-Monogramm
 /// ist Vektor-Text, nie generiert (Anti-Slop §5).
 struct CardBack: View {
+    var materialVariant: Int? = nil
     var scale: CGFloat = 1
 
+    private static let damageOverlayNames = [
+        "card_back_damage_00", "card_back_damage_01", "card_back_damage_02",
+        "card_back_damage_03", "card_back_damage_04", "card_back_damage_05",
+        "card_back_damage_06", "card_back_damage_07", "card_back_damage_08",
+        "card_back_damage_09",
+    ]
     private static let facetColors: [Color] = [
         Tokens.jewelGold, Tokens.jewelRose, Tokens.jewelSmaragd, Tokens.jewelAmethyst,
     ]
     private static let platin = Tokens.jewelPlatin.opacity(0.8)
+    private static let materialMarks = W2BackPatina.marks()
+    private static let materialInk = Color(hex: 0x8B7C70)
 
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8 * scale).fill(Color(hex: 0x14110F))
+            materialPatina
+            materialDamageOverlay
             facetLozenge
             if scale >= 1.2 { monograms }
         }
@@ -27,6 +38,55 @@ struct CardBack: View {
         // (Render-Eigenschaft, nicht Teil des Assets - Game-Feel-Pass).
         .overlay(RoundedRectangle(cornerRadius: 8 * scale)
             .strokeBorder(Color(hex: 0x626268).opacity(0.9), lineWidth: 0.6 * scale))
+    }
+
+    /// Transparente Gebrauchsspur über dem neutralen W2-Material. Der feste
+    /// Frame und Clip halten Silhouette, Schatten und Layout variantengleich.
+    @ViewBuilder
+    private var materialDamageOverlay: some View {
+        if let materialVariant,
+           Self.damageOverlayNames.indices.contains(materialVariant) {
+            Image(Self.damageOverlayNames[materialVariant])
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 52 * scale, height: 74 * scale)
+                .clipShape(RoundedRectangle(cornerRadius: 8 * scale))
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
+    }
+
+    /// Feste, paarweise punktsymmetrische Materialfasern ohne Kartenidentität.
+    private var materialPatina: some View {
+        Canvas { context, size in
+            let longEdge = max(size.width, size.height)
+
+            for mark in Self.materialMarks {
+                let center = CGPoint(
+                    x: size.width * CGFloat(mark.center.x),
+                    y: size.height * CGFloat(mark.center.y)
+                )
+                let angle = CGFloat(mark.rotationDegrees * .pi / 180)
+                let halfLength = max(0.4 * scale, longEdge * CGFloat(mark.radius) * 1.8)
+                let offset = CGPoint(
+                    x: cos(angle) * halfLength,
+                    y: sin(angle) * halfLength
+                )
+                var fibre = Path()
+                fibre.move(to: CGPoint(x: center.x - offset.x, y: center.y - offset.y))
+                fibre.addLine(to: CGPoint(x: center.x + offset.x, y: center.y + offset.y))
+                context.stroke(
+                    fibre,
+                    with: .color(Self.materialInk.opacity(mark.opacity * 0.62)),
+                    style: StrokeStyle(
+                        lineWidth: max(0.2 * scale, longEdge * CGFloat(mark.radius) * 0.22),
+                        lineCap: .round
+                    )
+                )
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8 * scale))
     }
 
     private var facetLozenge: some View {

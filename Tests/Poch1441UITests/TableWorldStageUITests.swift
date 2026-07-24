@@ -18,6 +18,23 @@ final class TableWorldStageUITests: XCTestCase {
     }
 
     @MainActor
+    func testPhase1EmptyCenterMaterialPresentation() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = localizedArguments([
+            "-dealDone",
+            "-emptyCenterMaterialQA",
+            "-coachOff",
+            "-players=4"
+        ])
+        app.launch()
+
+        assertWindowOrientation(.portrait, in: app)
+        assertBoard("table.world.phase1.board", in: app)
+        attachScreenshot(of: app, named: "poch-disc-phase1-empty-center-material")
+    }
+
+    @MainActor
     func testPhase2PortraitMaterialAndFreeStageCenter() {
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
@@ -115,29 +132,26 @@ final class TableWorldStageUITests: XCTestCase {
                       "Der echte Tutorialflow muss mit dem ersten R1-Stein beginnen.")
         openingToken.tap()
 
-        let action = app.buttons["firstRun.coachAction"]
-        XCTAssertTrue(action.waitForExistence(timeout: 4),
-                      "Nach dem Mittelkontakt muss die Tischfinanzierung verfügbar sein.")
-        action.tap()
-
         Thread.sleep(forTimeInterval: 0.42)
-        if action.exists {
-            XCTAssertFalse(action.isEnabled,
-                           "Während der R1-Welle darf kein zweiter Funding-Start möglich sein.")
-        }
+        XCTAssertTrue(app.otherElements["firstRun.coach"].exists,
+                      "Die automatische Tischmontage muss ihren aktuellen Beat erklären.")
+        XCTAssertFalse(app.buttons["firstRun.coachAction"].exists,
+                       "Die Tischmontage darf keinen passiven Weiter-Tap verlangen.")
         attachScreenshot(of: app, named: "guided-r1-funding-wave")
 
         let learningState = app.descendants(matching: .any)
             .matching(identifier: "firstRun.learningState").firstMatch
         XCTAssertTrue(learningState.waitForExistence(timeout: 3))
         let settled = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "value == %@", "Verbinden"),
+            predicate: NSPredicate(format: "value == %@", "Dein Zug"),
             object: learningState
         )
-        XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 5), .completed,
-                       "Nach vier Beitragswellen muss der Tisch einmalig in den nächsten Lernzustand wechseln.")
+        XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 15), .completed,
+                       "Die Montage muss nach Finanzierung und Kartengeben einmalig bei Trumpf halten.")
+        let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 2),
-                      "Nach dem letzten Kontakt muss die nächste Tutorialaktion wieder verfügbar sein.")
+                      "Nach der Montage muss Trumpf wieder eine echte Tutorialaktion sein.")
+        XCTAssertEqual(action.label, "Trumpf aufdecken")
         attachScreenshot(of: app, named: "guided-r1-funding-settled")
     }
 
@@ -155,18 +169,14 @@ final class TableWorldStageUITests: XCTestCase {
         assertWindowOrientation(.portrait, in: app)
         let openingToken = app.buttons["firstRun.openingToken"]
         XCTAssertTrue(openingToken.waitForExistence(timeout: 4))
-        openingToken.tap()
-
-        let action = app.buttons["firstRun.coachAction"]
-        XCTAssertTrue(action.waitForExistence(timeout: 4))
         let startedAt = Date()
-        action.tap()
+        openingToken.tap()
 
         let learningState = app.descendants(matching: .any)
             .matching(identifier: "firstRun.learningState").firstMatch
         XCTAssertTrue(learningState.waitForExistence(timeout: 2))
         let settled = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "value == %@", "Verbinden"),
+            predicate: NSPredicate(format: "value == %@", "Dein Zug"),
             object: learningState
         )
         XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 2), .completed)
@@ -174,7 +184,9 @@ final class TableWorldStageUITests: XCTestCase {
         // der normale Vier-Wellen-Pfad benötigt dagegen deutlich über vier.
         XCTAssertLessThan(Date().timeIntervalSince(startedAt), 3.0,
                           "Reduced Motion darf keine unsichtbare R1-Welle abwarten.")
+        let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 2))
+        XCTAssertEqual(action.label, "Trumpf aufdecken")
         attachScreenshot(of: app, named: "guided-r1-funding-reduced-motion")
     }
 
@@ -370,7 +382,6 @@ final class TableWorldStageUITests: XCTestCase {
     private func assertPhase2ResultZones(in app: XCUIApplication) {
         let result = app.otherElements.matching(identifier: "phase2.result").firstMatch
         let hand = app.otherElements.matching(identifier: "phase2.hand").firstMatch
-        let newRound = app.buttons["phase2.newRound"]
         let continueButton = app.buttons["phase2.continue"]
         let opponents = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH %@", "phase2.opponent.")
@@ -378,11 +389,12 @@ final class TableWorldStageUITests: XCTestCase {
 
         XCTAssertTrue(result.waitForExistence(timeout: 2))
         XCTAssertTrue(hand.waitForExistence(timeout: 2))
-        XCTAssertTrue(newRound.waitForExistence(timeout: 2))
         XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["phase2.newRound"].exists,
+                       "Phase 2 darf keine regelwidrige neue Runde anbieten.")
         XCTAssertGreaterThan(opponents.count, 0)
 
-        let resultBottom = max(newRound.frame.maxY, continueButton.frame.maxY)
+        let resultBottom = continueButton.frame.maxY
         for index in 0..<opponents.count {
             XCTAssertLessThanOrEqual(resultBottom, opponents.element(boundBy: index).frame.minY,
                                      "Ergebnis und Gegner benötigen getrennte Bühnenzonen.")

@@ -40,8 +40,14 @@ struct Phase2PresentationContractTests {
         let result = try section(in: source,
                                  from: "private var resultBanner: some View",
                                  through: "// MARK: - Bausteine")
-        expect(result.components(separatedBy: "isEnabled: payoutControlsEnabled").count - 1 == 2,
-               "Both Phase-2 exits must wait for the payout to land")
+        expect(result.components(separatedBy: "isEnabled: payoutControlsEnabled").count - 1 == 1,
+               "The legal Phase-2 continuation must wait for the payout to land")
+        expect(!result.contains("phase2.newRound"),
+               "Phase 2 must not offer a round action that the rules reject")
+        expect(source.contains("let hapticsEnabled: Bool"),
+               "Phase 2 must receive the user's haptics preference")
+        expect(source.contains("guard hapticsEnabled, !previous, current"),
+               "The slider wall may fire only while haptics are enabled and on entry")
         expect(source.contains(".accessibilityAdjustableAction"),
                "The bid rail needs a non-drag accessibility path")
         expect(source.contains("game.resumeBettingIfNeeded()"),

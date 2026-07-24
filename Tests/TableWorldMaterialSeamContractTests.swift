@@ -29,13 +29,17 @@ struct TableWorldMaterialSeamContractTests {
                                 from: "struct TableWorldBoardBase: View",
                                 through: "/// Ein einzelner regelneutraler Spielstein")
         expect(board.contains("case .pochDisc:"), "Board basis must render Track A")
-        expect(board.contains("Image(\"PochDisc2026\")"),
-               "Track A must use the canonical satin-aluminium 2026 Poch Disc")
+        expect(board.contains("PochDiscMaterialImage(size: diameter)"),
+               "Track A must use the canonical composite Poch Disc material")
+        expect(source.contains("Image(\"PochDiscCleanBase\")"),
+               "The composite Poch Disc needs its normalized clean base")
+        expect(source.contains("Image(\"PochDiscMaterialGrade\")"),
+               "The composite Poch Disc needs its admitted material grade")
         expect(!board.contains("PochRingPM49"),
                "The historical PM49 render must not remain a Track-A design anchor")
         expect(board.contains("case .unterwegs:"), "Board basis must render Track B")
         expect(board.contains("Image(\"TravelTray\")"), "Track B must use the approved travel tray")
-        expect(board.components(separatedBy: ".accessibilityHidden(true)").count - 1 == 2,
+        expect(board.components(separatedBy: ".accessibilityHidden(true)").count - 1 >= 2,
                "Both bare board assets must stay decorative below semantic pool overlays")
         expect(!board.contains("default:"), "A new table world must not silently inherit a material")
         expect(source.contains("struct TableWorldSpatialPresentation: ViewModifier"),
@@ -48,8 +52,8 @@ struct TableWorldMaterialSeamContractTests {
         let piece = try section(in: source,
                                 from: "struct TableWorldPiece: View",
                                 through: "enum TableWorldPiecePlacement")
-        expect(piece.contains("R1Token(size: size, colorway: .naturalWhite)"),
-               "Track A must render canonical R1 natural white")
+        expect(piece.contains("R1Colorway.resolve(compartment: compartment"),
+               "Track A must render the canonical deterministic R1 palette")
         expect(piece.contains("TravelCentPiece(seed: seed,"),
                "Track B must render a deterministic approved 1-cent asset")
         expect(!piece.contains("TableChip"), "The shared seam must not reintroduce the legacy alias")

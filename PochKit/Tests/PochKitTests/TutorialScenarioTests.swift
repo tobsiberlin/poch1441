@@ -19,6 +19,20 @@ final class TutorialScenarioTests: XCTestCase {
         let lessons: [Lesson]
     }
 
+    private struct AppBotCatalog: Decodable {
+        struct Entry: Decodable {
+            let id: String
+            let profile: BotProfile
+        }
+
+        struct TutorialSeat: Decodable {
+            let opponentID: String
+        }
+
+        let profiles: [Entry]
+        let tutorialLineup: [TutorialSeat]
+    }
+
     /// Der Test liest bewusst dieselbe Build-Time-Quelle wie die App. `#filePath` hält
     /// die Auflösung unabhängig vom Arbeitsverzeichnis von Xcode und `swift test`.
     private func loadCatalog() throws -> Catalog {
@@ -30,6 +44,17 @@ final class TutorialScenarioTests: XCTestCase {
         let url = repositoryRoot.appendingPathComponent("App/TutorialScenarios.json")
         let data = try Data(contentsOf: url)
         return try JSONDecoder().decode(Catalog.self, from: data)
+    }
+
+    private func loadAppBotCatalog() throws -> AppBotCatalog {
+        let repositoryRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let url = repositoryRoot.appendingPathComponent("App/BotProfiles.json")
+        let data = try Data(contentsOf: url)
+        return try JSONDecoder().decode(AppBotCatalog.self, from: data)
     }
 
     private func seed(
@@ -104,7 +129,7 @@ final class TutorialScenarioTests: XCTestCase {
             seed: seed(for: .meld, playerCount: 4, catalog: catalog)
         )
         XCTAssertEqual(fourPlayer.humanSeat, 0, "Der Mensch sitzt links vom Geber")
-        XCTAssertEqual(fourPlayer.round.deal.upcard, Card(suit: .hearts, rank: .jack))
+        XCTAssertEqual(fourPlayer.round.deal.upcard, Card(suit: .diamonds, rank: .jack))
         XCTAssertEqual(
             Melding.pools(
                 for: fourPlayer.round.deal.hands[fourPlayer.humanSeat],
@@ -118,9 +143,108 @@ final class TutorialScenarioTests: XCTestCase {
             guard case .melded(let player, let pool, let chips) = event else { return nil }
             return (player, pool, chips)
         }
-        XCTAssertEqual(melds.map(\.0), [0, 0, 0, 3, 3])
-        XCTAssertEqual(melds.map(\.1), [.king, .queen, .mariage, .ace, .ten])
+        XCTAssertEqual(melds.map(\.0), [0, 0, 0, 2, 3])
+        XCTAssertEqual(melds.map(\.1), [.king, .queen, .mariage, .ten, .ace])
         XCTAssertEqual(melds.map(\.2), [4, 4, 4, 4, 4])
+    }
+
+    /// Die erste Lernreise bleibt eine einzige echte Runde. Ihr Meld-Seed muss daher
+    /// auch den tatsächlichen Poch mit der kuratierten Besetzung und ein eigenes
+    /// Anspiel tragen, statt beim Aktwechsel unbemerkt Hand oder Trumpf auszutauschen.
+    func testFourPlayerMeldSeedCarriesTheCompleteFirstJourney() throws {
+        let catalog = try loadCatalog()
+        let botCatalog = try loadAppBotCatalog()
+        let started = try startRound(
+            playerCount: 4,
+            seed: seed(for: .meld, playerCount: 4, catalog: catalog)
+        )
+        XCTAssertEqual(started.humanSeat, 0)
+
+        let profilesByID = Dictionary(uniqueKeysWithValues:
+            botCatalog.profiles.map { ($0.id, $0.profile) })
+        let tutorialProfiles = try botCatalog.tutorialLineup.map { seat in
+            try XCTUnwrap(profilesByID[seat.opponentID])
+        }
+        XCTAssertEqual(tutorialProfiles.count, 3)
+
+        var round = started.round
+        let opening = try XCTUnwrap(round.betting.legalActions(for: started.humanSeat)?.openRange)
+        XCTAssertTrue(opening.contains(1))
+        try round.applyBet(.open(1), by: started.humanSeat)
+
+        var botRNG = SeededRNG(seed: 0xC0FFEE)
+        var decisionCount = 0
+        while round.stage == .betting, decisionCount < 32 {
+            decisionCount += 1
+            let player = round.betting.turn
+            let legal = try XCTUnwrap(round.betting.legalActions(for: player))
+            if player == started.humanSeat {
+                try round.applyBet(legal.canCall ? .call : .pass, by: player)
+                continue
+            }
+
+            let profile = tutorialProfiles[player - 1]
+            _ = BotBrain.thinkSeconds(profile: profile, rng: &botRNG)
+            let observation = try XCTUnwrap(round.botObservation(for: player))
+            let action = BotBrain.action(profile: profile,
+                                         observation: observation,
+                                         legal: legal,
+                                         rng: &botRNG)
+            try round.applyBet(action, by: player)
+        }
+
+        XCTAssertLessThan(decisionCount, 32)
+        XCTAssertEqual(round.stage, .playout)
+        XCTAssertEqual(round.pochWinner, started.humanSeat)
+        let bettingOutcome = try XCTUnwrap(round.events.compactMap { event -> BettingPhase.Outcome? in
+            guard case .bettingEnded(let outcome) = event else { return nil }
+            return outcome
+        }.last)
+        guard case .showdown(let players) = bettingOutcome else {
+            return XCTFail("Die erste Lernreise muss den vollständigen Showdown lehren")
+        }
+        XCTAssertEqual(Set(players), Set(0..<4))
+        let pochWin = try XCTUnwrap(round.events.compactMap { event -> Bool? in
+            guard case .pochWon(_, _, _, let byShowdown) = event else { return nil }
+            return byShowdown
+        }.last)
+        XCTAssertTrue(pochWin)
+        let phase = try XCTUnwrap(round.playout)
+        XCTAssertEqual(phase.leader, started.humanSeat)
+
+        XCTAssertEqual(
+            ComboEvaluator.best(
+                in: round.deal.hands[started.humanSeat],
+                trump: round.deal.trump
+            ),
+            Combo(kind: .triple, rank: .queen, containsTrump: true)
+        )
+        XCTAssertEqual(
+            ComboEvaluator.best(in: round.deal.hands[1], trump: round.deal.trump),
+            Combo(kind: .triple, rank: .eight, containsTrump: false)
+        )
+
+        var guidedChain = phase
+        try guidedChain.lead(Card(suit: .hearts, rank: .jack))
+        XCTAssertEqual(
+            guidedChain.plays.map(\.card),
+            [
+                Card(suit: .hearts, rank: .jack),
+                Card(suit: .hearts, rank: .queen),
+                Card(suit: .hearts, rank: .king),
+                Card(suit: .hearts, rank: .ace)
+            ]
+        )
+        XCTAssertEqual(
+            guidedChain.plays.map(\.player),
+            [started.humanSeat, started.humanSeat, 3, started.humanSeat]
+        )
+        XCTAssertEqual(guidedChain.leader, started.humanSeat)
+        XCTAssertGreaterThanOrEqual(
+            guidedChain.hands[started.humanSeat].count,
+            2,
+            "Nach der erklärten Reihe braucht der Mensch eine echte neue Startwahl"
+        )
     }
 
     /// Der Poch-Seed muss den Menschen am ersten Zug regelkonform eröffnen lassen. Der Test

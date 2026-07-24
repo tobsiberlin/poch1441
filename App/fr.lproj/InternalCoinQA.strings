@@ -1,0 +1,16 @@
+"internal.coinQA.body" = "Vérifiez si l’image, le son du cuivre et les vibrations coïncident à l’impact.";
+"internal.coinQA.close" = "Fermer";
+"internal.coinQA.eyebrow" = "TEST INTERNE DE L’APPAREIL";
+"internal.coinQA.haptics" = "Vibrations";
+"internal.coinQA.mode" = "Mouvement";
+"internal.coinQA.mode.reduced" = "Réduit";
+"internal.coinQA.mode.standard" = "Standard";
+"internal.coinQA.note" = "Testez sans câble. Pour la validation, recommencez une fois avec Réduire les animations.";
+"internal.coinQA.open" = "Tester le contact de la pièce sur cet iPhone";
+"internal.coinQA.play" = "Lancer le test";
+"internal.coinQA.sound" = "Son";
+"internal.coinQA.state.contact" = "Contact détecté";
+"internal.coinQA.state.flying" = "Pièce en mouvement";
+"internal.coinQA.state.ready" = "Prêt";
+"internal.coinQA.state.resting" = "Pièce au repos";
+"internal.coinQA.title" = "Contact de la pièce";

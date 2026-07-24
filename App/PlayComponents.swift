@@ -26,12 +26,17 @@ struct OpponentPortrait: View {
     var size: CGFloat = 62
     var showsText: Bool = true
     let morph: Namespace.ID?
+    var reduceMotionOverride = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var currentPortraitAsset = ""
     @State private var previousPortraitAsset: String?
     @State private var portraitReveal = true
     @State private var portraitTransitionTask: Task<Void, Never>?
+
+    private var effectiveReduceMotion: Bool {
+        reduceMotion || reduceMotionOverride
+    }
 
     private var palette: (skin: Color, coat: Color, accent: Color) {
         switch seat % 3 {
@@ -50,7 +55,7 @@ struct OpponentPortrait: View {
                 .frame(width: size, height: size)
                 .opacity(isActive ? 1 : 0.46)
                 .saturation(isActive ? 1 : 0.22)
-                .animation(.easeInOut(duration: 0.24), value: isFocus)
+                .animation(effectiveReduceMotion ? nil : .easeInOut(duration: 0.24), value: isFocus)
                 .ifLet(morph) { view, namespace in
                     view.matchedGeometryEffect(id: "token\(seat)", in: namespace)
                 }
@@ -114,12 +119,12 @@ struct OpponentPortrait: View {
             if let previousPortraitAsset {
                 portraitImage(previousPortraitAsset)
                     .opacity(portraitReveal ? 0 : 1)
-                    .blur(radius: reduceMotion ? 0 : (portraitReveal ? 0.55 : 0))
+                    .blur(radius: effectiveReduceMotion ? 0 : (portraitReveal ? 0.55 : 0))
             }
 
             portraitImage(currentPortraitAsset.isEmpty ? portraitAssetName : currentPortraitAsset)
                 .opacity(previousPortraitAsset == nil || portraitReveal ? 1 : 0)
-                .blur(radius: reduceMotion ? 0 : (portraitReveal ? 0 : 0.45))
+                .blur(radius: effectiveReduceMotion ? 0 : (portraitReveal ? 0 : 0.45))
 
             RadialGradient(colors: [
                 palette.accent.opacity(portraitReveal ? 0 : 0.09),
@@ -143,8 +148,8 @@ struct OpponentPortrait: View {
         previousPortraitAsset = outgoing
         currentPortraitAsset = nextAsset
         portraitReveal = false
-        let duration = reduceMotion ? 0.16 : 0.42
-        withAnimation(reduceMotion
+        let duration = effectiveReduceMotion ? 0.16 : 0.42
+        withAnimation(effectiveReduceMotion
                       ? .linear(duration: duration)
                       : .timingCurve(0.22, 0.72, 0.20, 1, duration: duration)) {
             portraitReveal = true
@@ -283,7 +288,14 @@ struct OpponentPanel: View {
     var mood: OpponentMood = .neutral
     var width: CGFloat = 110
     var tendencyTitle: String?
+    var showsSpeechBubble = true
     let morph: Namespace.ID?
+    var reduceMotionOverride = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var effectiveReduceMotion: Bool {
+        reduceMotion || reduceMotionOverride
+    }
 
     private var role: String {
         switch seat % 3 {
@@ -295,7 +307,7 @@ struct OpponentPanel: View {
 
     var body: some View {
         let compact = width < 100
-        VStack(spacing: 3) {
+        VStack(spacing: 4) {
             ZStack {
                 opponentCardBacks
                     .offset(y: -14)
@@ -323,9 +335,10 @@ struct OpponentPanel: View {
                                  mood: mood,
                                  size: compact ? 54 : 62,
                                  showsText: false,
-                                 morph: morph)
+                                 morph: morph,
+                                 reduceMotionOverride: effectiveReduceMotion)
 
-                if !reactionIsQuiet {
+                if !reactionIsQuiet, showsSpeechBubble {
                     reactionSpeechBubble
                         .offset(y: -43)
                         .transition(.scale(scale: 0.82, anchor: .bottom).combined(with: .opacity))
@@ -351,18 +364,18 @@ struct OpponentPanel: View {
                     .minimumScaleFactor(0.72)
             }
 
-            if reactionIsQuiet {
+            if reactionIsQuiet || !showsSpeechBubble {
                 reactionBar
                     .frame(width: width)
             } else {
                 Color.clear.frame(height: 18)
             }
         }
-        .frame(width: width, height: compact ? 96 : 104)
+        .frame(width: width, height: compact ? 96 : 112)
         .opacity(isActive ? 1 : 0.64)
         .saturation(isActive ? 1 : 0.34)
-        .animation(.easeInOut(duration: 0.28), value: isFocus)
-        .animation(.easeInOut(duration: 0.28), value: isActive)
+        .animation(effectiveReduceMotion ? nil : .easeInOut(duration: 0.28), value: isFocus)
+        .animation(effectiveReduceMotion ? nil : .easeInOut(duration: 0.28), value: isActive)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             String(format: String(localized: "opponent.a11y.summary",
@@ -630,16 +643,6 @@ enum R1Colorway: CaseIterable, Sendable {
         }
     }
 
-    fileprivate var edge: Color {
-        switch self {
-        case .naturalWhite: Tokens.r1NaturalEdge
-        case .terracotta: Tokens.r1TerracottaEdge
-        case .sage: Tokens.r1SageEdge
-        case .slate: Tokens.r1SlateEdge
-        case .ochre: Tokens.r1OchreEdge
-        }
-    }
-
     fileprivate var assetName: String {
         switch self {
         case .naturalWhite: "R1NaturalWhite"
@@ -678,26 +681,35 @@ struct R1Token: View {
     }
 
     var body: some View {
-        ZStack {
-            Image(colorway.assetName)
-                .resizable()
-                .interpolation(.high)
-                .scaledToFit()
-                .frame(width: size, height: size)
-                .scaleEffect(Tokens.r1AssetScale)
-                .shadow(color: Color.black.opacity(0.72 - elevation * 0.10),
-                        radius: size * Tokens.r1ContactShadowRadiusRatio,
-                        x: size * Tokens.r1ContactShadowXRatio,
-                        y: size * Tokens.r1ContactShadowYRatio)
-                .shadow(color: Color.black.opacity(0.34 - elevation * 0.06),
-                        radius: size * Tokens.r1CastShadowRadiusRatio,
-                        x: size * Tokens.r1CastShadowXRatio,
-                        y: size * Tokens.r1CastShadowYRatio)
-
-            R1MintEmboss(colorway: colorway,
-                         size: size,
-                         markRotation: markRotation)
-        }
+        Image(colorway.assetName)
+            .resizable()
+            .interpolation(.medium)
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .scaleEffect(Tokens.r1AssetScale)
+            .shadow(color: Color.black.opacity(
+                Tokens.r1ContactShadowOpacity
+                    - elevation * Tokens.r1ContactShadowElevationFade
+            ),
+                    radius: size * Tokens.r1ContactShadowRadiusRatio,
+                    x: size * Tokens.r1ContactShadowXRatio,
+                    y: size * Tokens.r1ContactShadowYRatio)
+            .shadow(color: Color.black.opacity(
+                Tokens.r1CastShadowOpacity
+                    - elevation * Tokens.r1CastShadowElevationFade
+            ),
+                    radius: size * (
+                        Tokens.r1CastShadowRadiusRatio
+                        + elevation * Tokens.r1CastShadowElevationRadiusRatio
+                    ),
+                    x: size * (
+                        Tokens.r1CastShadowXRatio
+                        + elevation * Tokens.r1CastShadowElevationXRatio
+                    ),
+                    y: size * (
+                        Tokens.r1CastShadowYRatio
+                        + elevation * Tokens.r1CastShadowElevationYRatio
+                    ))
         .frame(width: size, height: size)
         .accessibilityHidden(true)
     }
@@ -706,73 +718,6 @@ struct R1Token: View {
 /// Übergangsname für noch nicht migrierte Bühnen. Neue Materialdarstellung
 /// verwendet `R1Token`; der Alias verändert weder Farbe noch Physik.
 typealias TableChip = R1Token
-
-/// Große W2-Blindprägung der verbindlichen Präzisionsscheiben-Referenz. Ring,
-/// Rändelung und Schulter liegen vollständig im Build-Time-Materialasset; die
-/// Laufzeit zeichnet ausschließlich die tiefe, materialfarbene Prägerille.
-private struct R1MintEmboss: View {
-    let colorway: R1Colorway
-    let size: CGFloat
-    let markRotation: Double
-
-    var body: some View {
-        R1FacetSignet()
-            .stroke(colorway.edge.opacity(0.88),
-                    style: StrokeStyle(lineWidth: max(0.34, size * 0.010),
-                                       lineCap: .round,
-                                       lineJoin: .round))
-        .frame(width: size * Tokens.r1SignetBBoxRatio,
-               height: size * Tokens.r1SignetBBoxRatio)
-        .offset(y: size * Tokens.r1SignetVerticalOffsetRatio)
-        .rotationEffect(.degrees(markRotation))
-        .shadow(color: colorway.face.opacity(0.46),
-                radius: 0,
-                x: -max(0.14, size * Tokens.r1EmbossLightOffsetRatio),
-                y: -max(0.14, size * Tokens.r1EmbossLightOffsetRatio))
-        .shadow(color: colorway.edge.opacity(0.68),
-                radius: 0,
-                x: max(0.18, size * Tokens.r1EmbossDarkOffsetRatio),
-                y: max(0.18, size * Tokens.r1EmbossDarkOffsetRatio))
-    }
-}
-
-private struct R1FacetSignet: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let outer = [
-            CGPoint(x: rect.midX, y: rect.minY),
-            CGPoint(x: rect.maxX, y: rect.midY),
-            CGPoint(x: rect.midX, y: rect.maxY),
-            CGPoint(x: rect.minX, y: rect.midY)
-        ]
-        let inner = outer.map {
-            CGPoint(x: center.x + ($0.x - center.x) * 0.56,
-                    y: center.y + ($0.y - center.y) * 0.56)
-        }
-        for index in outer.indices {
-            let next = (index + 1) % outer.count
-            path.move(to: outer[index])
-            path.addLine(to: outer[next])
-            path.move(to: inner[index])
-            path.addLine(to: inner[next])
-            path.move(to: outer[index])
-            path.addLine(to: inner[index])
-        }
-        path.move(to: inner[0])
-        path.addLine(to: inner[2])
-        path.move(to: inner[1])
-        path.addLine(to: inner[3])
-
-        let coreRadius = rect.width * 0.075
-        path.move(to: CGPoint(x: center.x, y: center.y - coreRadius))
-        path.addLine(to: CGPoint(x: center.x + coreRadius, y: center.y))
-        path.addLine(to: CGPoint(x: center.x, y: center.y + coreRadius))
-        path.addLine(to: CGPoint(x: center.x - coreRadius, y: center.y))
-        path.closeSubpath()
-        return path
-    }
-}
 
 /// R1-Steine liegen als natürlich geschichtete Gruppe in der Mulde. Der
 /// Kontakt-Schatten bleibt hart, der Höhenschatten weich.
@@ -792,6 +737,9 @@ struct TableTokenPile: View {
         let tokenDiameter = tokenDiameterOverride
             ?? min(Tokens.tableTokenDiameter,
                    diameter * Tokens.tableTokenToFloorRatio)
+        let pileSpread = compartment == .center
+            ? Tokens.r1CenterPileSpread
+            : Tokens.r1OuterPileSpread
         ZStack {
             ForEach(poses.indices, id: \.self) { index in
                 let pose = poses[index]
@@ -802,9 +750,10 @@ struct TableTokenPile: View {
                         markRotation: pose.rotation,
                         surfaceVariant: index,
                         elevation: pose.elevation / 0.22)
-                    .offset(x: pose.offset.width * tokenDiameter,
-                            y: pose.offset.height * tokenDiameter
-                                - pose.elevation * tokenDiameter * 0.06)
+                    .offset(x: pose.offset.width * tokenDiameter * pileSpread,
+                            y: pose.offset.height * tokenDiameter * pileSpread
+                                - pose.elevation * tokenDiameter
+                                    * Tokens.r1PileElevationLiftRatio)
                     .zIndex(pose.elevation * 100 + Double(index) * 0.01)
             }
 
@@ -857,18 +806,23 @@ struct RecessedTokenPile: View {
                 .frame(width: floorDiameter, height: floorDiameter)
                 .clipShape(Circle())
 
-            R1WellFrontLip()
-                .stroke(
-                    LinearGradient(colors: [
-                        Color.black.opacity(0.03),
-                        Color.black.opacity(0.18)
-                    ], startPoint: .top, endPoint: .bottom),
-                    style: StrokeStyle(lineWidth: max(0.55, diameter * 0.025),
-                                       lineCap: .round)
-                )
-                .frame(width: diameter * 0.70, height: diameter * 0.70)
-                .offset(y: diameter * 0.028)
-                .allowsHitTesting(false)
+            // The center bowl already owns a broad, raised front bezel in the
+            // physical board asset. Reusing the compact outer-well catch arc
+            // here drew a second false bowl directly around the token pile.
+            if compartment != .center {
+                R1WellFrontLip()
+                    .stroke(
+                        LinearGradient(colors: [
+                            Color.black.opacity(0.03),
+                            Color.black.opacity(0.18)
+                        ], startPoint: .top, endPoint: .bottom),
+                        style: StrokeStyle(lineWidth: max(0.55, diameter * 0.025),
+                                           lineCap: .round)
+                    )
+                    .frame(width: diameter * 0.70, height: diameter * 0.70)
+                    .offset(y: diameter * 0.028)
+                    .allowsHitTesting(false)
+            }
 
         }
         .frame(width: diameter, height: diameter)
@@ -1138,7 +1092,7 @@ struct PocketValueMarker: View {
         HStack(alignment: .firstTextBaseline, spacing: compact ? 1.5 : 3) {
             Text(pool.indexLabel)
                 .foregroundStyle(engraved
-                    ? Tokens.jewelPlatin.opacity(compact ? 0.52 : 0.58)
+                    ? Tokens.jewelPlatin.opacity(compact ? 0.82 : 0.58)
                     : (pool.indexLabel.count > 2
                         ? Tokens.jewelPlatin.opacity(compact ? 0.84 : 0.96)
                         : tint.opacity(compact ? 0.90 : 1)))
@@ -1151,7 +1105,7 @@ struct PocketValueMarker: View {
             }
         }
         .font(.system(size: engraved
-            ? (compact ? 5.5 : 7.4)
+            ? (compact ? 6.8 : 7.4)
             : (compact ? 6.2 : 9.6),
             weight: engraved ? .semibold : .heavy,
             design: engraved ? .default : .rounded))

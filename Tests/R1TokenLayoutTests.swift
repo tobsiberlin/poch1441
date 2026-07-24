@@ -60,7 +60,9 @@ struct R1TokenLayoutTests {
     private static func measuredR1HullFitsEveryBoardWellAtOnePhysicalSize() {
         let measuredAlphaRadius = Tokens.r1MeasuredAlphaRadiusRatio * Tokens.r1AssetScale
         let fullSize = Tokens.tableTokenDiameter
-        let compactSize = fullSize * Tokens.phase2BoardScale
+        let compactSize = fullSize
+            * Tokens.phase2BoardScale
+            * Tokens.r1CompactTokenScale
 
         let phase1Outer = physicalTokenDiameter(
             requested: fullSize,
@@ -86,18 +88,35 @@ struct R1TokenLayoutTests {
         expect(abs(phase2Outer - phase2Center) < 0.001,
                "the compact R1 must keep one physical size in outer and center wells")
 
-        for (tokenDiameter, wellDiameter) in [
-            (phase1Outer, Tokens.phase1OuterWellDiameter),
-            (phase2Outer, phase2OuterDiameter)
-        ] {
+        let outerCompartments = TravelCompartment.allCases.filter { $0 != .center }
+        let configurations: [(CGFloat, CGFloat, CGFloat, [TravelCompartment])] = [
+            (phase1Outer,
+             Tokens.phase1OuterWellDiameter,
+             Tokens.r1OuterPileSpread,
+             outerCompartments),
+            (phase1Center,
+             Tokens.phase1CenterWellDiameter,
+             Tokens.r1CenterPileSpread,
+             [.center]),
+            (phase2Outer,
+             phase2OuterDiameter,
+             Tokens.r1OuterPileSpread,
+             outerCompartments),
+            (phase2Center,
+             phase2CenterDiameter,
+             Tokens.r1CenterPileSpread,
+             [.center])
+        ]
+        for (tokenDiameter, wellDiameter, pileSpread, compartments) in configurations {
             let floorRadius = wellDiameter * Tokens.outerWellFloorRatio / 2
-            for compartment in TravelCompartment.allCases {
+            for compartment in compartments {
                 for seed: UInt64 in [1, 1_441, 1_444, .max] {
                     for pose in R1TokenSlots.layout(for: 12,
                                                     seed: seed,
                                                     compartment: compartment) {
                         let occupiedRadius = (
-                            hypot(pose.offset.width, pose.offset.height) + measuredAlphaRadius
+                            hypot(pose.offset.width, pose.offset.height) * pileSpread
+                                + measuredAlphaRadius
                         ) * tokenDiameter
                         expect(occupiedRadius <= floorRadius,
                                "the measured R1 alpha hull must stay inside the textile floor")
@@ -114,18 +133,20 @@ struct R1TokenLayoutTests {
             * measuredDiscDiameterRatio
             * Tokens.pochDiscAssetScale
         let visibleR1Diameter = Tokens.tableTokenDiameter
-            * Tokens.r1MeasuredAlphaRadiusRatio
-            * 2
+            * Tokens.r1MeasuredAlphaWidthRatio
             * Tokens.r1AssetScale
         let ratio = visibleR1Diameter / visibleDiscDiameter
-        expect((0.102...0.110).contains(ratio),
-               "the visible R1 body must match the direct-reference 0.102-0.110 D scale")
+        expect((0.102...0.107).contains(ratio),
+               "the visible R1 width must match the direct-reference 0.102-0.107 D scale")
 
         let outerFloorDiameter = Tokens.phase1OuterWellDiameter
             * Tokens.outerWellFloorRatio
-        let tokenToFloor = Tokens.tableTokenDiameter / outerFloorDiameter
-        expect((0.70...0.74).contains(tokenToFloor),
-               "one R1 must use 70-74 percent of the measured textile floor")
+        let visibleTokenToFloor = Tokens.tableTokenDiameter
+            * Tokens.r1MeasuredAlphaWidthRatio
+            * Tokens.r1AssetScale
+            / outerFloorDiameter
+        expect((0.68...0.71).contains(visibleTokenToFloor),
+               "one visible R1 body must use 68-71 percent of the textile floor")
     }
 
     private static func physicalTokenDiameter(requested: CGFloat,
@@ -135,7 +156,7 @@ struct R1TokenLayoutTests {
     }
 
     private static func twoTokenGroupsUseTheAvailableFloor() {
-        let measuredAlphaRadius = Tokens.r1MeasuredAlphaRadiusRatio * Tokens.r1AssetScale
+        let measuredAlphaWidth = Tokens.r1MeasuredAlphaWidthRatio * Tokens.r1AssetScale
         let floorDiameter = Tokens.phase1OuterWellDiameter * Tokens.outerWellFloorRatio
         for compartment in TravelCompartment.allCases {
             let pair = R1TokenSlots.layout(for: 2,
@@ -143,10 +164,12 @@ struct R1TokenLayoutTests {
                                            compartment: compartment)
             let centerDistance = hypot(pair[0].offset.width - pair[1].offset.width,
                                        pair[0].offset.height - pair[1].offset.height)
-            let visibleGroupDiameter = (centerDistance + measuredAlphaRadius * 2)
+            let visibleGroupDiameter = (
+                centerDistance * Tokens.r1OuterPileSpread + measuredAlphaWidth
+            )
                 * Tokens.tableTokenDiameter
             let utilization = visibleGroupDiameter / floorDiameter
-            expect((0.90...0.98).contains(utilization),
+            expect((0.88...0.96).contains(utilization),
                    "a two-token R1 group must use the floor without touching the metal ring")
         }
     }

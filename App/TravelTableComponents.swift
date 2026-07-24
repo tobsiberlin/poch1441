@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Semantische 8+1-Topologie von Track B. Diese Datei enthält bewusst keine
@@ -50,6 +51,87 @@ enum TravelTableGeometry {
 
     static func normalizedWellDiameter(for compartment: TravelCompartment) -> Double {
         compartment == .center ? 0.318 : 0.212
+    }
+}
+
+/// Screen-Space-Anker, mit denen bestehende Track-B-Komponenten positioniert
+/// werden können. Der Typ enthält ausschließlich Darstellungsgeometrie.
+struct TravelTableProjectedAnchors: Equatable, Sendable {
+    let compartment: TravelCompartment
+    let wellCenter: CGPoint
+    let labelAnchor: CGPoint
+    let restSlots: [CGPoint]
+    let overflowContactSlot: CGPoint
+}
+
+/// Verbindet ein Tray-Profil mit der gemeinsamen Board-Screen-Projektion.
+///
+/// Der Adapter erhält die bestehende Komponentenreihenfolge und validiert die
+/// reine 8+1-Zuordnung. Spielregeln, Einsätze und Besitzstände bleiben beim
+/// Aufrufer.
+struct TravelTableProjectionAdapter: Sendable {
+    enum AdapterError: Error, Equatable, Sendable {
+        case missingWell(TravelCompartment)
+        case duplicateWell(TravelCompartment)
+        case emptyFloorPath(TravelCompartment)
+    }
+
+    private let wellsByCompartment: [TravelCompartment: WellProfile]
+    private let projection: BoardSpaceProjection
+
+    init(profile: TravelTrayProfile = .smokeClearSquare,
+         projection: BoardSpaceProjection) throws {
+        var resolved: [TravelCompartment: WellProfile] = [:]
+        for compartment in TravelTableGeometry.compartments {
+            let matches = profile.wells.filter { $0.compartment == compartment }
+            guard let well = matches.first else {
+                throw AdapterError.missingWell(compartment)
+            }
+            guard matches.count == 1 else {
+                throw AdapterError.duplicateWell(compartment)
+            }
+            guard !well.floorPath.points.isEmpty else {
+                throw AdapterError.emptyFloorPath(compartment)
+            }
+            resolved[compartment] = well
+        }
+        wellsByCompartment = resolved
+        self.projection = projection
+    }
+
+    func anchors(for compartment: TravelCompartment) throws -> TravelTableProjectedAnchors {
+        let well = try resolvedWell(for: compartment)
+        return TravelTableProjectedAnchors(
+            compartment: compartment,
+            wellCenter: try projection.screenPoint(for: normalizedCenter(of: well.floorPath)),
+            labelAnchor: try projection.screenPoint(for: well.labelAnchor),
+            restSlots: try well.restSlots.map(projection.screenPoint(for:)),
+            overflowContactSlot: try projection.screenPoint(for: well.overflowContactSlot)
+        )
+    }
+
+    func anchorsInComponentOrder() throws -> [TravelTableProjectedAnchors] {
+        try TravelTableGeometry.compartments.map { try anchors(for: $0) }
+    }
+
+    func projectedWell(for compartment: TravelCompartment) throws -> ProjectedWellProfile {
+        try resolvedWell(for: compartment).projected(using: projection)
+    }
+
+    private func resolvedWell(for compartment: TravelCompartment) throws -> WellProfile {
+        guard let well = wellsByCompartment[compartment] else {
+            throw AdapterError.missingWell(compartment)
+        }
+        return well
+    }
+
+    private func normalizedCenter(of contour: TravelTrayContour) -> NormalizedBoardPoint {
+        let total = contour.points.reduce(into: (x: 0.0, y: 0.0)) { partial, point in
+            partial.x += point.x
+            partial.y += point.y
+        }
+        let divisor = Double(contour.points.count)
+        return NormalizedBoardPoint(x: total.x / divisor, y: total.y / divisor)
     }
 }
 
