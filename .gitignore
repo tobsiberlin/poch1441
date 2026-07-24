@@ -22,5 +22,6 @@ build/
 artifacts/
 *.mp4
 *.wav
+!App/Audio/first-run-*.wav
 !App/Audio/cent-copper-polycarbonate-01.wav
 .poch-simulator-udid
