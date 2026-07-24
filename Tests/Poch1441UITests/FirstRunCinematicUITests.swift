@@ -13,6 +13,7 @@ final class FirstRunCinematicUITests: XCTestCase {
             let app = XCUIApplication()
             app.launchArguments = [
                 "-firstRun",
+                "-firstRunOpening=tableCinematic",
                 "-firstRunScene=\(sceneIndex)",
                 "-players=4",
                 "-sound", "false",
@@ -75,6 +76,7 @@ final class FirstRunCinematicUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-firstRun",
+            "-firstRunOpening=tableCinematic",
             "-reduceMotionQA",
             "-players=4",
             "-sound", "false",
@@ -100,6 +102,7 @@ final class FirstRunCinematicUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-firstRun",
+            "-firstRunOpening=tableCinematic",
             "-players=4",
             "-sound", "false",
             "-haptics", "false",
@@ -121,6 +124,7 @@ final class FirstRunCinematicUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-firstRun",
+            "-firstRunOpening=tableCinematic",
             "-firstRunScene=6",
             "-players=4",
             "-sound", "false",

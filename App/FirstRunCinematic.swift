@@ -472,7 +472,7 @@ struct FirstRunCinematic: View {
         guard !didStart else { return }
         didStart = true
 
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if let argument = ProcessInfo.processInfo.arguments.first(where: {
             $0.hasPrefix("-firstRunScene=")
         }), let raw = Int(argument.split(separator: "=").last ?? "6"),

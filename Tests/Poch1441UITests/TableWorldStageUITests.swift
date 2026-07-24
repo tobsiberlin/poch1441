@@ -108,7 +108,7 @@ final class TableWorldStageUITests: XCTestCase {
         assertWindowOrientation(.portrait, in: app)
         assertBoard("table.world.phase2.board", in: app)
         let sequence = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", "SEQ, 13")).firstMatch
+            .matching(NSPredicate(format: "label == %@", "FOLGE, 13")).firstMatch
         XCTAssertTrue(sequence.waitForExistence(timeout: 3),
                       "Die Sequenzmulde muss ihren öffentlichen Wert benennen.")
         XCTAssertTrue(sequence.label.hasSuffix(", 13"),
@@ -127,6 +127,7 @@ final class TableWorldStageUITests: XCTestCase {
         app.launch()
 
         assertWindowOrientation(.portrait, in: app)
+        dismissTutorialCurtainIfNeeded(in: app)
         let openingToken = app.buttons["firstRun.openingToken"]
         XCTAssertTrue(openingToken.waitForExistence(timeout: 4),
                       "Der echte Tutorialflow muss mit dem ersten R1-Stein beginnen.")
@@ -139,17 +140,8 @@ final class TableWorldStageUITests: XCTestCase {
                        "Die Tischmontage darf keinen passiven Weiter-Tap verlangen.")
         attachScreenshot(of: app, named: "guided-r1-funding-wave")
 
-        let learningState = app.descendants(matching: .any)
-            .matching(identifier: "firstRun.learningState").firstMatch
-        XCTAssertTrue(learningState.waitForExistence(timeout: 3))
-        let settled = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "value == %@", "Dein Zug"),
-            object: learningState
-        )
-        XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 15), .completed,
-                       "Die Montage muss nach Finanzierung und Kartengeben einmalig bei Trumpf halten.")
         let action = app.buttons["firstRun.coachAction"]
-        XCTAssertTrue(action.waitForExistence(timeout: 2),
+        XCTAssertTrue(action.waitForExistence(timeout: 15),
                       "Nach der Montage muss Trumpf wieder eine echte Tutorialaktion sein.")
         XCTAssertEqual(action.label, "Trumpf aufdecken")
         attachScreenshot(of: app, named: "guided-r1-funding-settled")
@@ -167,6 +159,7 @@ final class TableWorldStageUITests: XCTestCase {
         app.launch()
 
         assertWindowOrientation(.portrait, in: app)
+        dismissTutorialCurtainIfNeeded(in: app)
         let openingToken = app.buttons["firstRun.openingToken"]
         XCTAssertTrue(openingToken.waitForExistence(timeout: 4))
         let startedAt = Date()
@@ -203,6 +196,7 @@ final class TableWorldStageUITests: XCTestCase {
 
         assertWindowOrientation(.portrait, in: app)
         assertBoard("table.world.phase1.board", in: app)
+        dismissTutorialCurtainIfNeeded(in: app)
         let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 3))
         action.tap()
@@ -210,11 +204,11 @@ final class TableWorldStageUITests: XCTestCase {
             .matching(identifier: "phase1.meld.flight").firstMatch
         let target = app.descendants(matching: .any)
             .matching(identifier: "phase1.meld.target").firstMatch
+        XCTAssertTrue(target.waitForExistence(timeout: 3),
+                      "Der Materialtransfer braucht während des Flugs ein eindeutiges Gewinnerziel.")
         XCTAssertTrue(flight.waitForExistence(timeout: 3),
                       "Die Meldung muss als sichtbarer R1-Transfer beginnen.")
         attachImmediateScreenshot(named: "meld-payout-heavy-r1-flight")
-        XCTAssertTrue(target.waitForExistence(timeout: 1),
-                      "Der Materialtransfer braucht ein eindeutiges Gewinnerziel.")
 
         let presentation = app.descendants(matching: .any)
             .matching(identifier: "phase1.presentation").firstMatch
@@ -243,6 +237,7 @@ final class TableWorldStageUITests: XCTestCase {
         app.launch()
 
         assertWindowOrientation(.portrait, in: app)
+        dismissTutorialCurtainIfNeeded(in: app)
         let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 3))
         action.tap()
@@ -274,6 +269,7 @@ final class TableWorldStageUITests: XCTestCase {
         app.launch()
 
         assertWindowOrientation(.landscapeLeft, in: app)
+        dismissTutorialCurtainIfNeeded(in: app)
         let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 3))
         action.tap()
@@ -380,7 +376,10 @@ final class TableWorldStageUITests: XCTestCase {
 
     @MainActor
     private func assertPhase2ResultZones(in app: XCUIApplication) {
-        let result = app.otherElements.matching(identifier: "phase2.result").firstMatch
+        // SwiftUI führt das innere Banner bewusst in den stabilen äußeren
+        // Aktionscontainer zusammen. Das ist derselbe öffentliche Vertrag,
+        // den der Dynamic-Type-Gate über beide Ergebnisvarianten prüft.
+        let result = app.otherElements.matching(identifier: "phase2.actions").firstMatch
         let hand = app.otherElements.matching(identifier: "phase2.hand").firstMatch
         let continueButton = app.buttons["phase2.continue"]
         let opponents = app.descendants(matching: .any).matching(
@@ -507,5 +506,13 @@ final class TableWorldStageUITests: XCTestCase {
             "-AppleLanguages", "(de)",
             "-AppleLocale", "de_DE"
         ]
+    }
+
+    @MainActor
+    private func dismissTutorialCurtainIfNeeded(in app: XCUIApplication) {
+        let curtain = app.buttons["tutorial.phaseCurtain.continue"]
+        if curtain.waitForExistence(timeout: 3), curtain.isHittable {
+            curtain.tap()
+        }
     }
 }

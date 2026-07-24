@@ -164,7 +164,7 @@ struct Phase3View: View {
                     .allowsHitTesting(false)
             }
         }
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         .task {
             guard ProcessInfo.processInfo.arguments.contains("-phase3ActionQA") else { return }
             try? await Task.sleep(for: .milliseconds(1_200))
@@ -178,7 +178,7 @@ struct Phase3View: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var phase3ReduceMotion: Bool {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         reduceMotion || ProcessInfo.processInfo.arguments.contains("-reduceMotionQA")
         #else
         reduceMotion

@@ -7,13 +7,16 @@ final class TranscriptDealUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = localizedArguments(["-transcriptDealQA", "-coachOff", "-players=4"])
 
-        let startedAt = Date()
         app.launch()
-        let status = waitForDealCount(8, in: app, timeout: 10)
+        let status = dealStatus(in: app)
+        XCTAssertTrue(status.waitForExistence(timeout: 3),
+                      "Der Transcript-Dealstatus muss vor der Zeitmessung sichtbar sein.")
+        let startedAt = Date()
+        waitForDealCount(8, status: status, in: app, timeout: 7)
         let elapsed = Date().timeIntervalSince(startedAt)
 
         XCTAssertTrue(status.exists, "Der Standardpfad muss acht echte Kontaktmarker erreichen.")
-        XCTAssertLessThan(elapsed, 8, "Acht Kontakte dürfen keine versteckte Langzeitpause enthalten.")
+        XCTAssertLessThan(elapsed, 5, "Acht sichtbare Kontakte dürfen keine versteckte Langzeitpause enthalten.")
         assertAtMostTwoMovingCards(in: app, samples: 24)
         attachScreenshot(of: app, named: "transcript-deal-stage3-standard-eight-contact")
     }
@@ -26,13 +29,16 @@ final class TranscriptDealUITests: XCTestCase {
             "-transcriptDealReducedMotionQA", "-coachOff", "-players=4"
         ])
 
-        let startedAt = Date()
         app.launch()
-        let status = waitForDealCount(8, in: app, timeout: 8)
+        let status = dealStatus(in: app)
+        XCTAssertTrue(status.waitForExistence(timeout: 3),
+                      "Der Reduced-Motion-Status muss vor der Zeitmessung sichtbar sein.")
+        let startedAt = Date()
+        waitForDealCount(8, status: status, in: app, timeout: 5)
         let elapsed = Date().timeIntervalSince(startedAt)
 
         XCTAssertTrue(status.exists, "Reduced Motion muss dieselben acht Kontaktmarker erreichen.")
-        XCTAssertLessThan(elapsed, 6, "Reduced Motion darf keine normale Flugzeit abwarten.")
+        XCTAssertLessThan(elapsed, 3, "Reduced Motion darf ab sichtbarem Start keine normale Flugzeit abwarten.")
         let moving = movingFlights(in: app)
         XCTAssertEqual(moving.count, 0, "Reduced Motion darf keinen räumlichen Flug offen lassen.")
         attachScreenshot(of: app, named: "transcript-deal-stage3-reduced-eight-contact")
@@ -77,18 +83,18 @@ final class TranscriptDealUITests: XCTestCase {
     }
 
     @MainActor
+    private func dealStatus(in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(identifier: "phase1.presentation").firstMatch
+    }
+
+    @MainActor
     private func waitForDealCount(
         _ count: Int,
+        status: XCUIElement,
         in app: XCUIApplication,
         timeout: TimeInterval
-    ) -> XCUIElement {
-        let status = app.descendants(matching: .any)
-            .matching(identifier: "phase1.presentation").firstMatch
-        guard status.waitForExistence(timeout: min(timeout, 3)) else {
-            XCTFail("Der Transcript-Dealstatus wurde nicht sichtbar.")
-            return status
-        }
-
+    ) {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             XCTAssertLessThanOrEqual(
@@ -96,12 +102,11 @@ final class TranscriptDealUITests: XCTestCase {
                 2,
                 "Flug und Settle zusammen dürfen nie mehr als zwei Karten bewegen."
             )
-            if landedCount(from: status) >= count { return status }
+            if landedCount(from: status) >= count { return }
             Thread.sleep(forTimeInterval: 0.025)
         }
         let finalValue = status.value as? String ?? "<kein Wert>"
         XCTFail("Dealstatus \(count) wurde nicht rechtzeitig erreicht; letzter Wert: \(finalValue)")
-        return status
     }
 
     @MainActor

@@ -62,7 +62,7 @@ struct ContentView: View {
     /// DEBUG-Launch-Args "-pochenStart"/"-ausspielStart" öffnen Akt 2/3 direkt
     /// (Screenshot-/QA-Läufe ohne Tap).
     @State private var akt: Akt = {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if ProcessInfo.processInfo.arguments.contains("-ausspielStart") { return .ausspielen }
         if ProcessInfo.processInfo.arguments.contains("-pochenStart") { return .pochen }
         #endif
@@ -82,7 +82,7 @@ struct ContentView: View {
     /// Track B bleibt bis zur vollständigen Board-/Materialmigration aus dem
     /// Produktpfad. DEBUG kann beide Welten für Integrationsscreens explizit wählen.
     private var theme: Theme {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if let argument = ProcessInfo.processInfo.arguments.first(where: {
             $0.hasPrefix("-tableWorld=")
         }), let value = argument.split(separator: "=").last {
@@ -112,7 +112,7 @@ struct ContentView: View {
     @State private var guidedAntePoolCounts: [Pool: Int] = [:]
     @State private var guidedAnteLandedEvents: Set<Int> = []
     @State private var guidedAnteWave: GuidedAnteWaveState?
-    #if DEBUG
+    #if DEBUG || INTERNAL_QA
     @State private var debugReduceMotionOverride = false
     #endif
     #if INTERNAL_QA
@@ -138,7 +138,7 @@ struct ContentView: View {
     }
 
     private var guidedReduceMotion: Bool {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         reduceMotion
             || debugReduceMotionOverride
             || ProcessInfo.processInfo.arguments.contains("-reduceMotionQA")
@@ -148,16 +148,16 @@ struct ContentView: View {
     }
 
     private var firstRunOpeningStyle: FirstRunOpeningStyle {
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-firstRunOpening=timeSwipe") {
-            return .timeSwipe
+        #if DEBUG || INTERNAL_QA
+        if ProcessInfo.processInfo.arguments.contains("-firstRunOpening=tableCinematic") {
+            return .tableCinematic
         }
         #endif
-        return .tableCinematic
+        return .timeSwipe
     }
 
     private var phase1SettlesImmediately: Bool {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         // Stage-3 Reduced-Motion QA still needs real presentation events so the
         // transcript callback can prove the same causal contact without a flight.
         if ProcessInfo.processInfo.arguments.contains("-transcriptDealReducedMotionQA") {
@@ -168,7 +168,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if ProcessInfo.processInfo.arguments.contains("-travelTableProbe") {
             TravelTableMaterialProbe()
         } else {
@@ -279,7 +279,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            #if DEBUG
+            #if DEBUG || INTERNAL_QA
             let args = ProcessInfo.processInfo.arguments
             let startsGuidedQA = args.contains("-tutorialSeed")
                 || args.contains("-tutorialMotionQA")
@@ -331,7 +331,7 @@ struct ContentView: View {
             guard !effectsEnabled, akt == .melden else { return }
             game.settlePhase1Presentation()
         }
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
             if args.contains("-resetTutorialProgressQA") {
@@ -429,7 +429,8 @@ struct ContentView: View {
             }
             if args.contains("-meldPayoutQA") {
                 selectedTutorialLesson = .meld
-                startGuidedRound(.meld)
+                let testsFullJourney = args.contains("-meldPayoutFastTransitionQA")
+                startGuidedRound(testsFullJourney ? nil : .meld)
                 game.debugStartMeldPayout()
             }
             if args.contains("-tutorialBidding") {
@@ -1775,15 +1776,11 @@ struct ContentView: View {
         guard guidedRoundActive, akt == .melden, !guidedMeldBusy else { return false }
         if guidedMeldBeat == FirstRunBeat.revealTrump.rawValue
             || guidedMeldBeat == FirstRunBeat.connectMeld.rawValue
+            || guidedMeldBeat == FirstRunBeat.proveMeld.rawValue
             || guidedMeldBeat == FirstRunBeat.release.rawValue {
             return true
         }
-        #if DEBUG
-        return guidedMeldBeat == FirstRunBeat.proveMeld.rawValue
-            && ProcessInfo.processInfo.arguments.contains("-meldPayoutQA")
-        #else
         return false
-        #endif
     }
 
     private func performGuidedMeldCoachAction() {
@@ -1843,7 +1840,7 @@ struct ContentView: View {
             case 5:
                 game.presentation.setFirstRunBeat(.proveMeld)
             case 6:
-                #if DEBUG
+                #if DEBUG || INTERNAL_QA
                 if ProcessInfo.processInfo.arguments.contains("-meldPayoutFastTransitionQA") {
                     game.debugBeginNextMeldPayout()
                     try? await Task.sleep(for: .milliseconds(240))
@@ -1945,22 +1942,8 @@ struct ContentView: View {
               akt == .melden,
               guidedMeldBeat == FirstRunBeat.connectMeld.rawValue,
               !guidedMeldBusy else { return }
-        guidedMeldBusy = true
         game.presentation.setFirstRunBeat(.proveMeld)
-        let generation = guidedMeldGeneration
-        guidedMeldTask = Task { @MainActor in
-            if !guidedReduceMotion {
-                try? await Task.sleep(for: .milliseconds(240))
-            }
-            guard guidedMeldFlowIsCurrent(generation) else { return }
-            scheduleMeldPayoutQAInterruptionIfNeeded(generation: generation)
-            await game.revealAllGuidedMelds(reduceMotion: phase1SettlesImmediately)
-            guard guidedMeldFlowIsCurrent(generation) else { return }
-            game.presentation.setFirstRunBeat(.release)
-            guidedMeldTask = nil
-            guidedMeldBusy = false
-            guidedCoachFocused = true
-        }
+        guidedCoachFocused = true
     }
 
     private func guidedMeldFlowIsCurrent(_ generation: Int) -> Bool {
@@ -1971,7 +1954,7 @@ struct ContentView: View {
     }
 
     private func scheduleMeldPayoutQAInterruptionIfNeeded(generation: Int) {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         let args = ProcessInfo.processInfo.arguments
         if args.contains("-meldPayoutLiveReduceMotionQA") {
             guidedMeldInterruptionTask = Task { @MainActor in
@@ -2024,7 +2007,7 @@ struct ContentView: View {
         guidedMeldBusy = false
     }
 
-    #if DEBUG
+    #if DEBUG || INTERNAL_QA
     private func runGuidedMeldMotionQA() {
         startGuidedRound()
         guidedAntePoolCounts[.center] = 1
@@ -4091,7 +4074,7 @@ struct ContentView: View {
                         .allowsHitTesting(guidedCoachInteractionAvailable)
 
                     ZStack(alignment: .bottom) {
-                        handView
+                        guidedHandView
                             .frame(width: size.width - 24,
                                    height: handHeight,
                                    alignment: .bottom)
@@ -4139,16 +4122,19 @@ struct ContentView: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("firstRun.learningBoard")
 
-            handView
+            guidedHandView
                 .frame(width: zones.hand.width,
                        height: zones.hand.height,
                        alignment: .bottom)
                 .clipped()
                 .position(x: zones.hand.midX, y: zones.hand.midY)
+                .allowsHitTesting(false)
+                .zIndex(1)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("firstRun.learningHand")
 
             guidedCoachViewport(in: zones)
+                .zIndex(2)
         }
         .overlayPreferenceValue(TutorialCardAnchorPreferenceKey.self) { anchors in
             if (guidedMeldBeat == FirstRunBeat.connectMeld.rawValue
@@ -4215,24 +4201,8 @@ struct ContentView: View {
                 .fill(Tokens.jewelGold)
                 .frame(width: 6, height: 6)
                 .position(wellPoint)
-
-            if guidedMeldBeat == FirstRunBeat.connectMeld.rawValue,
-               !guidedMeldBusy {
-                Button(action: completeGuidedMeldMatch) {
-                    Color.clear
-                        .frame(width: max(44, cardFrame.width + 8),
-                               height: max(44, cardFrame.height + 8))
-                        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .position(x: cardFrame.midX, y: cardFrame.midY)
-                .accessibilityLabel(String(localized: "tutorial.meld.action.connectClaim",
-                                           defaultValue: "Trumpf-König melden"))
-                .accessibilityHint(String(localized: "tutorial.meld.connect.body",
-                                          defaultValue: "Tippe den markierten König. Er bleibt in deiner Hand und gewinnt sofort den König-Topf."))
-                .accessibilityIdentifier("firstRun.meldMatch")
-            }
         }
+        .allowsHitTesting(false)
     }
 
     private var guidedIntroRank: Rank {
@@ -4466,7 +4436,7 @@ struct ContentView: View {
     }
 
     private func presentedChips(in pool: Pool) -> Int {
-#if DEBUG
+#if DEBUG || INTERNAL_QA
         if pool == .center,
            ProcessInfo.processInfo.arguments.contains("-emptyCenterMaterialQA") {
             return 0
@@ -4550,6 +4520,13 @@ struct ContentView: View {
         handFan(cardScale: 1.62)
     }
 
+    /// Das Tutorial zeigt und erklärt eine konkrete Karte. Deshalb entspricht
+    /// sein Layout-Rahmen der voll sichtbaren Karte; andernfalls würde der obere
+    /// Teil zwar gerendert, aber außerhalb der berührbaren SwiftUI-Fläche liegen.
+    private var guidedHandView: some View {
+        handFan(cardScale: 1.62, reservesFullCardHeight: true)
+    }
+
     private var landscapeHandView: some View {
         handFan(cardScale: 1.04)
     }
@@ -4558,10 +4535,11 @@ struct ContentView: View {
     /// explanation instead of below it. The smaller physical cards preserve
     /// their full touch target while keeping every card inside the stage.
     private var compactAccessibilityLandscapeHand: some View {
-        handFan(cardScale: 0.74)
+        handFan(cardScale: 0.74, reservesFullCardHeight: true)
     }
 
-    private func handFan(cardScale: CGFloat) -> some View {
+    private func handFan(cardScale: CGFloat,
+                         reservesFullCardHeight: Bool = false) -> some View {
         let cards = Array(game.humanHand.prefix(game.humanDealtVisible))
         let totalSlots = game.humanHand.count
 
@@ -4577,48 +4555,36 @@ struct ContentView: View {
                     && card == guidedIntroCard
 
                 Group {
-                    if isGuidedTarget, dynamicTypeSize.isAccessibilitySize {
-                        Button(action: completeGuidedMeldMatch) {
-                            CardFace(
-                                card: card,
-                                goldenStopper: true,
-                                scale: cardScale,
-                                isAccessibilityHidden: true
-                            )
-                            .contentShape(RoundedRectangle(cornerRadius: 10,
-                                                           style: .continuous))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(String(localized: "tutorial.meld.action.connectClaim",
-                                                   defaultValue: "Trumpf-König melden"))
-                        .accessibilityHint(String(localized: "tutorial.meld.connect.body",
-                                                  defaultValue: "Tippe den markierten König. Er bleibt in deiner Hand und gewinnt sofort den König-Topf."))
-                        .accessibilityIdentifier("firstRun.meldMatch")
+                    if isGuidedTarget {
+                        CardFace(
+                            card: card,
+                            goldenStopper: true,
+                            scale: cardScale
+                        )
+                        .accessibilityIdentifier("firstRun.meldTargetCard")
                     } else {
                         CardFace(
                             card: card,
-                            goldenStopper: isGuidedTarget,
+                            goldenStopper: false,
                             scale: cardScale,
-                            isAccessibilityHidden: isGuidedTarget
+                            isAccessibilityHidden: false
+                        )
+                        .accessibilityIdentifier(
+                            "phase1.hand.card.\(card.suit.rawValue).\(card.rank.rawValue)"
                         )
                     }
                 }
                     .anchorPreference(key: TutorialCardAnchorPreferenceKey.self,
                                       value: .bounds) { [card: $0] }
-                    .accessibilityIdentifier(
-                        isGuidedTarget
-                            ? "firstRun.meldMatch"
-                            : "phase1.hand.card.\(card.suit.rawValue).\(card.rank.rawValue)"
-                    )
                     .offset(pose.offset)
                     .rotationEffect(.degrees(pose.rotationDegrees), anchor: .bottom)
-                    .zIndex(Double(i))
+                    .zIndex(isGuidedTarget ? Double(cards.count + 1) : Double(i))
                     .transition(.scale(scale: 0.86, anchor: .bottom).combined(with: .opacity))
             }
         }
         .animation(.easeOut(duration: 0.12), value: game.humanDealtVisible)
         // Nur ~60% der Kartenhöhe sichtbar - Rest blendet am Bildschirmrand aus
-        .frame(height: 74 * cardScale * 0.62)
+        .frame(height: 74 * cardScale * (reservesFullCardHeight ? 1 : 0.62))
     }
 }
 

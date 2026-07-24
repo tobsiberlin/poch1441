@@ -681,7 +681,7 @@ struct FirstRunTimeSwipeOpening: View {
 
     @discardableResult
     private func applyDebugProgressOverride() -> Bool {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         let prefix = "-firstRunTimeProgress="
         guard let argument = ProcessInfo.processInfo.arguments.first(where: {
             $0.hasPrefix(prefix)

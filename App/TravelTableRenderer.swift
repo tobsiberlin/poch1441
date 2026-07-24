@@ -290,7 +290,7 @@ extension TravelCompartment {
     }
 }
 
-#if DEBUG
+#if DEBUG || INTERNAL_QA
 struct TravelTableMaterialProbe: View {
     private let counts: [TravelCompartment: Int] = [
         .king: 0, .queen: 3, .mariage: 2, .jack: 0,

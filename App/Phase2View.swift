@@ -33,6 +33,18 @@ private struct Phase2StageGeometry {
     }
 }
 
+private enum Phase2PortraitLayout {
+    static let accessibilityResultStageHeight: CGFloat = 186
+    static let accessibilityResultDecisionHeight: CGFloat = 184
+    static let accessibilityResultBoardScale: CGFloat = 0.72
+    static let accessibilityResultActionLift: CGFloat = 24
+    static let compactBettingOpponentScale: CGFloat = 0.68
+    static let compactBettingOpponentGap: CGFloat = 74
+    static let compactBettingHandReserve: CGFloat = 168
+    static let standardResultHandReserve: CGFloat = 138
+    static let standardResultSeatOffset: CGFloat = 80
+}
+
 /// Phase 2 (Pochen) - der psychologische Kern (§6b) im Kompressions-Layout (§5b, Akt 2):
 /// Gegner rücken als Kardinalpunkt-Tokens nah (§5c, Platzhalter bis Charakterstil-Urteil),
 /// die echte Poch-Mulde bleibt materiell sichtbar und wird nur semantisch akzentuiert.
@@ -68,14 +80,14 @@ struct Phase2View: View {
     @State private var payoutPresentationGeneration = 0
     @State private var payoutImpact = 0
     @State private var guidedPreludeStep = 0
-    #if DEBUG
+    #if DEBUG || INTERNAL_QA
     @State private var qaPochFlight = 0
     @State private var qaCoinTranscriptContact = 0
     @State private var qaCoinTranscriptRest = 0
     #endif
 
     private var phase2ReduceMotion: Bool {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         reduceMotion || ProcessInfo.processInfo.arguments.contains("-reduceMotionQA")
         #else
         reduceMotion
@@ -108,7 +120,7 @@ struct Phase2View: View {
             scheduleGuidedPrelude()
             startPayoutPresentationIfNeeded()
             game.resumeBettingIfNeeded()
-            #if DEBUG
+            #if DEBUG || INTERNAL_QA
             if let argument = ProcessInfo.processInfo.arguments.first(where: {
                 $0.hasPrefix("-tutorialBiddingStep=")
             }), let step = Int(argument.split(separator: "=").last ?? "0") {
@@ -184,7 +196,7 @@ struct Phase2View: View {
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
-            #if DEBUG
+            #if DEBUG || INTERNAL_QA
             if theme == .unterwegs,
                ProcessInfo.processInfo.arguments.contains("-transcriptCoinQA"),
                let plan = try? CertifiedCoinTranscript.bundled() {
@@ -224,7 +236,7 @@ struct Phase2View: View {
             }
             #endif
         }
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         .task {
             let arguments = ProcessInfo.processInfo.arguments
             if arguments.contains("-pochActionQA") {
@@ -244,12 +256,17 @@ struct Phase2View: View {
     }
 
     private func portraitStage(width w: CGFloat, height h: CGFloat) -> some View {
-        let topH = min(Tokens.phase2StageHeight, h * 0.37)
-        let decisionTop = topH + 8
         let accessibilityResult = game.stage != .betting
             && dynamicTypeSize.isAccessibilitySize
+        let topH = accessibilityResult
+            ? min(Phase2PortraitLayout.accessibilityResultStageHeight, h * 0.28)
+            : min(Tokens.phase2StageHeight, h * 0.37)
+        let decisionTop = topH + 8
         let guidedPreludeActive = isGuidedRound && guidedPreludeStep < 2
         let decisionH: CGFloat = {
+            if accessibilityResult {
+                return Phase2PortraitLayout.accessibilityResultDecisionHeight
+            }
             if dynamicTypeSize.isAccessibilitySize {
                 return guidedPreludeActive ? 236 : (isGuidedRound ? 176 : 146)
             }
@@ -258,26 +275,41 @@ struct Phase2View: View {
         let compactHeight = h < Tokens.phase2CompactHeight
         let actionGap: CGFloat = compactHeight ? 10 : 14
         let actionsTop = decisionTop + decisionH + actionGap
-            - (game.stage != .betting && dynamicTypeSize.isAccessibilitySize ? 12 : 0)
+            - (accessibilityResult ? Phase2PortraitLayout.accessibilityResultActionLift : 0)
         let actionsH: CGFloat = game.stage == .betting
             ? (dynamicTypeSize.isAccessibilitySize ? 64 : 56)
             : resultActionAreaHeight
         let opponentGap = game.stage == .betting
             ? (compactHeight
-                ? max(12, Tokens.phase2OpponentGapCompact)
+                ? Phase2PortraitLayout.compactBettingOpponentGap
                 : Tokens.phase2OpponentGapRegular)
             : 24
-        let resultSeatOffset: CGFloat = game.stage == .betting ? 0 : 64
+        let resultSeatOffset: CGFloat = {
+            guard game.stage != .betting else { return 0 }
+            return accessibilityResult
+                ? 64
+                : Phase2PortraitLayout.standardResultSeatOffset
+        }()
         let naturalSeatsTop = actionsTop + actionsH + opponentGap + resultSeatOffset
-        let handReserve = game.stage == .betting
-            ? Tokens.phase2HandReservedHeight
-            : Tokens.phase2ResultHandReservedHeight
+        let handReserve: CGFloat = {
+            if game.stage == .betting {
+                return compactHeight
+                    ? Phase2PortraitLayout.compactBettingHandReserve
+                    : Tokens.phase2HandReservedHeight
+            }
+            return accessibilityResult
+                ? Tokens.phase2ResultHandReservedHeight
+                : Phase2PortraitLayout.standardResultHandReserve
+        }()
         let latestSeatsTop = h - handReserve
         let seatsY = min(naturalSeatsTop, latestSeatsTop)
 
         return ZStack(alignment: .top) {
             topArea
                 .frame(width: w, height: topH)
+                .scaleEffect(accessibilityResult
+                             ? Phase2PortraitLayout.accessibilityResultBoardScale
+                             : 1)
                 .modifier(TableShake(
                     amplitude: phase2ReduceMotion ? 0 : Tokens.pochShakeAmp,
                     animatableData: CGFloat(game.pochShock)))
@@ -288,6 +320,7 @@ struct Phase2View: View {
                 .frame(width: min(342, w - 14))
                 .frame(height: decisionH, alignment: .top)
                 .offset(y: decisionTop)
+                .zIndex(guidedPreludeActive ? 4 : 0)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("phase2.decision")
 
@@ -305,7 +338,11 @@ struct Phase2View: View {
                 .opacity(isGuidedRound && guidedFocus != .actions ? 0 : 1)
 
             portraitsRow(maxPanelWidth: compactHeight ? 96 : 106,
-                         panelScale: accessibilityResult ? 0.68 : 1)
+                         panelScale: accessibilityResult
+                         ? 0.68
+                         : (compactHeight && game.stage == .betting
+                            ? Phase2PortraitLayout.compactBettingOpponentScale
+                            : 1))
                 .frame(width: w, height: Tokens.phase2OpponentRowHeight,
                        alignment: .top)
                 .offset(y: seatsY + (accessibilityResult ? 49 : 0))
@@ -322,6 +359,7 @@ struct Phase2View: View {
                 .position(x: w / 2,
                           y: h - (game.stage == .betting ? 58 : 0)
                               + (accessibilityResult ? 5 : 0))
+                .allowsHitTesting(false)
             // Die eigene Hand bleibt immer vollständig deckend. Opacity
             // auf dem gesamten Fächer lässt sonst Karten darunter durch-
             // scheinen und liest sich wie ein unscharfes Doppelbild.
@@ -374,6 +412,7 @@ struct Phase2View: View {
                        height: decisionHeight,
                        alignment: .top)
                 .position(x: centerX, y: decisionHeight / 2 + 1)
+                .zIndex(guidedPreludeActive ? 4 : 0)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("phase2.decision")
 
@@ -405,6 +444,7 @@ struct Phase2View: View {
             handFan(cardScale: 0.82)
                 .frame(width: w * 0.42, height: 64, alignment: .bottom)
                 .position(x: w * 0.34, y: h - 18)
+                .allowsHitTesting(false)
         }
     }
 

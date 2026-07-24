@@ -186,7 +186,7 @@ final class GameState {
     /// Beobachtbare Spiegelung der aktuellen Runde - die Runde ist ein Wert, GameState
     /// führt die lebende Kopie (Aktionen mutieren hier, source liefert nur frische Runden).
     private(set) var round: Round
-    #if DEBUG
+    #if DEBUG || INTERNAL_QA
     private var debugBoardPresentation: [Pool: Int] = [:]
     #endif
     /// Letzter sichtbarer Auftritt pro Sitz (Action-Bubble in Phase 2).
@@ -222,7 +222,7 @@ final class GameState {
     // MARK: - Gemeinsame Werte
 
     func chips(in pool: Pool) -> Int {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if let value = debugBoardPresentation[pool] { return value }
         #endif
         return round.board[pool]
@@ -435,7 +435,7 @@ final class GameState {
     }
 
     private func tutorialSeed(for lesson: TutorialLesson) -> UInt64 {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if lesson == .playout,
            let override = ProcessInfo.processInfo.arguments.first(where: {
                $0.hasPrefix("-guidedPlayoutSeedQA=")
@@ -1100,7 +1100,7 @@ final class GameState {
         endPhase = .done
     }
 
-    #if DEBUG
+    #if DEBUG || INTERNAL_QA
     /// QA-Helfer (Launch-Arg -ausspielStart): Bietrunde per Alle-passen überspringen,
     /// damit Screenshots direkt in Phase 3 starten. Nur DEBUG, nie Release (§6).
     func debugSkipToPlayout() {
@@ -1300,7 +1300,7 @@ final class GameState {
     /// die Mulde und wird zum Flugobjekt. Das Gewinnerkonto wächst weiterhin
     /// erst beim Kontakt (`meldShown`), sodass kein Stein doppelt sichtbar ist.
     func displayedChips(in pool: Pool) -> Int {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if let value = debugBoardPresentation[pool] { return value }
         #endif
         return round.board[pool] + meldEvents.dropFirst(startedMelds)
@@ -1580,7 +1580,7 @@ final class GameState {
         pulsingPool = nil
     }
 
-    #if DEBUG
+    #if DEBUG || INTERNAL_QA
     /// Deterministic product presentation for the Phase-1 payout UI tests. The
     /// underlying meld event still comes from the curated PochKit tutorial round.
     func debugStartMeldPayout() {

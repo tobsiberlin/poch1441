@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Builds the two loopable first-run sound worlds from CC0 room recordings.
+"""Builds the loopable first-run sound worlds from CC0 room recordings.
 
 The human room and laughter recordings are inputs so the repository does not
 need to retain large lossless source files. The two musical arrangements are
-generated deterministically here and share the same four-note motif.
+generated deterministically here and share the same four-note motif. The
+time-noise transition layer is entirely synthetic and can be built alone.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ SAMPLE_RATE = 44_100
 DURATION = 8.0
 FRAME_COUNT = int(SAMPLE_RATE * DURATION)
 RNG = np.random.default_rng(1_441)
+TIME_NOISE_SEED = 14_410_005
 
 
 def read_wav(path: Path) -> np.ndarray:
@@ -143,6 +145,52 @@ def normalize(signal: np.ndarray, peak: float = 0.82) -> np.ndarray:
     return signal if maximum == 0 else signal * (peak / maximum)
 
 
+def periodic_band_noise(rng: np.random.Generator) -> np.ndarray:
+    """Returns spectrally shaped noise whose final sample wraps to the first."""
+    frequencies = np.fft.rfftfreq(FRAME_COUNT, 1.0 / SAMPLE_RATE)
+    lower = np.clip((frequencies - 180.0) / (520.0 - 180.0), 0.0, 1.0)
+    upper = np.clip((6_200.0 - frequencies) / (6_200.0 - 3_600.0), 0.0, 1.0)
+    band = np.sin(lower * math.pi / 2.0) ** 2 * np.sin(upper * math.pi / 2.0) ** 2
+    colour = (np.maximum(frequencies, 520.0) / 1_000.0) ** -0.32
+    phases = rng.uniform(0.0, 2.0 * math.pi, len(frequencies))
+    spectrum = band * colour * np.exp(1j * phases)
+    spectrum[0] = 0.0
+    spectrum[-1] = 0.0
+    noise = np.fft.irfft(spectrum, n=FRAME_COUNT)
+    rms = float(np.sqrt(np.mean(noise * noise)))
+    return noise if rms == 0 else noise / rms
+
+
+def periodic_tonal_texture(rng: np.random.Generator) -> np.ndarray:
+    """Returns a quiet, pitchable resonance without a wall-clock gesture."""
+    frequencies = np.fft.rfftfreq(FRAME_COUNT, 1.0 / SAMPLE_RATE)
+    profile = np.exp(-0.5 * ((frequencies - 760.0) / 18.0) ** 2)
+    profile[np.abs(frequencies - 760.0) > 54.0] = 0.0
+    phases = rng.uniform(0.0, 2.0 * math.pi, len(frequencies))
+    spectrum = profile * np.exp(1j * phases)
+    spectrum[0] = 0.0
+    spectrum[-1] = 0.0
+    texture = np.fft.irfft(spectrum, n=FRAME_COUNT)
+    rms = float(np.sqrt(np.mean(texture * texture)))
+    return texture if rms == 0 else texture / rms
+
+
+def time_noise() -> np.ndarray:
+    """Builds subtle noise plus a continuous rate-pitchable tonal texture."""
+    rng = np.random.default_rng(TIME_NOISE_SEED)
+    centre = periodic_band_noise(rng)
+    side = periodic_band_noise(rng)
+    result = np.column_stack(
+        [centre * 0.93 + side * 0.20, centre * 0.93 - side * 0.20]
+    ) * 0.045
+
+    resonance = periodic_tonal_texture(rng) * 0.007
+    result[:, 0] += resonance * 0.72
+    result[:, 1] += np.roll(resonance, 17) * 0.69
+    result -= np.mean(result, axis=0, keepdims=True)
+    return normalize(result, peak=0.32)
+
+
 def write_wav(path: Path, signal: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     pcm = np.clip(signal, -1, 1)
@@ -178,14 +226,27 @@ def build(cafe_path: Path, laughter_path: Path, output_dir: Path) -> None:
     }
     for filename, signal in outputs.items():
         write_wav(output_dir / filename, normalize(soften_loop_edges(signal)))
+    build_time_noise(output_dir)
+
+
+def build_time_noise(output_dir: Path) -> None:
+    write_wav(output_dir / "first-run-time-noise.wav", time_noise())
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cafe-wav", type=Path, required=True)
-    parser.add_argument("--laughter-wav", type=Path, required=True)
+    parser.add_argument("--cafe-wav", type=Path)
+    parser.add_argument("--laughter-wav", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--time-noise-only", action="store_true")
     arguments = parser.parse_args()
+    if arguments.time_noise_only:
+        build_time_noise(arguments.output_dir)
+        return
+    if arguments.cafe_wav is None or arguments.laughter_wav is None:
+        parser.error(
+            "--cafe-wav and --laughter-wav are required unless --time-noise-only is set"
+        )
     build(arguments.cafe_wav, arguments.laughter_wav, arguments.output_dir)
 
 

@@ -60,14 +60,16 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
         let stage = app.otherElements["firstRun.timeSwipe.stage"]
         XCTAssertTrue(stage.waitForExistence(timeout: 4))
 
-        stage.coordinate(withNormalizedOffset: CGVector(dx: 0.18, dy: 0.48))
+        // Die direkte Zeitgeste gehört bewusst auf die Bildbühne. Der untere
+        // Textfilm bleibt für CTAs und lesbare Kopie reserviert.
+        stage.coordinate(withNormalizedOffset: CGVector(dx: 0.06, dy: 0.28))
             .press(forDuration: 0.05,
-                   thenDragTo: stage.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.48)))
+                   thenDragTo: stage.coordinate(withNormalizedOffset: CGVector(dx: 0.96, dy: 0.28)))
         XCTAssertTrue(app.buttons["firstRun.intro.primary"].waitForExistence(timeout: 3))
 
-        stage.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: 0.48))
+        stage.coordinate(withNormalizedOffset: CGVector(dx: 0.94, dy: 0.28))
             .press(forDuration: 0.05,
-                   thenDragTo: stage.coordinate(withNormalizedOffset: CGVector(dx: 0.08, dy: 0.48)))
+                   thenDragTo: stage.coordinate(withNormalizedOffset: CGVector(dx: 0.04, dy: 0.28)))
         let title = app.descendants(matching: .any)["firstRun.timeSwipe.title"]
         XCTAssertTrue(title.waitForExistence(timeout: 2))
         XCTAssertEqual(title.label, "Pokers älterer Bruder. Seit 1441.")
@@ -107,12 +109,31 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
     }
 
     @MainActor
+    func testProductionOpeningSurvivesRotation() {
+        let app = launchApp()
+        let prelude = app.otherElements["firstRun.timeSwipe.prelude"]
+        XCTAssertTrue(prelude.waitForExistence(timeout: 4))
+        assertWindowOrientation(.portrait, in: app)
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        assertWindowOrientation(.landscape, in: app)
+        XCTAssertTrue(prelude.waitForExistence(timeout: 2))
+
+        enterTimeline(app)
+        let stage = app.otherElements["firstRun.timeSwipe.stage"]
+        XCTAssertTrue(stage.waitForExistence(timeout: 4))
+
+        XCUIDevice.shared.orientation = .portrait
+        assertWindowOrientation(.portrait, in: app)
+        XCTAssertTrue(stage.waitForExistence(timeout: 2))
+    }
+
+    @MainActor
     private func launchApp(extra: [String] = []) -> XCUIApplication {
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
         app.launchArguments = [
             "-firstRun",
-            "-firstRunOpening=timeSwipe",
             "-players=4",
             "-sound", "false",
             "-haptics", "false",
@@ -122,6 +143,23 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
         ] + extra
         app.launch()
         return app
+    }
+
+    @MainActor
+    private func assertWindowOrientation(_ orientation: WindowOrientation,
+                                         in app: XCUIApplication,
+                                         timeout: TimeInterval = 5) {
+        let window = app.windows.firstMatch
+        XCTAssertTrue(window.waitForExistence(timeout: timeout))
+        let expectedLandscape = orientation == .landscape
+        let predicate = NSPredicate { _, _ in
+            let frame = window.frame
+            return expectedLandscape ? frame.width > frame.height : frame.height > frame.width
+        }
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: timeout), .completed,
+                       "Das produktive Onboarding muss die angeforderte Orientierung annehmen. " +
+                       "Fenster: \(window.frame)")
     }
 
     @MainActor
@@ -138,4 +176,9 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
         screenshot.lifetime = .keepAlways
         add(screenshot)
     }
+}
+
+private enum WindowOrientation {
+    case portrait
+    case landscape
 }

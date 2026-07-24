@@ -318,6 +318,5 @@ struct PhaseCurtain: View {
                     .shadow(color: .black.opacity(0.62), radius: 26, y: 14)
             )
         }
-        .allowsHitTesting(false)
     }
 }

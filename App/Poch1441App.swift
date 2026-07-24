@@ -42,7 +42,7 @@ final class PochOrientationDelegate: NSObject, UIApplicationDelegate {
     }
 
     private var requestedOrientationMask: UIInterfaceOrientationMask? {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         if ProcessInfo.processInfo.arguments.contains("-landscapeQA") {
             return .landscapeLeft
         }

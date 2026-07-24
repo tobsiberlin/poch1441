@@ -162,9 +162,11 @@ final class ProductWayfindingUITests: XCTestCase {
         for index in 0..<opponents.count {
             let opponent = opponents.element(boundBy: index).frame
             XCTAssertFalse(actions.frame.intersects(opponent),
-                           "Aktionen und Gegnerreaktionen brauchen getrennte Zonen.")
+                           "Aktionen \(actions.frame) und Gegnerreaktion \(opponent) " +
+                           "brauchen getrennte Zonen.")
             XCTAssertFalse(hand.frame.intersects(opponent),
-                           "Gegner und eigene Hand brauchen getrennte Zonen.")
+                           "Gegner \(opponent) und eigene Hand \(hand.frame) " +
+                           "brauchen getrennte Zonen.")
         }
 
         let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())

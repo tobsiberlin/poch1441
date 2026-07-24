@@ -86,7 +86,7 @@ enum CertifiedDealTranscript {
     /// No release build can select this route. Stage 3 is a launch-argument gate
     /// for one deterministic debug seed while ImpactFlight remains the default.
     static var requestedDebugMode: TranscriptPlaybackMode? {
-        #if DEBUG
+        #if DEBUG || INTERNAL_QA
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("-transcriptDealReducedMotionQA") {
             return .reducedMotion

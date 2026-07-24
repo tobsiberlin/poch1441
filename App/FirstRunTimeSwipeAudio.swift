@@ -1,9 +1,9 @@
 import AVFoundation
 import os
 
-/// Four pre-rendered layers stay phase-aligned while the finger changes only
-/// their mix. No audio is restarted during scrubbing, so reversing the gesture
-/// sounds continuous instead of triggering a stack of short effects.
+/// Four scene layers stay phase-aligned while a fifth, synthetic transition
+/// texture follows the finger directly. No audio is restarted during scrubbing,
+/// so reversing the gesture reverses the acoustic seam without retriggering it.
 @MainActor
 final class FirstRunTimeSwipeAudio {
     private static let log = Logger(subsystem: "com.tobc.poch1441",
@@ -14,6 +14,7 @@ final class FirstRunTimeSwipeAudio {
         case originMotif = "first-run-origin-motif"
         case presentRoom = "first-run-present-room"
         case presentMotif = "first-run-present-motif"
+        case timeNoise = "first-run-time-noise"
     }
 
     private var players: [Layer: AVAudioPlayer] = [:]
@@ -52,16 +53,18 @@ final class FirstRunTimeSwipeAudio {
 
     func update(progress: Double) {
         guard isPlaying else { return }
-        let clamped = Float(FirstRunTimeSwipeProjection.clamped(progress))
-        let present = smoothstep(clamped)
-        let origin = 1 - present
+        let mix = FirstRunTimeSwipeAudioMix.state(
+            progress: FirstRunTimeSwipeProjection.clamped(progress)
+        )
 
         // Keep the mix perceptually smooth without allowing a long ramp to
         // trail behind a fast reversal of the direct-manipulation gesture.
-        players[.originRoom]?.setVolume(origin * 0.36, fadeDuration: 0.012)
-        players[.originMotif]?.setVolume(origin * 0.18, fadeDuration: 0.012)
-        players[.presentRoom]?.setVolume(present * 0.28, fadeDuration: 0.012)
-        players[.presentMotif]?.setVolume(present * 0.16, fadeDuration: 0.012)
+        players[.originRoom]?.setVolume(mix.originRoomVolume, fadeDuration: 0.012)
+        players[.originMotif]?.setVolume(mix.originMotifVolume, fadeDuration: 0.012)
+        players[.presentRoom]?.setVolume(mix.presentRoomVolume, fadeDuration: 0.012)
+        players[.presentMotif]?.setVolume(mix.presentMotifVolume, fadeDuration: 0.012)
+        players[.timeNoise]?.rate = mix.timeNoiseRate
+        players[.timeNoise]?.setVolume(mix.timeNoiseVolume, fadeDuration: 0.012)
     }
 
     func stop() {
@@ -93,6 +96,10 @@ final class FirstRunTimeSwipeAudio {
             }
             let player = try AVAudioPlayer(contentsOf: url)
             player.volume = 0
+            if layer == .timeNoise {
+                player.enableRate = true
+                player.rate = 1
+            }
             player.prepareToPlay()
             preparedPlayers[layer] = player
         }
@@ -102,10 +109,6 @@ final class FirstRunTimeSwipeAudio {
         try session.setActive(true)
         players = preparedPlayers
         isPrepared = true
-    }
-
-    private func smoothstep(_ value: Float) -> Float {
-        value * value * (3 - 2 * value)
     }
 
     private enum AudioError: LocalizedError {
