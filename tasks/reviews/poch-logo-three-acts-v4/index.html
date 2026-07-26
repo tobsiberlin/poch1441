@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>POCH 1441 - Drei Akte Geometrie</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #101821;
+      --panel: #151f29;
+      --ivory: #f4f0e8;
+      --muted: #aab2ba;
+      --line: rgba(244, 240, 232, .13);
+      --brass: #c8a35a;
+      --copper: #c96e55;
+      --plum: #8d74aa;
+      --sage: #6f9b8b;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--ink); color: var(--ivory); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; }
+    main { width: min(1460px, calc(100% - 40px)); margin: auto; padding: 52px 0 80px; }
+    header { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: end; padding-bottom: 34px; border-bottom: 1px solid var(--line); }
+    h1 { max-width: 900px; margin: 0; font-size: clamp(46px, 6.4vw, 92px); line-height: .94; letter-spacing: -.06em; }
+    header p, .section-head p, .copy p, footer { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.48; }
+    .eyebrow { display: block; margin-bottom: 15px; color: var(--brass); font-size: 12px; font-weight: 780; letter-spacing: .12em; text-transform: uppercase; }
+    .section-head { display: grid; grid-template-columns: 1fr minmax(300px, 520px); gap: 28px; align-items: baseline; margin: 58px 0 22px; }
+    h2 { margin: 0; font-size: clamp(30px, 3.4vw, 50px); letter-spacing: -.045em; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    article { overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--panel); }
+    article.recommended { border-color: rgba(200, 163, 90, .64); }
+    .copy { display: grid; grid-template-columns: 1fr auto; gap: 20px; padding: 25px 27px 22px; }
+    h3 { margin: 0 0 6px; font-size: 25px; letter-spacing: -.03em; }
+    .tag { align-self: start; padding: 7px 10px; border: 1px solid currentColor; border-radius: 8px; color: var(--brass); font-size: 11px; font-weight: 780; letter-spacing: .1em; text-transform: uppercase; }
+    .stage { min-height: 420px; display: grid; place-items: center; margin: 0 18px 18px; border-radius: 16px; background: radial-gradient(circle, rgba(244,240,232,.065), transparent 45%), #111a24; }
+    .symbol { width: min(56%, 260px); filter: drop-shadow(0 22px 30px rgba(0,0,0,.28)); }
+    .construction .stage { background-image: linear-gradient(rgba(244,240,232,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(244,240,232,.045) 1px, transparent 1px); background-size: 24px 24px; }
+    .construction .symbol { filter: none; }
+    .lockup-stage { min-height: 240px; display: grid; place-items: center; margin: 18px 0 0; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
+    .lockup { display: flex; align-items: center; gap: clamp(16px, 2.5vw, 34px); padding: 32px; }
+    .lockup svg { width: clamp(58px, 8vw, 112px); }
+    .word { display: flex; align-items: baseline; gap: clamp(17px, 2.4vw, 34px); font-size: clamp(38px, 6vw, 82px); font-weight: 830; letter-spacing: -.05em; }
+    .year { color: var(--brass); font-size: .56em; font-weight: 680; letter-spacing: .19em; }
+    .sizes { display: flex; align-items: end; justify-content: center; gap: clamp(24px, 5vw, 76px); width: 100%; min-height: 270px; margin-top: 18px; padding: 48px 30px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
+    .size { display: grid; justify-items: center; gap: 15px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+    .size svg { width: var(--size); height: var(--size); }
+    footer { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); }
+    @media (max-width: 820px) { main { width: min(100% - 24px, 680px); padding-top: 30px; } header, .section-head, .grid { grid-template-columns: 1fr; } header { gap: 20px; } .copy { grid-template-columns: 1fr; } .tag { justify-self: start; } .stage { min-height: 360px; } .sizes { gap: 22px; } }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="balanced" viewBox="0 0 240 240">
+        <path d="M60.27 58.13A86 86 0 0 1 179.73 58.13" fill="none" stroke="#c8a35a" stroke-width="24" stroke-linecap="round"/>
+        <path d="M203.45 99.19A86 86 0 0 1 143.70 202.67" fill="none" stroke="#8d74aa" stroke-width="24" stroke-linecap="round"/>
+        <path d="M96.30 202.67A86 86 0 0 1 36.55 99.19" fill="none" stroke="#6f9b8b" stroke-width="24" stroke-linecap="round"/>
+        <circle cx="120" cy="120" r="38" fill="none" stroke="#f4f0e8" stroke-width="15"/>
+        <path fill="#c96e55" d="M120 102L138 120L120 138L102 120Z"/>
+      </symbol>
+      <symbol id="compact" viewBox="0 0 240 240">
+        <path d="M55.10 63.57A86 86 0 0 1 184.90 63.57" fill="none" stroke="#c8a35a" stroke-width="24" stroke-linecap="round"/>
+        <path d="M201.31 92.00A86 86 0 0 1 136.41 204.42" fill="none" stroke="#8d74aa" stroke-width="24" stroke-linecap="round"/>
+        <path d="M103.59 204.42A86 86 0 0 1 38.69 92.00" fill="none" stroke="#6f9b8b" stroke-width="24" stroke-linecap="round"/>
+        <circle cx="120" cy="120" r="38" fill="none" stroke="#f4f0e8" stroke-width="15"/>
+        <path fill="#c96e55" d="M120 102L138 120L120 138L102 120Z"/>
+      </symbol>
+      <symbol id="airy" viewBox="0 0 240 240">
+        <path d="M65.88 53.21A86 86 0 0 1 174.12 53.21" fill="none" stroke="#c8a35a" stroke-width="22" stroke-linecap="round"/>
+        <path d="M204.94 106.55A86 86 0 0 1 150.82 200.17" fill="none" stroke="#8d74aa" stroke-width="22" stroke-linecap="round"/>
+        <path d="M89.18 200.17A86 86 0 0 1 35.06 106.55" fill="none" stroke="#6f9b8b" stroke-width="22" stroke-linecap="round"/>
+        <circle cx="120" cy="120" r="38" fill="none" stroke="#f4f0e8" stroke-width="15"/>
+        <path fill="#c96e55" d="M120 102L138 120L120 138L102 120Z"/>
+      </symbol>
+      <symbol id="mono" viewBox="0 0 240 240">
+        <g fill="none" stroke="#f4f0e8" stroke-linecap="round">
+          <path d="M60.27 58.13A86 86 0 0 1 179.73 58.13" stroke-width="24"/>
+          <path d="M203.45 99.19A86 86 0 0 1 143.70 202.67" stroke-width="24"/>
+          <path d="M96.30 202.67A86 86 0 0 1 36.55 99.19" stroke-width="24"/>
+          <circle cx="120" cy="120" r="38" stroke-width="15"/>
+        </g>
+        <path fill="#f4f0e8" d="M120 102L138 120L120 138L102 120Z"/>
+      </symbol>
+    </defs>
+  </svg>
+  <main>
+    <header>
+      <div><span class="eyebrow">Richtung 02 - geometrisch neu konstruiert</span><h1>Drei Akte. Ein präzises Zeichen.</h1></div>
+      <p>Drei Bögen, drei identische Winkel, drei identische Abstände. Der Innenring und der Einsatzkern sind exakt zentriert. Keine handgezeichneten Kurven, keine zufälligen Endpunkte.</p>
+    </header>
+    <div class="section-head"><h2>Proportionen</h2><p>Die ausgewogene Fassung lässt den drei Phasen Luft, ohne wie ein Ladeindikator zu zerfallen. Kompakt und luftig dienen als bewusste Gegenproben.</p></div>
+    <section class="grid" aria-label="Drei Akte Proportionsvergleich">
+      <article class="recommended"><div class="copy"><div><h3>01 Ausgewogen</h3><p>88 Grad je Bogen, 32 Grad konstruktiver Abstand. Ruhig, prägnant und stabil in kleinen Größen.</p></div><span class="tag">Empfehlung</span></div><div class="stage"><svg class="symbol"><use href="#balanced"/></svg></div></article>
+      <article><div class="copy"><div><h3>02 Kompakt</h3><p>98 Grad je Bogen. Mehr Masse und Energie, aber bereits näher an einem geschlossenen Spinner.</p></div><span class="tag">Dicht</span></div><div class="stage"><svg class="symbol"><use href="#compact"/></svg></div></article>
+      <article><div class="copy"><div><h3>03 Luftig</h3><p>78 Grad je Bogen. Editorialer und leichter, bei 24 Pixeln jedoch weniger geschlossen.</p></div><span class="tag">Leicht</span></div><div class="stage"><svg class="symbol"><use href="#airy"/></svg></div></article>
+      <article class="construction"><div class="copy"><div><h3>04 Einfarbig</h3><p>Dieselbe Geometrie ohne Farbpflicht. Für Gravur, Prägung, Stempel und einfarbigen Druck.</p></div><span class="tag">Physisch</span></div><div class="stage"><svg class="symbol"><use href="#mono"/></svg></div></article>
+    </section>
+    <div class="section-head"><h2>Wortmarke</h2><p>Das Zeichen steht bewusst vor POCH, statt wieder als auffälliges O verkleidet zu werden. „1441“ erhält gleichmäßige Laufweite als Herkunftsmarke.</p></div>
+    <div class="lockup-stage"><div class="lockup"><svg><use href="#balanced"/></svg><div class="word"><span>POCH</span><span class="year">1441</span></div></div></div>
+    <div class="section-head"><h2>Echte Größen</h2><p>Entscheidend ist nicht der große Hero-Shot, sondern ob Bögen, Innenring und Kern auf dem Homescreen zusammenhalten.</p></div>
+    <div class="sizes">
+      <div class="size"><svg style="--size:24px"><use href="#balanced"/></svg><span>24 PX</span></div>
+      <div class="size"><svg style="--size:40px"><use href="#balanced"/></svg><span>40 PX</span></div>
+      <div class="size"><svg style="--size:60px"><use href="#balanced"/></svg><span>60 PX</span></div>
+      <div class="size"><svg style="--size:120px"><use href="#balanced"/></svg><span>120 PX</span></div>
+    </div>
+    <footer>Arbeitsfavorit: „Ausgewogen“. Als nächster Schritt folgen optischer Ausgleich der Rundkappen, Wortmarken-Outlines und ein physischer 8-mm-Gravurtest - erst danach wird das Zeichen in die App übernommen.</footer>
+  </main>
+</body>
+</html>

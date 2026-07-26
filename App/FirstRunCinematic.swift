@@ -123,7 +123,7 @@ struct FirstRunCinematic: View {
         let landscape = size.width > size.height
         let compactHeight = !landscape && size.height < 720
         let boardDiameter = min(
-            landscape ? size.height * 0.60 : size.width * (compactHeight ? 0.62 : 0.72),
+            landscape ? size.height * 0.60 : size.width * (compactHeight ? 0.62 : 0.695),
             landscape ? size.width * 0.40 : size.height * (compactHeight ? 0.31 : 0.38),
             330
         )
@@ -296,15 +296,7 @@ struct FirstRunCinematic: View {
     private func cinematicHeader(safeArea: EdgeInsets) -> some View {
         VStack {
             HStack(alignment: .center) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("POCH")
-                        .font(.system(size: 20, weight: .heavy))
-                        .foregroundStyle(Tokens.jewelPlatin)
-                    Text("1441")
-                        .font(.system(size: 20, weight: .light))
-                        .foregroundStyle(Tokens.jewelGold)
-                }
-                .accessibilityElement(children: .combine)
+                PochBrandWordmark(height: 22)
                 .accessibilityHidden(showsPeople)
                 .opacity(showsPeople ? 0 : 1)
                 .animation(reduceMotion
@@ -400,12 +392,7 @@ struct FirstRunCinematic: View {
                                   safeArea: EdgeInsets) -> some View {
         ScrollView {
             VStack(spacing: 18) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("POCH").font(.title2.weight(.heavy))
-                    Text("1441").font(.title2.weight(.light))
-                        .foregroundStyle(Tokens.jewelGold)
-                }
-                .foregroundStyle(Tokens.jewelPlatin)
+                PochBrandWordmark(height: 26)
                 .padding(.top, safeArea.top + 14)
 
                 HStack(spacing: 24) {
@@ -440,7 +427,7 @@ struct FirstRunCinematic: View {
                         .foregroundStyle(Tokens.jewelPlatin)
                         .accessibilityIdentifier("firstRun.intro.title")
                     Text(String(localized: "firstRun.cinematic.accessibility.body",
-                                defaultValue: "Hana spielt die erste Runde mit dir. Bestimmte Trumpfkarten gewinnen Bonus-Töpfe, gleiche Karten öffnen das Pochen und die letzte Karte gewinnt die Mitte."))
+                                defaultValue: "Hana spielt die erste Runde mit dir. Bestimmte Trumpfkarten bringen sofort Chips, gleiche Karten öffnen das Pochen und die letzte Karte gewinnt die Mitte."))
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Tokens.jewelPlatin.opacity(0.80))
                         .multilineTextAlignment(.center)

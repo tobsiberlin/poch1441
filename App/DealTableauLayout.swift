@@ -53,8 +53,8 @@ enum DealTableauLayout {
             channel: 2
         )) * 0.8
         return Pose(
-            offset: CGSize(width: normalized * 25 + horizontalVariation,
-                           height: -20 + abs(normalized) * 3 + verticalVariation),
+            offset: CGSize(width: normalized * 23 + horizontalVariation,
+                           height: -39 + abs(normalized) * 2.5 + verticalVariation),
             rotationDegrees: Double(normalized) * 12 + angleVariation
         )
     }

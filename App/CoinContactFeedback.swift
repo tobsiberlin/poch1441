@@ -37,9 +37,8 @@ final class CoinContactFeedbackEngine: MotionContactCueOutput {
             withExtension: "wav"
         ) else { throw FeedbackError.missingAudioFingerprint }
 
+        try PochAudioSession.prepareAmbientMixing()
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.ambient, options: [.mixWithOthers])
-        try session.setActive(true)
 
         let file = try AVAudioFile(forReading: audioURL)
         guard let buffer = AVAudioPCMBuffer(

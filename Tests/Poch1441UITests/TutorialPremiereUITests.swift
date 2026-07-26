@@ -107,17 +107,17 @@ final class TutorialPremiereUITests: XCTestCase {
             .waitForExistence(timeout: 2))
         let coachAction = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(coachAction.waitForExistence(timeout: 2))
-        XCTAssertEqual(coachAction.label, "Trumpf-König melden")
+        XCTAssertEqual(coachAction.label, "Trumpf-König zeigen")
         coachAction.tap()
         let nextAction = app.buttons["firstRun.coachAction"]
         let advanced = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "label == %@", "Gewinn einsammeln"),
+            predicate: NSPredicate(format: "label == %@", "Beide Gewinne holen"),
             object: nextAction
         )
         XCTAssertEqual(XCTWaiter.wait(for: [advanced], timeout: 2), .completed,
-                       "Trumpf-König melden muss sichtbar zur Auszahlung weiterführen.")
+                       "Trumpf-König zeigen muss sichtbar zur Auszahlung weiterführen.")
         let updatedState = app.descendants(matching: .any)["firstRun.learningState"]
-        XCTAssertEqual(updatedState.value as? String, "Gewinn zeigen")
+        XCTAssertEqual(updatedState.value as? String, "Chips holen")
     }
 
     @MainActor
@@ -144,7 +144,7 @@ final class TutorialPremiereUITests: XCTestCase {
         }
 
         let status = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "DEINE ERSTE REIHE")
+            NSPredicate(format: "label CONTAINS %@", "ERÖFFNE DIE ERSTE REIHE")
         ).firstMatch
         let center = app.descendants(matching: .any)["Poch-Medaillon"].firstMatch
         XCTAssertTrue(status.waitForExistence(timeout: 8))
@@ -172,13 +172,17 @@ final class TutorialPremiereUITests: XCTestCase {
         dismissTutorialCurtainIfNeeded(in: app)
 
         let window = app.windows.firstMatch
-        let title = app.staticTexts["Deine Karten öffnen den Poch"]
+        let board = app.images.matching(identifier: "table.world.phase2.board").firstMatch
+        let decision = app.otherElements["phase2.decision"]
+        let title = app.staticTexts["Du darfst pochen"]
         let body = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "damit darfst du pochen")
+            NSPredicate(format: "label CONTAINS %@", "Gleiche Werte öffnen das Gebot")
         ).firstMatch
         let action = app.buttons["Einsatz wählen"]
 
         XCTAssertTrue(window.waitForExistence(timeout: 4))
+        XCTAssertTrue(board.waitForExistence(timeout: 8))
+        XCTAssertTrue(decision.waitForExistence(timeout: 4))
         XCTAssertTrue(title.waitForExistence(timeout: 8))
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(action.waitForExistence(timeout: 4))
@@ -189,7 +193,14 @@ final class TutorialPremiereUITests: XCTestCase {
                        "Erklärung und nächste Aktion dürfen sich nicht überlagern.")
         XCTAssertTrue(window.frame.contains(title.frame))
         XCTAssertTrue(window.frame.contains(body.frame))
-        XCTAssertTrue(window.frame.contains(action.frame))
+        XCTAssertTrue(window.frame.contains(action.frame),
+                      "Das Aktionsfeld \(action.frame) muss vollständig im SE-Fenster \(window.frame) liegen.")
+        XCTAssertLessThan(abs(board.frame.midX - window.frame.midX), 8,
+                          "Das Poch-Brett muss im geführten Hochformat die visuelle Mitte halten.")
+        XCTAssertGreaterThanOrEqual(board.frame.width, window.frame.width * 0.54,
+                                    "Das Poch-Brett darf im Tutorial nicht wie ein untergeordnetes Status-Icon wirken.")
+        XCTAssertGreaterThan(decision.frame.minY, board.frame.midY,
+                             "Die Erklärung muss unterhalb der spielentscheidenden Brettmitte beginnen.")
     }
 
     @MainActor
@@ -210,13 +221,17 @@ final class TutorialPremiereUITests: XCTestCase {
         dismissTutorialCurtainIfNeeded(in: app)
 
         let window = app.windows.firstMatch
-        let title = app.staticTexts["Deine Karten öffnen den Poch"]
+        let board = app.images.matching(identifier: "table.world.phase2.board").firstMatch
+        let decision = app.otherElements["phase2.decision"]
+        let title = app.staticTexts["Du darfst pochen"]
         let body = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "damit darfst du pochen")
+            NSPredicate(format: "label CONTAINS %@", "Gleiche Werte lassen dich pochen")
         ).firstMatch
         let action = app.buttons["Einsatz wählen"]
 
         XCTAssertTrue(window.waitForExistence(timeout: 4))
+        XCTAssertTrue(board.waitForExistence(timeout: 8))
+        XCTAssertTrue(decision.waitForExistence(timeout: 4))
         XCTAssertTrue(title.waitForExistence(timeout: 8))
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(action.waitForExistence(timeout: 4))
@@ -225,9 +240,16 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertFalse(body.frame.intersects(action.frame))
         XCTAssertTrue(window.frame.contains(title.frame))
         XCTAssertTrue(window.frame.contains(body.frame))
-        XCTAssertTrue(window.frame.contains(action.frame))
-        XCTAssertGreaterThan(title.frame.height, 20,
+        XCTAssertTrue(window.frame.contains(action.frame),
+                      "Die AX-Aktion \(action.frame) muss vollständig im Fenster \(window.frame) liegen.")
+        XCTAssertGreaterThan(title.frame.height, 40,
                              "Accessibility XXXL muss den Tutorialtitel sichtbar vergrößern.")
+        XCTAssertGreaterThan(body.frame.height, 40,
+                             "Accessibility XXXL darf die Regelerklärung nicht auf Standardgröße deckeln.")
+        XCTAssertGreaterThanOrEqual(action.frame.height, 52,
+                                    "Die nächste Aktion braucht bei Accessibility XXXL eine vergrößerte Trefferfläche.")
+        XCTAssertGreaterThan(decision.frame.minY, board.frame.midY,
+                             "Auch bei Accessibility XXXL muss die Erklärung unter dem Brett beginnen.")
     }
 
     @MainActor
@@ -329,16 +351,46 @@ final class TutorialPremiereUITests: XCTestCase {
             "Dieses Film-Gate wird ausschließlich auf dem 390 × 844-Referenzgerät bewertet."
         )
 
+        let prelude = app.buttons["firstRun.timeSwipe.prelude.primary"]
+        XCTAssertTrue(prelude.waitForExistence(timeout: 4))
+        XCTAssertEqual(prelude.label, "Poch entdecken")
+        attachFilmFrame(in: app, reducedMotion: reducedMotion, moment: "prelude")
+        prelude.tap()
+
+        if reducedMotion {
+            let next = app.buttons["firstRun.timeSwipe.next"]
+            XCTAssertTrue(next.waitForExistence(timeout: 4))
+            next.tap()
+            next.tap()
+        } else {
+            let stage = app.otherElements["firstRun.timeSwipe.stage"]
+            XCTAssertTrue(stage.waitForExistence(timeout: 4))
+            stage.coordinate(withNormalizedOffset: CGVector(dx: 0.06, dy: 0.28))
+                .press(forDuration: 0.05,
+                       thenDragTo: stage.coordinate(withNormalizedOffset: CGVector(dx: 0.96,
+                                                                                   dy: 0.28)))
+        }
+
         let intro = app.buttons["firstRun.intro.primary"]
         let skipIntro = app.buttons["firstRun.intro.secondary"]
         XCTAssertTrue(intro.waitForExistence(timeout: 4))
         XCTAssertTrue(skipIntro.waitForExistence(timeout: 2))
-        XCTAssertEqual(intro.label, "Mitspielen")
+        XCTAssertEqual(intro.label, "An den Tisch")
         XCTAssertTrue(window.frame.contains(skipIntro.frame),
                       "Auch der freie Einstieg muss ohne Scrollen vollständig sichtbar sein.")
         XCTAssertFalse(intro.frame.intersects(skipIntro.frame))
         attachFilmFrame(in: app, reducedMotion: reducedMotion, moment: "intro")
         intro.tap()
+
+        let boardTourNext = app.buttons["firstRun.boardTour.next"]
+        for step in 1...4 {
+            XCTAssertTrue(boardTourNext.waitForExistence(timeout: 5),
+                          "Kameraeinstellung \(step) muss bis zur Bestätigung stehen bleiben.")
+            attachFilmFrame(in: app,
+                            reducedMotion: reducedMotion,
+                            moment: "board-tour-\(step)")
+            boardTourNext.tap()
+        }
 
         let openingToken = app.buttons["firstRun.openingToken"]
         XCTAssertTrue(openingToken.waitForExistence(timeout: 4))
@@ -357,15 +409,19 @@ final class TutorialPremiereUITests: XCTestCase {
         let meldTarget = app.descendants(matching: .any)["firstRun.meldTargetCard"]
         XCTAssertTrue(meldTarget.waitForExistence(timeout: 5))
         XCTAssertTrue(coachAction.waitForExistence(timeout: 5))
-        XCTAssertEqual(coachAction.label, "Trumpf-König melden")
+        XCTAssertEqual(coachAction.label, "Trumpf-König zeigen")
         attachFilmFrame(in: app, reducedMotion: reducedMotion, moment: "meld-match")
         coachAction.tap()
 
         XCTAssertTrue(coachAction.waitForExistence(timeout: 12))
-        XCTAssertEqual(coachAction.label, "Weiter zum Pochen")
+        XCTAssertEqual(coachAction.label, "Beide Gewinne holen")
         coachAction.tap()
 
-        confirmPhaseCurtain("Jetzt pochen", in: app)
+        XCTAssertTrue(coachAction.waitForExistence(timeout: 12))
+        XCTAssertEqual(coachAction.label, "Jetzt herausfordern")
+        coachAction.tap()
+
+        confirmPhaseCurtain("Pochen", in: app)
 
         let showStake = app.buttons["Einsatz wählen"]
         XCTAssertTrue(showStake.waitForExistence(timeout: 12))
@@ -379,8 +435,9 @@ final class TutorialPremiereUITests: XCTestCase {
 
         finishBiddingWhenTheTutorialReturnsControl(to: app)
 
-        let showdown = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "gewinnt den Showdown")
+        let showdown = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS[c] %@ OR label CONTAINS[c] %@ OR label CONTAINS[c] %@",
+                        "Showdown", "schlägt", "schlagen")
         ).firstMatch
         XCTAssertTrue(showdown.waitForExistence(timeout: 8),
                       "Die erste Lernreise muss ihren echten Showdown sichtbar erklären.")
@@ -392,7 +449,7 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertTrue(continueToPlayout.isHittable)
         continueToPlayout.tap()
 
-        confirmPhaseCurtain("Karten ausspielen", in: app)
+        confirmPhaseCurtain("Ausspielen", in: app)
 
         let phase3 = app.descendants(matching: .any)["table.world.phase3"]
         XCTAssertTrue(phase3.waitForExistence(timeout: 6))
@@ -522,6 +579,7 @@ final class TutorialPremiereUITests: XCTestCase {
 
         while Date() < deadline, !completion.exists {
             let guidedAdvanceLabels = [
+                "Nächste Karte erklären",
                 "Nächste Karte ansehen",
                 "Hana eröffnet die nächste Reihe",
                 "Noah eröffnet die nächste Reihe",

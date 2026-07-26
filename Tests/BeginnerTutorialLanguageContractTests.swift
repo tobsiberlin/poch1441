@@ -37,9 +37,10 @@ struct BeginnerTutorialLanguageContractTests {
                "The guided Poch lesson must teach the public result")
         expect(phase2.contains("pochShowdownSummary"),
                "The guided Poch lesson must explain an actual showdown")
-        expect(phase2.contains("Anzahl vor Rang"),
-               "The showdown must teach quantity before rank")
-        expect(phase2.contains("Der Poch-Topf bleibt liegen und wächst"),
+        expect(phase2.contains("Mehr gleiche Karten sind stärker")
+               && !phase2.contains("Anzahl vor Rang"),
+               "The showdown must teach quantity before rank without technical shorthand")
+        expect(phase2.contains("Der Pott bleibt liegen. In der nächsten Runde kommen neue Chips dazu"),
                "All-pass carry-over must be framed as future value")
         expect(!phase2.contains("return \"Einsatz ansehen\""),
                "The first bidding CTA must describe the next decision, not an info view")
@@ -69,13 +70,33 @@ struct BeginnerTutorialLanguageContractTests {
             expect(!beginnerSurface.contains(forbidden),
                    "Beginner surface must not expose legacy wording: \(forbidden)")
         }
-        expect(content.contains("sieben Bonus-Töpfen, Poch-Topf und Mitte"),
-               "The first screen must establish the three prize areas")
-        expect(content.contains("Er bleibt in deiner Hand"),
+        expect(content.contains("guidedBoardTourStep"),
+               "The first round must stop for a visible board tour")
+        expect(content.contains("firstRun.cinematic.opening.title")
+               && content.contains("firstRun.cinematic.bonus.title")
+               && content.contains("firstRun.cinematic.bidding.title")
+               && content.contains("firstRun.cinematic.playout.title"),
+               "The board tour must introduce hands, trump wins, the Poch and the card race")
+        expect(content.contains("firstRun.boardTour.next"),
+               "Every board-tour stop must wait for an explicit confirmation")
+        expect(content.contains("guidedBoardTourCameraReady")
+               && content.contains("guidedBoardTourCameraOffset")
+               && content.contains("rotation3DEffect"),
+               "The tour must establish, dolly and add restrained parallax instead of snapping between diagrams")
+        expect(content.contains("guidedTrumpTableCard")
+               && content.contains("CardBack(scale: cardScale)")
+               && content.contains("CardFace(card: game.upcard"),
+               "Trump must be revealed on a physical table card, not only in a badge")
+        expect(content.contains("guidedAnteContactTick += 1")
+               && content.contains("surface: guidedAnteContactSurface"),
+               "Every visible funding-chip impact must emit its own contact feedback")
+        expect(content.contains("game.completeGuidedTableFunding()"),
+               "The final visible chip contact must not add a bundled duplicate acknowledgement")
+        expect(localizations.contains("Er gewinnt das König-Feld sofort und bleibt trotzdem in deiner Hand"),
                "Melding must not imply that the card leaves the hand")
-        expect(content.contains("Mariage"),
-               "King and Queen must not collide with the equal-rank pair term")
-        expect(localizations.contains("Zieh deinen ersten Chip in die Mitte"),
+        expect(localizations.contains("bildet er die Hochzeit"),
+               "King and Queen must use an explained everyday name")
+        expect(localizations.contains("Dieser Chip macht das Finale wertvoll"),
                "The first action must name the shared payment and its destination")
         expect(!localizations.contains("Ziehe den Stein in die Mitte"),
                "Beginner copy must use Chip consistently")
@@ -89,6 +110,27 @@ struct BeginnerTutorialLanguageContractTests {
                "Settlement labels must be localized")
         expect(localizations.contains("\"GESAMT\""),
                "German settlement copy must use Gesamt, not Total")
+        expect(localizations.contains("\"value\" : \"Trumpf zeigen\""),
+               "The first phase must use its canonical visible name")
+        expect(localizations.contains("\"value\" : \"Pochen\""),
+               "The second phase must teach the game's canonical term")
+        expect(localizations.contains("\"value\" : \"Ausspielen\""),
+               "The third phase must use its canonical visible name")
+        expect(localizations.contains("\"value\" : \"FINALE\""),
+               "The central end prize must be named Finale")
+        for legacyGermanValue in [
+            "\"value\" : \"Bonus-Töpfe ansehen\"",
+            "\"value\" : \"Werte sammeln. Die Mitte bleibt für den Schluss.\"",
+            "\"value\" : \"Dein Trumpf-König trifft\"",
+            "\"value\" : \"Gewinn einsammeln\""
+        ] {
+            expect(!localizations.contains(legacyGermanValue),
+                   "German beginner copy must not retain: \(legacyGermanValue)")
+        }
+        for legacyGermanTerm in ["Bonus-Töpfe", "Poch-Topf", "Weiter zum Ausspielen"] {
+            expect(!localizations.contains("\"value\" : \"(legacyGermanTerm)"),
+                   "German beginner copy must not lead with unexplained terminology: \(legacyGermanTerm)")
+        }
 
         expect(pochRing.contains("case .sequence: return \"FOLGE\""),
                "The board must use a readable German label instead of SEQ")

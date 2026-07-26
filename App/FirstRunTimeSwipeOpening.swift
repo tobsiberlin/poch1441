@@ -61,12 +61,24 @@ struct FirstRunTimeSwipeOpening: View {
                 audioDirector.stop()
             }
         }
+        .onChange(of: settledProgress) { _, progress in
+            guard hasEnteredTimeline else { return }
+            // The discrete VoiceOver / Reduce Motion timeline has no drag
+            // progress callback. Keep its era mix attached to the same source
+            // of truth instead of leaving the tavern audible at "Heute".
+            audioDirector.update(progress: progress)
+        }
         .onChange(of: usesDiscretePresentation) { _, isDiscrete in
             guard isDiscrete else { return }
             settleTask?.cancel()
             interactiveTranslation = 0
-            settledProgress = FirstRunTimeSwipeProjection
+            let snappedProgress = FirstRunTimeSwipeProjection
                 .nearestChapter(to: settledProgress).progress
+            settledProgress = snappedProgress
+            // The nearest chapter can equal the current value (notably at
+            // Poque). Refresh explicitly so a live Reduce Motion switch also
+            // softens the acoustic seam when no progress change is emitted.
+            audioDirector.update(progress: snappedProgress)
         }
         .onDisappear {
             settleTask?.cancel()
@@ -94,14 +106,7 @@ struct FirstRunTimeSwipeOpening: View {
             .allowsHitTesting(false)
 
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("POCH")
-                        .font(.system(size: 21, weight: .heavy))
-                    Text("1441")
-                        .font(.system(size: 21, weight: .light))
-                        .foregroundStyle(Color(hex: 0xD8B466))
-                }
-                .foregroundStyle(Color(hex: 0xF4F0E8))
+                PochBrandWordmark(height: 24)
                 .padding(.top, safeArea.top + 10)
 
                 Spacer()
@@ -290,15 +295,7 @@ struct FirstRunTimeSwipeOpening: View {
                         showsFinalActions: Bool) -> some View {
         VStack {
             HStack(alignment: .center) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("POCH")
-                        .font(.system(size: 19, weight: .heavy))
-                        .foregroundStyle(Color(hex: 0xF3EFE7))
-                    Text("1441")
-                        .font(.system(size: 19, weight: .light))
-                        .foregroundStyle(Color(hex: 0xD8B466))
-                }
-                .accessibilityElement(children: .combine)
+                PochBrandWordmark(height: 21)
 
                 Spacer()
 
@@ -454,12 +451,8 @@ struct FirstRunTimeSwipeOpening: View {
         let chapter = FirstRunTimeSwipeProjection.chapter(for: settledProgress)
         return ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("POCH")
-                        .font(.system(size: 22, weight: .heavy))
-                    Text("1441")
-                        .font(.system(size: 22, weight: .light))
-                        .foregroundStyle(Color(hex: 0xD8B466))
+                HStack(alignment: .center, spacing: 10) {
+                    PochBrandWordmark(height: 24)
                     Spacer()
                     Button(String(localized: "firstRun.timeSwipe.skip",
                                   defaultValue: "Überspringen"), action: skipToToday)
@@ -469,7 +462,6 @@ struct FirstRunTimeSwipeOpening: View {
                         .disabled(chapter == .today)
                         .accessibilityHidden(chapter == .today)
                 }
-                .foregroundStyle(Color(hex: 0xF4F0E8))
                 .padding(.top, safeArea.top + 10)
 
                 discreteImage(chapter: chapter, size: size)
@@ -663,7 +655,7 @@ struct FirstRunTimeSwipeOpening: View {
                 title: String(localized: "firstRun.timeSwipe.today.title",
                               defaultValue: "Drei Chancen. Eine Runde."),
                 body: String(localized: "firstRun.timeSwipe.today.body",
-                             defaultValue: "Die richtigen Trumpfkarten räumen Bonus-Töpfe ab. Beim Pochen riskierst du Chips. Wer zuerst alle Karten los ist, holt das Finale.")
+                             defaultValue: "Bestimmte Trumpfkarten bringen sofort Chips. Beim Pochen setzt du auf gleiche Karten. Wer seine Hand zuerst leert, gewinnt die Mitte.")
             )
         }
     }

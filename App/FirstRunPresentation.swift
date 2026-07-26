@@ -141,22 +141,22 @@ struct FirstRunStageZones: Equatable {
 
         let top = safeArea.top + 8
         let handTop = size.height - safeArea.bottom - 126
-        let boardY = top + 142
-        let boardSide = min(usableWidth - 32,
-                            max(180, handTop - boardY - 202),
-                            max(216, size.height * 0.36))
+        let boardY = top + 160
+        let boardSide = min(usableWidth - 24,
+                            max(180, handTop - boardY - 190),
+                            max(228, size.height * 0.39))
         let boardX = safeArea.leading + (usableWidth - boardSide) / 2
-        let decisionY = boardY + boardSide + 10
+        let decisionY = boardY + boardSide + 16
         let decisionHeight = max(152, min(190, handTop - decisionY - 6))
         return FirstRunStageZones(
             header: CGRect(x: safeArea.leading + 18,
                            y: top,
                            width: usableWidth - 36,
-                           height: 76),
+                           height: 72),
             opponents: CGRect(x: safeArea.leading + 22,
-                              y: top + 76,
+                              y: top + 70,
                               width: usableWidth - 44,
-                              height: 58),
+                              height: 82),
             decision: CGRect(x: safeArea.leading + 18,
                              y: decisionY,
                              width: usableWidth - 36,

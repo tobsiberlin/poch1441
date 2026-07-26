@@ -10,11 +10,11 @@ struct FirstRunTimeSwipeAudioMix: Equatable, Sendable {
     let timeNoiseVolume: Float
     let timeNoiseRate: Float
 
-    static func state(progress: Double) -> Self {
+    static func state(progress: Double, reduceMotion: Bool = false) -> Self {
         let clamped = min(max(progress, 0), 1)
-        let eased = smoothstep(clamped)
-        let origin = Float(1 - eased)
-        let present = Float(eased)
+        let angle = clamped * .pi / 2
+        let origin = clamped == 1 ? Float.zero : Float(cos(angle))
+        let present = clamped == 0 ? Float.zero : Float(sin(angle))
 
         // A fourth-power sine bump keeps both eras completely clean while
         // concentrating the acoustic seam around the finger's midpoint.
@@ -22,18 +22,14 @@ struct FirstRunTimeSwipeAudioMix: Equatable, Sendable {
         let seam = Float(pow(seamPosition, 4))
 
         return Self(
-            originRoomVolume: origin * 0.36,
-            originMotifVolume: origin * 0.18,
-            presentRoomVolume: present * 0.28,
-            presentMotifVolume: present * 0.16,
-            timeNoiseVolume: seam * 0.15,
+            originRoomVolume: origin * 0.78,
+            originMotifVolume: origin * 0.12,
+            presentRoomVolume: present * 0.78,
+            presentMotifVolume: present * 0.10,
+            timeNoiseVolume: seam * (reduceMotion ? 0.10 : 0.28),
             // A restrained interval reads as material transformation rather
             // than a literal radio sweep. Reversing the finger reverses it.
-            timeNoiseRate: 0.84 + Float(clamped) * 0.32
+            timeNoiseRate: reduceMotion ? 1 : 0.84 + Float(clamped) * 0.32
         )
-    }
-
-    private static func smoothstep(_ value: Double) -> Double {
-        value * value * (3 - 2 * value)
     }
 }

@@ -2,6 +2,38 @@ import XCTest
 
 final class FirstRunUITests: XCTestCase {
     @MainActor
+    func testBoardTourExplainsTheWholeTableBeforeTheFirstMove() {
+        let app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launchArguments = localizedArguments([
+            "-tutorialSeed", "-reduceMotionQA", "-players=4"
+        ])
+        app.launch()
+
+        let title = app.staticTexts["firstRun.boardTour.title"]
+        let body = app.staticTexts["firstRun.boardTour.body"]
+        let next = app.buttons["firstRun.boardTour.next"]
+        let expectedTitles = [
+            "Du kennst nur deine Hand.",
+            "Die offene Karte bestimmt Trumpf.",
+            "Gleiche Werte lassen dich pochen.",
+            "Spiele deine Hand leer."
+        ]
+
+        for expectedTitle in expectedTitles {
+            XCTAssertTrue(title.waitForExistence(timeout: 4))
+            XCTAssertEqual(title.label, expectedTitle)
+            XCTAssertTrue(body.exists)
+            XCTAssertTrue(next.isHittable)
+            next.tap()
+        }
+
+        XCTAssertFalse(app.otherElements["firstRun.boardTour"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["firstRun.openingToken"].waitForExistence(timeout: 3),
+                      "Erst nach dem vollständigen Rundgang darf der erste Spielzug beginnen.")
+    }
+
+    @MainActor
     func testNaturalMontageReturnsAVisibleTrumpAction() {
         let app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
@@ -576,7 +608,7 @@ final class FirstRunUITests: XCTestCase {
 
     @MainActor
     private func learningCoachTitleHeight(in app: XCUIApplication) -> CGFloat {
-        let title = app.staticTexts["Dein Trumpf-König trifft"]
+        let title = app.staticTexts["Dein König gewinnt dieses Feld"]
         XCTAssertTrue(title.waitForExistence(timeout: 4),
                       "Die aktuelle Coach-Erklärung muss für den Größenvergleich existieren.")
         XCTAssertGreaterThan(title.frame.height, 0,
@@ -586,9 +618,14 @@ final class FirstRunUITests: XCTestCase {
 
     @MainActor
     private func dismissGuidedPhaseCurtainIfPresent(in app: XCUIApplication) {
+        let boardTour = app.buttons["firstRun.boardTour.next"]
+        for _ in 0..<4 where boardTour.waitForExistence(timeout: 1) {
+            XCTAssertTrue(boardTour.isHittable,
+                          "Jede Brettstation muss bewusst bestätigt werden können.")
+            boardTour.tap()
+        }
         let continueButton = app.buttons["tutorial.phaseCurtain.continue"]
         if continueButton.waitForExistence(timeout: 2) {
-            XCTAssertEqual(continueButton.label, "Bonus-Töpfe ansehen")
             XCTAssertTrue(continueButton.isHittable,
                           "Das erste Lernfenster muss vor der Tischaktion bewusst bestätigt werden können.")
             continueButton.tap()

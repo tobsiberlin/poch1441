@@ -13,6 +13,7 @@ struct DealOverlay: View {
     let reduceMotion: Bool
     var showsSeatTargets = true
     var showsSeatIdentities = true
+    @AppStorage("sound") private var soundEnabled = true
 
     var body: some View {
         GeometryReader { geo in
@@ -54,6 +55,7 @@ struct DealOverlay: View {
                                    seat: order[i].seat,
                                    slot: order[i].slot,
                                    totalSlots: totalSlots(for: order[i].seat),
+                                   playerCount: game.playerCount,
                                    sequence: i,
                                    generation: generation,
                                    currentGeneration: {
@@ -112,6 +114,27 @@ struct DealOverlay: View {
             )
         }
         .allowsHitTesting(false)
+        .onAppear {
+            guard soundEnabled else { return }
+            TableFoleyAudio.shared.prepare()
+        }
+        .onChange(of: soundEnabled) { _, enabled in
+            guard enabled else { return }
+            TableFoleyAudio.shared.prepare()
+        }
+        .onChange(of: game.landedDeals) { previous, current in
+            guard reduceMotion, soundEnabled, current > previous else { return }
+            let landedIndex = current - 1
+            let seat = game.dealOrder.indices.contains(landedIndex)
+                ? game.dealOrder[landedIndex].seat
+                : 0
+            TableFoleyAudio.shared.playCardDeal(
+                sequence: landedIndex,
+                generation: game.meldPresentationGeneration,
+                seat: seat,
+                playerCount: game.playerCount
+            )
+        }
     }
 
     private var trumpTint: Color {
@@ -293,21 +316,21 @@ private struct DealSeatTargets: View {
                                  isActive: true,
                                  isFocus: dealt > 0,
                                  mood: dealt > 0 ? .thinking : .neutral,
-                                 size: 44,
+                                 size: DealCardPose.opponentPortraitSize,
                                  showsText: false,
                                  morph: nil)
 
                 Text(game.name(of: seat).uppercased())
-                    .font(.system(size: 7.5, weight: .heavy))
+                    .font(.system(size: 8.5, weight: .heavy))
                     .tracking(1.0)
                     .foregroundStyle(Tokens.jewelPlatin.opacity(dealt > 0 ? 0.76 : 0.38))
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(Capsule().fill(Color.black.opacity(0.46)))
-                    .offset(y: 47)
+                    .offset(y: 48)
             }
         }
-        .frame(width: 108, height: 94)
+        .frame(width: 108, height: 120)
         .position(point)
         .opacity(dealt == 0 ? 0.48 : 1)
         .accessibilityElement(children: .ignore)
@@ -443,7 +466,8 @@ private enum DealBackMaterial {
 private enum DealCardPose {
     static let sourceScale: CGFloat = 0.96
     static let humanTargetScale: CGFloat = 1.08
-    static let opponentTargetScale: CGFloat = 0.82
+    static let opponentTargetScale: CGFloat = 0.66
+    static let opponentPortraitSize: CGFloat = 62
     static let shadowSettleStart: CGFloat = 0.62
 
     private static let sourceIndex = 2
@@ -562,11 +586,13 @@ private struct FlyingBack: View {
     let seat: Int
     let slot: Int
     let totalSlots: Int
+    let playerCount: Int
     let sequence: Int
     let generation: Int
     let currentGeneration: () -> Int
     let transcriptMode: TranscriptPlaybackMode?
     let onImpact: () -> Void
+    @AppStorage("sound") private var soundEnabled = true
     @State private var transaction: CardFlightTransaction
 
     init(from: CGPoint,
@@ -574,6 +600,7 @@ private struct FlyingBack: View {
          seat: Int,
          slot: Int,
          totalSlots: Int,
+         playerCount: Int,
          sequence: Int,
          generation: Int,
          currentGeneration: @escaping () -> Int,
@@ -584,6 +611,7 @@ private struct FlyingBack: View {
         self.seat = seat
         self.slot = slot
         self.totalSlots = totalSlots
+        self.playerCount = playerCount
         self.sequence = sequence
         self.generation = generation
         self.currentGeneration = currentGeneration
@@ -685,6 +713,7 @@ private struct FlyingBack: View {
             eventID: eventID,
             generation: currentGeneration()
         ) == .accepted else { return }
+        playContactFoley()
         onImpact()
         _ = transaction.complete(eventID: eventID, generation: generation)
     }
@@ -695,6 +724,7 @@ private struct FlyingBack: View {
             eventID: eventID,
             generation: currentGeneration()
         ) == .accepted else { return }
+        playContactFoley()
         onImpact()
     }
 
@@ -705,6 +735,14 @@ private struct FlyingBack: View {
 
     private func cancelTransaction() {
         transaction.cancel()
+    }
+
+    private func playContactFoley() {
+        guard soundEnabled else { return }
+        TableFoleyAudio.shared.playCardDeal(sequence: sequence,
+                                            generation: generation,
+                                            seat: seat,
+                                            playerCount: playerCount)
     }
 
     fileprivate static func landingAngle(

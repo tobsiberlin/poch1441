@@ -30,16 +30,30 @@ enum Tokens {
     static let tileDiameter: CGFloat = 56
     static let centerDiameter: CGFloat = 84
     static let tileCorner: CGFloat = 16
-    // Der kompakte Phase-2-Auftritt folgt dem freigegebenen Mockup: Die Disc ist
-    // ein präziser Tischanker, aber nicht die dominante Vollbildfläche aus Phase 1.
-    static let phase2BoardScale: CGFloat = 0.54
-    static let phase2StageHeight: CGFloat = 260
+    // In Phase 2 bleibt die Disc der räumliche Anker. Sie ist kleiner als in
+    // Phase 1, aber groß genug, damit Mulden, Einsätze und Auszahlungen ohne
+    // Sucharbeit lesbar bleiben.
+    static let phase2BoardScale: CGFloat = 0.60
+    static let phase2StageHeight: CGFloat = 270
+    static let phase2BoardDecisionGap: CGFloat = 20
     static let phase2CompactHeight: CGFloat = 760
-    static let phase2OpponentRowHeight: CGFloat = 116
+    static let phase2VeryCompactHeight: CGFloat = 650
+    static let phase2OpponentRowHeight: CGFloat = 120
+    static let phase2CompactOpponentRowHeight: CGFloat = 104
+    static let phase2VeryCompactOpponentRowHeight: CGFloat = 100
+    static let phase2DecisionOpponentGap: CGFloat = 18
+    static let phase2OpponentHandGap: CGFloat = 18
     static let phase2OpponentGapCompact: CGFloat = 8
     static let phase2OpponentGapRegular: CGFloat = 18
     static let phase2HandReservedHeight: CGFloat = 210
     static let phase2ResultHandReservedHeight: CGFloat = 154
+
+    // Soziale Präsenz: Gesichter müssen als Mitspieler lesbar sein, nicht als
+    // Status-Icons. Die Werte bleiben klein genug für drei Sitze auf 375 pt.
+    static let firstRunOpponentPortraitSize: CGFloat = 58
+    static let phase1OpponentPortraitSize: CGFloat = 44
+    static let phase3OpponentPortraitSize: CGFloat = 68
+    static let phase3OpponentSpacing: CGFloat = 14
 
     // Gefuehrte Melde-Runde: eigene Komposition statt der tieferen Position des
     // regulaeren Austeilrituals. Brett, Spotlight und Coach verwenden dieselbe Geometrie.
@@ -245,5 +259,63 @@ extension Color {
                   green: Double((hex >> 8) & 0xFF) / 255,
                   blue: Double(hex & 0xFF) / 255,
                   opacity: alpha)
+    }
+}
+
+/// Production POCH 1441 wordmark. The vector asset is an outlined master with
+/// no font dependency, so the same geometry survives App-Icon, print and the
+/// later milled/debossed physical board. The independent Three Acts symbol
+/// keeps the three phases visible without turning the O into a pictogram.
+struct PochBrandWordmark: View {
+    var height: CGFloat = 24
+    var color: Color? = nil
+
+    @ViewBuilder
+    var body: some View {
+        if let color {
+            Image("PochBrandWordmark")
+                .renderingMode(.template)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .foregroundStyle(color)
+                .frame(width: height * (1180.0 / 220.0), height: height)
+                .accessibilityLabel(Text(verbatim: "Poch 1441"))
+        } else {
+            Image("PochBrandWordmarkFullColor")
+                .renderingMode(.original)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: height * (1180.0 / 220.0), height: height)
+                .accessibilityLabel(Text(verbatim: "Poch 1441"))
+        }
+    }
+}
+
+struct PochBrandSymbol: View {
+    var size: CGFloat = 44
+    var color: Color? = nil
+
+    @ViewBuilder
+    var body: some View {
+        if let color {
+            Image("PochBrandSymbol")
+                .renderingMode(.template)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .foregroundStyle(color)
+                .frame(width: size, height: size)
+                .accessibilityLabel(Text(verbatim: "Poch"))
+        } else {
+            Image("PochBrandSymbolFullColor")
+                .renderingMode(.original)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .accessibilityLabel(Text(verbatim: "Poch"))
+        }
     }
 }

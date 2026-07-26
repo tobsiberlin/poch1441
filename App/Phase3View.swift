@@ -26,24 +26,27 @@ struct Phase3View: View {
                 && game.revealedPlays == 0
                 && game.cascadeIdle
             let compactHeight = h < 720
-            // Beim ersten Anspiel braucht die Erklärung eine eigene Bühne oberhalb
-            // der Mitte. Danach rückt der Status näher an die laufende Kette.
-            let statusY = awaitingFirstLead
-                ? min(h * (compactHeight ? 0.18 : 0.20), compactHeight ? 120 : 140)
+            let stageLayout = Phase3StageLayout(
+                height: h,
+                compactHeight: compactHeight,
+                guided: isGuidedRound,
+                awaitingFirstLead: awaitingFirstLead,
+                showsGuidedAction: game.guidedPlayoutCanAdvance,
+                handIsRelevant: game.cascadeIdle
+                    || game.guidedRequiredHumanFollowCard != nil
+            )
+            let playedTopOffset = stageLayout.playedTopOffset
+            let opponentsY = stageLayout.opponentsCenterY
+            let statusY = game.stage == .playout
+                ? stageLayout.statusCenterY
                 : min(h * (compactHeight ? 0.40 : 0.555), compactHeight ? 278 : 398)
-            let playedTopOffset = Phase3CardGeometry.playedTopOffset
-                - (compactHeight && !awaitingFirstLead ? 66 : 0)
-            let opponentsY = awaitingFirstLead
-                ? (compactHeight
-                   ? min(max(statusY + 160, h * 0.60), h - 178)
-                   : min(max(statusY + 190, h * 0.71), h - 170))
-                : (compactHeight
-                   ? min(max(statusY + 132, h - 210), h - 175)
-                   : min(max(statusY + 112, h - 220), h - 192))
             ZStack(alignment: .top) {
-                playedCardsFan
-                    .frame(width: w)
-                    .offset(y: playedTopOffset)
+                if !awaitingFirstLead {
+                    playedCardsFan
+                        .frame(width: w)
+                        .offset(y: playedTopOffset)
+                        .transition(.opacity)
+                }
 
                 if game.stage == .playout, !phase3ReduceMotion, let lastPlay = lastRevealedPlay {
                     let seat = game.uiSeat(forRoundSeat: lastPlay.player)
@@ -83,13 +86,14 @@ struct Phase3View: View {
                 }
 
                 if game.stage == .playout {
-                    statusLine
-                        .frame(width: min(320, w - 24))
-                        .position(x: w / 2, y: statusY)
-                    if isGuidedRound, game.guidedPlayoutCanAdvance {
-                        guidedAdvanceButton
-                            .frame(width: min(286, w - 42))
-                            .position(x: w / 2, y: statusY + 72)
+                    if isGuidedRound {
+                        guidedControlPanel
+                            .frame(width: min(344, w - 20))
+                            .padding(.top, stageLayout.statusTop)
+                    } else {
+                        statusLine
+                            .frame(width: min(328, w - 24))
+                            .position(x: w / 2, y: statusY)
                     }
                     opponentsRow
                         .frame(width: w)
@@ -98,8 +102,12 @@ struct Phase3View: View {
                         .frame(width: w,
                                height: Phase3CardGeometry.handContainerHeight,
                                alignment: .bottom)
+                        .saturation(stageLayout.handIsRelevant ? 1 : 0.45)
+                        .opacity(stageLayout.handIsRelevant ? 1 : 0.46)
                         .position(x: w / 2,
-                                  y: h - Phase3CardGeometry.handCenterBottomInset)
+                                  y: stageLayout.handCenterY)
+                        .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.18),
+                                   value: stageLayout.handIsRelevant)
                 } else if game.endPhase <= .frozen {
                     finalMomentStatus
                         .frame(width: min(336, w - 24))
@@ -188,7 +196,7 @@ struct Phase3View: View {
     // MARK: - Gegner als ruhiger Rahmen (§5c Phase 3: matter Schiefer, Fokus aufs Rennen)
 
     private var opponentsRow: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: Phase3CardGeometry.opponentSpacing) {
             ForEach(game.activeUISeats.filter { $0 != 0 }, id: \.self) { seat in
                 slateToken(seat: seat)
             }
@@ -213,12 +221,28 @@ struct Phase3View: View {
                                 mood: isWinner
                                     ? .winning
                                     : (guidedReaction.mood ?? (isLeader ? .pressure : .neutral)),
-                                size: 42,
+                                size: Phase3CardGeometry.opponentPortraitSize,
                                 morph: morph,
                                 reduceMotionOverride: phase3ReduceMotion)
-        .saturation(focused ? 1 : (isGuidedRound ? 0.50 : 0.2))
-        .opacity(focused ? 1 : (isGuidedRound ? 0.68 : 0.48))
-        .animation(phase3ReduceMotion ? nil : .easeInOut(duration: 0.25), value: focused)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 5)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.black.opacity(focused ? 0.34 : 0.18))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder((focused ? Tokens.jewelGold : Tokens.slate)
+                            .opacity(focused ? 0.30 : 0.10), lineWidth: 0.8)
+                )
+        )
+        .saturation(focused ? 1 : (isGuidedRound ? 0.88 : 0.78))
+        .opacity(focused ? 1 : (isGuidedRound ? 0.96 : 0.88))
+        .scaleEffect(focused ? 1.025 : 1)
+        .animation(phase3ReduceMotion
+                   ? nil
+                   : .spring(duration: 0.28, bounce: 0.04),
+                   value: focused)
+        .accessibilityIdentifier("phase3.opponent.\(seat)")
     }
 
     /// In der Lernrunde reagiert immer genau ein Gesicht auf eine öffentliche
@@ -339,6 +363,8 @@ struct Phase3View: View {
         .opacity(frozen ? 0.55 : 1)
         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.12), value: frozen)
         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.18), value: settledPlays)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("phase3.played")
     }
 
     private var settledChains: [[PlayoutPhase.Play]] {
@@ -688,20 +714,40 @@ struct Phase3View: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
-            .padding(.top, 2)
-            .padding(.bottom, 0)
-            .frame(height: 78)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .frame(minHeight: 82)
             .background(
-                LinearGradient(colors: [
-                    Color.clear,
-                    Color.black.opacity(0.58),
-                    Color.clear
-                ], startPoint: .top, endPoint: .bottom)
-                .frame(width: 340, height: 100)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color(hex: 0x111014).opacity(0.90))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(Tokens.jewelSmaragd.opacity(0.16), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.30), radius: 12, y: 7)
             )
             .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("phase3.status")
             .zIndex(5)
         )
+    }
+
+    private var guidedControlPanel: some View {
+        VStack(spacing: 9) {
+            guidedStatusLine
+            if game.guidedPlayoutCanAdvance {
+                guidedAdvanceButton
+                    .frame(maxWidth: 286)
+                    .transition(phase3ReduceMotion
+                                ? .opacity
+                                : .opacity.combined(with: .scale(scale: 0.96)))
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("phase3.guided.panel")
+        .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.18),
+                   value: game.guidedPlayoutCanAdvance)
+        .zIndex(10)
     }
 
     private var guidedStatusLine: some View {
@@ -716,34 +762,103 @@ struct Phase3View: View {
                     .tracking(1.25)
                     .foregroundStyle(Tokens.jewelGold.opacity(0.88))
             }
-            Text(copy.title)
-                .font(.system(size: 16, weight: .heavy))
-                .tracking(0.45)
-                .foregroundStyle(Tokens.jewelGold)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.86)
-            Text(copy.detail)
-                .font(.system(size: 11.2, weight: .semibold))
-                .foregroundStyle(Tokens.jewelPlatin.opacity(0.86))
-                .multilineTextAlignment(.center)
-                .lineLimit(3)
-                .minimumScaleFactor(0.88)
+            if game.revealedPlayEvents.isEmpty {
+                guidedOpeningSequence(copy: copy)
+            } else {
+                Text(copy.title)
+                    .font(.system(size: 16, weight: .heavy))
+                    .tracking(0.45)
+                    .foregroundStyle(Tokens.jewelGold)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.86)
+                Text(copy.detail)
+                    .font(.system(size: 11.2, weight: .semibold))
+                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.86))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.88)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .frame(minHeight: 90)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .frame(minHeight: game.revealedPlayEvents.isEmpty ? 116 : 102)
         .background(
-            LinearGradient(colors: [
-                Color.clear,
-                Color.black.opacity(0.64),
-                Color.clear
-            ], startPoint: .top, endPoint: .bottom)
-            .frame(width: 340, height: 118)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(hex: 0x111014).opacity(0.93))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(Tokens.jewelGold.opacity(0.22), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.34), radius: 14, y: 8)
         )
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("phase3.guided.explanation")
         .zIndex(5)
+    }
+
+    private func guidedOpeningSequence(copy: Phase3GuidedStatusCopy) -> some View {
+        let statements = guidedOpeningStatements(copy.detail)
+        return HStack(alignment: .center, spacing: 4) {
+            guidedOpeningStep(number: "1",
+                              text: copy.title,
+                              identifier: "phase3.guided.opening.action",
+                              emphasized: true)
+            guidedOpeningArrow
+            guidedOpeningStep(number: "2",
+                              text: statements.reason,
+                              identifier: "phase3.guided.opening.reason",
+                              emphasized: false)
+            guidedOpeningArrow
+            guidedOpeningStep(number: "3",
+                              text: statements.consequence,
+                              identifier: "phase3.guided.opening.consequence",
+                              emphasized: false)
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func guidedOpeningStep(number: String,
+                                   text: String,
+                                   identifier: String,
+                                   emphasized: Bool) -> some View {
+        VStack(spacing: 5) {
+            Text(number)
+                .font(.system(size: 8, weight: .heavy))
+                .foregroundStyle(emphasized ? Color.black.opacity(0.82) : Tokens.jewelGold)
+                .frame(width: 18, height: 18)
+                .background(Circle().fill(emphasized
+                                          ? Tokens.jewelGold
+                                          : Tokens.jewelGold.opacity(0.12)))
+            Text(text)
+                .font(.system(size: emphasized ? 9.6 : 8.8,
+                              weight: emphasized ? .heavy : .semibold))
+                .foregroundStyle(emphasized
+                                 ? Tokens.jewelPlatin
+                                 : Tokens.jewelPlatin.opacity(0.78))
+                .multilineTextAlignment(.center)
+                .lineLimit(4)
+                .minimumScaleFactor(0.78)
+        }
+        .frame(maxWidth: .infinity, minHeight: 66, alignment: .top)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(identifier)
+    }
+
+    private var guidedOpeningArrow: some View {
+        Image(systemName: "chevron.right")
+            .font(.system(size: 8, weight: .bold))
+            .foregroundStyle(Tokens.jewelGold.opacity(0.42))
+            .accessibilityHidden(true)
+    }
+
+    private func guidedOpeningStatements(_ detail: String) -> (reason: String, consequence: String) {
+        let statements = detail
+            .split(separator: ".", omittingEmptySubsequences: true)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) + "." }
+        guard let reason = statements.first else { return (detail, detail) }
+        let consequence = statements.dropFirst().joined(separator: " ")
+        return (reason, consequence.isEmpty ? detail : consequence)
     }
 
     private var guidedAdvanceButton: some View {
@@ -759,7 +874,7 @@ struct Phase3View: View {
                         .shadow(color: Tokens.jewelGold.opacity(0.20), radius: 10, y: 4)
                 )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(Phase3GuidedButtonStyle(reduceMotion: phase3ReduceMotion))
         .accessibilityIdentifier("phase3.guided.advance")
         .zIndex(8)
     }
@@ -784,11 +899,11 @@ struct Phase3View: View {
                                                         defaultValue: "eine Karte")
             return Phase3GuidedStatusCopy(
                 eyebrow: String(localized: "phase3.guided.first.eyebrow",
-                                 defaultValue: "DEINE ERSTE REIHE"),
+                                 defaultValue: "ERÖFFNE DIE ERSTE REIHE"),
                 title: String(format: String(localized: "phase3.guided.first.title",
                                              defaultValue: "LEGE %@"), label),
                 detail: String(format: String(localized: "phase3.guided.first.detail",
-                                              defaultValue: "%@ eröffnet die Reihe. Danach geht dieselbe Farbe Karte für Karte aufwärts."),
+                                              defaultValue: "%@ eröffnet eine Reihe. Danach steigt dieselbe Farbe Karte für Karte."),
                                label)
             )
         }
@@ -1248,6 +1363,49 @@ private struct Phase3GuidedStatusCopy {
     let detail: String
 }
 
+private struct Phase3StageLayout {
+    let statusTop: CGFloat
+    let statusCenterY: CGFloat
+    let playedTopOffset: CGFloat
+    let opponentsCenterY: CGFloat
+    let handCenterY: CGFloat
+    let handIsRelevant: Bool
+
+    init(height: CGFloat,
+         compactHeight: Bool,
+         guided: Bool,
+         awaitingFirstLead: Bool,
+         showsGuidedAction: Bool,
+         handIsRelevant: Bool) {
+        statusTop = compactHeight ? 8 : 12
+        statusCenterY = compactHeight ? 51 : 57
+        if awaitingFirstLead {
+            playedTopOffset = compactHeight ? 138 : 148
+        } else if guided, showsGuidedAction {
+            playedTopOffset = compactHeight ? 184 : 194
+        } else if guided {
+            playedTopOffset = compactHeight ? 136 : 144
+        } else {
+            playedTopOffset = compactHeight ? 108 : 118
+        }
+        handCenterY = height - Phase3CardGeometry.handCenterBottomInset
+        opponentsCenterY = handCenterY - (compactHeight ? 139 : 141)
+        self.handIsRelevant = handIsRelevant
+    }
+}
+
+private struct Phase3GuidedButtonStyle: ButtonStyle {
+    let reduceMotion: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.975 : 1)
+            .opacity(configuration.isPressed ? 0.88 : 1)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.12),
+                       value: configuration.isPressed)
+    }
+}
+
 private struct Phase3CardPose {
     let point: CGPoint
     let rotationDegrees: Double
@@ -1256,6 +1414,8 @@ private struct Phase3CardPose {
 
 private enum Phase3CardGeometry {
     private static let cardHeightAtUnitScale: CGFloat = 74
+    static let opponentPortraitSize: CGFloat = Tokens.phase3OpponentPortraitSize
+    static let opponentSpacing: CGFloat = Tokens.phase3OpponentSpacing
     static let handCardScale: CGFloat = 1.50
     static let handContainerHeight: CGFloat = 150
     static let handCenterBottomInset: CGFloat = 104

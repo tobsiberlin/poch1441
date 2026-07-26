@@ -306,7 +306,7 @@ struct OpponentPanel: View {
     }
 
     var body: some View {
-        let compact = width < 100
+        let compact = width < 106
         VStack(spacing: 4) {
             ZStack {
                 opponentCardBacks
@@ -324,7 +324,7 @@ struct OpponentPanel: View {
                             Tokens.jewelPlatin.opacity(isFocus ? 0.20 : 0.06)
                         ], startPoint: .top, endPoint: .bottom),
                         lineWidth: isFocus ? 1.4 : 0.9))
-                    .frame(width: compact ? 58 : 66, height: compact ? 58 : 66)
+                    .frame(width: compact ? 66 : 74, height: compact ? 66 : 74)
                     .shadow(color: isFocus ? actionTint.opacity(0.16) : .black.opacity(0.30),
                             radius: isFocus ? 12 : 7, y: 4)
 
@@ -333,7 +333,7 @@ struct OpponentPanel: View {
                                  isActive: isActive,
                                  isFocus: isFocus,
                                  mood: mood,
-                                 size: compact ? 54 : 62,
+                                 size: compact ? 62 : 70,
                                  showsText: false,
                                  morph: morph,
                                  reduceMotionOverride: effectiveReduceMotion)
@@ -344,7 +344,7 @@ struct OpponentPanel: View {
                         .transition(.scale(scale: 0.82, anchor: .bottom).combined(with: .opacity))
                 }
             }
-            .frame(width: width, height: compact ? 62 : 68)
+            .frame(width: width, height: compact ? 70 : 78)
 
             VStack(spacing: 1) {
                 Text(name)
@@ -371,7 +371,7 @@ struct OpponentPanel: View {
                 Color.clear.frame(height: 18)
             }
         }
-        .frame(width: width, height: compact ? 96 : 112)
+        .frame(width: width, height: compact ? 104 : 120)
         .opacity(isActive ? 1 : 0.64)
         .saturation(isActive ? 1 : 0.34)
         .animation(effectiveReduceMotion ? nil : .easeInOut(duration: 0.28), value: isFocus)

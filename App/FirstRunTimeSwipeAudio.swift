@@ -1,5 +1,6 @@
 import AVFoundation
 import os
+import UIKit
 
 /// Four scene layers stay phase-aligned while a fifth, synthetic transition
 /// texture follows the finger directly. No audio is restarted during scrubbing,
@@ -31,7 +32,11 @@ final class FirstRunTimeSwipeAudio {
     }
 
     func startIfEnabled(_ enabled: Bool, progress: Double) {
-        guard enabled, Self.isAvailableInCurrentRuntime else { return }
+        guard enabled else {
+            stop()
+            return
+        }
+        guard Self.isAvailableInCurrentRuntime else { return }
         do {
             stopTask?.cancel()
             stopTask = nil
@@ -54,17 +59,18 @@ final class FirstRunTimeSwipeAudio {
     func update(progress: Double) {
         guard isPlaying else { return }
         let mix = FirstRunTimeSwipeAudioMix.state(
-            progress: FirstRunTimeSwipeProjection.clamped(progress)
+            progress: FirstRunTimeSwipeProjection.clamped(progress),
+            reduceMotion: UIAccessibility.isReduceMotionEnabled
         )
 
-        // Keep the mix perceptually smooth without allowing a long ramp to
-        // trail behind a fast reversal of the direct-manipulation gesture.
-        players[.originRoom]?.setVolume(mix.originRoomVolume, fadeDuration: 0.012)
-        players[.originMotif]?.setVolume(mix.originMotifVolume, fadeDuration: 0.012)
-        players[.presentRoom]?.setVolume(mix.presentRoomVolume, fadeDuration: 0.012)
-        players[.presentMotif]?.setVolume(mix.presentMotifVolume, fadeDuration: 0.012)
+        // Direct assignment keeps the mix a pure function of finger position:
+        // a reversal cannot trail an earlier wall-clock volume ramp.
+        players[.originRoom]?.volume = mix.originRoomVolume
+        players[.originMotif]?.volume = mix.originMotifVolume
+        players[.presentRoom]?.volume = mix.presentRoomVolume
+        players[.presentMotif]?.volume = mix.presentMotifVolume
         players[.timeNoise]?.rate = mix.timeNoiseRate
-        players[.timeNoise]?.setVolume(mix.timeNoiseVolume, fadeDuration: 0.012)
+        players[.timeNoise]?.volume = mix.timeNoiseVolume
     }
 
     func stop() {
@@ -104,9 +110,7 @@ final class FirstRunTimeSwipeAudio {
             preparedPlayers[layer] = player
         }
 
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.ambient, options: [.mixWithOthers])
-        try session.setActive(true)
+        try PochAudioSession.prepareAmbientMixing()
         players = preparedPlayers
         isPrepared = true
     }
@@ -120,5 +124,17 @@ final class FirstRunTimeSwipeAudio {
                 return "Missing first-run audio layer \(name)"
             }
         }
+    }
+}
+
+/// One release audio policy for intro ambience, table Foley and material
+/// contacts. Poch adds itself to the room instead of taking over the device;
+/// the silent switch remains respected and existing background audio may mix.
+@MainActor
+enum PochAudioSession {
+    static func prepareAmbientMixing() throws {
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.ambient, options: [.mixWithOthers])
+        try session.setActive(true)
     }
 }

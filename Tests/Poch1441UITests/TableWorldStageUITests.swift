@@ -349,6 +349,87 @@ final class TableWorldStageUITests: XCTestCase {
     }
 
     @MainActor
+    func testGuidedPhase3StagesRulePeopleAndHandWithoutOverlap() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = localizedArguments([
+            "-tutorialPlayout",
+            "-guidedPlayoutSeedQA=20",
+            "-reduceMotionQA",
+            "-players=4"
+        ])
+        app.launch()
+
+        assertWindowOrientation(.portrait, in: app)
+        let phase = app.descendants(matching: .any)["table.world.phase3"]
+        XCTAssertTrue(phase.waitForExistence(timeout: 8))
+        dismissTutorialCurtainIfNeeded(in: app)
+
+        let window = app.windows.firstMatch
+        let panel = app.descendants(matching: .any)["phase3.guided.explanation"]
+        let action = app.descendants(matching: .any)["phase3.guided.opening.action"]
+        let reason = app.descendants(matching: .any)["phase3.guided.opening.reason"]
+        let consequence = app.descendants(matching: .any)["phase3.guided.opening.consequence"]
+        let center = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label == %@", "Poch-Medaillon")
+        ).firstMatch
+        let opponents = app.images.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Opponent")
+        )
+        let handCards = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "phase3.hand.card.")
+        )
+
+        XCTAssertTrue(panel.waitForExistence(timeout: 6))
+        XCTAssertTrue(action.waitForExistence(timeout: 4))
+        XCTAssertTrue(reason.waitForExistence(timeout: 4))
+        XCTAssertTrue(consequence.waitForExistence(timeout: 4))
+        XCTAssertTrue(handCards.firstMatch.waitForExistence(timeout: 4))
+        XCTAssertEqual(opponents.count, 3)
+        XCTAssertFalse(center.exists,
+                       "Vor der ersten Karte gehört die Mitte der Erklärung statt einer leeren Brettbühne.")
+        XCTAssertLessThan(action.frame.midX, reason.frame.midX)
+        XCTAssertLessThan(reason.frame.midX, consequence.frame.midX)
+        XCTAssertFalse(action.frame.intersects(reason.frame))
+        XCTAssertFalse(reason.frame.intersects(consequence.frame))
+        XCTAssertTrue(window.frame.contains(panel.frame))
+
+        let portraits = opponents.allElementsBoundByIndex
+        let cards = handCards.allElementsBoundByIndex
+        let opponentTop = portraits.map(\.frame.minY).min() ?? 0
+        let opponentBottom = portraits.map(\.frame.maxY).max() ?? 0
+        let handTop = cards.map(\.frame.minY).min() ?? 0
+        XCTAssertLessThan(panel.frame.maxY + 12, opponentTop,
+                          "Erklärung und Mitspieler brauchen getrennte Bühnenzonen.")
+        XCTAssertLessThan(opponentBottom + 10, handTop,
+                          "Mitspieler dürfen nicht auf der eigenen Hand sitzen.")
+        attachScreenshot(of: app,
+                         named: "phase3-guided-opening-\(Int(window.frame.width))x\(Int(window.frame.height))")
+
+        let jack = app.buttons["phase3.hand.card.hearts.11"]
+        XCTAssertTrue(waitUntil(timeout: 8) { jack.isEnabled && jack.isHittable })
+        jack.tap()
+        let queen = app.buttons["phase3.hand.card.hearts.12"]
+        XCTAssertTrue(waitUntil(timeout: 8) { queen.isEnabled && queen.isHittable })
+        queen.tap()
+
+        let advance = app.buttons["phase3.guided.advance"]
+        XCTAssertTrue(advance.waitForExistence(timeout: 8))
+        XCTAssertTrue(advance.isHittable)
+        XCTAssertTrue(center.waitForExistence(timeout: 4))
+        XCTAssertFalse(panel.frame.intersects(center.frame),
+                       "Coach-Panel und ausgespielte Reihe dürfen sich nicht überlagern.")
+        XCTAssertLessThanOrEqual(panel.frame.maxY, advance.frame.minY)
+        XCTAssertLessThanOrEqual(advance.frame.maxY + 12, center.frame.minY,
+                                 "Die Bestätigung braucht eine eigene Zone zwischen Erklärung und Brett.")
+        Thread.sleep(forTimeInterval: 0.8)
+        XCTAssertTrue(advance.exists,
+                      "Der erklärte Gegnerzug darf ohne Bestätigung nicht autonom weiterlaufen.")
+        attachScreenshot(of: app,
+                         named: "phase3-guided-confirm-\(Int(window.frame.width))x\(Int(window.frame.height))")
+    }
+
+    @MainActor
     func testPochPayoutResultFitsCompactLandscape() {
         XCUIDevice.shared.orientation = .landscapeLeft
         let app = XCUIApplication()
@@ -509,7 +590,22 @@ final class TableWorldStageUITests: XCTestCase {
     }
 
     @MainActor
+    private func waitUntil(timeout: TimeInterval,
+                           condition: @escaping () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if condition() { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.10))
+        }
+        return condition()
+    }
+
+    @MainActor
     private func dismissTutorialCurtainIfNeeded(in app: XCUIApplication) {
+        let boardTour = app.buttons["firstRun.boardTour.next"]
+        for _ in 0..<4 where boardTour.waitForExistence(timeout: 1) {
+            boardTour.tap()
+        }
         let curtain = app.buttons["tutorial.phaseCurtain.continue"]
         if curtain.waitForExistence(timeout: 3), curtain.isHittable {
             curtain.tap()

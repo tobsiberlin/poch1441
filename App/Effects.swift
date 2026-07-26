@@ -194,6 +194,14 @@ private final class R1ContactAudio {
 
     func prepare() {
         guard Self.isAvailableInCurrentRuntime else { return }
+        do {
+            try PochAudioSession.prepareAmbientMixing()
+        } catch {
+            Self.log.error(
+                "Unable to prepare ambient audio session: \(error.localizedDescription, privacy: .public)"
+            )
+            return
+        }
         for name in outerVariants + centerVariants + stackVariants {
             _ = player(named: name)
         }

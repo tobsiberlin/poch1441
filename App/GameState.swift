@@ -1239,6 +1239,15 @@ final class GameState {
         presentation.complete(id: "first-run-table-funding")
     }
 
+    /// Completes the visible per-chip funding wave without inventing a second
+    /// aggregate contact. The individual admitted impacts already own sound
+    /// and haptics; this edge only closes the presentation transaction.
+    func completeGuidedTableFunding() {
+        beginGuidedTableFunding()
+        guard presentation.impact(id: "first-run-table-funding") else { return }
+        presentation.complete(id: "first-run-table-funding")
+    }
+
     func markGuidedOpeningTokenLanded() {
         beginGuidedOpeningToken()
         guard presentation.impact(id: "first-run-opening-token") else { return }

@@ -1,23 +1,24 @@
 # First-run time-swipe audio sources
 
-The first-run room layers are derived from two CC0 recordings. The musical
-layers and the band-limited `first-run-time-noise.wav` transition layer are
-generated deterministically by `tools/build_first_run_time_swipe_audio.py` and
-contain no third-party music or samples. The transition layer uses synthetic
-noise and a very quiet, continuous tonal texture whose perceived pitch can be
-coupled to swipe progress through playback rate. It contains no voices or radio
-fragments.
+All five first-run layers are generated deterministically by
+`tools/build_first_run_time_swipe_audio.py`. They contain no recordings,
+third-party samples, intelligible speech, or music.
 
-- `Cafe ambiance.ogg`, Marble Toast, 7 July 2024, CC0 1.0:
-  https://commons.wikimedia.org/wiki/File:Cafe_ambiance.ogg
-- `Laughter(s).ogg`, sagetyrtle, 14 April 2007, CC0 1.0:
-  https://commons.wikimedia.org/wiki/File:Laughter(s).ogg
+- The 1441 room uses non-verbal formant voices, overlapping cheers and laughter,
+  a broad crowd bed, and long stereo room reflections.
+- The present room uses fewer, closer non-verbal voices, one restrained laugh,
+  a warmer room bed, card shuffles, and quiet tableware details.
+- The transition uses band-limited synthetic noise and a very quiet, continuous
+  tonal texture whose perceived pitch can be coupled to swipe progress through
+  playback rate. It contains no voices or radio fragments.
 
-The source recordings are decoded to 44.1 kHz stereo PCM before the build
-script runs. Large decoded intermediates are intentionally not stored in the
-repository.
+The complete asset set can be reproduced without source recordings:
 
-The synthetic transition layer can be reproduced without source recordings:
+```sh
+python3 tools/build_first_run_time_swipe_audio.py --output-dir App/Audio
+```
+
+The transition layer can also be rebuilt alone:
 
 ```sh
 python3 tools/build_first_run_time_swipe_audio.py \

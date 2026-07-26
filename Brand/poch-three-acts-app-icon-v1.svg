@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 Three Acts app icon master</title>
+  <rect width="1024" height="1024" fill="#101821"/>
+  <g transform="translate(92 92) scale(3.5)">
+    <path d="M60.27 58.13A86 86 0 0 1 179.73 58.13" fill="none" stroke="#C8A35A" stroke-width="24" stroke-linecap="round"/>
+    <path d="M203.45 99.19A86 86 0 0 1 143.70 202.67" fill="none" stroke="#8D74AA" stroke-width="24" stroke-linecap="round"/>
+    <path d="M96.30 202.67A86 86 0 0 1 36.55 99.19" fill="none" stroke="#6F9B8B" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="120" cy="120" r="38" fill="none" stroke="#F4F0E8" stroke-width="15"/>
+    <path fill="#C96E55" d="M120 102L138 120L120 138L102 120Z"/>
+  </g>
+</svg>

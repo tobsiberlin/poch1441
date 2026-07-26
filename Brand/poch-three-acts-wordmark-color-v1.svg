@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 220">
+  <title>POCH 1441 Three Acts color wordmark candidate</title>
+  <desc>Outlined POCH wordmark with an independent three-phase symbol and evenly tracked provenance.</desc>
+  <g transform="translate(0 2) scale(.9)">
+    <path d="M60.27 58.13A86 86 0 0 1 179.73 58.13" fill="none" stroke="#C8A35A" stroke-width="24" stroke-linecap="round"/>
+    <path d="M203.45 99.19A86 86 0 0 1 143.70 202.67" fill="none" stroke="#8D74AA" stroke-width="24" stroke-linecap="round"/>
+    <path d="M96.30 202.67A86 86 0 0 1 36.55 99.19" fill="none" stroke="#6F9B8B" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="120" cy="120" r="38" fill="none" stroke="#F4F0E8" stroke-width="15"/>
+    <path fill="#C96E55" d="M120 102L138 120L120 138L102 120Z"/>
+  </g>
+  <g transform="translate(200 0)" fill="#F4F0E8">
+    <path fill-rule="evenodd" d="M32 32H102C139 32 158 52 158 87C158 122 138 141 102 141H74V182H32ZM74 67V107H98C111 107 117 100 117 87C117 74 111 67 98 67Z"/>
+    <ellipse cx="257" cy="107" rx="56" ry="55" fill="none" stroke="#F4F0E8" stroke-width="40"/>
+    <path d="M490 66C471 43 448 32 414 32C365 32 338 65 338 107C338 150 367 182 414 182C448 182 473 170 491 146L459 123C448 136 436 143 418 143C395 143 381 129 381 107C381 85 395 71 418 71C436 71 448 78 459 91Z"/>
+    <path d="M510 32H552V86H616V32H658V182H616V125H552V182H510Z"/>
+  </g>
+  <g fill="#C8A35A" transform="translate(900 51.5) scale(.75)">
+    <path d="M0 84L25 62H53V174H18V96H0Z"/>
+    <g transform="translate(67 0)"><path fill-rule="evenodd" d="M43 62H77V126H93V156H77V174H43V156H0V128ZM43 99L19 126H43Z"/></g>
+    <g transform="translate(174 0)"><path fill-rule="evenodd" d="M43 62H77V126H93V156H77V174H43V156H0V128ZM43 99L19 126H43Z"/></g>
+    <g transform="translate(281 0)"><path d="M0 84L25 62H53V174H18V96H0Z"/></g>
+  </g>
+</svg>

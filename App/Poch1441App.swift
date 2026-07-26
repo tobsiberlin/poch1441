@@ -23,7 +23,7 @@ final class PochOrientationDelegate: NSObject, UIApplicationDelegate {
         if window?.traitCollection.userInterfaceIdiom == .pad {
             return .all
         }
-        return requestedOrientationMask ?? .allButUpsideDown
+        return forcedQAOrientationMask ?? .allButUpsideDown
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
@@ -31,7 +31,7 @@ final class PochOrientationDelegate: NSObject, UIApplicationDelegate {
     }
 
     @objc private func deviceOrientationDidChange() {
-        guard let mask = requestedOrientationMask else { return }
+        guard let mask = forcedQAOrientationMask else { return }
 
         for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
             scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
@@ -41,7 +41,7 @@ final class PochOrientationDelegate: NSObject, UIApplicationDelegate {
         }
     }
 
-    private var requestedOrientationMask: UIInterfaceOrientationMask? {
+    private var forcedQAOrientationMask: UIInterfaceOrientationMask? {
         #if DEBUG || INTERNAL_QA
         if ProcessInfo.processInfo.arguments.contains("-landscapeQA") {
             return .landscapeLeft
@@ -50,19 +50,7 @@ final class PochOrientationDelegate: NSObject, UIApplicationDelegate {
             return .portrait
         }
         #endif
-
-        switch UIDevice.current.orientation {
-        case .portrait:
-            return .portrait
-        case .portraitUpsideDown:
-            return .portraitUpsideDown
-        case .landscapeLeft:
-            return .landscapeRight
-        case .landscapeRight:
-            return .landscapeLeft
-        default:
-            return nil
-        }
+        return nil
     }
 }
 

@@ -140,7 +140,7 @@ platform :ios do
         skip_waiting_for_build_processing: false,
         distribute_external: false,
         uses_non_exempt_encryption: false,
-        changelog: "Interner kabelloser Produktcheck: neuer spielnaher Vorscreen, interaktive Zeitreise von 1441 bis heute, überarbeitete Tutorial-Regie, organisch verteilte Karten sowie neue Münz-, Klang- und Kontaktabstimmung. Bitte Einstieg, Wischrichtung, Lesbarkeit und erste komplette Runde prüfen. Kein Produktionskandidat."
+        changelog: "Interner QA-Build: neue Drei-Akte-Marke, atmosphärische Zeitreise mit fingergekoppeltem Epochenklang, klarere Tischführung, verständlichere Poch-Regie, größere Spielflächen sowie organischere Karten- und Chip-Akustik. Bitte den kompletten Erstlauf, Rotation, große Schrift und Audio auf dem iPhone prüfen. Kein Produktionskandidat."
       )
     else
       UI.success("InternalQA archive and IPA are ready; TestFlight upload was intentionally skipped.")
@@ -161,7 +161,7 @@ platform :ios do
       skip_waiting_for_build_processing: false,
       distribute_external: false,
       uses_non_exempt_encryption: false,
-      changelog: "Interner kabelloser Produktcheck: neuer spielnaher Vorscreen, interaktive Zeitreise von 1441 bis heute, überarbeitete Tutorial-Regie, organisch verteilte Karten sowie neue Münz-, Klang- und Kontaktabstimmung. Bitte Einstieg, Wischrichtung, Lesbarkeit und erste komplette Runde prüfen. Kein Produktionskandidat."
+      changelog: "Interner QA-Build: neue Drei-Akte-Marke, atmosphärische Zeitreise mit fingergekoppeltem Epochenklang, klarere Tischführung, verständlichere Poch-Regie, größere Spielflächen sowie organischere Karten- und Chip-Akustik. Bitte den kompletten Erstlauf, Rotation, große Schrift und Audio auf dem iPhone prüfen. Kein Produktionskandidat."
     )
   end
 

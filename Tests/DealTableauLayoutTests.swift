@@ -26,7 +26,7 @@ struct DealTableauLayoutTests {
                "opponent slots must stay ordered from left to right")
         expect(abs(poses[0].offset.width + poses[10].offset.width) <= 2.3,
                "natural edge variation must still leave the tableau visually centered")
-        expect(poses.allSatisfy { $0.offset.height <= -15 },
+        expect(poses.allSatisfy { $0.offset.height <= -33 },
                "opponent card fans must settle above, not across, player portraits")
     }
 
@@ -75,8 +75,8 @@ struct DealTableauLayoutTests {
         },
                "subtle variation must preserve left-to-right card ordering")
         expect(seatOne.allSatisfy {
-            abs($0.offset.width) <= 27 &&
-                $0.offset.height >= -22 && $0.offset.height <= -15 &&
+            abs($0.offset.width) <= 26 &&
+                $0.offset.height >= -42 && $0.offset.height <= -33 &&
                 abs($0.rotationDegrees) <= 13
         },
                "resting variation must remain restrained and readable")
