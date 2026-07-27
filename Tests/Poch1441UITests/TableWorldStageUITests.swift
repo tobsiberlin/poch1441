@@ -143,7 +143,7 @@ final class TableWorldStageUITests: XCTestCase {
         let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 15),
                       "Nach der Montage muss Trumpf wieder eine echte Tutorialaktion sein.")
-        XCTAssertEqual(action.label, "Trumpf aufdecken")
+        XCTAssertEqual(action.label, "Tischkarte aufdecken")
         attachScreenshot(of: app, named: "guided-r1-funding-settled")
     }
 
@@ -169,7 +169,7 @@ final class TableWorldStageUITests: XCTestCase {
             .matching(identifier: "firstRun.learningState").firstMatch
         XCTAssertTrue(learningState.waitForExistence(timeout: 2))
         let settled = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "value == %@", "Dein Zug"),
+            predicate: NSPredicate(format: "value == %@", "Jetzt du"),
             object: learningState
         )
         XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 2), .completed)
@@ -179,7 +179,7 @@ final class TableWorldStageUITests: XCTestCase {
                           "Reduced Motion darf keine unsichtbare R1-Welle abwarten.")
         let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 2))
-        XCTAssertEqual(action.label, "Trumpf aufdecken")
+        XCTAssertEqual(action.label, "Tischkarte aufdecken")
         attachScreenshot(of: app, named: "guided-r1-funding-reduced-motion")
     }
 
@@ -367,12 +367,7 @@ final class TableWorldStageUITests: XCTestCase {
 
         let window = app.windows.firstMatch
         let panel = app.descendants(matching: .any)["phase3.guided.explanation"]
-        let action = app.descendants(matching: .any)["phase3.guided.opening.action"]
-        let reason = app.descendants(matching: .any)["phase3.guided.opening.reason"]
-        let consequence = app.descendants(matching: .any)["phase3.guided.opening.consequence"]
-        let center = app.descendants(matching: .any).matching(
-            NSPredicate(format: "label == %@", "Poch-Medaillon")
-        ).firstMatch
+        let center = app.descendants(matching: .any)["phase3.center"].firstMatch
         let opponents = app.images.matching(
             NSPredicate(format: "label BEGINSWITH %@", "Opponent")
         )
@@ -381,17 +376,14 @@ final class TableWorldStageUITests: XCTestCase {
         )
 
         XCTAssertTrue(panel.waitForExistence(timeout: 6))
-        XCTAssertTrue(action.waitForExistence(timeout: 4))
-        XCTAssertTrue(reason.waitForExistence(timeout: 4))
-        XCTAssertTrue(consequence.waitForExistence(timeout: 4))
         XCTAssertTrue(handCards.firstMatch.waitForExistence(timeout: 4))
         XCTAssertEqual(opponents.count, 3)
         XCTAssertFalse(center.exists,
                        "Vor der ersten Karte gehört die Mitte der Erklärung statt einer leeren Brettbühne.")
-        XCTAssertLessThan(action.frame.midX, reason.frame.midX)
-        XCTAssertLessThan(reason.frame.midX, consequence.frame.midX)
-        XCTAssertFalse(action.frame.intersects(reason.frame))
-        XCTAssertFalse(reason.frame.intersects(consequence.frame))
+        XCTAssertGreaterThan(panel.frame.height, 80,
+                             "Handlung und Begründung müssen gemeinsam lesbar bleiben.")
+        XCTAssertLessThan(panel.frame.height, 180,
+                          "Die Erklärung darf nicht wieder zur Textwand werden.")
         XCTAssertTrue(window.frame.contains(panel.frame))
 
         let portraits = opponents.allElementsBoundByIndex

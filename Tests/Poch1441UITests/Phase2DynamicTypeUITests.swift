@@ -187,7 +187,7 @@ final class Phase2DynamicTypeUITests: XCTestCase {
         }
 
         let continueButton = app.buttons["phase2.continue"]
-        XCTAssertEqual(continueButton.label, "Weiter zum Ausspielen",
+        XCTAssertEqual(continueButton.label, "Hand leerspielen",
                        "\(context): Das VoiceOver-Label darf nicht gekürzt werden.")
         XCTAssertTrue(continueButton.isHittable, "\(context): Weiter muss erreichbar sein.")
     }

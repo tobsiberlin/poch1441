@@ -144,10 +144,11 @@ struct FirstRunStageZones: Equatable {
         let boardY = top + 160
         let boardSide = min(usableWidth - 24,
                             max(180, handTop - boardY - 190),
-                            max(228, size.height * 0.39))
+                            max(228, size.height * 0.39),
+                            Tokens.guidedMeldLearningBoardMax)
         let boardX = safeArea.leading + (usableWidth - boardSide) / 2
         let decisionY = boardY + boardSide + 16
-        let decisionHeight = max(152, min(190, handTop - decisionY - 6))
+        let decisionHeight = max(110, min(146, handTop - decisionY - 18))
         return FirstRunStageZones(
             header: CGRect(x: safeArea.leading + 18,
                            y: top,

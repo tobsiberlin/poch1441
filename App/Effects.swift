@@ -290,41 +290,91 @@ struct PhaseCurtain: View {
     let title: String
     let subtitle: String
     let tint: Color
+    let showsAction: Bool
+    let actionTitle: String
+    let action: () -> Void
 
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.34)
-                .ignoresSafeArea()
-
-            VStack(spacing: 8) {
-                Text(phase)
-                    .font(.system(size: 10, weight: .heavy))
-                    .tracking(2.2)
-                    .foregroundStyle(tint.opacity(0.92))
-                Text(title)
-                    .font(.system(size: 28, weight: .heavy))
-                    .foregroundStyle(Tokens.jewelPlatin)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-                Text(subtitle)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Tokens.slate)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+        GeometryReader { proxy in
+            // A phase handoff owns the screen. Showing the next tutorial card
+            // and its hand underneath reads as accidental overlap even when
+            // hit testing is correctly blocked.
+            ZStack {
+                Color(hex: 0x07090C)
+                    .ignoresSafeArea()
+                ScrollView(.vertical) {
+                    VStack {
+                        curtainCard
+                    }
+                    .frame(maxWidth: .infinity,
+                           minHeight: max(0, proxy.size.height - 32),
+                           alignment: .center)
+                    .padding(.vertical, 16)
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
+                .accessibilityIdentifier("tutorial.phaseCurtain.scroll")
+                .padding(.horizontal, 32)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
-            .frame(maxWidth: 330)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(LinearGradient(colors: [
-                        Color(hex: 0x17141D),
-                        Color(hex: 0x0B0A10)
-                    ], startPoint: .top, endPoint: .bottom))
-                    .overlay(RoundedRectangle(cornerRadius: 18)
-                        .strokeBorder(tint.opacity(0.34), lineWidth: 1))
-                    .shadow(color: .black.opacity(0.62), radius: 26, y: 14)
-            )
         }
+    }
+
+    private var curtainCard: some View {
+        VStack(spacing: 10) {
+            Text(phase)
+                .font(.caption2.weight(.heavy))
+                .tracking(2.2)
+                .foregroundStyle(tint.opacity(0.92))
+            Text(title)
+                .font(.title2.weight(.heavy))
+                .foregroundStyle(Tokens.jewelPlatin)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(subtitle)
+                .font(.body.weight(.medium))
+                .foregroundStyle(Tokens.slate)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if showsAction {
+                Rectangle()
+                    .fill(tint.opacity(0.18))
+                    .frame(height: 1)
+                    .padding(.top, 4)
+
+                Button(action: action) {
+                    HStack(spacing: 8) {
+                        Text(actionTitle)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.82)
+                        Image(systemName: "arrow.right")
+                    }
+                    // Der Regeltext darf mit Dynamic Type stark wachsen. Die
+                    // einzige bestätigende Aktion bleibt dagegen eine stabile,
+                    // einzeilige Touch-Fläche und darf nie aus der Kapsel laufen.
+                    .font(.system(size: 17, weight: .heavy))
+                    .dynamicTypeSize(.xSmall ... .xxLarge)
+                    .foregroundStyle(Tokens.bgDeep)
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .background(Capsule().fill(tint))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("tutorial.phaseCurtain.continue")
+                .padding(.top, 2)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 20)
+        .frame(maxWidth: 330)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(LinearGradient(colors: [
+                    Color(hex: 0x17141D),
+                    Color(hex: 0x0B0A10)
+                ], startPoint: .top, endPoint: .bottom))
+                .overlay(RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(tint.opacity(0.34), lineWidth: 1))
+                .shadow(color: .black.opacity(0.62), radius: 26, y: 14)
+        )
     }
 }

@@ -9,14 +9,24 @@ final class TableFoleyAudio {
 
     private static let log = Logger(subsystem: "com.tobc.poch1441",
                                     category: "TableFoleyAudio")
-    private let variants = [
+    private let cardVariants = [
         "card-deal-01",
         "card-deal-02",
         "card-deal-03"
     ]
+    private let centerChipVariants = [
+        "r1-ceramic-center-01",
+        "r1-ceramic-center-02",
+        "r1-ceramic-center-03"
+    ]
+    private let stackChipVariants = [
+        "r1-ceramic-stack-01",
+        "r1-ceramic-stack-02",
+        "r1-ceramic-stack-03"
+    ]
     private var voices: [String: [AVAudioPlayer]] = [:]
     private var nextVoice: [String: Int] = [:]
-    private var previousVariant: Int?
+    private var previousVariant: [String: Int] = [:]
 
     private static var isAvailableInCurrentRuntime: Bool {
         #if targetEnvironment(simulator)
@@ -36,7 +46,7 @@ final class TableFoleyAudio {
             )
             return
         }
-        for name in variants {
+        for name in cardVariants + centerChipVariants + stackChipVariants {
             _ = players(named: name)
         }
     }
@@ -46,23 +56,82 @@ final class TableFoleyAudio {
                       seat: Int,
                       playerCount: Int) {
         guard Self.isAvailableInCurrentRuntime else { return }
+        play(family: "deal",
+             variants: cardVariants,
+             seed: sequence &+ generation &* 31,
+             salt: 0xCA4D_1441,
+             volume: 0.38,
+             pan: TableFoleySpatialModel.pan(seat: seat,
+                                             playerCount: playerCount))
+    }
+
+    /// A deliberate, close table-card turn. It is quieter than dealing and
+    /// fires only when the trump card visibly changes face.
+    func playCardReveal(sequence: Int, generation: Int) {
+        guard Self.isAvailableInCurrentRuntime else { return }
+        play(family: "reveal",
+             variants: cardVariants,
+             seed: sequence &+ generation &* 43,
+             salt: 0x7EAE_1441,
+             volume: 0.28,
+             pan: 0)
+    }
+
+    /// One played-card contact at the exact accepted landing edge.
+    func playCardPlay(sequence: Int,
+                      generation: Int,
+                      seat: Int,
+                      playerCount: Int) {
+        guard Self.isAvailableInCurrentRuntime else { return }
+        play(family: "play",
+             variants: cardVariants,
+             seed: sequence &+ generation &* 47,
+             salt: 0xCA7D_1441,
+             volume: 0.34,
+             pan: TableFoleySpatialModel.pan(seat: seat,
+                                             playerCount: playerCount))
+    }
+
+    /// Ceramic chip contact for the Poch-Pott. Bets use the center-well
+    /// family; payouts use the slightly broader stack family.
+    func playChipContact(sequence: Int,
+                         generation: Int,
+                         seat: Int,
+                         playerCount: Int,
+                         isPayout: Bool) {
+        guard Self.isAvailableInCurrentRuntime else { return }
+        let family = isPayout ? "payout" : "bet"
+        play(family: family,
+             variants: isPayout ? stackChipVariants : centerChipVariants,
+             seed: sequence &+ generation &* 53,
+             salt: isPayout ? 0x57AC_1441 : 0xCE17_1441,
+             volume: isPayout ? 0.40 : 0.32,
+             pan: TableFoleySpatialModel.pan(seat: seat,
+                                             playerCount: playerCount))
+    }
+
+    private func play(family: String,
+                      variants: [String],
+                      seed: Int,
+                      salt: UInt64,
+                      volume: Float,
+                      pan: Float) {
         let index = R1ContactVariantResolver.resolve(
             variantCount: variants.count,
-            seed: sequence &+ generation &* 31,
-            familySalt: 0xCA4D_1441,
-            previousIndex: previousVariant
+            seed: seed,
+            familySalt: salt,
+            previousIndex: previousVariant[family]
         )
         let name = variants[index]
         guard let pool = players(named: name), !pool.isEmpty else { return }
         let voiceIndex = nextVoice[name, default: 0] % pool.count
         let player = pool[voiceIndex]
 
-        previousVariant = index
+        previousVariant[family] = index
         nextVoice[name] = voiceIndex + 1
         player.currentTime = 0
-        player.volume = 0.52
-        player.pan = TableFoleySpatialModel.pan(seat: seat,
-                                                playerCount: playerCount)
+        player.volume = volume
+        player.pan = pan
         player.play()
     }
 

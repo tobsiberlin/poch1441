@@ -2,9 +2,9 @@ import AVFoundation
 import os
 import UIKit
 
-/// Four scene layers stay phase-aligned while a fifth, synthetic transition
-/// texture follows the finger directly. No audio is restarted during scrubbing,
-/// so reversing the gesture reverses the acoustic seam without retriggering it.
+/// Four natural scene layers stay phase-aligned while the retired transition
+/// player remains silent for resource compatibility. No audio is restarted
+/// during scrubbing, so reversing the gesture reverses the rooms immediately.
 @MainActor
 final class FirstRunTimeSwipeAudio {
     private static let log = Logger(subsystem: "com.tobc.poch1441",
@@ -21,6 +21,9 @@ final class FirstRunTimeSwipeAudio {
     private var players: [Layer: AVAudioPlayer] = [:]
     private var isPrepared = false
     private var isPlaying = false
+    private var masterGain: Float = 0
+    private var currentMix: FirstRunTimeSwipeAudioMix?
+    private var startTask: Task<Void, Never>?
     private var stopTask: Task<Void, Never>?
 
     private static var isAvailableInCurrentRuntime: Bool {
@@ -42,15 +45,38 @@ final class FirstRunTimeSwipeAudio {
             stopTask = nil
             try prepareIfNeeded()
             if !isPlaying {
+                currentMix = mixState(progress: progress)
                 let startTime = (players.values.map(\.deviceCurrentTime).max() ?? 0) + 0.05
                 players.values.forEach {
                     $0.currentTime = 0
                     $0.numberOfLoops = -1
+                    $0.volume = 0
                     $0.play(atTime: startTime)
                 }
                 isPlaying = true
+                masterGain = 0
+                applyCurrentMix(fadeDuration: 0)
+                startTask?.cancel()
+                startTask = Task { @MainActor [weak self] in
+                    // Keep the ambience silent until the phase-aligned players
+                    // actually begin, then raise only the master. Finger progress
+                    // remains live throughout this perceptual fade.
+                    try? await Task.sleep(for: .milliseconds(50))
+                    let frameCount = 40
+                    for frame in 1...frameCount {
+                        guard let self, !Task.isCancelled else { return }
+                        let linear = Float(frame) / Float(frameCount)
+                        self.masterGain = linear * linear * (3 - 2 * linear)
+                        self.applyCurrentMix(fadeDuration: 0.02)
+                        try? await Task.sleep(for: .milliseconds(16))
+                    }
+                    self?.masterGain = 1
+                    self?.applyCurrentMix(fadeDuration: 0.02)
+                    self?.startTask = nil
+                }
+            } else {
+                update(progress: progress)
             }
-            update(progress: progress)
         } catch {
             Self.log.error("Unable to start time-swipe audio: \(error.localizedDescription, privacy: .public)")
         }
@@ -58,23 +84,25 @@ final class FirstRunTimeSwipeAudio {
 
     func update(progress: Double) {
         guard isPlaying else { return }
-        let mix = FirstRunTimeSwipeAudioMix.state(
-            progress: FirstRunTimeSwipeProjection.clamped(progress),
-            reduceMotion: UIAccessibility.isReduceMotionEnabled
-        )
+        currentMix = mixState(progress: progress)
+        applyCurrentMix(fadeDuration: 0.02)
+    }
 
-        // Direct assignment keeps the mix a pure function of finger position:
-        // a reversal cannot trail an earlier wall-clock volume ramp.
-        players[.originRoom]?.volume = mix.originRoomVolume
-        players[.originMotif]?.volume = mix.originMotifVolume
-        players[.presentRoom]?.volume = mix.presentRoomVolume
-        players[.presentMotif]?.volume = mix.presentMotifVolume
-        players[.timeNoise]?.rate = mix.timeNoiseRate
-        players[.timeNoise]?.volume = mix.timeNoiseVolume
+    /// Decode and prepare the five layers while the silent prelude is visible.
+    /// Any failure is logged when playback is actually requested.
+    func prepare() {
+        guard Self.isAvailableInCurrentRuntime else { return }
+        do {
+            try prepareIfNeeded()
+        } catch {
+            Self.log.error("Unable to prepare time-swipe audio: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     func stop() {
         guard isPlaying else { return }
+        startTask?.cancel()
+        startTask = nil
         stopTask?.cancel()
         players.values.forEach {
             $0.setVolume(0, fadeDuration: 0.18)
@@ -85,6 +113,8 @@ final class FirstRunTimeSwipeAudio {
             guard !Task.isCancelled else { return }
             activePlayers.forEach { $0.stop() }
             self?.isPlaying = false
+            self?.masterGain = 0
+            self?.currentMix = nil
             // The session is shared by the game table. Deactivating it here
             // could silence a round that starts while this fade is finishing.
             self?.stopTask = nil
@@ -113,6 +143,33 @@ final class FirstRunTimeSwipeAudio {
         try PochAudioSession.prepareAmbientMixing()
         players = preparedPlayers
         isPrepared = true
+    }
+
+    private func mixState(progress: Double) -> FirstRunTimeSwipeAudioMix {
+        FirstRunTimeSwipeAudioMix.state(
+            progress: FirstRunTimeSwipeProjection.clamped(progress),
+            reduceMotion: UIAccessibility.isReduceMotionEnabled
+        )
+    }
+
+    private func applyCurrentMix(fadeDuration: TimeInterval) {
+        guard let mix = currentMix else { return }
+        players[.originRoom]?.setVolume(mix.originRoomVolume * masterGain,
+                                        fadeDuration: fadeDuration)
+        players[.originMotif]?.setVolume(mix.originMotifVolume * masterGain,
+                                         fadeDuration: fadeDuration)
+        players[.presentRoom]?.setVolume(mix.presentRoomVolume * masterGain,
+                                         fadeDuration: fadeDuration)
+        players[.presentMotif]?.setVolume(mix.presentMotifVolume * masterGain,
+                                          fadeDuration: fadeDuration)
+        players[.originRoom]?.pan = mix.originRoomPan
+        players[.originMotif]?.pan = mix.originMotifPan
+        players[.presentRoom]?.pan = mix.presentRoomPan
+        players[.presentMotif]?.pan = mix.presentMotifPan
+        players[.timeNoise]?.rate = mix.timeNoiseRate
+        players[.timeNoise]?.pan = 0
+        players[.timeNoise]?.setVolume(mix.timeNoiseVolume * masterGain,
+                                       fadeDuration: fadeDuration)
     }
 
     private enum AudioError: LocalizedError {

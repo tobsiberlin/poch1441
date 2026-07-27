@@ -9,6 +9,9 @@ struct TableFoleyContractTests {
     static func main() throws {
         let audio = try source("App/TableFoleyAudio.swift")
         let deal = try source("App/DealOverlay.swift")
+        let content = try source("App/ContentView.swift")
+        let phase2 = try source("App/Phase2View.swift")
+        let phase3 = try source("App/Phase3View.swift")
         let builder = try source("tools/build_table_foley_audio.py")
 
         for variant in 1...3 {
@@ -35,6 +38,17 @@ struct TableFoleyContractTests {
                "Foley must trigger on the admitted physical contact")
         expect(deal.contains("guard reduceMotion, soundEnabled, current > previous"),
                "Reduced Motion must retain one causal contact without a flight")
+        expect(audio.contains("func playCardReveal")
+               && content.contains("playCardReveal("),
+               "The physical trump flip must emit one causal card contact")
+        expect(audio.contains("func playChipContact")
+               && phase2.contains("commitBetImpact")
+               && phase2.contains("commitPayoutImpact")
+               && phase2.contains("playChipContact("),
+               "Phase-2 bet and payout impacts must route ceramic Foley")
+        expect(audio.contains("func playCardPlay")
+               && phase3.contains("playCardPlay("),
+               "Accepted Phase-3 card landings must route table Foley")
 
         FileHandle.standardOutput.write(Data("TableFoleyContractTests: PASS\n".utf8))
     }

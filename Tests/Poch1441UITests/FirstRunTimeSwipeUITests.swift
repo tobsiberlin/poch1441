@@ -19,9 +19,9 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
     @MainActor
     func testFrozenHistoricalStatesStayReadable() {
         let states: [(progress: String, title: String, name: String)] = [
-            ("0", "Pokers älterer Bruder. Seit 1441.", "origin"),
-            ("0.55", "Über Poque führt die Spur weiter.", "branch"),
-            ("1", "Drei Chancen. Eine Runde.", "today")
+            ("0", "1441: Ein Tisch, drei Chancen.", "origin"),
+            ("0.55", "Poch hinterlässt Spuren im Poker.", "branch"),
+            ("1", "Jetzt bist du dran.", "today")
         ]
 
         for state in states {
@@ -72,7 +72,7 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
                    thenDragTo: stage.coordinate(withNormalizedOffset: CGVector(dx: 0.04, dy: 0.28)))
         let title = app.descendants(matching: .any)["firstRun.timeSwipe.title"]
         XCTAssertTrue(title.waitForExistence(timeout: 2))
-        XCTAssertEqual(title.label, "Pokers älterer Bruder. Seit 1441.")
+        XCTAssertEqual(title.label, "1441: Ein Tisch, drei Chancen.")
     }
 
     @MainActor
@@ -97,35 +97,48 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
         enterTimeline(app)
         XCTAssertTrue(app.scrollViews["firstRun.timeSwipe.discrete"].waitForExistence(timeout: 4))
         XCTAssertEqual(app.descendants(matching: .any)["firstRun.timeSwipe.title"].label,
-                       "Pokers älterer Bruder. Seit 1441.")
+                       "1441: Ein Tisch, drei Chancen.")
 
         let next = app.buttons["firstRun.timeSwipe.next"]
         XCTAssertTrue(next.waitForExistence(timeout: 2))
         next.tap()
         XCTAssertEqual(app.descendants(matching: .any)["firstRun.timeSwipe.title"].label,
-                       "Über Poque führt die Spur weiter.")
+                       "Poch hinterlässt Spuren im Poker.")
         next.tap()
         XCTAssertTrue(app.buttons["firstRun.intro.primary"].waitForExistence(timeout: 2))
     }
 
     @MainActor
-    func testProductionOpeningSurvivesRotation() {
-        let app = launchApp()
-        let prelude = app.otherElements["firstRun.timeSwipe.prelude"]
-        XCTAssertTrue(prelude.waitForExistence(timeout: 4))
-        assertWindowOrientation(.portrait, in: app)
+    func testProductionOpeningSurvivesCompactOrientations() {
+        let portrait = launchApp(extra: ["-portraitQA"])
+        let portraitWindow = portrait.windows.firstMatch
+        XCTAssertTrue(portrait.otherElements["firstRun.timeSwipe.prelude"].waitForExistence(timeout: 4))
+        assertWindowOrientation(.portrait, in: portrait)
+        XCTAssertEqual(portraitWindow.frame.size, CGSize(width: 375, height: 667),
+                       "Der kompakte Hochformat-Gate muss wirklich auf dem iPhone SE laufen.")
+        portrait.terminate()
 
-        XCUIDevice.shared.orientation = .landscapeLeft
-        assertWindowOrientation(.landscape, in: app)
-        XCTAssertTrue(prelude.waitForExistence(timeout: 2))
+        let landscape = launchApp(extra: ["-landscapeQA"])
+        let landscapeWindow = landscape.windows.firstMatch
+        XCTAssertTrue(landscape.otherElements["firstRun.timeSwipe.prelude"].waitForExistence(timeout: 4))
+        assertWindowOrientation(.landscape, in: landscape)
+        XCTAssertEqual(landscapeWindow.frame.size, CGSize(width: 667, height: 375),
+                       "Der kompakte Querformat-Gate muss wirklich auf dem iPhone SE laufen.")
 
-        enterTimeline(app)
-        let stage = app.otherElements["firstRun.timeSwipe.stage"]
-        XCTAssertTrue(stage.waitForExistence(timeout: 4))
-
-        XCUIDevice.shared.orientation = .portrait
-        assertWindowOrientation(.portrait, in: app)
-        XCTAssertTrue(stage.waitForExistence(timeout: 2))
+        enterTimeline(landscape)
+        let compactTimeline = landscape.scrollViews["firstRun.timeSwipe.discrete"]
+        XCTAssertTrue(compactTimeline.waitForExistence(timeout: 4),
+                      "Kurzes Querformat braucht die scrollbare Kapitelansicht statt einer verdeckten Filmkarte.")
+        let title = landscape.descendants(matching: .any)["firstRun.timeSwipe.title"]
+        let body = landscape.descendants(matching: .any)["firstRun.timeSwipe.body"]
+        let next = landscape.buttons["firstRun.timeSwipe.next"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        XCTAssertTrue(body.waitForExistence(timeout: 3))
+        XCTAssertTrue(next.waitForExistence(timeout: 3))
+        XCTAssertFalse(title.frame.intersects(body.frame))
+        XCTAssertFalse(body.frame.intersects(next.frame))
+        XCTAssertTrue(next.isHittable)
+        landscape.terminate()
     }
 
     @MainActor

@@ -90,7 +90,7 @@ final class ProductWayfindingUITests: XCTestCase {
         app.buttons["Mit Hana spielen"].tap()
         XCTAssertTrue(app.staticTexts["Hana spielt mit"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["HANA"].exists)
-        XCTAssertTrue(app.buttons["Runde beginnen"].exists)
+        XCTAssertTrue(app.buttons["Spielteil starten"].exists)
         attachScreenshot(named: "learn-with-hana-simple-entry")
 
         app.buttons["xmark"].tap()
@@ -107,12 +107,12 @@ final class ProductWayfindingUITests: XCTestCase {
         XCTAssertTrue(rulesBody.exists)
         rulesBody.swipeUp()
         let fullBiddingRule = app.staticTexts[
-            "Mit zwei gleichen Karten darfst du bieten. Bleiben mehrere, entscheidet die stärkste Gruppe."
+            "Mit einem Paar darfst du pochen. Vierling schlägt Drilling, Drilling schlägt Paar."
         ]
         XCTAssertTrue(fullBiddingRule.waitForExistence(timeout: 2),
                       "Die entscheidende Poch-Regel darf nie mit Auslassungspunkten enden.")
         let fullPlayoutRule = app.staticTexts[
-            "Eine Farbe läuft aufwärts. Wer die Reihe beendet, eröffnet neu."
+            "Auf jede Karte folgt die nächsthöhere derselben Farbe. Wer zuletzt legt, eröffnet neu."
         ]
         XCTAssertTrue(fullPlayoutRule.waitForExistence(timeout: 2),
                       "Auch die dritte Phase muss vollständig erreichbar und lesbar sein.")
@@ -132,7 +132,7 @@ final class ProductWayfindingUITests: XCTestCase {
     }
 
     @MainActor
-    func testLivePhase2HasSeparatedDecisionActionOpponentAndHandZones() {
+    func testLivePhase2SeparatesDecisionActionAndHandBeforeOpponentCloseup() {
         XCUIDevice.shared.orientation = .portrait
         let app = launchPhase2()
 
@@ -150,7 +150,8 @@ final class ProductWayfindingUITests: XCTestCase {
         XCTAssertTrue(decision.waitForExistence(timeout: 4))
         XCTAssertTrue(actions.waitForExistence(timeout: 4))
         XCTAssertTrue(hand.waitForExistence(timeout: 4))
-        XCTAssertGreaterThan(opponents.count, 0)
+        XCTAssertEqual(opponents.count, 0,
+                       "Während deiner Entscheidung gehört der Raum dem Brett, der Wahl und deiner Hand. Die Gegner erscheinen erst bei ihrer Reaktion.")
 
         XCTAssertGreaterThanOrEqual(board.frame.width, 190,
                                     "Die Poch-Scheibe muss Phase 2 visuell tragen.")
@@ -158,16 +159,6 @@ final class ProductWayfindingUITests: XCTestCase {
                        "Erklärung und Aktionen brauchen getrennte Zonen.")
         XCTAssertFalse(actions.frame.intersects(hand.frame),
                        "Aktionen und Hand dürfen sich nicht überlagern.")
-
-        for index in 0..<opponents.count {
-            let opponent = opponents.element(boundBy: index).frame
-            XCTAssertFalse(actions.frame.intersects(opponent),
-                           "Aktionen \(actions.frame) und Gegnerreaktion \(opponent) " +
-                           "brauchen getrennte Zonen.")
-            XCTAssertFalse(hand.frame.intersects(opponent),
-                           "Gegner \(opponent) und eigene Hand \(hand.frame) " +
-                           "brauchen getrennte Zonen.")
-        }
 
         let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         screenshot.name = "phase2-live-wayfinding-\(Int(window.frame.width))x\(Int(window.frame.height))"

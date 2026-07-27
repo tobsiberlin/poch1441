@@ -11,6 +11,7 @@ struct Phase3View: View {
     /// Phasen-Morph-Namespace (§5b) - geteilt mit ContentView/Phase2View.
     let morph: Namespace.ID
     let assistHints: Bool
+    let soundEnabled: Bool
     let isGuidedRound: Bool
     let onNewRound: () -> Void
     @State private var settledPlays = 0
@@ -25,27 +26,46 @@ struct Phase3View: View {
             let awaitingFirstLead = game.stage == .playout
                 && game.revealedPlays == 0
                 && game.cascadeIdle
+            let compactLandscape = w > h && h <= 430
             let compactHeight = h < 720
             let stageLayout = Phase3StageLayout(
+                width: w,
                 height: h,
                 compactHeight: compactHeight,
+                compactLandscape: compactLandscape,
                 guided: isGuidedRound,
                 awaitingFirstLead: awaitingFirstLead,
                 showsGuidedAction: game.guidedPlayoutCanAdvance,
                 handIsRelevant: game.cascadeIdle
                     || game.guidedRequiredHumanFollowCard != nil
             )
-            let playedTopOffset = stageLayout.playedTopOffset
+            let visibleChainCount = min(8, game.revealedChains.last?.count ?? 0)
+            let denseChainLift = compactLandscape
+                ? 0
+                : CGFloat(max(0, visibleChainCount - 6)) * 10
+            let playedTopOffset = stageLayout.playedTopOffset - denseChainLift
             let opponentsY = stageLayout.opponentsCenterY
             let statusY = game.stage == .playout
                 ? stageLayout.statusCenterY
                 : min(h * (compactHeight ? 0.40 : 0.555), compactHeight ? 278 : 398)
-            ZStack(alignment: .top) {
+            // In compact landscape the four stage zones are deliberately laid out
+            // from the leading edge. `.top` centers children horizontally and can
+            // pull the guidance column back over the played cards after rotation.
+            ZStack(alignment: .topLeading) {
                 if !awaitingFirstLead {
-                    playedCardsFan
-                        .frame(width: w)
-                        .offset(y: playedTopOffset)
-                        .transition(.opacity)
+                    if compactLandscape {
+                        playedCardsFan(compactLandscape: true)
+                            .frame(width: stageLayout.playedWidth)
+                            .frame(width: w, alignment: .leading)
+                            .padding(.leading, stageLayout.playedLeading)
+                            .offset(y: playedTopOffset)
+                            .transition(.opacity)
+                    } else {
+                        playedCardsFan(compactLandscape: false)
+                            .frame(width: w)
+                            .offset(y: playedTopOffset)
+                            .transition(.opacity)
+                    }
                 }
 
                 if game.stage == .playout, !phase3ReduceMotion, let lastPlay = lastRevealedPlay {
@@ -55,7 +75,11 @@ struct Phase3View: View {
                         index: max(futureChain.count - 1, 0),
                         count: max(futureChain.count, 1),
                         canvasWidth: w,
-                        topOffset: playedTopOffset
+                        topOffset: playedTopOffset,
+                        centerX: compactLandscape
+                            ? stageLayout.playedCenterX
+                            : nil,
+                        compactLandscape: compactLandscape
                     )
                     let humanSource = seat == 0
                         && pendingHumanFlightSource?.sequence == playSequence
@@ -75,6 +99,10 @@ struct Phase3View: View {
                                             sequence: playSequence,
                                             generation: playGeneration
                                           ) else { return }
+                                          playCardContact(
+                                            sequence: playSequence,
+                                            generation: playGeneration
+                                          )
                                           settledPlays = max(settledPlays, playSequence)
                                           if pendingHumanFlightSource?.sequence == playSequence,
                                              pendingHumanFlightSource?.generation == playGeneration {
@@ -87,24 +115,47 @@ struct Phase3View: View {
 
                 if game.stage == .playout {
                     if isGuidedRound {
-                        guidedControlPanel
-                            .frame(width: min(344, w - 20))
+                        guidedControlPanel(compactLandscape: compactLandscape)
+                            .frame(width: compactLandscape
+                                   ? stageLayout.guidanceWidth
+                                   : min(344, w - 20))
+                            .frame(width: w,
+                                   alignment: compactLandscape ? .leading : .center)
                             .padding(.top, stageLayout.statusTop)
                     } else {
                         statusLine
                             .frame(width: min(328, w - 24))
                             .position(x: w / 2, y: statusY)
                     }
-                    opponentsRow
-                        .frame(width: w)
-                        .position(x: w / 2, y: opponentsY)
-                    handFan(canvas: CGSize(width: w, height: h))
-                        .frame(width: w,
-                               height: Phase3CardGeometry.handContainerHeight,
+                    opponentsRow(compactLandscape: compactLandscape)
+                        .frame(width: compactLandscape
+                               ? stageLayout.opponentsWidth
+                               : w)
+                        .position(x: compactLandscape
+                                  ? stageLayout.opponentsCenterX
+                                  : w / 2,
+                                  y: opponentsY)
+                    handFan(canvas: CGSize(width: w, height: h),
+                            compactLandscape: compactLandscape,
+                            centerX: compactLandscape
+                                ? stageLayout.handCenterX
+                                : nil)
+                        .frame(width: compactLandscape
+                               ? stageLayout.handWidth
+                               : w,
+                               height: Phase3CardGeometry.handContainerHeight(
+                                compactLandscape: compactLandscape
+                               ),
                                alignment: .bottom)
-                        .saturation(stageLayout.handIsRelevant ? 1 : 0.45)
-                        .opacity(stageLayout.handIsRelevant ? 1 : 0.46)
-                        .position(x: w / 2,
+                        // Opponent turns must stay readable as real cards, not
+                        // dissolve into a grey ghost hand. Relevance is shown
+                        // through restrained colour, while identity and count
+                        // remain visually stable.
+                        .saturation(stageLayout.handIsRelevant ? 1 : 0.78)
+                        .opacity(stageLayout.handIsRelevant ? 1 : 0.90)
+                        .position(x: compactLandscape
+                                  ? stageLayout.handCenterX
+                                  : w / 2,
                                   y: stageLayout.handCenterY)
                         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.18),
                                    value: stageLayout.handIsRelevant)
@@ -112,7 +163,7 @@ struct Phase3View: View {
                     finalMomentStatus
                         .frame(width: min(336, w - 24))
                         .position(x: w / 2, y: statusY)
-                    opponentsRow
+                    opponentsRow(compactLandscape: compactLandscape)
                         .frame(width: w)
                         .position(x: w / 2, y: opponentsY)
                 } else if game.endPhase < .done {
@@ -138,10 +189,15 @@ struct Phase3View: View {
             game.configureGuidedPlayoutPresentation(isGuidedRound)
             if phase3ReduceMotion, game.revealedPlays > game.landedPlays {
                 let generation = game.playPresentationGeneration
+                let previousLanded = game.landedPlays
                 game.settlePlayPresentationForReducedMotion(
                     sequence: game.revealedPlays,
                     generation: generation
                 )
+                if game.landedPlays > previousLanded {
+                    playCardContact(sequence: game.revealedPlays,
+                                    generation: generation)
+                }
             }
             settledPlays = min(game.landedPlays, game.resolvedPlayCount)
         }
@@ -152,6 +208,7 @@ struct Phase3View: View {
                     sequence: newValue,
                     generation: generation
                 ) else { return }
+                playCardContact(sequence: newValue, generation: generation)
                 settledPlays = max(settledPlays, newValue)
             }
         }
@@ -159,10 +216,15 @@ struct Phase3View: View {
             guard isReduced,
                   game.revealedPlays > game.landedPlays else { return }
             let generation = game.playPresentationGeneration
+            let previousLanded = game.landedPlays
             game.settlePlayPresentationForReducedMotion(
                 sequence: game.revealedPlays,
                 generation: generation
             )
+            if game.landedPlays > previousLanded {
+                playCardContact(sequence: game.revealedPlays,
+                                generation: generation)
+            }
             settledPlays = max(settledPlays, game.landedPlays)
             pendingHumanFlightSource = nil
         }
@@ -183,6 +245,19 @@ struct Phase3View: View {
         #endif
     }
 
+    private func playCardContact(sequence: Int, generation: Int) {
+        guard soundEnabled,
+              let phase = game.round.playout,
+              phase.plays.indices.contains(sequence - 1) else { return }
+        let play = phase.plays[sequence - 1]
+        TableFoleyAudio.shared.playCardPlay(
+            sequence: sequence,
+            generation: generation,
+            seat: game.uiSeat(forRoundSeat: play.player),
+            playerCount: game.playerCount
+        )
+    }
+
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var phase3ReduceMotion: Bool {
@@ -195,17 +270,22 @@ struct Phase3View: View {
 
     // MARK: - Gegner als ruhiger Rahmen (§5c Phase 3: matter Schiefer, Fokus aufs Rennen)
 
-    private var opponentsRow: some View {
-        HStack(spacing: Phase3CardGeometry.opponentSpacing) {
+    private func opponentsRow(compactLandscape: Bool) -> some View {
+        HStack(spacing: Phase3CardGeometry.opponentSpacing(
+            compactLandscape: compactLandscape
+        )) {
             ForEach(game.activeUISeats.filter { $0 != 0 }, id: \.self) { seat in
-                slateToken(seat: seat)
+                slateToken(seat: seat, compactLandscape: compactLandscape)
             }
         }
         .padding(.top, 4)
         .padding(.bottom, 2)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Gegnerbereich")
+        .accessibilityIdentifier("phase3.opponents")
     }
 
-    private func slateToken(seat: Int) -> some View {
+    private func slateToken(seat: Int, compactLandscape: Bool) -> some View {
         let isLeader = game.playoutLeader == seat && game.stage == .playout
         let isWinner = game.stage != .playout
             && game.roundResult?.winner == seat
@@ -221,16 +301,20 @@ struct Phase3View: View {
                                 mood: isWinner
                                     ? .winning
                                     : (guidedReaction.mood ?? (isLeader ? .pressure : .neutral)),
-                                size: Phase3CardGeometry.opponentPortraitSize,
+                                size: Phase3CardGeometry.opponentPortraitSize(
+                                    compactLandscape: compactLandscape
+                                ),
                                 morph: morph,
                                 reduceMotionOverride: phase3ReduceMotion)
-        .padding(.horizontal, 6)
-        .padding(.vertical, 5)
+        .padding(.horizontal, compactLandscape ? 2 : 6)
+        .padding(.vertical, compactLandscape ? 2 : 5)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: compactLandscape ? 12 : 16,
+                             style: .continuous)
                 .fill(Color.black.opacity(focused ? 0.34 : 0.18))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    RoundedRectangle(cornerRadius: compactLandscape ? 12 : 16,
+                                     style: .continuous)
                         .strokeBorder((focused ? Tokens.jewelGold : Tokens.slate)
                             .opacity(focused ? 0.30 : 0.10), lineWidth: 0.8)
                 )
@@ -272,7 +356,7 @@ struct Phase3View: View {
         let pastChains = max(0, game.revealedChains.count - 1)
         return HStack(spacing: 10) {
             HStack(spacing: 5) {
-                Text("Centerpot").font(.system(size: 11, weight: .medium))
+                Text("Mitte").font(.system(size: 11, weight: .medium))
                     .foregroundStyle(Tokens.slate)
                 Text("\(value)").font(.system(size: 13, weight: .bold))
                     .foregroundStyle(Tokens.jewelPlatin)
@@ -306,7 +390,7 @@ struct Phase3View: View {
 
     /// Grosser angewinkelter Fächer der aktuellen Kette + Poch-Medaillon.
     /// Muster identisch mit ContentView::handView (.offset + .rotationEffect anchor:.bottom).
-    private var playedCardsFan: some View {
+    private func playedCardsFan(compactLandscape: Bool) -> some View {
         let chains = settledChains
         let currentChain = chains.last ?? []
         let finalCards = Array(game.revealedPlayEvents.prefix(settledPlays).suffix(8)).map(\.card)
@@ -319,7 +403,8 @@ struct Phase3View: View {
         let previewMode = currentChain.isEmpty && !finalTableau
         let cardScale = Phase3CardGeometry.playedCardScale(
             previewMode: previewMode,
-            finalTableau: finalTableau
+            finalTableau: finalTableau,
+            compactLandscape: compactLandscape
         )
 
         return ZStack {
@@ -328,7 +413,8 @@ struct Phase3View: View {
                     index: i,
                     count: N,
                     previewMode: previewMode,
-                    finalTableau: finalTableau
+                    finalTableau: finalTableau,
+                    compactLandscape: compactLandscape
                 )
 
                 CardFace(card: card,
@@ -347,23 +433,34 @@ struct Phase3View: View {
         }
         .frame(height: Phase3CardGeometry.playedFrameHeight(
             previewMode: previewMode,
-            finalTableau: finalTableau
+            finalTableau: finalTableau,
+            compactLandscape: compactLandscape
         ))
         .overlay {
-            ZStack {
-                medallion
-                    .offset(y: previewMode ? 98 : 58)
-                sideDeck
-                    .offset(x: 136, y: previewMode ? 84 : 44)
+            if !isGuidedRound {
+                ZStack {
+                    medallion(compactLandscape: compactLandscape)
+                        .offset(y: compactLandscape
+                                ? (previewMode ? 58 : 34)
+                                : (previewMode ? 98 : 58))
+                    sideDeck(compactLandscape: compactLandscape)
+                        .offset(x: compactLandscape ? 72 : 136,
+                                y: compactLandscape
+                                    ? (previewMode ? 50 : 28)
+                                    : (previewMode ? 84 : 44))
+                }
+                .allowsHitTesting(false)
             }
-            .allowsHitTesting(false)
         }
-        .padding(.bottom, previewMode ? 128 : 112)
+        .padding(.bottom, compactLandscape
+                 ? (previewMode ? 58 : 46)
+                 : (previewMode ? 128 : 112))
         .saturation(frozen ? 0.08 : 1)
         .opacity(frozen ? 0.55 : 1)
         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.12), value: frozen)
         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.18), value: settledPlays)
         .accessibilityElement(children: .contain)
+        .accessibilityLabel("Gespielte Karten")
         .accessibilityIdentifier("phase3.played")
     }
 
@@ -379,9 +476,12 @@ struct Phase3View: View {
         return chains
     }
 
-    /// Poch-Medaillon: ruhiger Hauptpot-Anker im Kartenstrom.
-    private var medallion: some View {
-        ZStack {
+    /// Poch-Medaillon: ruhiger Anker für die ausgespielte Kartenreihe.
+    private func medallion(compactLandscape: Bool) -> some View {
+        let outerSize: CGFloat = compactLandscape ? 58 : 116
+        let innerSize: CGFloat = compactLandscape ? 46 : 92
+        let coreSize: CGFloat = compactLandscape ? 27 : 54
+        return ZStack {
             Circle()
                 .fill(LinearGradient(colors: [
                     Color(hex: 0x252229),
@@ -390,42 +490,46 @@ struct Phase3View: View {
                 .overlay(Circle().strokeBorder(Tokens.jewelGold.opacity(0.70), lineWidth: 2.0))
                 .overlay(Circle().strokeBorder(Color.black.opacity(0.75), lineWidth: 4).padding(5))
                 .overlay(Circle().strokeBorder(Tokens.jewelPlatin.opacity(0.14), lineWidth: 1).padding(9))
-                .frame(width: 116, height: 116)
-                .shadow(color: .black.opacity(0.72), radius: 12, y: 7)
+                .frame(width: outerSize, height: outerSize)
+                .shadow(color: .black.opacity(0.72),
+                        radius: compactLandscape ? 7 : 12,
+                        y: compactLandscape ? 4 : 7)
             Circle()
                 .fill(RadialGradient(colors: [
                     Tokens.jewelPlatin.opacity(0.14),
                     Color.clear
                 ], center: .topLeading, startRadius: 2, endRadius: 44))
-                .frame(width: 92, height: 92)
-            RoundedRectangle(cornerRadius: 12)
+                .frame(width: innerSize, height: innerSize)
+            RoundedRectangle(cornerRadius: compactLandscape ? 6 : 12)
                 .fill(LinearGradient(colors: [
                     Tokens.jewelSmaragd.opacity(theme.isTravelTable ? 0.66 : 0.58),
                     Tokens.jewelAmethyst.opacity(theme.isTravelTable ? 0.60 : 0.52)
                 ], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .frame(width: 54, height: 54)
+                .frame(width: coreSize, height: coreSize)
                 .rotationEffect(.degrees(45))
-                .overlay(RoundedRectangle(cornerRadius: 12)
+                .overlay(RoundedRectangle(cornerRadius: compactLandscape ? 6 : 12)
                     .strokeBorder(Tokens.jewelPlatin.opacity(0.30), lineWidth: 1)
                     .rotationEffect(.degrees(45)))
                 .shadow(color: theme.smaragdFocus.opacity(theme.isTravelTable ? 0.16 : 0.10),
                         radius: theme.isTravelTable ? 7 : 5)
             VStack(spacing: -1) {
                 Text("MITTE")
-                    .font(.system(size: 8, weight: .heavy))
-                    .tracking(1.0)
+                    .font(.system(size: compactLandscape ? 5 : 8, weight: .heavy))
+                    .tracking(compactLandscape ? 0.5 : 1.0)
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.66))
                 Text("\(game.chips(in: .center))")
-                    .font(.system(size: 28, weight: .heavy))
+                    .font(.system(size: compactLandscape ? 14 : 28, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.90))
             }
         }
-        .accessibilityLabel("Poch-Medaillon")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "board.center", defaultValue: "Mitte"))
+        .accessibilityIdentifier("phase3.center")
     }
 
-    private var sideDeck: some View {
-        let deckW: CGFloat = 40
-        let deckH: CGFloat = 56
+    private func sideDeck(compactLandscape: Bool) -> some View {
+        let deckW: CGFloat = compactLandscape ? 25 : 40
+        let deckH: CGFloat = compactLandscape ? 35 : 56
         return ZStack {
             RoundedRectangle(cornerRadius: 9)
                 .fill(Color.black.opacity(0.42))
@@ -438,7 +542,7 @@ struct Phase3View: View {
                     seat: 0,
                     slot: 0
                 ),
-                scale: 0.50
+                scale: compactLandscape ? 0.31 : 0.50
             )
                 .rotationEffect(.degrees(2))
                 .shadow(color: .black.opacity(0.58), radius: 9, y: 5)
@@ -462,8 +566,8 @@ struct Phase3View: View {
                         .font(.system(size: 9, weight: .heavy))
                         .tracking(2.2)
                         .foregroundStyle(theme.smaragdFocus.opacity(0.80))
-                    Text(result.winner == 0 ? "Du nimmst die Mitte"
-                                             : "\(game.name(of: result.winner)) nimmt die Mitte")
+                    Text(result.winner == 0 ? "Du gewinnst die Mitte"
+                                             : "\(game.name(of: result.winner)) gewinnt die Mitte")
                         .font(.system(size: 20, weight: .heavy))
                         .foregroundStyle(Tokens.jewelPlatin.opacity(0.94))
                         .lineLimit(1)
@@ -474,7 +578,7 @@ struct Phase3View: View {
                 HStack(spacing: 8) {
                     settlementPill(String(localized: "phase3.metric.center", defaultValue: "MITTE"),
                                    "\(result.centerPool)", Tokens.jewelPlatin)
-                    settlementPill(String(localized: "phase3.metric.remaining", defaultValue: "RESTKARTEN"),
+                    settlementPill(String(localized: "phase3.metric.remaining", defaultValue: "FÜR RESTKARTEN"),
                                    "+\(total - result.centerPool)", Tokens.jewelGold)
                     settlementPill(String(localized: "phase3.metric.total", defaultValue: "GESAMT"),
                                    "\(total)", Tokens.jewelSmaragd)
@@ -482,7 +586,7 @@ struct Phase3View: View {
                 .frame(maxWidth: 328)
                 recapStrip(game.roundRecap)
             } else {
-                Text("Abrechnung läuft")
+                Text("Jetzt werden die Mitte und die Restkarten abgerechnet.")
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
             }
@@ -529,7 +633,7 @@ struct Phase3View: View {
                     .font(.system(size: 12.5, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.92))
                 Text(String(format: String(localized: "phase3.result.total",
-                                           defaultValue: "Dazu kommen %d Chips aus den Restkarten der anderen."),
+                                           defaultValue: "%d zusätzliche Chips zahlen die anderen für ihre Restkarten."),
                             remainingPayments))
                     .font(.system(size: 9.8, weight: .semibold))
                     .foregroundStyle(Tokens.slate.opacity(0.82))
@@ -559,10 +663,10 @@ struct Phase3View: View {
     private func winnerCaption(_ winner: Int) -> String {
         if winner == 0 {
             return String(localized: "phase3.result.you.finish",
-                          defaultValue: "Dein letzter Zug entscheidet.")
+                          defaultValue: "Du legst deine letzte Karte und gewinnst die Mitte.")
         }
         let format = String(localized: "phase3.result.opponent.finish",
-                            defaultValue: "%@ schließt die Runde ab.")
+                            defaultValue: "%@ legt die letzte Karte und gewinnt die Mitte.")
         return String(format: format, game.name(of: winner))
     }
 
@@ -589,10 +693,10 @@ struct Phase3View: View {
             guard let seat = recap.finalPlayer else { return "" }
             if seat == 0 {
                 return String(localized: "phase3.final.you",
-                              defaultValue: "Du hast deine Hand geleert")
+                              defaultValue: "Du hast deine letzte Karte gelegt")
             }
             let format = String(localized: "phase3.final.opponent",
-                                defaultValue: "%@ hat zuerst keine Karten mehr")
+                                defaultValue: "%@ hat die letzte Karte gelegt")
             return String(format: format, game.name(of: seat))
         }()
 
@@ -637,10 +741,10 @@ struct Phase3View: View {
         guard let winner = game.roundRecap.finalPlayer else { return "" }
         if winner == 0 {
             return String(localized: "phase3.final.you.body",
-                          defaultValue: "Du nimmst die Mitte. Jeder Gegner zahlt dir 1 Chip pro Restkarte - solange sein Vorrat reicht.")
+                          defaultValue: "Du nimmst die Mitte und 1 Chip für jede Restkarte der anderen.")
         }
         let format = String(localized: "phase3.final.opponent.body",
-                            defaultValue: "%@ nimmt die Mitte. Du zahlst 1 Chip pro Restkarte - solange dein Vorrat reicht.")
+                            defaultValue: "%@ nimmt die Mitte. Du zahlst 1 Chip pro Restkarte.")
         return String(format: format, game.name(of: winner))
     }
 
@@ -654,18 +758,18 @@ struct Phase3View: View {
         let firstLead = game.revealedPlays == 0 && game.cascadeIdle
         let title: String = {
             guard game.cascadeIdle else {
-                return String(localized: "phase3.chain.running", defaultValue: "DIE REIHE LÄUFT AUFWÄRTS")
+                return String(localized: "phase3.chain.running", defaultValue: "Die Kartenreihe geht weiter")
             }
             if firstLead {
                 if leader == 0 {
-                    return String(localized: "phase3.start.you", defaultValue: "TIPPE DEINE STARTKARTE")
+                    return String(localized: "phase3.start.you", defaultValue: "Wähle deine Startkarte")
                 }
                 let format = String(localized: "phase3.start.opponent",
                                     defaultValue: "%@ LEGT DIE STARTKARTE")
                 return String(format: format, game.name(of: leader).uppercased())
             }
             if leader == 0 {
-                return String(localized: "phase3.lead.you", defaultValue: "DU BEGINNST EINE NEUE REIHE")
+                return String(localized: "phase3.lead.you", defaultValue: "Du beginnst eine neue Reihe")
             }
             let format = String(localized: "phase3.lead.opponent",
                                 defaultValue: "%@ BEGINNT EINE NEUE REIHE")
@@ -673,21 +777,21 @@ struct Phase3View: View {
         }()
         let detail: String = {
             guard game.cascadeIdle else {
-                return String(localized: "phase3.chain.detail", defaultValue: "Jetzt folgt die nächsthöhere Karte derselben Farbe. Fehlt sie, endet die Reihe.")
+                return String(localized: "phase3.chain.detail", defaultValue: "Die Kartenfarben sind Herz, Karo, Kreuz und Pik. Jetzt folgt die nächsthöhere Karte dieser Farbe.")
             }
             if firstLead {
                 return String(localized: "phase3.start.detail",
-                              defaultValue: "Tippe eine beliebige Karte. Danach folgt automatisch die nächsthöhere Karte derselben Farbe.")
+                              defaultValue: "Wähle eine Startkarte. Danach geht es in derselben Kartenfarbe aufwärts.")
             }
             if leader == 0, assistHints {
                 return String(localized: "phase3.lead.hint",
-                              defaultValue: "Du hast die letzte mögliche Karte gelegt. Wähle jetzt eine neue Startkarte.")
+                              defaultValue: "Die passende nächste Karte fehlt. Weil du zuletzt gelegt hast, eröffnest du die nächste Reihe.")
             }
             return leader == 0
                 ? String(localized: "phase3.lead.you.detail",
-                         defaultValue: "Du hast die letzte mögliche Karte gelegt. Wähle jetzt eine neue Startkarte.")
+                         defaultValue: "Die passende nächste Karte fehlt. Weil du zuletzt gelegt hast, eröffnest du die nächste Reihe.")
                 : String(localized: "phase3.lead.opponent.detail",
-                         defaultValue: "Wer die letzte mögliche Karte legt, beginnt die nächste Reihe.")
+                         defaultValue: "Die passende nächste Karte fehlt. Wer zuletzt gelegt hat, eröffnet die nächste Reihe.")
         }()
         return AnyView(VStack(spacing: 7) {
             HStack(spacing: 7) {
@@ -732,18 +836,19 @@ struct Phase3View: View {
         )
     }
 
-    private var guidedControlPanel: some View {
-        VStack(spacing: 9) {
-            guidedStatusLine
+    private func guidedControlPanel(compactLandscape: Bool) -> some View {
+        VStack(spacing: compactLandscape ? 6 : 9) {
+            guidedStatusLine(compactLandscape: compactLandscape)
             if game.guidedPlayoutCanAdvance {
                 guidedAdvanceButton
-                    .frame(maxWidth: 286)
+                    .frame(maxWidth: compactLandscape ? 220 : 286)
                     .transition(phase3ReduceMotion
                                 ? .opacity
                                 : .opacity.combined(with: .scale(scale: 0.96)))
             }
         }
         .accessibilityElement(children: .contain)
+        .accessibilityLabel("Erklärung und Aktion")
         .accessibilityIdentifier("phase3.guided.panel")
         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.18),
                    value: game.guidedPlayoutCanAdvance)
@@ -751,8 +856,12 @@ struct Phase3View: View {
     }
 
     private var guidedStatusLine: some View {
+        guidedStatusLine(compactLandscape: false)
+    }
+
+    private func guidedStatusLine(compactLandscape: Bool) -> some View {
         let copy = guidedStatusCopy
-        return VStack(spacing: 7) {
+        return VStack(spacing: compactLandscape ? 4 : 7) {
             HStack(spacing: 7) {
                 Circle()
                     .fill(Tokens.jewelGold.opacity(0.90))
@@ -762,27 +871,23 @@ struct Phase3View: View {
                     .tracking(1.25)
                     .foregroundStyle(Tokens.jewelGold.opacity(0.88))
             }
-            if game.revealedPlayEvents.isEmpty {
-                guidedOpeningSequence(copy: copy)
-            } else {
-                Text(copy.title)
-                    .font(.system(size: 16, weight: .heavy))
-                    .tracking(0.45)
-                    .foregroundStyle(Tokens.jewelGold)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.86)
-                Text(copy.detail)
-                    .font(.system(size: 11.2, weight: .semibold))
-                    .foregroundStyle(Tokens.jewelPlatin.opacity(0.86))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.88)
-            }
+            Text(copy.title)
+                .font(.system(size: compactLandscape ? 13.5 : 16, weight: .heavy))
+                .tracking(0.25)
+                .foregroundStyle(Tokens.jewelGold)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.86)
+            Text(copy.detail)
+                .font(.system(size: compactLandscape ? 9.2 : 11.2, weight: .semibold))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.86))
+                .multilineTextAlignment(.center)
+                .lineLimit(compactLandscape ? 4 : 3)
+                .minimumScaleFactor(0.88)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
-        .frame(minHeight: game.revealedPlayEvents.isEmpty ? 116 : 102)
+        .padding(.horizontal, compactLandscape ? 10 : 14)
+        .padding(.vertical, compactLandscape ? 8 : 11)
+        .frame(minHeight: compactLandscape ? 86 : 102)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color(hex: 0x111014).opacity(0.93))
@@ -795,70 +900,6 @@ struct Phase3View: View {
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("phase3.guided.explanation")
         .zIndex(5)
-    }
-
-    private func guidedOpeningSequence(copy: Phase3GuidedStatusCopy) -> some View {
-        let statements = guidedOpeningStatements(copy.detail)
-        return HStack(alignment: .center, spacing: 4) {
-            guidedOpeningStep(number: "1",
-                              text: copy.title,
-                              identifier: "phase3.guided.opening.action",
-                              emphasized: true)
-            guidedOpeningArrow
-            guidedOpeningStep(number: "2",
-                              text: statements.reason,
-                              identifier: "phase3.guided.opening.reason",
-                              emphasized: false)
-            guidedOpeningArrow
-            guidedOpeningStep(number: "3",
-                              text: statements.consequence,
-                              identifier: "phase3.guided.opening.consequence",
-                              emphasized: false)
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    private func guidedOpeningStep(number: String,
-                                   text: String,
-                                   identifier: String,
-                                   emphasized: Bool) -> some View {
-        VStack(spacing: 5) {
-            Text(number)
-                .font(.system(size: 8, weight: .heavy))
-                .foregroundStyle(emphasized ? Color.black.opacity(0.82) : Tokens.jewelGold)
-                .frame(width: 18, height: 18)
-                .background(Circle().fill(emphasized
-                                          ? Tokens.jewelGold
-                                          : Tokens.jewelGold.opacity(0.12)))
-            Text(text)
-                .font(.system(size: emphasized ? 9.6 : 8.8,
-                              weight: emphasized ? .heavy : .semibold))
-                .foregroundStyle(emphasized
-                                 ? Tokens.jewelPlatin
-                                 : Tokens.jewelPlatin.opacity(0.78))
-                .multilineTextAlignment(.center)
-                .lineLimit(4)
-                .minimumScaleFactor(0.78)
-        }
-        .frame(maxWidth: .infinity, minHeight: 66, alignment: .top)
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier(identifier)
-    }
-
-    private var guidedOpeningArrow: some View {
-        Image(systemName: "chevron.right")
-            .font(.system(size: 8, weight: .bold))
-            .foregroundStyle(Tokens.jewelGold.opacity(0.42))
-            .accessibilityHidden(true)
-    }
-
-    private func guidedOpeningStatements(_ detail: String) -> (reason: String, consequence: String) {
-        let statements = detail
-            .split(separator: ".", omittingEmptySubsequences: true)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) + "." }
-        guard let reason = statements.first else { return (detail, detail) }
-        let consequence = statements.dropFirst().joined(separator: " ")
-        return (reason, consequence.isEmpty ? detail : consequence)
     }
 
     private var guidedAdvanceButton: some View {
@@ -881,10 +922,18 @@ struct Phase3View: View {
 
     private var guidedAdvanceTitle: String {
         guard let phase = game.round.playout else {
-            return String(localized: "phase3.guided.next", defaultValue: "Nächste Karte ansehen")
+            return String(localized: "phase3.guided.next", defaultValue: "Weiter")
         }
         if phase.plays.indices.contains(game.revealedPlays) {
-            return String(localized: "phase3.guided.next", defaultValue: "Nächste Karte ansehen")
+            let next = phase.plays[game.revealedPlays]
+            let seat = game.uiSeat(forRoundSeat: next.player)
+            if seat == 0 {
+                return String(localized: "phase3.guided.next.you",
+                              defaultValue: "Karte legen")
+            }
+            let format = String(localized: "phase3.guided.next.opponent",
+                                defaultValue: "%@ legt %@")
+            return String(format: format, game.name(of: seat), guidedCardName(next.card))
         }
         let format = String(localized: "phase3.guided.opponent.lead.action",
                             defaultValue: "%@ eröffnet die nächste Reihe")
@@ -894,17 +943,13 @@ struct Phase3View: View {
     private var guidedStatusCopy: Phase3GuidedStatusCopy {
         let events = game.revealedPlayEvents
         guard let last = events.last else {
-            let card = game.guidedRecommendedOpeningCard
-            let label = card.map(cardLabel) ?? String(localized: "phase3.guided.card",
-                                                        defaultValue: "eine Karte")
             return Phase3GuidedStatusCopy(
                 eyebrow: String(localized: "phase3.guided.first.eyebrow",
-                                 defaultValue: "ERÖFFNE DIE ERSTE REIHE"),
-                title: String(format: String(localized: "phase3.guided.first.title",
-                                             defaultValue: "LEGE %@"), label),
-                detail: String(format: String(localized: "phase3.guided.first.detail",
-                                              defaultValue: "%@ eröffnet eine Reihe. Danach steigt dieselbe Farbe Karte für Karte."),
-                               label)
+                                 defaultValue: "KARTENFARBE: HERZ"),
+                title: String(localized: "phase3.guided.first.title",
+                              defaultValue: "Starte mit dem Herz-Buben."),
+                detail: String(localized: "phase3.guided.first.detail",
+                               defaultValue: "Damit beginnt eine Herz-Reihe. Als Nächstes passt nur die Herz-Dame.")
             )
         }
 
@@ -912,48 +957,48 @@ struct Phase3View: View {
         let actor = seat == 0
             ? String(localized: "phase3.guided.you", defaultValue: "Du")
             : game.name(of: seat)
-        let currentLabel = cardLabel(last.card)
+        let currentLabel = guidedCardName(last.card)
 
         if game.cascadeIdle {
             let nextRank = Rank(rawValue: last.card.rank.rawValue + 1)
             let ending: String
             if let nextRank {
-                let missing = cardLabel(Card(suit: last.card.suit, rank: nextRank))
+                let missing = guidedCardName(Card(suit: last.card.suit, rank: nextRank))
                 if seat == 0 {
                     ending = String(format: String(localized: "phase3.guided.break.missing.you",
-                                                   defaultValue: "%@ fehlt. Du hast die letzte mögliche Karte gelegt und eröffnest deshalb neu."),
+                                                   defaultValue: "%@ fehlt - die Reihe endet. Du hast zuletzt gelegt und eröffnest neu."),
                                     missing)
                 } else {
                     ending = String(format: String(localized: "phase3.guided.break.missing.opponent",
-                                                   defaultValue: "%@ fehlt. %@ hat die letzte mögliche Karte gelegt und eröffnet deshalb neu."),
+                                                   defaultValue: "%@ fehlt - die Reihe endet. %@ eröffnet neu."),
                                     missing, actor)
                 }
             } else {
                 if seat == 0 {
                     ending = String(format: String(localized: "phase3.guided.break.ace.you",
-                                                   defaultValue: "Mit %@ ist die Reihe vollständig. Du hast sie geschlossen und eröffnest deshalb neu."),
+                                                   defaultValue: "Das %@ ist die höchste Karte - die Reihe endet. Du eröffnest neu."),
                                     currentLabel)
                 } else {
                     ending = String(format: String(localized: "phase3.guided.break.ace.opponent",
-                                                   defaultValue: "Mit %@ ist die Reihe vollständig. %@ hat sie geschlossen und eröffnet deshalb neu."),
+                                                   defaultValue: "Das %@ ist die höchste Karte - die Reihe endet. %@ eröffnet neu."),
                                     currentLabel, actor)
                 }
             }
             let title = seat == 0
                 ? String(localized: "phase3.guided.new.you",
-                         defaultValue: "WÄHLE DEINE NEUE STARTKARTE")
+                         defaultValue: "Du eröffnest die nächste Reihe")
                 : String(format: String(localized: "phase3.guided.new.opponent",
-                                        defaultValue: "%@ ERÖFFNET NEU"), actor.uppercased())
+                                        defaultValue: "%@ ERÖFFNET DIE NÄCHSTE REIHE"), actor.uppercased())
             let choice = seat == 0
                 ? String(format: String(localized: "phase3.guided.new.choice",
-                                        defaultValue: " Du entscheidest selbst - alle %d Karten in deiner Hand sind gültige Starts."),
+                                        defaultValue: "Wähle jetzt eine neue Startkarte."),
                          game.displayedHumanHand.count)
                 : ""
             return Phase3GuidedStatusCopy(
                 eyebrow: String(format: String(localized: "phase3.guided.break.eyebrow",
                                                defaultValue: "REIHE ENDET BEI %@"), currentLabel),
                 title: title,
-                detail: ending + choice
+                detail: [ending, choice].filter { !$0.isEmpty }.joined(separator: " ")
             )
         }
 
@@ -962,22 +1007,23 @@ struct Phase3View: View {
         if last.isLead {
             if seat == 0 {
                 reason = String(format: String(localized: "phase3.guided.reason.lead.you",
-                                               defaultValue: "Du eröffnest mit %@. Jetzt sucht der Tisch die nächsthöhere Karte derselben Farbe."),
+                                               defaultValue: "Du eröffnest mit %@. Jetzt folgt die nächsthöhere Karte derselben Kartenfarbe."),
                                 currentLabel)
             } else {
                 reason = String(format: String(localized: "phase3.guided.reason.lead.opponent",
-                                               defaultValue: "%@ eröffnet mit %@. Jetzt sucht der Tisch die nächsthöhere Karte derselben Farbe."),
+                                               defaultValue: "%@ eröffnet mit %@. Jetzt folgt die nächsthöhere Karte derselben Kartenfarbe."),
                                 actor, currentLabel)
             }
         } else if let previous {
+            let previousLabel = guidedCardName(previous.card)
             if seat == 0 {
                 reason = String(format: String(localized: "phase3.guided.reason.follow.you",
-                                               defaultValue: "Du legst %@, weil sie direkt auf %@ folgt und dieselbe Farbe hat."),
-                                currentLabel, cardLabel(previous.card))
+                                               defaultValue: "Du legst %@ - diese Karte folgt direkt auf %@."),
+                                currentLabel, previousLabel)
             } else {
                 reason = String(format: String(localized: "phase3.guided.reason.follow.opponent",
-                                               defaultValue: "%@ legt %@, weil sie direkt auf %@ folgt und dieselbe Farbe hat."),
-                                actor, currentLabel, cardLabel(previous.card))
+                                               defaultValue: "%@ legt %@ - diese Karte folgt direkt auf %@."),
+                                actor, currentLabel, previousLabel)
             }
         } else {
             reason = seat == 0
@@ -994,26 +1040,66 @@ struct Phase3View: View {
                                     defaultValue: "%@ LEGT %@"), actor.uppercased(), currentLabel)
 
         if let required = game.guidedRequiredHumanFollowCard {
-            let requiredLabel = cardLabel(required)
+            let requiredLabel = guidedCardName(required)
             return Phase3GuidedStatusCopy(
                 eyebrow: playedEyebrow,
                 title: String(format: String(localized: "phase3.guided.follow.title",
-                                             defaultValue: "TIPPE DEIN %@"), requiredLabel),
-                detail: reason + " " + String(format: String(localized: "phase3.guided.follow.detail",
-                                                              defaultValue: "Du hältst die nächste Karte der Reihe: %@."),
-                                                 requiredLabel)
+                                             defaultValue: "Lege %@."), guidedCardObjectName(required)),
+                detail: String(format: String(localized: "phase3.guided.follow.detail",
+                                              defaultValue: "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Kartenfarbe passt."),
+                               currentLabel,
+                               requiredLabel)
             )
         }
 
         return Phase3GuidedStatusCopy(
             eyebrow: playedEyebrow,
             title: game.guidedPlayoutCanAdvance
-                ? String(localized: "phase3.guided.watch.title",
-                         defaultValue: "WER HAT DIE NÄCHSTE KARTE?")
+                ? String(format: String(localized: "phase3.guided.watch.title",
+                                        defaultValue: "Die %@-Reihe geht weiter."),
+                         guidedSuitName(last.card.suit))
                 : String(localized: "phase3.guided.row.title",
-                         defaultValue: "DIE REIHE LÄUFT AUFWÄRTS"),
+                         defaultValue: "Die Kartenreihe geht weiter."),
             detail: reason
         )
+    }
+
+    private func guidedCardName(_ card: Card) -> String {
+        let suit = guidedSuitName(card.suit)
+        let rank: String = switch card.rank {
+        case .seven: "Sieben"
+        case .eight: "Acht"
+        case .nine: "Neun"
+        case .ten: "Zehn"
+        case .jack: "Bube"
+        case .queen: "Dame"
+        case .king: "König"
+        case .ace: "Ass"
+        }
+        return "\(suit)-\(rank)"
+    }
+
+    private func guidedSuitName(_ suit: Suit) -> String {
+        switch suit {
+        case .hearts: "Herz"
+        case .diamonds: "Karo"
+        case .clubs: "Kreuz"
+        case .spades: "Pik"
+        }
+    }
+
+    private func guidedCardObjectName(_ card: Card) -> String {
+        let name = guidedCardName(card)
+        switch card.rank {
+        case .jack:
+            return "den \(name)n"
+        case .king:
+            return "den \(name)"
+        case .seven, .eight, .nine, .ten, .queen:
+            return "die \(name)"
+        case .ace:
+            return "das \(name)"
+        }
     }
 
     private func cardLabel(_ card: Card) -> String {
@@ -1025,7 +1111,9 @@ struct Phase3View: View {
     }
 
     /// Angewinkelter Handfächer (Muster von ContentView::handView, §5b Akt 3 Spielerhand).
-    private func handFan(canvas: CGSize) -> some View {
+    private func handFan(canvas: CGSize,
+                         compactLandscape: Bool,
+                         centerX: CGFloat?) -> some View {
         let cards = game.displayedHumanHand
         let N = cards.count
 
@@ -1034,17 +1122,22 @@ struct Phase3View: View {
                 let pose = Phase3CardGeometry.handLocalPose(
                     index: i,
                     count: N,
-                    raised: game.canHumanPlay(card, guided: isGuidedRound)
+                    raised: game.canHumanPlay(card, guided: isGuidedRound),
+                    compactLandscape: compactLandscape
                 )
                 let canPlay = game.canHumanPlay(card, guided: isGuidedRound)
 
                 ZStack {
                     CardFace(card: card,
-                             scale: Phase3CardGeometry.handCardScale,
+                             scale: Phase3CardGeometry.handCardScale(
+                                compactLandscape: compactLandscape
+                             ),
                              isAccessibilityHidden: true)
                         .overlay(
                             RoundedRectangle(
-                                cornerRadius: 9 * Phase3CardGeometry.handCardScale + 1.4
+                                cornerRadius: 9 * Phase3CardGeometry.handCardScale(
+                                    compactLandscape: compactLandscape
+                                ) + 1.4
                             )
                                 .strokeBorder(Tokens.jewelGold.opacity(canPlay ? 0.70 : 0),
                                               lineWidth: canPlay ? 1.4 : 0)
@@ -1066,14 +1159,20 @@ struct Phase3View: View {
                                 index: i,
                                 count: N,
                                 canvas: canvas,
-                                raised: canPlay
+                                raised: canPlay,
+                                centerX: centerX,
+                                compactLandscape: compactLandscape
                             )
                         )
                         game.humanLead(card, guided: isGuidedRound)
                     } label: {
                         Color.clear
-                            .frame(width: 52 * Phase3CardGeometry.handCardScale,
-                                   height: 74 * Phase3CardGeometry.handCardScale)
+                            .frame(width: 52 * Phase3CardGeometry.handCardScale(
+                                compactLandscape: compactLandscape
+                            ),
+                                   height: 74 * Phase3CardGeometry.handCardScale(
+                                    compactLandscape: compactLandscape
+                                   ))
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -1092,9 +1191,12 @@ struct Phase3View: View {
             }
         }
         .accessibilityElement(children: .contain)
+        .accessibilityLabel("Deine Handkarten")
         .accessibilityIdentifier("phase3.hand")
         .animation(phase3ReduceMotion ? nil : .easeOut(duration: 0.16), value: N)
-        .frame(height: Phase3CardGeometry.handFrameHeight, alignment: .bottom)
+        .frame(height: Phase3CardGeometry.handFrameHeight(
+            compactLandscape: compactLandscape
+        ), alignment: .bottom)
     }
 
     // MARK: - Rundenende
@@ -1116,21 +1218,38 @@ struct Phase3View: View {
                                              morph: nil)
                         }
                         VStack(alignment: r.winner == 0 ? .center : .leading, spacing: 4) {
-                            Text(r.winner == 0 ? "Du gewinnst" : "\(game.name(of: r.winner)) gewinnt")
+                            Text(r.winner == 0
+                                 ? String(localized: "phase3.result.you.title",
+                                          defaultValue: "Du hast deine letzte Karte gelegt.")
+                                 : String(format: String(localized: "phase3.result.opponent.title",
+                                                         defaultValue: "%@ hat die letzte Karte gelegt"),
+                                          game.name(of: r.winner)))
                                 .font(.system(size: 24, weight: .heavy))
                                 .foregroundStyle(Tokens.jewelPlatin)
-                            Text("Runde abgeschlossen")
+                            Text(String(localized: "phase3.result.eyebrow",
+                                        defaultValue: "Runde beendet"))
                                 .font(.system(size: 10, weight: .bold))
                                 .tracking(1.9)
                                 .foregroundStyle(theme.smaragdFocus.opacity(0.82))
                         }
                     }
+
+                    Text(r.winner == 0
+                         ? String(localized: "phase3.result.you.body",
+                                  defaultValue: "Du gewinnst die Chips aus der Mitte. Zusätzlich zahlt dir jeder Gegner für jede übrige Handkarte 1 Chip.")
+                         : String(format: String(localized: "phase3.result.opponent.body",
+                                                 defaultValue: "%@ gewinnt die Chips aus der Mitte. Für jede Karte, die du noch hältst, zahlst du 1 Chip - höchstens deinen Vorrat."),
+                                  game.name(of: r.winner)))
+                        .font(.system(size: 12.5, weight: .semibold))
+                        .foregroundStyle(Tokens.jewelPlatin.opacity(0.76))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                 }
 
                 HStack(spacing: 10) {
                     resultMetric(String(localized: "phase3.metric.center", defaultValue: "MITTE"),
                                  "\(r.centerPool)", Tokens.jewelPlatin)
-                    resultMetric(String(localized: "phase3.metric.remaining", defaultValue: "RESTKARTEN"),
+                    resultMetric(String(localized: "phase3.metric.remaining", defaultValue: "FÜR RESTKARTEN"),
                                  "+\(payments)", Tokens.jewelGold)
                     resultMetric(String(localized: "phase3.metric.total", defaultValue: "GESAMT"),
                                  "\(r.centerPool + payments)", theme.smaragdFocus)
@@ -1210,7 +1329,7 @@ struct Phase3View: View {
             recapPill("REIHEN", "\(recap.chains)")
             recapPill("LÄNGSTE", "\(recap.longestChain)")
             recapPill("LETZTE", final)
-            recapPill("FINISH", finisher)
+            recapPill("SIEGER", finisher)
         }
         .padding(.vertical, 2)
     }
@@ -1367,22 +1486,66 @@ private struct Phase3StageLayout {
     let statusTop: CGFloat
     let statusCenterY: CGFloat
     let playedTopOffset: CGFloat
+    let playedLeading: CGFloat
+    let playedWidth: CGFloat
+    let playedCenterX: CGFloat
     let opponentsCenterY: CGFloat
+    let opponentsWidth: CGFloat
+    let opponentsCenterX: CGFloat
     let handCenterY: CGFloat
+    let handWidth: CGFloat
+    let handCenterX: CGFloat
+    let guidanceWidth: CGFloat
     let handIsRelevant: Bool
 
-    init(height: CGFloat,
+    init(width: CGFloat,
+         height: CGFloat,
          compactHeight: Bool,
+         compactLandscape: Bool,
          guided: Bool,
          awaitingFirstLead: Bool,
          showsGuidedAction: Bool,
          handIsRelevant: Bool) {
+        if compactLandscape {
+            guidanceWidth = min(228, width * 0.36)
+            let horizontalGap: CGFloat = 10
+            let rightLeading = guidanceWidth + horizontalGap
+            let rightWidth = max(0, width - rightLeading)
+            playedLeading = rightLeading
+            playedWidth = min(184, rightWidth * 0.46)
+            playedCenterX = playedLeading + playedWidth / 2
+            opponentsWidth = max(156, rightWidth - playedWidth - 8)
+            opponentsCenterX = width - opponentsWidth / 2
+            handWidth = rightWidth
+            handCenterX = rightLeading + rightWidth / 2
+            statusTop = 4
+            statusCenterY = 45
+            playedTopOffset = 4
+            opponentsCenterY = 40
+            handCenterY = height
+                - Phase3CardGeometry.handContainerHeight(compactLandscape: true) / 2
+                - 8
+            self.handIsRelevant = handIsRelevant
+            return
+        }
+
+        guidanceWidth = min(344, width - 20)
+        playedLeading = 0
+        playedWidth = width
+        playedCenterX = width / 2
+        opponentsWidth = width
+        opponentsCenterX = width / 2
+        handWidth = width
+        handCenterX = width / 2
         statusTop = compactHeight ? 8 : 12
         statusCenterY = compactHeight ? 51 : 57
         if awaitingFirstLead {
             playedTopOffset = compactHeight ? 138 : 148
         } else if guided, showsGuidedAction {
-            playedTopOffset = compactHeight ? 184 : 194
+            // The guided explanation and its action own the first zone. The
+            // cards sit in a separate band directly below it and finish before
+            // the opponent portraits begin.
+            playedTopOffset = compactHeight ? 144 : 154
         } else if guided {
             playedTopOffset = compactHeight ? 136 : 144
         } else {
@@ -1414,22 +1577,44 @@ private struct Phase3CardPose {
 
 private enum Phase3CardGeometry {
     private static let cardHeightAtUnitScale: CGFloat = 74
-    static let opponentPortraitSize: CGFloat = Tokens.phase3OpponentPortraitSize
-    static let opponentSpacing: CGFloat = Tokens.phase3OpponentSpacing
-    static let handCardScale: CGFloat = 1.50
-    static let handContainerHeight: CGFloat = 150
+    static func opponentPortraitSize(compactLandscape: Bool) -> CGFloat {
+        compactLandscape ? 42 : Tokens.phase3OpponentPortraitSize
+    }
+
+    static func opponentSpacing(compactLandscape: Bool) -> CGFloat {
+        compactLandscape ? 4 : Tokens.phase3OpponentSpacing
+    }
+
+    static func handCardScale(compactLandscape: Bool) -> CGFloat {
+        compactLandscape ? 0.90 : 1.50
+    }
+
+    static func handContainerHeight(compactLandscape: Bool) -> CGFloat {
+        compactLandscape ? 76 : 150
+    }
+
     static let handCenterBottomInset: CGFloat = 104
-    static let handFrameHeight: CGFloat = cardHeightAtUnitScale * handCardScale * 0.92
+
+    static func handFrameHeight(compactLandscape: Bool) -> CGFloat {
+        cardHeightAtUnitScale * handCardScale(compactLandscape: compactLandscape) * 0.92
+    }
 
     static let playedTopOffset: CGFloat = 52
 
-    static func playedCardScale(previewMode: Bool, finalTableau: Bool) -> CGFloat {
-        finalTableau ? 1.34 : (previewMode ? 1.34 : 1.42)
+    static func playedCardScale(previewMode: Bool,
+                                finalTableau: Bool,
+                                compactLandscape: Bool) -> CGFloat {
+        if compactLandscape { return 0.88 }
+        return finalTableau ? 1.34 : (previewMode ? 1.34 : 1.42)
     }
 
-    static func playedFrameHeight(previewMode: Bool, finalTableau: Bool) -> CGFloat {
+    static func playedFrameHeight(previewMode: Bool,
+                                  finalTableau: Bool,
+                                  compactLandscape: Bool) -> CGFloat {
         cardHeightAtUnitScale
-            * playedCardScale(previewMode: previewMode, finalTableau: finalTableau)
+            * playedCardScale(previewMode: previewMode,
+                              finalTableau: finalTableau,
+                              compactLandscape: compactLandscape)
             * (previewMode || finalTableau ? 1.76 : 1.40)
     }
 
@@ -1437,44 +1622,56 @@ private enum Phase3CardGeometry {
         index: Int,
         count: Int,
         previewMode: Bool,
-        finalTableau: Bool
+        finalTableau: Bool,
+        compactLandscape: Bool
     ) -> Phase3CardPose {
         let t: CGFloat = count > 1 ? CGFloat(index) / CGFloat(count - 1) : 0.5
         let broadFan = previewMode || finalTableau
         let spreadDegrees = count > 1
-            ? min(Double(count) * (broadFan ? 9.8 : 10.8), broadFan ? 70.0 : 62.0)
+            ? min(Double(count) * (compactLandscape ? 6.4 : (broadFan ? 9.8 : 10.8)),
+                  compactLandscape ? 38.0 : (broadFan ? 70.0 : 62.0))
             : 0
         let totalWidth: CGFloat = count > 1
-            ? min(CGFloat(count - 1) * (broadFan ? 30 : 37), broadFan ? 218 : 206)
+            ? min(CGFloat(count - 1) * (compactLandscape ? 22 : (broadFan ? 30 : 37)),
+                  compactLandscape ? 132 : (broadFan ? 218 : 206))
             : 0
         let xOffset: CGFloat = count > 1 ? -totalWidth / 2 + t * totalWidth : 0
-        let crownLift = CGFloat(sin(Double(t) * .pi)) * (broadFan ? 44 : 34)
-        let edgeDrop = abs(t - 0.5) * (broadFan ? 38 : 24)
+        let crownLift = CGFloat(sin(Double(t) * .pi))
+            * (compactLandscape ? 18 : (broadFan ? 44 : 34))
+        let edgeDrop = abs(t - 0.5)
+            * (compactLandscape ? 12 : (broadFan ? 38 : 24))
         let angle = count > 1
             ? -spreadDegrees / 2 + Double(t) * spreadDegrees
             : 0
         return Phase3CardPose(
             point: CGPoint(x: xOffset, y: edgeDrop - crownLift),
             rotationDegrees: angle,
-            scale: playedCardScale(previewMode: previewMode, finalTableau: finalTableau)
+            scale: playedCardScale(previewMode: previewMode,
+                                   finalTableau: finalTableau,
+                                   compactLandscape: compactLandscape)
         )
     }
 
     static func playedTargetPose(index: Int,
                                  count: Int,
                                  canvasWidth: CGFloat,
-                                 topOffset: CGFloat = playedTopOffset) -> Phase3CardPose {
+                                 topOffset: CGFloat = playedTopOffset,
+                                 centerX: CGFloat? = nil,
+                                 compactLandscape: Bool = false) -> Phase3CardPose {
         let local = playedLocalPose(
             index: index,
             count: count,
             previewMode: false,
-            finalTableau: false
+            finalTableau: false,
+            compactLandscape: compactLandscape
         )
         return Phase3CardPose(
             point: CGPoint(
-                x: canvasWidth / 2 + local.point.x,
+                x: (centerX ?? canvasWidth / 2) + local.point.x,
                 y: topOffset
-                    + playedFrameHeight(previewMode: false, finalTableau: false) / 2
+                    + playedFrameHeight(previewMode: false,
+                                        finalTableau: false,
+                                        compactLandscape: compactLandscape) / 2
                     + local.point.y
             ),
             rotationDegrees: local.rotationDegrees,
@@ -1482,10 +1679,15 @@ private enum Phase3CardGeometry {
         )
     }
 
-    static func handLocalPose(index: Int, count: Int, raised: Bool) -> Phase3CardPose {
+    static func handLocalPose(index: Int,
+                              count: Int,
+                              raised: Bool,
+                              compactLandscape: Bool) -> Phase3CardPose {
         let t: CGFloat = count > 1 ? CGFloat(index) / CGFloat(count - 1) : 0.5
-        let spreadDegrees = min(Double(count) * 7.4, 44.0)
-        let totalWidth: CGFloat = min(CGFloat(count) * 32, 246)
+        let spreadDegrees = min(Double(count) * (compactLandscape ? 4.6 : 7.4),
+                                compactLandscape ? 28.0 : 44.0)
+        let totalWidth: CGFloat = min(CGFloat(count) * (compactLandscape ? 24 : 32),
+                                      compactLandscape ? 230 : 246)
         let xOffset: CGFloat = count > 1 ? -totalWidth / 2 + t * totalWidth : 0
         let yOffset = raised ? -4 * (1 - abs(t - 0.5) * 1.2) : 0
         let angle = count > 1
@@ -1494,7 +1696,7 @@ private enum Phase3CardGeometry {
         return Phase3CardPose(
             point: CGPoint(x: xOffset, y: yOffset),
             rotationDegrees: angle,
-            scale: handCardScale
+            scale: handCardScale(compactLandscape: compactLandscape)
         )
     }
 
@@ -1502,17 +1704,24 @@ private enum Phase3CardGeometry {
         index: Int,
         count: Int,
         canvas: CGSize,
-        raised: Bool
+        raised: Bool,
+        centerX: CGFloat?,
+        compactLandscape: Bool
     ) -> Phase3CardPose {
-        let local = handLocalPose(index: index, count: count, raised: raised)
-        let containerBottom = canvas.height
-            - handCenterBottomInset
-            + handContainerHeight / 2
+        let local = handLocalPose(index: index,
+                                  count: count,
+                                  raised: raised,
+                                  compactLandscape: compactLandscape)
+        let containerBottom = compactLandscape
+            ? canvas.height
+            : canvas.height - handCenterBottomInset
+                + handContainerHeight(compactLandscape: false) / 2
         return Phase3CardPose(
             point: CGPoint(
-                x: canvas.width / 2 + local.point.x,
+                x: (centerX ?? canvas.width / 2) + local.point.x,
                 y: containerBottom
-                    - cardHeightAtUnitScale * handCardScale / 2
+                    - cardHeightAtUnitScale
+                        * handCardScale(compactLandscape: compactLandscape) / 2
                     + local.point.y
             ),
             rotationDegrees: local.rotationDegrees,

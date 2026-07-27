@@ -74,7 +74,7 @@ enum Tokens {
     /// hält höchstens drei Chips gleichzeitig in Bewegung; Quelle, Ziel und
     /// Spieler bleiben dadurch lesbar statt als radiale Salve zu erscheinen.
     static let guidedAnteFlight: Double = 0.32
-    static let guidedAnteStagger: Double = 0.105
+    static let guidedAnteStagger: Double = 0.13
     static let guidedAnteWaveRest: Double = 0.22
     /// Reagiert während einer laufenden Welle zeitnah auf einen Wechsel der
     /// systemweiten Einstellung "Bewegung reduzieren".

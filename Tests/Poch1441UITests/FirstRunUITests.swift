@@ -5,7 +5,7 @@ final class FirstRunUITests: XCTestCase {
     func testBoardTourExplainsTheWholeTableBeforeTheFirstMove() {
         let app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launchArguments = localizedArguments([
+        app.launchArguments = standardContentSizeArguments([
             "-tutorialSeed", "-reduceMotionQA", "-players=4"
         ])
         app.launch()
@@ -13,24 +13,76 @@ final class FirstRunUITests: XCTestCase {
         let title = app.staticTexts["firstRun.boardTour.title"]
         let body = app.staticTexts["firstRun.boardTour.body"]
         let next = app.buttons["firstRun.boardTour.next"]
+        let board = app.descendants(matching: .any)["firstRun.learningBoard"]
+        let panel = app.descendants(matching: .any)["firstRun.boardTour.panel"]
         let expectedTitles = [
-            "Du kennst nur deine Hand.",
-            "Die offene Karte bestimmt Trumpf.",
-            "Gleiche Werte lassen dich pochen.",
-            "Spiele deine Hand leer."
+            "Trumpf holt sofort Chips.",
+            "Gleiche Karten bringen dich ins Bieten.",
+            "Wer zuerst keine Karten mehr hat, gewinnt die Mitte."
         ]
+        let window = app.windows.firstMatch
 
         for expectedTitle in expectedTitles {
             XCTAssertTrue(title.waitForExistence(timeout: 4))
             XCTAssertEqual(title.label, expectedTitle)
             XCTAssertTrue(body.exists)
             XCTAssertTrue(next.isHittable)
+            XCTAssertTrue(board.waitForExistence(timeout: 3))
+            XCTAssertTrue(panel.waitForExistence(timeout: 3))
+            XCTAssertFalse(board.frame.intersects(panel.frame),
+                           "Der Rundgang muss das vorgestellte Brett sichtbar lassen. Brett: \(board.frame), Karte: \(panel.frame)")
+            XCTAssertTrue(window.frame.contains(board.frame),
+                          "Das vorgestellte Brett muss vollständig im SE-Fenster bleiben.")
+            XCTAssertTrue(window.frame.contains(panel.frame),
+                          "Der Erklärungskasten darf nicht aus dem SE-Fenster laufen.")
+            XCTAssertFalse(title.frame.intersects(body.frame))
+            XCTAssertFalse(body.frame.intersects(next.frame))
+            let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            screenshot.name = "board-tour-\(expectedTitle)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
             next.tap()
         }
 
         XCTAssertFalse(app.otherElements["firstRun.boardTour"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.buttons["firstRun.openingToken"].waitForExistence(timeout: 3),
                       "Erst nach dem vollständigen Rundgang darf der erste Spielzug beginnen.")
+    }
+
+    @MainActor
+    func testBoardTourKeepsItsActionVisibleAtAccessibilityXXXLOnSmallPhone() throws {
+        let app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launchArguments = accessibilityXXXLArguments([
+            "-tutorialSeed", "-reduceMotionQA", "-players=4"
+        ])
+        app.launch()
+
+        let window = app.windows.firstMatch
+        guard window.waitForExistence(timeout: 4), window.frame.width <= 390 else {
+            app.terminate()
+            throw XCTSkip("Dieser Gate wird gezielt auf einer kleinen iPhone-Klasse ausgeführt.")
+        }
+
+        let panel = app.descendants(matching: .any)["firstRun.boardTour.panel"]
+        let next = app.buttons["firstRun.boardTour.next"]
+        let board = app.descendants(matching: .any)["firstRun.learningBoard"]
+
+        for step in 1...3 {
+            XCTAssertTrue(panel.waitForExistence(timeout: 4))
+            XCTAssertTrue(next.waitForExistence(timeout: 2))
+            XCTAssertTrue(board.waitForExistence(timeout: 2))
+            XCTAssertTrue(window.frame.contains(panel.frame),
+                          "Die XXL-Erklärung in Schritt \(step) muss im SE-Fenster bleiben.")
+            XCTAssertTrue(window.frame.contains(next.frame),
+                          "Die XXL-Aktion in Schritt \(step) muss vollständig sichtbar bleiben.")
+            XCTAssertTrue(next.isHittable,
+                          "Die XXL-Aktion in Schritt \(step) muss ohne Scroll-Rätsel bedienbar sein.")
+            XCTAssertFalse(board.frame.intersects(panel.frame),
+                           "Auch XXL darf Erklärung und vorgestelltes Brett nicht überlagern. Brett: \(board.frame), Karte: \(panel.frame)")
+            attachScreenshot(of: app, named: "board-tour-xxxl-step-\(step)")
+            next.tap()
+        }
     }
 
     @MainActor
@@ -51,7 +103,7 @@ final class FirstRunUITests: XCTestCase {
 
         let action = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(action.waitForExistence(timeout: 15))
-        XCTAssertEqual(action.label, "Trumpf aufdecken")
+        XCTAssertEqual(action.label, "Tischkarte aufdecken")
         XCTAssertTrue(action.isHittable)
 
         let window = app.windows.firstMatch
@@ -118,19 +170,19 @@ final class FirstRunUITests: XCTestCase {
         let nextAction = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(nextAction.waitForExistence(timeout: 15),
                       "Nach der Montage muss Trumpf die nächste eigene Handlung sein.")
-        XCTAssertEqual(nextAction.label, "Trumpf aufdecken")
+        XCTAssertEqual(nextAction.label, "Tischkarte aufdecken")
         XCTAssertTrue(nextAction.isHittable,
                       "Trumpf aufdecken muss ohne Scrollen sichtbar und direkt tippbar sein.")
-        assertLearningState("Dein Zug", in: app)
+        assertLearningState("Jetzt du", in: app)
         assertFixedOpponents(in: app)
         attachScreenshot(of: app, named: "first-contact-montage-complete")
 
         let checkpoints: [(step: Int, state: String, name: String)] = [
-            (3, "Dein Zug", "first-card"),
-            (4, "Dein Zug", "trump-ready"),
-            (5, "Dein Zug", "meld-connect"),
-            (6, "Gewinn zeigen", "meld-prove"),
-            (7, "Geschafft", "meld-release")
+            (3, "DEIN ZUG", "first-card"),
+            (4, "DEIN ZUG", "trump-ready"),
+            (5, "DEIN ZUG", "meld-connect"),
+            (6, "ERGEBNIS", "meld-prove"),
+            (7, "WEITER", "meld-release")
         ]
 
         for checkpoint in checkpoints {
@@ -152,7 +204,7 @@ final class FirstRunUITests: XCTestCase {
                 let action = app.buttons["firstRun.coachAction"]
                 XCTAssertTrue(action.waitForExistence(timeout: 4),
                               "Der Melde-Moment braucht neben der Karte eine eindeutige sichtbare Aktion.")
-                XCTAssertEqual(action.label, "Trumpf-König melden")
+                XCTAssertEqual(action.label, "König zeigen")
                 XCTAssertTrue(action.isHittable,
                               "Trumpf-König melden muss ohne Rätselstelle bedienbar sein.")
             }
@@ -267,7 +319,7 @@ final class FirstRunUITests: XCTestCase {
         dismissGuidedPhaseCurtainIfPresent(in: app)
 
         assertWindow(in: app, hasOrientation: .portrait)
-        assertLearningState("Dein Zug", in: app)
+        assertLearningState("Jetzt du", in: app)
         assertMeldMatchIsReachable(in: app)
         assertLearningStageDoesNotOverlap(in: app, context: "XXXL Portrait")
         attachScreenshot(of: app, named: "first-run-learning-xxxl-portrait")
@@ -293,7 +345,7 @@ final class FirstRunUITests: XCTestCase {
             standardApp.terminate()
             throw XCTSkip("Dieser Gate wird gezielt auf einer kleinen iPhone-Klasse wie dem iPhone SE ausgeführt.")
         }
-        assertLearningState("Dein Zug", in: standardApp)
+        assertLearningState("Jetzt du", in: standardApp)
         let standardCoachTitleHeight = learningCoachTitleHeight(in: standardApp)
         standardApp.terminate()
 
@@ -304,7 +356,7 @@ final class FirstRunUITests: XCTestCase {
         landscapeApp.launch()
         dismissGuidedPhaseCurtainIfPresent(in: landscapeApp)
         assertWindow(in: landscapeApp, hasOrientation: .portrait)
-        assertLearningState("Dein Zug", in: landscapeApp)
+        assertLearningState("Jetzt du", in: landscapeApp)
         let accessibilityCoachTitleHeight = learningCoachTitleHeight(in: landscapeApp)
         XCTAssertGreaterThan(
             accessibilityCoachTitleHeight,
@@ -318,7 +370,7 @@ final class FirstRunUITests: XCTestCase {
 
         rotateForegroundAppToLandscape(landscapeApp)
         assertSmallPhoneLandscapeWindow(in: landscapeApp)
-        assertLearningState("Dein Zug", in: landscapeApp)
+        assertLearningState("Jetzt du", in: landscapeApp)
         attachLearningViewportEvidence(
             in: landscapeApp,
             named: "first-run-learning-xxxl-landscape-initial-frames"
@@ -360,8 +412,8 @@ final class FirstRunUITests: XCTestCase {
             app.buttons["firstRun.coachAction"].waitForExistence(timeout: 15),
             "Rotation während der Montage muss stabil bis zur nächsten eigenen Handlung führen."
         )
-        XCTAssertEqual(app.buttons["firstRun.coachAction"].label, "Trumpf aufdecken")
-        assertLearningState("Dein Zug", in: app)
+        XCTAssertEqual(app.buttons["firstRun.coachAction"].label, "Tischkarte aufdecken")
+        assertLearningState("Jetzt du", in: app)
         app.terminate()
     }
 
@@ -379,7 +431,7 @@ final class FirstRunUITests: XCTestCase {
 
         let secondary = app.buttons["firstRun.intro.secondary"]
         XCTAssertTrue(secondary.waitForExistence(timeout: 4))
-        XCTAssertEqual(secondary.label, "Ohne Hinweise starten")
+        XCTAssertEqual(secondary.label, "Ohne Hinweise spielen")
         XCTAssertTrue(secondary.isHittable)
         secondary.tap()
 
@@ -835,7 +887,7 @@ final class FirstRunUITests: XCTestCase {
     private func meldMatchAction(in app: XCUIApplication) -> XCUIElement {
         let identifiedAction = app.buttons["firstRun.meldMatch"]
         if identifiedAction.exists { return identifiedAction }
-        return app.buttons["Trumpf-König melden"]
+        return app.buttons["König zeigen"]
     }
 
     @MainActor
@@ -863,8 +915,8 @@ final class FirstRunUITests: XCTestCase {
     @MainActor
     private func assertFullFirstRunActionLabels(in app: XCUIApplication) {
         let expectedLabels = [
-            "firstRun.intro.primary": "Mitspielen",
-            "firstRun.intro.secondary": "Ohne Hinweise starten"
+            "firstRun.intro.primary": "An den Tisch",
+            "firstRun.intro.secondary": "Ohne Hinweise spielen"
         ]
         for (identifier, expectedLabel) in expectedLabels {
             let button = app.buttons[identifier]

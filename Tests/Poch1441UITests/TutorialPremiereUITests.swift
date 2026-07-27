@@ -7,6 +7,7 @@ final class TutorialPremiereUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-tutorialSeed",
+            "-skipBoardTourQA",
             "-reduceMotionQA",
             "-players=4",
             "-sound", "false",
@@ -20,23 +21,79 @@ final class TutorialPremiereUITests: XCTestCase {
         let openingToken = app.buttons["firstRun.openingToken"]
         XCTAssertTrue(curtain.waitForExistence(timeout: 6))
         XCTAssertTrue(openingToken.waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["chrome.settings"].exists,
+                       "Während des Phasenübergangs darf keine zweite Navigationsebene sichtbar sein.")
+        XCTAssertFalse(app.buttons["chrome.pause"].exists,
+                       "Während des Phasenübergangs darf Pause nicht über der Übergabe schweben.")
+        attachCurrentFrame(in: app, named: "tutorial-phase-curtain")
 
-        // SwiftUI meldet verdeckte Accessibility-Nodes teilweise weiterhin als
-        // `isHittable`. Entscheidend ist der echte Nutzervertrag: Ein Tap an der
-        // Tischposition darf durch die Vollflächenblende keinen Zustand ändern.
-        openingToken.tap()
+        // SwiftUI kann verdeckte Accessibility-Nodes weiterhin als bedienbar
+        // melden. Ein semantischer `tap()` würde das verdeckte Element jedoch
+        // direkt adressieren; der rohe Bildschirmtap prüft stattdessen den
+        // tatsächlichen Vollflächenvorhang.
+        let tokenFrame = openingToken.frame
+        app.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: tokenFrame.midX, dy: tokenFrame.midY))
+            .tap()
         XCTAssertTrue(curtain.exists,
                       "Die Phasenblende muss den versuchten Tisch-Tap abfangen.")
         XCTAssertTrue(openingToken.exists,
-                      "Der erste Stein darf unter der Blende noch nicht gesetzt werden.")
+                      "Der erste Chip darf unter der Blende noch nicht gesetzt werden.")
 
         curtain.tap()
         XCTAssertFalse(curtain.waitForExistence(timeout: 2))
+        XCTAssertTrue(openingToken.waitForExistence(timeout: 3))
         XCTAssertTrue(openingToken.isHittable,
                       "Nach der bewussten Übergabe muss der erste Spielzug erreichbar sein.")
         openingToken.tap()
         XCTAssertFalse(openingToken.waitForExistence(timeout: 2),
                        "Nach der Bestätigung muss derselbe Tisch-Tap den Zug ausführen.")
+    }
+
+    @MainActor
+    func testPhaseCurtainReflowsAtAccessibilityXXXLInPortraitAndLandscape() {
+        for configuration in [(name: "portrait", flag: "-portraitQA", size: CGSize(width: 375, height: 667)),
+                              (name: "landscape", flag: "-landscapeQA", size: CGSize(width: 667, height: 375))] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "-tutorialSeed", "-skipBoardTourQA", "-reduceMotionQA", "-players=4",
+                "-sound", "false", "-haptics", "false", configuration.flag,
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+                "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"
+            ]
+            app.launch()
+            let window = app.windows.firstMatch
+            let phase = app.staticTexts["1 VON 3"]
+            let title = app.staticTexts["TRUMPF ZEIGEN"]
+            let subtitle = app.staticTexts["Passende Trumpfkarten bringen dir sofort die Chips aus ihren Bonusfeldern."]
+            let action = app.buttons["tutorial.phaseCurtain.continue"]
+            XCTAssertTrue(window.waitForExistence(timeout: 4))
+            XCTAssertEqual(window.frame.size, configuration.size)
+            XCTAssertTrue(phase.waitForExistence(timeout: 5))
+            XCTAssertTrue(title.waitForExistence(timeout: 3))
+            XCTAssertTrue(subtitle.waitForExistence(timeout: 3))
+            XCTAssertTrue(action.waitForExistence(timeout: 3))
+            XCTAssertFalse(phase.frame.intersects(title.frame))
+            XCTAssertFalse(title.frame.intersects(subtitle.frame))
+            XCTAssertFalse(subtitle.frame.intersects(action.frame))
+            let scroll = app.scrollViews["tutorial.phaseCurtain.scroll"]
+            XCTAssertTrue(scroll.waitForExistence(timeout: 2))
+            for _ in 0..<12 where !action.isHittable || !window.frame.contains(action.frame) {
+                scroll.swipeUp(velocity: .slow)
+            }
+            XCTAssertTrue(action.isHittable,
+                          "Die bestätigende Aktion muss im AX-Scrollpfad bedienbar bleiben.")
+            XCTAssertTrue(window.frame.contains(action.frame),
+                          "Die bestätigende Aktion muss vollständig ins AX-Fenster gescrollt werden können.")
+            let actionLabel = app.staticTexts["Trumpf zeigen"]
+            XCTAssertTrue(actionLabel.waitForExistence(timeout: 2))
+            XCTAssertTrue(action.frame.contains(actionLabel.frame),
+                          "Der CTA-Text darf die goldene Aktionsfläche nicht verlassen.")
+            attachCurrentFrame(in: app,
+                               named: "tutorial-phase-curtain-ax-\(configuration.name)")
+            app.terminate()
+        }
+        XCUIDevice.shared.orientation = .portrait
     }
 
     @MainActor
@@ -107,17 +164,17 @@ final class TutorialPremiereUITests: XCTestCase {
             .waitForExistence(timeout: 2))
         let coachAction = app.buttons["firstRun.coachAction"]
         XCTAssertTrue(coachAction.waitForExistence(timeout: 2))
-        XCTAssertEqual(coachAction.label, "Trumpf-König zeigen")
+        XCTAssertEqual(coachAction.label, "König zeigen")
         coachAction.tap()
         let nextAction = app.buttons["firstRun.coachAction"]
         let advanced = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "label == %@", "Beide Gewinne holen"),
+            predicate: NSPredicate(format: "label == %@", "Chips nehmen"),
             object: nextAction
         )
         XCTAssertEqual(XCTWaiter.wait(for: [advanced], timeout: 2), .completed,
-                       "Trumpf-König zeigen muss sichtbar zur Auszahlung weiterführen.")
+                       "König zeigen muss sichtbar zur Auszahlung weiterführen.")
         let updatedState = app.descendants(matching: .any)["firstRun.learningState"]
-        XCTAssertEqual(updatedState.value as? String, "Chips holen")
+        XCTAssertEqual(updatedState.value as? String, "ERGEBNIS")
     }
 
     @MainActor
@@ -143,11 +200,19 @@ final class TutorialPremiereUITests: XCTestCase {
             curtain.tap()
         }
 
-        let status = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "ERÖFFNE DIE ERSTE REIHE")
-        ).firstMatch
-        let center = app.descendants(matching: .any)["Poch-Medaillon"].firstMatch
+        let status = app.descendants(matching: .any)["phase3.guided.explanation"]
         XCTAssertTrue(status.waitForExistence(timeout: 8))
+
+        let jack = app.buttons["phase3.hand.card.hearts.11"]
+        XCTAssertTrue(jack.waitForExistence(timeout: 8))
+        XCTAssertTrue(jack.isEnabled && jack.isHittable)
+        jack.tap()
+        let queen = app.buttons["phase3.hand.card.hearts.12"]
+        XCTAssertTrue(queen.waitForExistence(timeout: 8))
+        XCTAssertTrue(queen.isEnabled && queen.isHittable)
+        queen.tap()
+
+        let center = app.descendants(matching: .any)["phase3.center"].firstMatch
         XCTAssertTrue(center.waitForExistence(timeout: 4))
         XCTAssertFalse(status.frame.intersects(center.frame),
                        "Die Anfänger-Erklärung darf den großen Mittel-Topf nicht überdecken.")
@@ -174,11 +239,9 @@ final class TutorialPremiereUITests: XCTestCase {
         let window = app.windows.firstMatch
         let board = app.images.matching(identifier: "table.world.phase2.board").firstMatch
         let decision = app.otherElements["phase2.decision"]
-        let title = app.staticTexts["Du darfst pochen"]
-        let body = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "Gleiche Werte öffnen das Gebot")
-        ).firstMatch
-        let action = app.buttons["Einsatz wählen"]
+        let title = app.staticTexts["phase2.guided.title"]
+        let body = app.staticTexts["phase2.guided.body"]
+        let action = app.buttons["phase2.guided.prelude.action"]
 
         XCTAssertTrue(window.waitForExistence(timeout: 4))
         XCTAssertTrue(board.waitForExistence(timeout: 8))
@@ -186,6 +249,9 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 8))
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(action.waitForExistence(timeout: 4))
+        XCTAssertEqual(title.label, "Zwei Zehner - damit darfst du pochen.")
+        XCTAssertTrue(body.label.contains("Vierling schlägt Drilling"))
+        XCTAssertEqual(action.label, "Einsatz wählen")
         XCTAssertTrue(action.isHittable)
         XCTAssertFalse(title.frame.intersects(body.frame),
                        "Titel und Anfänger-Erklärung dürfen sich nicht überlagern.")
@@ -201,6 +267,84 @@ final class TutorialPremiereUITests: XCTestCase {
                                     "Das Poch-Brett darf im Tutorial nicht wie ein untergeordnetes Status-Icon wirken.")
         XCTAssertGreaterThan(decision.frame.minY, board.frame.midY,
                              "Die Erklärung muss unterhalb der spielentscheidenden Brettmitte beginnen.")
+        attachCurrentFrame(in: app, named: "tutorial-phase2-guided-402")
+    }
+
+    @MainActor
+    func testGuidedBiddingCompactPortraitAndLandscapeKeepZonesSeparate() {
+        for configuration in [(name: "portrait", flag: "-portraitQA", size: CGSize(width: 375, height: 667)),
+                              (name: "landscape", flag: "-landscapeQA", size: CGSize(width: 667, height: 375))] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "-tutorialBidding", "-tutorialBiddingStep=0", "-reduceMotionQA",
+                "-players=4", "-sound", "false", "-haptics", "false",
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+                configuration.flag, "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"
+            ]
+            app.launch()
+            let window = app.windows.firstMatch
+            XCTAssertTrue(window.waitForExistence(timeout: 5))
+            XCTAssertEqual(window.frame.size, configuration.size,
+                           "Der kompakte Poch-Gate muss die exakte SE-Geometrie prüfen.")
+            dismissTutorialCurtainIfNeeded(in: app)
+
+            let board = app.descendants(matching: .any)["table.world.phase2.board"].firstMatch
+            let decision = app.otherElements["phase2.decision"]
+            let hand = app.otherElements["phase2.hand"]
+            let prelude = app.buttons["phase2.guided.prelude.action"]
+            XCTAssertTrue(board.waitForExistence(timeout: 8))
+            XCTAssertTrue(decision.waitForExistence(timeout: 8))
+            XCTAssertTrue(hand.waitForExistence(timeout: 4))
+            XCTAssertTrue(prelude.waitForExistence(timeout: 4))
+            attachCurrentFrame(in: app,
+                               named: "tutorial-phase2-compact-\(configuration.name)-prelude")
+            XCTAssertTrue(prelude.isHittable,
+                          "Der erste Poch-Schritt muss direkt bedienbar sein. Aktion: \(prelude.frame)")
+            XCTAssertTrue(window.frame.contains(prelude.frame),
+                          "Der erste Poch-Schritt muss im Fenster liegen. Aktion: \(prelude.frame), Fenster: \(window.frame)")
+            XCTAssertTrue(window.frame.contains(board.frame),
+                          "Das Poch-Brett muss vollständig im Fenster liegen. Brett: \(board.frame), Fenster: \(window.frame)")
+            XCTAssertGreaterThanOrEqual(board.frame.width, 190)
+            XCTAssertFalse(board.frame.intersects(decision.frame),
+                           "Brett und Erklärung brauchen getrennte Zonen. Brett: \(board.frame), Erklärung: \(decision.frame)")
+            XCTAssertTrue(decision.frame.contains(prelude.frame))
+
+            prelude.tap()
+            let safeStake = app.buttons["phase2.guided.stake.1"]
+            let boldStake = app.buttons["phase2.guided.stake.2"]
+            XCTAssertTrue(safeStake.waitForExistence(timeout: 3))
+            XCTAssertTrue(boldStake.waitForExistence(timeout: 3))
+            XCTAssertTrue(safeStake.isHittable)
+            XCTAssertTrue(boldStake.isHittable)
+            XCTAssertTrue(decision.frame.contains(safeStake.frame))
+            XCTAssertTrue(decision.frame.contains(boldStake.frame))
+
+            safeStake.tap()
+            let actions = app.otherElements["phase2.actions"]
+            XCTAssertTrue(actions.waitForExistence(timeout: 4))
+
+            XCTAssertFalse(decision.frame.intersects(actions.frame),
+                           "Poch-Erklärung und Aktionen dürfen sich in \(configuration.name) nicht überlagern.")
+            XCTAssertFalse(actions.frame.intersects(hand.frame),
+                           "Poch-Aktionen und Hand dürfen sich in \(configuration.name) nicht überlagern.")
+            XCTAssertFalse(decision.frame.intersects(hand.frame),
+                           "Poch-Erklärung und Hand brauchen in \(configuration.name) eigene Flächen.")
+            XCTAssertTrue(window.frame.contains(actions.frame))
+            XCTAssertTrue(app.buttons["phase2.action.open"].isHittable)
+            let visibleHand = hand.frame.intersection(window.frame)
+            XCTAssertGreaterThanOrEqual(visibleHand.height, hand.frame.height * 0.18,
+                                        "Die eigene Hand muss als Spielkontext sichtbar bleiben.")
+
+            let raise = app.buttons["phase2.action.raise"]
+            if raise.exists {
+                XCTAssertFalse(raise.label.contains("…"),
+                               "Die Erhöhen-Aktion muss vollständig lesbar bleiben.")
+            }
+            attachCurrentFrame(in: app,
+                               named: "tutorial-phase2-compact-\(configuration.name)")
+            app.terminate()
+        }
+        XCUIDevice.shared.orientation = .portrait
     }
 
     @MainActor
@@ -221,13 +365,12 @@ final class TutorialPremiereUITests: XCTestCase {
         dismissTutorialCurtainIfNeeded(in: app)
 
         let window = app.windows.firstMatch
-        let board = app.images.matching(identifier: "table.world.phase2.board").firstMatch
+        let board = app.descendants(matching: .any)["table.world.phase2.board"]
         let decision = app.otherElements["phase2.decision"]
-        let title = app.staticTexts["Du darfst pochen"]
-        let body = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS %@", "Gleiche Werte lassen dich pochen")
-        ).firstMatch
-        let action = app.buttons["Einsatz wählen"]
+        let title = app.staticTexts["phase2.guided.title"]
+        let body = app.staticTexts["phase2.guided.body"]
+        let action = app.buttons["phase2.guided.prelude.action"]
+        let scroll = app.scrollViews["phase2.accessibility.scroll"]
 
         XCTAssertTrue(window.waitForExistence(timeout: 4))
         XCTAssertTrue(board.waitForExistence(timeout: 8))
@@ -235,21 +378,30 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 8))
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(action.waitForExistence(timeout: 4))
-        XCTAssertTrue(action.isHittable)
+        XCTAssertEqual(title.label, "Zwei Zehner: Du darfst pochen.")
+        XCTAssertEqual(body.label, "Gleiche Karten bringen dich ins Bieten.")
+        XCTAssertEqual(action.label, "Einsatz wählen")
         XCTAssertFalse(title.frame.intersects(body.frame))
-        XCTAssertFalse(body.frame.intersects(action.frame))
         XCTAssertTrue(window.frame.contains(title.frame))
-        XCTAssertTrue(window.frame.contains(body.frame))
-        XCTAssertTrue(window.frame.contains(action.frame),
-                      "Die AX-Aktion \(action.frame) muss vollständig im Fenster \(window.frame) liegen.")
         XCTAssertGreaterThan(title.frame.height, 40,
                              "Accessibility XXXL muss den Tutorialtitel sichtbar vergrößern.")
         XCTAssertGreaterThan(body.frame.height, 40,
                              "Accessibility XXXL darf die Regelerklärung nicht auf Standardgröße deckeln.")
-        XCTAssertGreaterThanOrEqual(action.frame.height, 52,
-                                    "Die nächste Aktion braucht bei Accessibility XXXL eine vergrößerte Trefferfläche.")
         XCTAssertGreaterThan(decision.frame.minY, board.frame.midY,
                              "Auch bei Accessibility XXXL muss die Erklärung unter dem Brett beginnen.")
+        XCTAssertTrue(scroll.exists,
+                      "Sehr große Schrift braucht einen klaren vertikalen Scrollpfad statt gequetschter Inhalte.")
+        XCTAssertGreaterThanOrEqual(body.frame.minX, window.frame.minX)
+        XCTAssertLessThanOrEqual(body.frame.maxX, window.frame.maxX,
+                                 "Der große Regeltext darf horizontal nicht abgeschnitten werden.")
+        for _ in 0..<6 where !action.isHittable || !window.frame.contains(action.frame) {
+            scroll.swipeUp()
+        }
+        XCTAssertTrue(action.isHittable)
+        XCTAssertTrue(window.frame.contains(action.frame),
+                      "Die AX-Aktion \(action.frame) muss vollständig erreichbar sein.")
+        XCTAssertGreaterThanOrEqual(action.frame.height, 52,
+                                    "Die nächste Aktion braucht bei Accessibility XXXL eine vergrößerte Trefferfläche.")
     }
 
     @MainActor
@@ -353,7 +505,7 @@ final class TutorialPremiereUITests: XCTestCase {
 
         let prelude = app.buttons["firstRun.timeSwipe.prelude.primary"]
         XCTAssertTrue(prelude.waitForExistence(timeout: 4))
-        XCTAssertEqual(prelude.label, "Poch entdecken")
+        XCTAssertEqual(prelude.label, "Geschichte entdecken")
         attachFilmFrame(in: app, reducedMotion: reducedMotion, moment: "prelude")
         prelude.tap()
 
@@ -383,7 +535,7 @@ final class TutorialPremiereUITests: XCTestCase {
         intro.tap()
 
         let boardTourNext = app.buttons["firstRun.boardTour.next"]
-        for step in 1...4 {
+        for step in 1...3 {
             XCTAssertTrue(boardTourNext.waitForExistence(timeout: 5),
                           "Kameraeinstellung \(step) muss bis zur Bestätigung stehen bleiben.")
             attachFilmFrame(in: app,
@@ -409,21 +561,21 @@ final class TutorialPremiereUITests: XCTestCase {
         let meldTarget = app.descendants(matching: .any)["firstRun.meldTargetCard"]
         XCTAssertTrue(meldTarget.waitForExistence(timeout: 5))
         XCTAssertTrue(coachAction.waitForExistence(timeout: 5))
-        XCTAssertEqual(coachAction.label, "Trumpf-König zeigen")
+        XCTAssertEqual(coachAction.label, "Karo-König zeigen")
         attachFilmFrame(in: app, reducedMotion: reducedMotion, moment: "meld-match")
         coachAction.tap()
 
         XCTAssertTrue(coachAction.waitForExistence(timeout: 12))
-        XCTAssertEqual(coachAction.label, "Beide Gewinne holen")
+        XCTAssertEqual(coachAction.label, "Gewinn einsammeln")
         coachAction.tap()
 
         XCTAssertTrue(coachAction.waitForExistence(timeout: 12))
-        XCTAssertEqual(coachAction.label, "Jetzt herausfordern")
+        XCTAssertEqual(coachAction.label, "Jetzt pochen")
         coachAction.tap()
 
-        confirmPhaseCurtain("Pochen", in: app)
+        confirmPhaseCurtain("Zum Poch-Pott", in: app)
 
-        let showStake = app.buttons["Einsatz wählen"]
+        let showStake = app.buttons["phase2.guided.prelude.action"]
         XCTAssertTrue(showStake.waitForExistence(timeout: 12))
         attachFilmFrame(in: app, reducedMotion: reducedMotion, moment: "poch-entry")
         advanceBiddingPrelude(in: app)
@@ -449,7 +601,7 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertTrue(continueToPlayout.isHittable)
         continueToPlayout.tap()
 
-        confirmPhaseCurtain("Ausspielen", in: app)
+        confirmPhaseCurtain("Erste Reihe starten", in: app)
 
         let phase3 = app.descendants(matching: .any)["table.world.phase3"]
         XCTAssertTrue(phase3.waitForExistence(timeout: 6))
@@ -487,7 +639,7 @@ final class TutorialPremiereUITests: XCTestCase {
 
     @MainActor
     private func advanceBiddingPrelude(in app: XCUIApplication) {
-        let showStake = app.buttons["Einsatz wählen"]
+        let showStake = app.buttons["phase2.guided.prelude.action"]
         XCTAssertTrue(showStake.waitForExistence(timeout: 12))
         XCTAssertTrue(showStake.isHittable)
         showStake.tap()
@@ -500,9 +652,10 @@ final class TutorialPremiereUITests: XCTestCase {
 
     @MainActor
     private func confirmPhaseCurtain(_ label: String, in app: XCUIApplication) {
-        let button = app.buttons[label]
+        let button = app.buttons["tutorial.phaseCurtain.continue"]
         XCTAssertTrue(button.waitForExistence(timeout: 8),
                       "Der Phasenwechsel muss lesbar stehen bleiben, bis er bestätigt wird.")
+        XCTAssertEqual(button.label, label)
         XCTAssertTrue(button.isHittable)
         button.tap()
     }
@@ -510,9 +663,28 @@ final class TutorialPremiereUITests: XCTestCase {
     @MainActor
     private func dismissTutorialCurtainIfNeeded(in app: XCUIApplication) {
         let curtain = app.buttons["tutorial.phaseCurtain.continue"]
-        if curtain.waitForExistence(timeout: 3), curtain.isHittable {
-            curtain.tap()
+        guard curtain.waitForExistence(timeout: 3) else { return }
+        let scroll = app.scrollViews["tutorial.phaseCurtain.scroll"]
+        for _ in 0..<5 where !curtain.isHittable {
+            if scroll.exists { scroll.swipeUp() }
         }
+        XCTAssertTrue(waitUntil(timeout: 2, condition: { curtain.isHittable }),
+                      "Die Phasenblende muss auch mit sehr großer Schrift bestätigbar sein.")
+        guard curtain.isHittable else { return }
+        curtain.tap()
+        XCTAssertFalse(curtain.waitForExistence(timeout: 3),
+                       "Die bestätigte Phasenblende muss den Tisch vollständig freigeben.")
+    }
+
+    @MainActor
+    private func waitUntil(timeout: TimeInterval,
+                           condition: @escaping () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if condition() { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.10))
+        }
+        return condition()
     }
 
     @MainActor
@@ -578,17 +750,10 @@ final class TutorialPremiereUITests: XCTestCase {
         let deadline = Date().addingTimeInterval(90)
 
         while Date() < deadline, !completion.exists {
-            let guidedAdvanceLabels = [
-                "Nächste Karte erklären",
-                "Nächste Karte ansehen",
-                "Hana eröffnet die nächste Reihe",
-                "Noah eröffnet die nächste Reihe",
-                "Jonas eröffnet die nächste Reihe"
-            ]
-            let revealNextCard = guidedAdvanceLabels
-                .map { app.buttons[$0] }
-                .first { $0.exists && $0.isEnabled && $0.isHittable }
-            if let revealNextCard {
+            let revealNextCard = app.buttons["phase3.guided.advance"]
+            if revealNextCard.exists,
+               revealNextCard.isEnabled,
+               revealNextCard.isHittable {
                 revealNextCard.tap()
                 RunLoop.current.run(until: Date().addingTimeInterval(0.45))
                 continue
@@ -615,6 +780,15 @@ final class TutorialPremiereUITests: XCTestCase {
         app.activate()
         let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         screenshot.name = "tutorial-premiere-\(moment)-\(reducedMotion ? "reduced-motion-" : "")390x844"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    @MainActor
+    private func attachCurrentFrame(in app: XCUIApplication, named name: String) {
+        app.activate()
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = name
         screenshot.lifetime = .keepAlways
         add(screenshot)
     }

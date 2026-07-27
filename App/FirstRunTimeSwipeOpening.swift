@@ -12,15 +12,23 @@ struct FirstRunTimeSwipeOpening: View {
 
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var hasEnteredTimeline = false
     @State private var interactiveTranslation: CGFloat = 0
     @State private var settledProgress = 0.0
     @State private var selectionFeedbackTick = 0
     @State private var settleTask: Task<Void, Never>?
     @State private var audioDirector = FirstRunTimeSwipeAudio()
+    @State private var audioPreloadTask: Task<Void, Never>?
 
     private var usesDiscretePresentation: Bool {
-        reduceMotion || voiceOverEnabled || dynamicTypeSize.isAccessibilitySize
+        // The cinematic split needs vertical room for scene, seam and copy.
+        // Compact landscape keeps the same story in a scrollable chapter view
+        // instead of allowing the fixed 272pt card to bury the imagery.
+        reduceMotion
+            || voiceOverEnabled
+            || dynamicTypeSize.isAccessibilitySize
+            || verticalSizeClass == .compact
     }
 
     var body: some View {
@@ -51,6 +59,16 @@ struct FirstRunTimeSwipeOpening: View {
                 hasEnteredTimeline = true
                 audioDirector.startIfEnabled(soundEnabled,
                                              progress: settledProgress)
+            } else {
+                // Keep synchronous AVAudioPlayer decoding off the critical
+                // launch-continuation dissolve. Playback still prepares on
+                // demand if the person reaches the timeline unusually fast.
+                audioPreloadTask?.cancel()
+                audioPreloadTask = Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(450))
+                    guard !Task.isCancelled else { return }
+                    audioDirector.prepare()
+                }
             }
         }
         .onChange(of: soundEnabled) { _, enabled in
@@ -82,6 +100,8 @@ struct FirstRunTimeSwipeOpening: View {
         }
         .onDisappear {
             settleTask?.cancel()
+            audioPreloadTask?.cancel()
+            audioPreloadTask = nil
             audioDirector.stop()
         }
     }
@@ -113,20 +133,20 @@ struct FirstRunTimeSwipeOpening: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text(String(localized: "firstRun.timeSwipe.prelude.eyebrow",
-                                defaultValue: "EINE RUNDE, DREI CHANCEN"))
+                                defaultValue: "POCH 1441"))
                         .font(.system(size: 10, weight: .heavy))
                         .tracking(1.9)
                         .foregroundStyle(Color(hex: 0xE5C374))
 
                     Text(String(localized: "firstRun.timeSwipe.prelude.title",
-                                defaultValue: "Ein Tisch. Drei Duelle."))
+                                defaultValue: "Fast 600 Jahre Geschichte. Jetzt beginnt deine Runde."))
                         .font(.system(size: 34, weight: .heavy))
                         .tracking(-0.8)
                         .foregroundStyle(Color(hex: 0xF4F0E8))
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text(String(localized: "firstRun.timeSwipe.prelude.body",
-                                defaultValue: "Räum mit Trumpf ab, poch um den Einsatz und werde deine Karten zuerst los."))
+                                defaultValue: "Zieh die Zeit nach vorn - vom Wirtshaus bis an deinen Tisch."))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color(hex: 0xF4F0E8).opacity(0.78))
                         .fixedSize(horizontal: false, vertical: true)
@@ -134,7 +154,7 @@ struct FirstRunTimeSwipeOpening: View {
                     Button(action: enterTimeline) {
                         HStack(spacing: 9) {
                             Text(String(localized: "firstRun.timeSwipe.prelude.primary",
-                                        defaultValue: "Poch entdecken"))
+                                        defaultValue: "Geschichte entdecken"))
                             Image(systemName: "arrow.right")
                                 .font(.subheadline.weight(.bold))
                         }
@@ -149,7 +169,7 @@ struct FirstRunTimeSwipeOpening: View {
 
                     Button(action: onPlayWithoutGuide) {
                         Text(String(localized: "firstRun.timeSwipe.withoutGuide",
-                                    defaultValue: "Ich kenne Poch schon"))
+                                    defaultValue: "Ohne Hinweise spielen"))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Color(hex: 0xF4F0E8).opacity(0.72))
                             .frame(maxWidth: .infinity, minHeight: 40)
@@ -302,7 +322,7 @@ struct FirstRunTimeSwipeOpening: View {
                 if !showsFinalActions {
                     Button(action: skipToToday) {
                         Text(String(localized: "firstRun.timeSwipe.skip",
-                                    defaultValue: "Überspringen"))
+                                    defaultValue: "Geschichte überspringen"))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Color(hex: 0xF3EFE7).opacity(0.82))
                             .padding(.horizontal, 13)
@@ -436,7 +456,7 @@ struct FirstRunTimeSwipeOpening: View {
 
             Button(action: onPlayWithoutGuide) {
                 Text(String(localized: "firstRun.timeSwipe.withoutGuide",
-                            defaultValue: "Ich kenne Poch schon"))
+                            defaultValue: "Ohne Hinweise spielen"))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color(hex: 0xF4F0E8).opacity(0.72))
                     .frame(maxWidth: .infinity, minHeight: 34)
@@ -455,7 +475,7 @@ struct FirstRunTimeSwipeOpening: View {
                     PochBrandWordmark(height: 24)
                     Spacer()
                     Button(String(localized: "firstRun.timeSwipe.skip",
-                                  defaultValue: "Überspringen"), action: skipToToday)
+                                  defaultValue: "Geschichte überspringen"), action: skipToToday)
                         .font(.system(size: 16, weight: .semibold))
                         .frame(minHeight: 44)
                         .opacity(chapter == .today ? 0 : 1)
@@ -635,27 +655,27 @@ struct FirstRunTimeSwipeOpening: View {
                 eyebrow: String(localized: "firstRun.timeSwipe.origin.eyebrow",
                                  defaultValue: "1441"),
                 title: String(localized: "firstRun.timeSwipe.origin.title",
-                              defaultValue: "Pokers älterer Bruder. Seit 1441."),
+                              defaultValue: "1441: Ein Tisch, drei Chancen."),
                 body: String(localized: "firstRun.timeSwipe.origin.body",
-                             defaultValue: "Drei Phasen, drei Wege zum Gewinn - und eine Spur, die bis ins 15. Jahrhundert führt.")
+                             defaultValue: "Die ältesten bekannten Spuren führen ins Jahr 1441. Schon damals verband Poch Trumpf, Einsatz und das Rennen um die letzte Karte.")
             )
         case .branch:
             return TimeSwipeCopy(
                 eyebrow: String(localized: "firstRun.timeSwipe.branch.eyebrow",
-                                 defaultValue: "DIE SPUR ZIEHT WEITER"),
+                                 defaultValue: "POQUE"),
                 title: String(localized: "firstRun.timeSwipe.branch.title",
-                              defaultValue: "Über Poque führt die Spur weiter."),
+                              defaultValue: "Pokers älterer Verwandter."),
                 body: String(localized: "firstRun.timeSwipe.branch.body",
-                             defaultValue: "Poque gilt als möglicher Vorläufer des Pokers. Poch selbst blieb ein eigenes Spiel.")
+                             defaultValue: "Über das französische Poque führt eine mögliche Entwicklungslinie zum Poker. Poch bleibt ein eigenes Spiel.")
             )
         case .today:
             return TimeSwipeCopy(
                 eyebrow: String(localized: "firstRun.timeSwipe.today.eyebrow",
                                  defaultValue: "HEUTE"),
                 title: String(localized: "firstRun.timeSwipe.today.title",
-                              defaultValue: "Drei Chancen. Eine Runde."),
+                              defaultValue: "Jetzt beginnt deine erste Runde."),
                 body: String(localized: "firstRun.timeSwipe.today.body",
-                             defaultValue: "Bestimmte Trumpfkarten bringen sofort Chips. Beim Pochen setzt du auf gleiche Karten. Wer seine Hand zuerst leert, gewinnt die Mitte.")
+                             defaultValue: "Hol dir Chips mit passenden Trumpfkarten, fordere die anderen im Poch-Pott heraus und werde deine Karten zuerst los.")
             )
         }
     }

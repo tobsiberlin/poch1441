@@ -279,7 +279,7 @@ extension TravelCompartment {
         switch self {
         case .king: "K"
         case .queen: "Q"
-        case .mariage: String(localized: "pool.mariage.short", defaultValue: "MARIAGE")
+        case .mariage: String(localized: "pool.mariage.short", defaultValue: "K+D")
         case .jack: "J"
         case .ten: "10"
         case .sequence: String(localized: "pool.sequence.short", defaultValue: "FOLGE")

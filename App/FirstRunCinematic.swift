@@ -337,14 +337,14 @@ struct FirstRunCinematic: View {
                     .foregroundStyle(Tokens.jewelGold.opacity(0.92))
 
                 Text(String(localized: "firstRun.cinematic.invitation.title",
-                            defaultValue: "Setz dich dazu."))
+                            defaultValue: "Setz dich zu uns."))
                     .font(.system(size: 28, weight: .heavy))
                     .foregroundStyle(Tokens.jewelPlatin)
                     .multilineTextAlignment(.center)
                     .accessibilityIdentifier("firstRun.intro.title")
 
                 Text(String(localized: "firstRun.cinematic.invitation.body",
-                            defaultValue: "Die erste Runde spielen wir zusammen."))
+                            defaultValue: "Ich bleibe für deine erste Runde an deiner Seite."))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.74))
                     .multilineTextAlignment(.center)
@@ -363,7 +363,7 @@ struct FirstRunCinematic: View {
             Button(action: onTakeSeat) {
                 HStack(spacing: 9) {
                     Text(String(localized: "firstRun.cinematic.takeSeat",
-                                defaultValue: "Mitspielen"))
+                                defaultValue: "Platz nehmen"))
                     Image(systemName: "arrow.right")
                         .font(.subheadline.weight(.bold))
                 }
@@ -378,7 +378,7 @@ struct FirstRunCinematic: View {
 
             Button(action: onPlayWithoutGuide) {
                 Text(String(localized: "firstRun.cinematic.withoutGuide",
-                            defaultValue: "Ohne Hinweise starten"))
+                            defaultValue: "Ohne Hinweise spielen"))
                     .font(.system(size: 12.5, weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.70))
                     .frame(maxWidth: .infinity, minHeight: 44)
@@ -410,7 +410,7 @@ struct FirstRunCinematic: View {
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(String(localized: "firstRun.cinematic.accessibility.people",
-                                            defaultValue: "Hana, Noah und Jonas sitzen am Tisch. Hana lädt dich zur ersten Runde ein."))
+                            defaultValue: "Hana, Noah und Jonas sitzen am Tisch. Dein Platz für die erste Runde ist frei."))
 
                 TableWorldBoardBase(world: theme,
                                     diameter: min(240, size.width * 0.66))
@@ -422,12 +422,12 @@ struct FirstRunCinematic: View {
 
                 VStack(spacing: 7) {
                     Text(String(localized: "firstRun.cinematic.invitation.title",
-                                defaultValue: "Setz dich dazu."))
+                                defaultValue: "Setz dich zu uns."))
                         .font(.title2.weight(.heavy))
                         .foregroundStyle(Tokens.jewelPlatin)
                         .accessibilityIdentifier("firstRun.intro.title")
                     Text(String(localized: "firstRun.cinematic.accessibility.body",
-                                defaultValue: "Hana spielt die erste Runde mit dir. Bestimmte Trumpfkarten bringen sofort Chips, gleiche Karten öffnen das Pochen und die letzte Karte gewinnt die Mitte."))
+                                defaultValue: "Hana spielt die erste Runde mit dir: Passende Trumpfkarten holen Bonusfelder. Mit mindestens zwei gleichen Karten bietest du um den Poch-Pott. Wer seine Hand zuerst leert, gewinnt die Mitte."))
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Tokens.jewelPlatin.opacity(0.80))
                         .multilineTextAlignment(.center)

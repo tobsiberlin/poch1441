@@ -178,7 +178,7 @@ struct DealOverlay: View {
         let spacing = min(CGFloat(126), w / CGFloat(max(count, 2)) * 0.88)
         let arc = abs(idx - center) * 14
         return CGPoint(x: w / 2 + (idx - center) * spacing,
-                       y: h * 0.225 + arc * 0.18)
+                       y: h * 0.155 + arc * 0.18)
     }
 
     private func poolPosition(_ pool: Pool, deck: CGPoint) -> CGPoint {
@@ -389,7 +389,7 @@ private struct DealSeatTargets: View {
         let spacing = min(CGFloat(126), w / CGFloat(max(count, 2)) * 0.88)
         let arc = abs(idx - center) * 14
         return CGPoint(x: w / 2 + (idx - center) * spacing,
-                       y: h * 0.225 + arc * 0.18)
+                       y: h * 0.155 + arc * 0.18)
     }
 }
 

@@ -1401,11 +1401,13 @@ final class GameState {
         }
     }
 
-    func revealGuidedTrumpf() {
-        guard !trumpRevealed else { return }
+    @discardableResult
+    func revealGuidedTrumpf() -> Bool {
+        guard !trumpRevealed else { return false }
         trumpRevealed = true
         lightPulse += 1
         hapticTick += 1
+        return true
     }
 
     func revealNextGuidedMeld(reduceMotion: Bool) async {

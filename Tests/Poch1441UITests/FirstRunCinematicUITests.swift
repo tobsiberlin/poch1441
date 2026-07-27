@@ -52,7 +52,7 @@ final class FirstRunCinematicUITests: XCTestCase {
                 XCTAssertTrue(body.waitForExistence(timeout: 2))
                 XCTAssertTrue(primary.waitForExistence(timeout: 2))
                 XCTAssertTrue(secondary.waitForExistence(timeout: 2))
-                XCTAssertEqual(primary.label, "Mitspielen")
+                XCTAssertEqual(primary.label, "Platz nehmen")
                 XCTAssertTrue(window.frame.contains(title.frame))
                 XCTAssertTrue(window.frame.contains(body.frame))
                 XCTAssertFalse(title.frame.intersects(body.frame))
@@ -92,8 +92,8 @@ final class FirstRunCinematicUITests: XCTestCase {
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(primary.waitForExistence(timeout: 2))
         XCTAssertTrue(primary.isHittable)
-        XCTAssertEqual(primary.label, "Mitspielen")
-        XCTAssertEqual(body.label, "Die erste Runde spielen wir zusammen.")
+        XCTAssertEqual(primary.label, "Platz nehmen")
+        XCTAssertEqual(body.label, "Ich bleibe für deine erste Runde an deiner Seite.")
     }
 
     @MainActor
@@ -114,7 +114,7 @@ final class FirstRunCinematicUITests: XCTestCase {
 
         let primary = app.buttons["firstRun.intro.primary"]
         XCTAssertTrue(primary.waitForExistence(timeout: 9))
-        XCTAssertEqual(primary.label, "Mitspielen")
+        XCTAssertEqual(primary.label, "Platz nehmen")
         XCTAssertTrue(primary.isHittable)
     }
 
