@@ -1894,7 +1894,8 @@ struct ContentView: View {
 
     private var guidedCoachRail: some View {
         let copy = guidedCopy
-        return VStack(alignment: .leading, spacing: 7) {
+        return VStack(alignment: .leading,
+                      spacing: dynamicTypeSize.isAccessibilitySize ? 7 : 1) {
             HStack(spacing: 10) {
             guidedCoachIcon(systemName: copy.step)
             VStack(alignment: .leading, spacing: 3) {
@@ -1975,7 +1976,7 @@ struct ContentView: View {
             }
         }
         .padding(.horizontal, 13)
-        .padding(.vertical, 7)
+        .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 7 : 1)
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color(hex: 0x111018).opacity(0.96))
@@ -1994,14 +1995,14 @@ struct ContentView: View {
                     if guidedMeldBeat >= FirstRunBeat.proveMeld.rawValue {
                         CardFace(card: Card(suit: game.trump, rank: .queen),
                                  goldenStopper: true,
-                                 scale: 0.62,
+                                 scale: dynamicTypeSize.isAccessibilitySize ? 0.62 : 0.46,
                                  isAccessibilityHidden: true)
                             .rotationEffect(.degrees(7), anchor: .bottom)
                             .offset(x: 8)
                     }
                     CardFace(card: guidedIntroCard,
                              goldenStopper: true,
-                             scale: 0.68,
+                             scale: dynamicTypeSize.isAccessibilitySize ? 0.68 : 0.50,
                              isAccessibilityHidden: true)
                         .rotationEffect(.degrees(guidedMeldBeat >= FirstRunBeat.proveMeld.rawValue ? -7 : 0),
                                         anchor: .bottom)
@@ -2009,14 +2010,14 @@ struct ContentView: View {
                 } else if guidedTrumpCardFlipped {
                     CardFace(card: game.upcard,
                              goldenStopper: true,
-                             scale: 0.72,
+                             scale: dynamicTypeSize.isAccessibilitySize ? 0.72 : 0.50,
                              isAccessibilityHidden: true)
                 } else {
-                    CardBack(scale: 0.72)
+                    CardBack(scale: dynamicTypeSize.isAccessibilitySize ? 0.72 : 0.50)
                 }
             }
                 .frame(width: guidedMeldBeat >= FirstRunBeat.proveMeld.rawValue ? 50 : 38,
-                       height: 54)
+                       height: dynamicTypeSize.isAccessibilitySize ? 54 : 36)
                 .shadow(color: .black.opacity(0.54), radius: 6, y: 4)
                 .accessibilityHidden(true)
         } else {
@@ -2500,12 +2501,12 @@ struct ContentView: View {
                             String(localized: "tutorial.meld.connect.body", defaultValue: "Karo ist Trumpf. Zeig den König: Du bekommst die Chips aus seinem Bonusfeld. Die Karte bleibt in deiner Hand."))
                 case 6:
                     return ("checkmark.seal.fill",
-                            String(localized: "tutorial.meld.claim.title", defaultValue: "Doppelt gewonnen."),
-                            String(localized: "tutorial.meld.claim.body", defaultValue: "König plus Dame in Trumpf ist die Hochzeit. Beide Bonusfelder zahlen jetzt aus."))
+                            String(localized: "tutorial.meld.claim.title", defaultValue: "Deine Hochzeit zahlt dreifach."),
+                            String(localized: "tutorial.meld.claim.body", defaultValue: "Du erhältst König, Dame und Hochzeit. Danach melden Noah und Jonas ihre Trumpfkarten."))
                 default:
                     return ("checkmark.circle.fill",
-                            String(localized: "tutorial.meld.release.title", defaultValue: "Zwei Bonusfelder für dich."),
-                            String(localized: "tutorial.meld.release.body", defaultValue: "Du gewinnst König und Hochzeit. Die übrigen Bonusfelder bleiben liegen und wachsen nächste Runde."))
+                            String(localized: "tutorial.meld.release.title", defaultValue: "Jede Meldung zahlt für sich."),
+                            String(localized: "tutorial.meld.release.body", defaultValue: "Du: König, Dame, Hochzeit. Noah: Zehn. Jonas: Ass. Jede Person nimmt nur ihre eigenen Bonuschips."))
                 }
             }
             if game.dealtCount < game.totalDeals {
@@ -4689,6 +4690,10 @@ struct ContentView: View {
                                       contextPools: guidedBoardTourCopy.contextPools)
                     .position(x: d / 2, y: d / 2)
                     .allowsHitTesting(false)
+                if guidedBoardTourStep == 0 {
+                    guidedBoardTourTrumpKing(in: d)
+                        .zIndex(20)
+                }
             } else if guidedRoundActive && guidedMeldBeat == 0 {
                 guidedBoardHighlights(size: d,
                                       focusPools: [.center, guidedIntroPool])
@@ -4837,6 +4842,33 @@ struct ContentView: View {
                    ? .linear(duration: 0.10)
                    : .spring(response: 0.42, dampingFraction: 0.92),
                    value: guidedTrumpCardFlipped)
+    }
+
+    private func guidedBoardTourTrumpKing(in boardSize: CGFloat) -> some View {
+        ZStack {
+            Ellipse()
+                .fill(RadialGradient(colors: [
+                    Tokens.jewelGold.opacity(0.28),
+                    .clear
+                ], center: .center, startRadius: 2, endRadius: 58))
+                .frame(width: 132, height: 104)
+                .blendMode(.screen)
+                .accessibilityHidden(true)
+
+            CardFace(card: Card(suit: game.trump, rank: .king),
+                     goldenStopper: true,
+                     scale: 1.24,
+                     isAccessibilityHidden: true)
+                .rotationEffect(.degrees(-4))
+                .shadow(color: .black.opacity(0.62), radius: 10, y: 7)
+        }
+        .position(x: boardSize / 2, y: boardSize * 0.53)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "tutorial.meld.boardTour.king",
+                                   defaultValue: "Dein Trumpf-König"))
+        .accessibilityValue("K \(game.trump.symbol)")
+        .accessibilityIdentifier("firstRun.boardTour.trumpKing")
+        .allowsHitTesting(false)
     }
 
     private var guidedIntroPool: Pool {
@@ -5104,7 +5136,7 @@ struct ContentView: View {
         // Die Lernhand bleibt groß genug zum Lesen, tritt aber bewusst hinter
         // Brett und Erklärung zurück. Die Kartenoberkante bleibt dadurch auch
         // beim Hochzeitsschritt sichtbar unterhalb der Coach-Karte.
-        handFan(cardScale: 1.00, reservesFullCardHeight: true)
+        handFan(cardScale: 1.34, reservesFullCardHeight: true)
     }
 
     private var landscapeHandView: some View {
@@ -5157,6 +5189,8 @@ struct ContentView: View {
                     .anchorPreference(key: TutorialCardAnchorPreferenceKey.self,
                                       value: .bounds) { [card: $0] }
                     .offset(pose.offset)
+                    .scaleEffect(isGuidedTarget ? 1.10 : 1, anchor: .bottom)
+                    .offset(y: isGuidedTarget ? -6 : 0)
                     .rotationEffect(.degrees(pose.rotationDegrees), anchor: .bottom)
                     .zIndex(isGuidedTarget ? Double(cards.count + 1) : Double(i))
                     .transition(.scale(scale: 0.86, anchor: .bottom).combined(with: .opacity))

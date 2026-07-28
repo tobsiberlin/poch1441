@@ -117,6 +117,7 @@ struct Phase2View: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var bid = 1.0
     @State private var presentedPot = 0
     @State private var pendingPot: Int?
@@ -1995,7 +1996,7 @@ struct Phase2View: View {
         let spreadDeg = min(Double(N) * 7.0, 38.0)
         let totalW: CGFloat = min(CGFloat(N) * 30, 224) * (cardScale / 1.62)
         return VStack(spacing: 7) {
-            if let combo {
+            if let combo, !isGuidedRound {
                 Text(String(
                     format: String(localized: "phase2.hand.combo",
                                    defaultValue: "%@ - deine stärkste Gruppe"),
@@ -2142,9 +2143,7 @@ struct Phase2View: View {
                     }
                 }
             } else if canOpen {
-                actionButton(String(format: String(localized: "phase2.action.open",
-                                                   defaultValue: "Mit %d Chips pochen"),
-                                    Int(bid)), style: .amethyst,
+                actionButton(openActionTitle(amount: Int(bid)), style: .amethyst,
                              systemImage: "hand.tap.fill",
                              identifier: "phase2.action.open") {
                     if let open = legal.openRange {
@@ -2169,6 +2168,16 @@ struct Phase2View: View {
         let format = String(localized: "phase2.action.call.cost.many",
                             defaultValue: "Für %d Chips mitgehen")
         return String(format: format, cost)
+    }
+
+    private func openActionTitle(amount: Int) -> String {
+        if amount == 1 {
+            return String(localized: "phase2.action.open.one",
+                          defaultValue: "Mit 1 Chip pochen")
+        }
+        let format = String(localized: "phase2.action.open",
+                            defaultValue: "Mit %d Chips pochen")
+        return String(format: format, amount)
     }
 
     private func wallLabel(_ range: ClosedRange<Int>) -> some View {
@@ -2252,7 +2261,8 @@ struct Phase2View: View {
         return Button(action: action) {
             ResilientActionLabel(
                 label,
-                systemImage: dynamicTypeSize.isAccessibilitySize ? nil : systemImage
+                systemImage: dynamicTypeSize.isAccessibilitySize
+                    || verticalSizeClass == .compact ? nil : systemImage
             )
             .foregroundStyle(foreground)
             .background(

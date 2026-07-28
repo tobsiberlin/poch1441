@@ -77,7 +77,7 @@ enum Tokens {
     static let guidedMeldLearningGap: CGFloat = 7
     /// Sichtbare Ruhezone zwischen Erklärung und Kartenhand im räumlichen
     /// Portrait-Layout. Der Screenshot-Vertrag fordert davon mindestens 12 pt.
-    static let guidedMeldCoachHandClearance: CGFloat = 18
+    static let guidedMeldCoachHandClearance: CGFloat = 24
     static let guidedOpeningTokenSize: CGFloat = 38
     static let guidedOpeningSourceGap: CGFloat = 66
     static let guidedOpeningSnapRadius: CGFloat = 58

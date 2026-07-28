@@ -255,7 +255,8 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(action.waitForExistence(timeout: 4))
         XCTAssertTrue(trumpCard.waitForExistence(timeout: 4))
-        XCTAssertTrue(comboBadge.waitForExistence(timeout: 4))
+        XCTAssertFalse(comboBadge.exists,
+                       "Der Coach nennt die konkrete Gruppe bereits; eine zweite Plakette darf nicht hinter der Hand liegen.")
         XCTAssertEqual(title.label, "Zwei Zehner: Du darfst pochen.")
         XCTAssertTrue(body.label.contains("Ein Drilling schlägt jedes Paar"))
         XCTAssertEqual(action.label, "Einsatz wählen")
@@ -344,6 +345,12 @@ final class TutorialPremiereUITests: XCTestCase {
                            "Poch-Erklärung und Hand brauchen in \(configuration.name) eigene Flächen.")
             XCTAssertTrue(window.frame.contains(actions.frame))
             XCTAssertTrue(app.buttons["phase2.action.open"].isHittable)
+            let open = app.buttons["phase2.action.open"]
+            XCTAssertEqual(open.label, "Mit 1 Chip pochen")
+            XCTAssertFalse(open.label.contains("\n"),
+                           "Der kurze Ein-Chip-Text darf im Querformat nicht umbrechen.")
+            XCTAssertTrue(window.frame.contains(open.frame),
+                          "Der vollständige Ein-Chip-Button muss im sichtbaren Fenster bleiben.")
             let visibleHand = hand.frame.intersection(window.frame)
             XCTAssertGreaterThanOrEqual(visibleHand.height, hand.frame.height * 0.18,
                                         "Die eigene Hand muss als Spielkontext sichtbar bleiben.")

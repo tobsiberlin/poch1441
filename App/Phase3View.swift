@@ -304,17 +304,20 @@ struct Phase3View: View {
         let focused = isWinner || guidedReaction.isFocus || (isLeader && guidedReaction.mood == nil)
         let restCards = game.displayedCardCount(of: seat)
         return VStack(spacing: compactLandscape ? 2 : 4) {
-            if let target = guidedAdvanceTarget,
-               target.seat == seat {
-                guidedOpponentAdvanceButton(
-                    target: target,
-                    compactLandscape: compactLandscape
-                )
-                .transition(phase3ReduceMotion
-                            ? .opacity
-                            : .opacity.combined(with: .scale(scale: 0.96,
-                                                             anchor: .bottom)))
+            ZStack(alignment: .bottom) {
+                if let target = guidedAdvanceTarget,
+                   target.seat == seat {
+                    guidedOpponentAdvanceButton(
+                        target: target,
+                        compactLandscape: compactLandscape
+                    )
+                    .transition(phase3ReduceMotion
+                                ? .opacity
+                                : .opacity.combined(with: .scale(scale: 0.96,
+                                                                 anchor: .bottom)))
+                }
             }
+            .frame(height: 48, alignment: .bottom)
 
             OpponentPortrait(seat: seat,
                              name: game.name(of: seat),
@@ -344,13 +347,13 @@ struct Phase3View: View {
                 )
                 .saturation(focused ? 1 : (isGuidedRound ? 0.88 : 0.78))
                 .opacity(focused ? 1 : (isGuidedRound ? 0.96 : 0.88))
-                .scaleEffect(focused ? 1.025 : 1)
                 .animation(phase3ReduceMotion
                            ? nil
                            : .spring(duration: 0.28, bounce: 0.04),
                            value: focused)
                 .accessibilityIdentifier("phase3.opponent.\(seat)")
         }
+        .frame(width: compactLandscape ? 72 : 112)
         .zIndex(guidedAdvanceTarget?.seat == seat ? 20 : 0)
     }
 
@@ -1390,6 +1393,8 @@ struct Phase3View: View {
         }
         .padding(18)
         .frame(maxWidth: 350, maxHeight: maxHeight)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("phase3.result")
         .background(RoundedRectangle(cornerRadius: 20)
             .fill(LinearGradient(colors: [
                 Color(hex: 0x17141D),
@@ -1722,9 +1727,9 @@ private struct Phase3StageLayout {
             // The guided explanation and its action own the first zone. The
             // cards sit in a separate band directly below it and finish before
             // the opponent portraits begin.
-            playedTopOffset = max(compactHeight ? 144 : 154, guidanceBottom + 10)
+            playedTopOffset = max(compactHeight ? 168 : 178, guidanceBottom + 44)
         } else if guided {
-            playedTopOffset = max(compactHeight ? 136 : 144, guidanceBottom + 10)
+            playedTopOffset = max(compactHeight ? 160 : 168, guidanceBottom + 44)
         } else {
             playedTopOffset = compactHeight ? 108 : 118
         }

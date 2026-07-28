@@ -142,7 +142,7 @@ struct FirstRunStageZones: Equatable {
         let top = safeArea.top + 8
         // Die Kartenhand ist eine eigene untere Bühne. 110 pt halten die
         // Karten lesbar, ohne dass ihre Oberkante in Erklärung oder CTA ragt.
-        let handHeight: CGFloat = 100
+        let handHeight: CGFloat = 112
         let handTop = size.height - safeArea.bottom - handHeight
         let boardY = top + 160
         // The compact portrait must reserve enough height for a complete
@@ -151,7 +151,7 @@ struct FirstRunStageZones: Equatable {
         let boardSide = min(usableWidth - 24,
                             max(180, handTop - boardY - 202),
                             max(228, size.height * 0.37),
-                            294)
+                            258)
         let boardX = safeArea.leading + (usableWidth - boardSide) / 2
         let decisionY = boardY + boardSide + 12
         let decisionHeight = min(

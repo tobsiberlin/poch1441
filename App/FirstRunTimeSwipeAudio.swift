@@ -18,6 +18,20 @@ final class FirstRunTimeSwipeAudio {
         case presentMotif = "first-run-present-motif"
         case signatureContact = "first-run-signature-contact"
         case timeNoise = "first-run-time-noise"
+
+        var resourceExtension: String {
+            switch self {
+            case .originRoom, .presentRoom: "m4a"
+            default: "wav"
+            }
+        }
+
+        var fileTypeHint: String {
+            switch self {
+            case .originRoom, .presentRoom: AVFileType.m4a.rawValue
+            default: AVFileType.wav.rawValue
+            }
+        }
     }
 
     private var players: [Layer: AVAudioPlayer] = [:]
@@ -63,7 +77,7 @@ final class FirstRunTimeSwipeAudio {
         applyCurrentMix(fadeDuration: 0.008)
     }
 
-    /// Reads every PCM layer on a utility executor while the silent prelude is
+    /// Reads every audio layer on a utility executor while the silent prelude is
     /// visible. Timeline entry never performs synchronous file I/O.
     func prepare() {
         guard Self.isAvailableInCurrentRuntime else { return }
@@ -98,7 +112,7 @@ final class FirstRunTimeSwipeAudio {
         var resources: [(Layer, URL)] = []
         for layer in Layer.allCases {
             guard let url = Bundle.main.url(forResource: layer.rawValue,
-                                            withExtension: "wav") else {
+                                            withExtension: layer.resourceExtension) else {
                 Self.log.error("Missing first-run audio layer \(layer.rawValue, privacy: .public)")
                 return
             }
@@ -148,7 +162,7 @@ final class FirstRunTimeSwipeAudio {
                 throw AudioError.missingLayer(layer.rawValue)
             }
             let player = try AVAudioPlayer(data: data,
-                                           fileTypeHint: AVFileType.wav.rawValue)
+                                           fileTypeHint: layer.fileTypeHint)
             player.volume = 0
             if layer == .timeNoise {
                 player.enableRate = true

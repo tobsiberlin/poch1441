@@ -25,20 +25,24 @@ struct FirstRunTimeSwipeAudioMix: Equatable, Sendable {
         let present = clamped == 0 ? Float.zero : Float(sin(angle))
         let seamPosition = Float(sin(clamped * .pi))
         let seam = seamPosition * seamPosition
-        let seamLevel: Float = reduceMotion ? 0.17 : 0.24
+        let seamLevel: Float = reduceMotion ? 0.045 : 0.065
         let finger = Float(clamped)
 
         return Self(
             // Every layer receives the era gain itself. At the endpoints the
             // opposite world is digital silence; at the seam both worlds retain
             // equal-power audibility without a loudness hole.
-            originRoomVolume: origin * 0.48,
-            originMotifVolume: origin * 0.55,
+            // The selected rooms carry the era identity. Authored motifs remain
+            // quiet tactile punctuation instead of competing music beds.
+            // The supplied historical master is roughly 14 dB hotter than the
+            // contemporary recording, so its runtime gain is compensated here.
+            originRoomVolume: origin * 0.09,
+            originMotifVolume: origin * 0.03,
             presentRoomVolume: present * 0.46,
-            presentMotifVolume: present * 0.68,
+            presentMotifVolume: present * 0.14,
             // The same physical knuckle contact and the same event grid survive
             // the complete gesture. Only their acoustic surface and position morph.
-            signatureContactVolume: 0.34,
+            signatureContactVolume: 0.18,
             // The authored texture is broadband and unpitched. Its squared
             // envelope creates one audible, reversible acoustic seam around
             // the center while remaining completely absent at both endpoints.

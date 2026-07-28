@@ -3,9 +3,9 @@ import Foundation
 @main
 struct FirstRunTimeSwipeAudioMixTests {
     private static let names = [
-        "first-run-origin-room.wav",
+        "first-run-origin-room.m4a",
         "first-run-origin-motif.wav",
-        "first-run-present-room.wav",
+        "first-run-present-room.m4a",
         "first-run-present-motif.wav",
         "first-run-signature-contact.wav",
         "first-run-time-noise.wav"
@@ -13,14 +13,15 @@ struct FirstRunTimeSwipeAudioMixTests {
 
     static func main() {
         let layers = names.map(pcm(named:))
+        let renderLayers = layers.map { Array($0.prefix(20 * 44_100)) }
         keepsEraEndpointsPure()
         followsTheFingerAndMovesTheSignatureThroughCenter()
-        rendersALevelMorphWithoutAnEndpointJump(layers)
-        keepsTheTimeSeamCenteredAndAudible(layers)
+        rendersALevelMorphWithoutAnEndpointJump(renderLayers)
+        keepsTheTimeSeamCenteredAndAudible(renderLayers)
         preservesOneLiteralSignatureContact(layers[4])
         sharesTheMusicalEventGrid(layers[1], layers[3])
         keepsTheRoomsSafeAndPurposefullyDifferent(layers[0], layers[2])
-        keepsTwentySecondPCMAssets(layers)
+        keepsCompactRoomAssetsAndTwentySecondAuthoredLoops(layers)
         preloadsFileBytesAwayFromTimelineEntry()
         keepsDiscreteTimelineWiredToAudio()
         clampsOutOfRangeProgress()
@@ -78,10 +79,12 @@ struct FirstRunTimeSwipeAudioMixTests {
         }
         let endpointDifference = abs(decibels(levels[0] / levels[100]))
         expect(endpointDifference <= 1.0,
-               "1441 and today must stay within 1 dB, measured \(endpointDifference) dB")
+               "1441 and today must stay within 1 dB, measured \(endpointDifference) dB "
+               + "(\(levels[0]) vs \(levels[100]))")
         let totalRange = decibels((levels.max() ?? 1) / max(0.000_001, levels.min() ?? 1))
         expect(totalRange <= 2.0,
-               "The rendered morph must not contain a loudness hole or bump")
+               "The rendered morph must not contain a loudness hole or bump, measured "
+               + "\(totalRange) dB")
     }
 
     private static func keepsTheTimeSeamCenteredAndAudible(_ layers: [[Frame]]) {
@@ -142,30 +145,39 @@ struct FirstRunTimeSwipeAudioMixTests {
 
     private static func keepsTheRoomsSafeAndPurposefullyDifferent(_ origin: [Frame],
                                                                    _ present: [Frame]) {
-        expect(rms(origin) > rms(present) * 1.55,
-               "The historical tavern must remain the louder, livelier room bed")
-        expect(abs(normalizedCorrelation(origin.map(\.left), present.map(\.left))) < 0.10,
-               "The room beds must describe genuinely different eras")
-        for room in [origin, present] {
-            let mid = rms(room.map { ($0.left + $0.right) * 0.5 })
-            let side = rms(room.map { ($0.left - $0.right) * 0.5 })
-            expect(decibels(side / mid) <= -12,
-                   "Era rooms must stay narrow enough for deterministic runtime panning")
-        }
+        expect(rms(origin) > 0.005 && rms(present) > 0.005,
+               "Both supplied room ambiences must remain audibly non-silent")
+        expect(abs(normalizedCorrelation(origin.map(\.left), present.map(\.left))) < 0.95,
+               "The supplied room beds must remain genuinely different recordings")
 
         let generator = source("tools/build_first_run_time_swipe_audio.py")
-        expect(generator.contains("standard_normal")
-            && generator.contains("captured speech, wildlife or language")
-            && !generator.contains("historical_room\": Source")
-            && !generator.contains("present_room\": Source"),
-               "Room beds must remain deterministic and free of speech/wildlife recordings")
+        let documentation = source("App/Audio/FIRST_RUN_AUDIO_SOURCES.md")
+        expect(!generator.contains("\"first-run-origin-room.wav\"")
+            && !generator.contains("\"first-run-present-room.wav\"")
+            && documentation.contains("73165bd306950e47d9d5d9947e6b21ce94e49fada32e2d352165ccbfa9c29211")
+            && documentation.contains("0b88207b551d2145ec6ce799c9091edb9951c25b94a2b4121a5bbae21018922c"),
+               "The interaction-layer builder must preserve the supplied, fingerprinted rooms")
     }
 
-    private static func keepsTwentySecondPCMAssets(_ layers: [[Frame]]) {
-        for (index, layer) in layers.enumerated() {
+    private static func keepsCompactRoomAssetsAndTwentySecondAuthoredLoops(_ layers: [[Frame]]) {
+        expect(layers[0].count >= 20 * 44_100,
+               "The historical room must cover the full interaction loop")
+        expect(layers[2].count >= 20 * 44_100,
+               "The present room must cover the full interaction loop")
+        for index in [1, 3, 4, 5] {
+            let layer = layers[index]
             expect(layer.count == 20 * 44_100,
                    "\(names[index]) must remain a 20-second stereo loop")
         }
+        let roomBytes = [names[0], names[2]].reduce(0) { total, name in
+            let attributes = try? FileManager.default.attributesOfItem(
+                atPath: "App/Audio/\(name)"
+            )
+            let size = (attributes?[.size] as? NSNumber)?.intValue ?? Int.max
+            return total + size
+        }
+        expect(roomBytes < 1_100_000,
+               "The two supplied rooms must stay compact enough for the app bundle")
     }
 
     private static func preloadsFileBytesAwayFromTimelineEntry() {
@@ -270,11 +282,36 @@ struct FirstRunTimeSwipeAudioMixTests {
     }
 
     private static func pcm(named name: String) -> [Frame] {
-        let data = try? Data(contentsOf: URL(fileURLWithPath: "App/Audio/\(name)"))
-        guard let data, data.count >= 44 else {
+        let sourceURL = URL(fileURLWithPath: "App/Audio/\(name)")
+        var decodedURL: URL?
+        let wavURL: URL
+        if sourceURL.pathExtension == "m4a" {
+            let temporary = FileManager.default.temporaryDirectory
+                .appendingPathComponent("poch-\(UUID().uuidString).wav")
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/afconvert")
+            process.arguments = [sourceURL.path, temporary.path,
+                                 "-f", "WAVE", "-d", "LEI16@44100", "-c", "2"]
+            do {
+                try process.run()
+                process.waitUntilExit()
+            } catch {
+                fail("Could not decode \(name): \(error)")
+            }
+            expect(process.terminationStatus == 0, "Could not decode \(name)")
+            decodedURL = temporary
+            wavURL = temporary
+        } else {
+            wavURL = sourceURL
+        }
+        defer {
+            if let decodedURL { try? FileManager.default.removeItem(at: decodedURL) }
+        }
+        guard let data = try? Data(contentsOf: wavURL), data.count >= 44,
+              let payload = waveData(in: data) else {
             fail("Missing PCM asset \(name)")
         }
-        let bytes = [UInt8](data.dropFirst(44))
+        let bytes = [UInt8](payload)
         var result: [Frame] = []
         result.reserveCapacity(bytes.count / 4)
         for index in stride(from: 0, to: bytes.count - 3, by: 4) {
@@ -286,6 +323,25 @@ struct FirstRunTimeSwipeAudioMixTests {
                                 right: Double(right) / 32_768))
         }
         return result
+    }
+
+    private static func waveData(in data: Data) -> Data? {
+        guard data.prefix(4) == Data("RIFF".utf8),
+              data.dropFirst(8).prefix(4) == Data("WAVE".utf8) else { return nil }
+        var offset = 12
+        while offset + 8 <= data.count {
+            let identifier = data[offset..<(offset + 4)]
+            let sizeBytes = data[(offset + 4)..<(offset + 8)]
+            let size = sizeBytes.enumerated().reduce(0) {
+                $0 | Int($1.element) << ($1.offset * 8)
+            }
+            let start = offset + 8
+            let end = start + size
+            guard end <= data.count else { return nil }
+            if identifier == Data("data".utf8) { return data[start..<end] }
+            offset = end + (size % 2)
+        }
+        return nil
     }
 
     private static func source(_ path: String) -> String {

@@ -1,9 +1,14 @@
 # First-run time-swipe audio sources
 
-`tools/build_first_run_time_swipe_audio.py` builds the six synchronized layers.
-The two rooms are deterministic synthesis and therefore contain no recorded
-speech, language, wildlife, wind or location ambience. Short physical contacts
-come only from the pinned CC0 recordings below.
+The first-run soundscape combines two supplied ambience recordings with four
+deterministically authored interaction layers. The supplied files are converted
+to AAC/M4A to keep their bundle footprint below 1.1 MB together. Short physical
+contacts in the authored layers come only from the pinned CC0 recordings below.
+
+| Role | Supplied file | Source SHA-256 | Bundle file |
+|---|---|---|---|
+| 1441 ambience | `old.wav` | `0b88207b551d2145ec6ce799c9091edb9951c25b94a2b4121a5bbae21018922c` | `first-run-origin-room.m4a`, AAC stereo 44.1 kHz, 96 kbps target |
+| Present ambience | `new.mp3` | `73165bd306950e47d9d5d9947e6b21ce94e49fada32e2d352165ccbfa9c29211` | `first-run-present-room.m4a`, AAC stereo 48 kHz, 96 kbps target |
 
 | Role | CC0 source | Freesound page | Preview SHA-256 |
 |---|---|---|---|
@@ -17,11 +22,10 @@ pins every processed preview byte-for-byte before decoding it.
 
 ## Match-cut contract
 
-- `first-run-origin-room.wav`: lively, wordless percussive tavern bustle,
-  indoor fire and timber body. It contains no continuous voice-like mid band.
-- `first-run-present-room.wav`: restrained HVAC and cloth-like indoor air.
-  Lounge identity comes from the separate Rhodes/brush motif, not from a
-  periodic room tone.
+- `first-run-origin-room.m4a` is the supplied historical ambience. Its runtime
+  gain is deliberately dominant over the authored motif.
+- `first-run-present-room.m4a` is the supplied contemporary ambience. Runtime
+  uses the full recording and loops it independently from the 20-second layers.
 - Both motif files use the exact same 20-second note and contact grid. The
   historical side renders short plucked voices; today renders warm electric
   piano. Cards and the era-correct metal/ceramic contact share timestamps.
@@ -30,14 +34,17 @@ pins every processed preview byte-for-byte before decoding it.
 - `first-run-time-noise.wav` is true mono duplicated to stereo. It therefore
   remains centered after fold-down and has no stable pitch or radio sweep.
 
-All layers are 20-second stereo PCM16 loops at 44.1 kHz. Runtime reads their
-bytes on a utility executor and only constructs prepared players after the
-off-main load completes. Endpoint and seam acceptance is render-tested rather
-than inferred from gain constants.
+The four authored layers are 20-second stereo PCM16 loops at 44.1 kHz. The
+historical room is 20 seconds; the contemporary room keeps its supplied
+54.768-second duration. Runtime reads all bytes on a utility executor and only
+constructs prepared players after the off-main load completes. Endpoint and
+seam acceptance is render-tested rather than inferred from gain constants.
 
 The final physical-iPhone speaker verdict remains a mandatory human gate.
 
-## Rebuild
+## Rebuild authored layers
+
+The command below deliberately does not overwrite the two supplied room files.
 
 ```sh
 python3 tools/build_first_run_time_swipe_audio.py --output-dir App/Audio

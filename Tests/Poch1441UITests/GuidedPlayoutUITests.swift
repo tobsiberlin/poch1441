@@ -75,10 +75,14 @@ final class GuidedPlayoutUITests: XCTestCase {
         let handCards = app.buttons.matching(
             NSPredicate(format: "identifier BEGINSWITH %@", "phase3.hand.card.")
         )
+        let playedCards = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "phase3.played.card.")
+        )
         XCTAssertTrue(explanation.waitForExistence(timeout: 6))
         XCTAssertTrue(advance.waitForExistence(timeout: 6))
         XCTAssertEqual(opponentPortraits.count, 3)
         XCTAssertGreaterThan(handCards.count, 1)
+        XCTAssertTrue(playedCards.firstMatch.waitForExistence(timeout: 6))
 
         let portraits = opponentPortraits.allElementsBoundByIndex
         let cards = handCards.allElementsBoundByIndex
@@ -96,6 +100,10 @@ final class GuidedPlayoutUITests: XCTestCase {
         let opponentBottom = portraits.map(\.frame.maxY).max() ?? 0
         let handTop = cards.map(\.frame.minY).min() ?? CGFloat.greatestFiniteMagnitude
         XCTAssertFalse(explanation.frame.intersects(advance.frame))
+        for card in playedCards.allElementsBoundByIndex {
+            XCTAssertFalse(card.frame.intersects(explanation.frame),
+                           "Gespielte Karten dürfen nicht unter der Erklärung abgeschnitten werden.")
+        }
         XCTAssertLessThanOrEqual(advance.frame.maxY + 4, opponentTop)
         XCTAssertLessThanOrEqual(opponentBottom + 4, handTop)
         assertAdvance(advance, isAnchoredToItsNamedOpponentIn: app)
@@ -264,6 +272,79 @@ final class GuidedPlayoutUITests: XCTestCase {
         XCTAssertFalse(queen.isEnabled,
                        "Die nächste Handlung darf vor dem sichtbaren Kartenkontakt nicht freigegeben werden.")
         XCTAssertTrue(waitUntil(timeout: 5) { queen.isEnabled && queen.isHittable })
+    }
+
+    @MainActor
+    func testOpponentSeatsStayFixedAcrossGuidedTurns() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = launchGuidedPlayout(reduceMotion: true)
+        openPlayoutCurtain(in: app)
+        advanceToFirstOpponentChoice(in: app)
+
+        let seats = (1...3).map { app.images["phase3.opponent.\($0)"] }
+        XCTAssertTrue(seats.allSatisfy(\.exists))
+        let initialFrames = seats.map(\.frame)
+
+        let advance = app.buttons["phase3.guided.advance"]
+        advance.tap()
+        let ace = app.buttons["phase3.hand.card.hearts.14"]
+        XCTAssertTrue(waitUntil(timeout: 8) { ace.isEnabled && ace.isHittable })
+        let framesAfterOpponent = seats.map(\.frame)
+        for index in seats.indices {
+            XCTAssertEqual(framesAfterOpponent[index].midX, initialFrames[index].midX,
+                           accuracy: 1)
+            XCTAssertEqual(framesAfterOpponent[index].midY, initialFrames[index].midY,
+                           accuracy: 1)
+        }
+
+        ace.tap()
+        XCTAssertTrue(waitUntil(timeout: 8) {
+            app.buttons.matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "phase3.hand.card.")
+            ).allElementsBoundByIndex.filter { $0.isEnabled && $0.isHittable }.count >= 2
+        })
+        let framesAfterHuman = seats.map(\.frame)
+        for index in seats.indices {
+            XCTAssertEqual(framesAfterHuman[index].midX, initialFrames[index].midX,
+                           accuracy: 1)
+            XCTAssertEqual(framesAfterHuman[index].midY, initialFrames[index].midY,
+                           accuracy: 1)
+        }
+    }
+
+    @MainActor
+    func testEmptyHandShowsPointsAndAResultAction() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = launchGuidedPlayout(reduceMotion: true)
+        openPlayoutCurtain(in: app)
+
+        let confirm = app.buttons["phase3.result.confirm"]
+        let deadline = Date().addingTimeInterval(90)
+        while Date() < deadline, !confirm.exists {
+            let advance = app.buttons["phase3.guided.advance"]
+            if advance.exists, advance.isEnabled, advance.isHittable {
+                advance.tap()
+            } else {
+                let cards = app.buttons.matching(
+                    NSPredicate(format: "identifier BEGINSWITH %@", "phase3.hand.card.")
+                )
+                if let card = cards.allElementsBoundByIndex.first(where: {
+                    $0.isEnabled && $0.isHittable
+                }) {
+                    card.tap()
+                }
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.20))
+        }
+
+        XCTAssertTrue(confirm.waitForExistence(timeout: 12),
+                      "Nach der letzten Handkarte muss die Abrechnung sichtbar werden.")
+        XCTAssertTrue(confirm.isEnabled && confirm.isHittable,
+                      "Die Abrechnung braucht eine echte nächste Handlung.")
+        XCTAssertTrue(app.staticTexts["MITTE"].exists)
+        XCTAssertTrue(app.staticTexts["FÜR RESTKARTEN"].exists)
+        XCTAssertTrue(app.staticTexts["GESAMT"].exists,
+                      "Die Abrechnung muss die erreichten Chip-/Punktwerte zeigen.")
     }
 
     @MainActor

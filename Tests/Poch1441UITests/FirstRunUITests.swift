@@ -15,6 +15,9 @@ final class FirstRunUITests: XCTestCase {
         let next = app.buttons["firstRun.boardTour.next"]
         let board = app.descendants(matching: .any)["firstRun.learningBoard"]
         let panel = app.descendants(matching: .any)["firstRun.boardTour.panel"]
+        let trumpKing = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label == %@", "Dein Trumpf-König")
+        ).firstMatch
         let expectedTitles = [
             "Dein Trumpf-König räumt das Bonusfeld ab.",
             "Mit gleichen Karten darfst du pochen.",
@@ -22,7 +25,7 @@ final class FirstRunUITests: XCTestCase {
         ]
         let window = app.windows.firstMatch
 
-        for expectedTitle in expectedTitles {
+        for (step, expectedTitle) in expectedTitles.enumerated() {
             XCTAssertTrue(title.waitForExistence(timeout: 4))
             XCTAssertEqual(title.label, expectedTitle)
             XCTAssertTrue(body.exists)
@@ -37,6 +40,12 @@ final class FirstRunUITests: XCTestCase {
                           "Der Erklärungskasten darf nicht aus dem SE-Fenster laufen.")
             XCTAssertFalse(title.frame.intersects(body.frame))
             XCTAssertFalse(body.frame.intersects(next.frame))
+            if step == 0 {
+                XCTAssertTrue(trumpKing.waitForExistence(timeout: 3),
+                              "Der erste Rundgang-Schritt muss den erklärten Trumpf-König wirklich zeigen.")
+                XCTAssertTrue(window.frame.contains(trumpKing.frame))
+                XCTAssertFalse(trumpKing.frame.intersects(panel.frame))
+            }
             let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             screenshot.name = "board-tour-\(expectedTitle)"
             screenshot.lifetime = .keepAlways
@@ -261,6 +270,11 @@ final class FirstRunUITests: XCTestCase {
                 XCTAssertEqual(action.label, "Karo-König zeigen")
                 XCTAssertTrue(action.isHittable,
                               "Trumpf-König melden muss ohne Rätselstelle bedienbar sein.")
+                let target = app.descendants(matching: .any)["firstRun.meldTargetCard"]
+                XCTAssertTrue(target.waitForExistence(timeout: 4))
+                XCTAssertGreaterThanOrEqual(target.frame.width, 70,
+                                            "Der zu meldende König muss als echte, lesbare Kartenwahl erscheinen.")
+                XCTAssertGreaterThanOrEqual(target.frame.height, 96)
             }
             attachScreenshot(of: app, named: checkpoint.name)
         }

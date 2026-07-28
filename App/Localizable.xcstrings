@@ -3424,6 +3424,17 @@
         }
       }
     },
+    "phase2.action.open.one" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit 1 Chip pochen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Poch with 1 chip" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pochen con 1 ficha" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pocher avec 1 jeton" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Poch con 1 gettone" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Poch met 1 fiche" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Poch za 1 żeton" } }
+      }
+    },
     "phase2.action.pass" : {
       "localizations" : {
         "de" : {
@@ -13430,49 +13441,60 @@
         }
       }
     },
+    "tutorial.meld.boardTour.king" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein Trumpf-König" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your trump king" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu rey de triunfo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ton roi d’atout" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il tuo re di briscola" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Jouw troefkoning" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Twój król atutowy" } }
+      }
+    },
     "tutorial.meld.claim.body" : {
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "König plus Dame in Trumpf ist die Hochzeit. Beide Bonusfelder zahlen jetzt aus."
+            "value" : "Du erhältst König, Dame und Hochzeit. Danach melden Noah und Jonas ihre Trumpfkarten."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "King plus queen in trump makes Marriage. Both bonus fields pay out now."
+            "value" : "You receive King, Queen and Marriage. Noah and Jonas then meld their trump cards."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Rey más dama de triunfo forman el Matrimonio. Las dos casillas bonus pagan ahora."
+            "value" : "Recibes Rey, Dama y Matrimonio. Después Noah y Jonas muestran sus triunfos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Le roi et la dame d’atout forment le Mariage. Les deux cases bonus paient maintenant."
+            "value" : "Tu reçois Roi, Dame et Mariage. Noah et Jonas annoncent ensuite leurs atouts."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Re e regina di briscola formano il Matrimonio. Ora pagano entrambe le caselle bonus."
+            "value" : "Ricevi Re, Regina e Matrimonio. Poi Noah e Jonas dichiarano le loro briscole."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Koning plus vrouw in troef vormen het Huwelijk. Beide bonusvelden betalen nu uit."
+            "value" : "Je krijgt Koning, Vrouw en Huwelijk. Daarna melden Noah en Jonas hun troefkaarten."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Król i dama w atu tworzą Małżeństwo. Oba pola bonusowe wypłacają teraz żetony."
+            "value" : "Otrzymujesz Króla, Damę i Małżeństwo. Potem Noah i Jonas meldują swoje atuty."
           }
         }
       }
@@ -13483,43 +13505,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Doppelt gewonnen."
+            "value" : "Deine Hochzeit zahlt dreifach."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Two wins"
+            "value" : "Your Marriage pays three times"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dos premios"
+            "value" : "Tu Matrimonio paga tres veces"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deux gains"
+            "value" : "Ton Mariage paie trois fois"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Due premi"
+            "value" : "Il tuo Matrimonio paga tre volte"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Twee keer winst"
+            "value" : "Je Huwelijk betaalt drie keer"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dwie wygrane"
+            "value" : "Twoje Małżeństwo płaci trzy razy"
           }
         }
       }
@@ -13906,43 +13928,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du gewinnst König und Hochzeit. Die übrigen Bonusfelder bleiben liegen und wachsen nächste Runde."
+            "value" : "Du: König, Dame, Hochzeit. Noah: Zehn. Jonas: Ass. Jede Person nimmt nur ihre eigenen Bonuschips."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "You win King and Marriage. The other bonus fields stay filled and grow next round."
+            "value" : "You: King, Queen, Marriage. Noah: Ten. Jonas: Ace. Each player takes only their own bonus chips."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Ganas Rey y Matrimonio. Las demás casillas bonus siguen llenas y crecen en la próxima ronda."
+            "value" : "Tú: Rey, Dama, Matrimonio. Noah: Diez. Jonas: As. Cada persona toma solo sus fichas bonus."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Tu gagnes Roi et Mariage. Les autres cases bonus restent pleines et grossissent au prochain tour."
+            "value" : "Toi : Roi, Dame, Mariage. Noah : Dix. Jonas : As. Chacun prend seulement ses jetons bonus."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Vinci Re e Matrimonio. Le altre caselle bonus restano piene e crescono nel prossimo giro."
+            "value" : "Tu: Re, Regina, Matrimonio. Noah: Dieci. Jonas: Asso. Ognuno prende solo le proprie fiche bonus."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Je wint Koning en Huwelijk. De andere bonusvelden blijven gevuld en groeien volgende ronde."
+            "value" : "Jij: Koning, Vrouw, Huwelijk. Noah: Tien. Jonas: Aas. Iedereen pakt alleen eigen bonusfiches."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-        "value" : "Wygrywasz Króla i Małżeństwo. Pozostałe pola bonusowe zostają pełne i rosną w następnej rundzie."
+            "value" : "Ty: Król, Dama, Małżeństwo. Noah: Dziesiątka. Jonas: As. Każdy bierze tylko własne żetony bonusowe."
           }
         }
       }
@@ -13953,43 +13975,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zwei Bonusfelder für dich."
+            "value" : "Jede Meldung zahlt für sich."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Two bonus fields for you"
+            "value" : "Each meld pays its owner"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dos casillas bonus para ti"
+            "value" : "Cada anuncio paga a su dueño"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deux cases bonus pour toi"
+            "value" : "Chaque annonce paie son auteur"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Due caselle bonus per te"
+            "value" : "Ogni dichiarazione paga chi la fa"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Twee bonusvelden voor jou"
+            "value" : "Elke melding betaalt de eigenaar"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dwa pola bonusowe dla ciebie"
+            "value" : "Każdy meldunek płaci właścicielowi"
           }
         }
       }

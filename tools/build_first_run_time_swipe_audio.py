@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build the deterministic, finger-morphed first-run soundscape.
+"""Build the deterministic interaction layers for the first-run soundscape.
 
 The two eras share a musical event grid and one real knuckle-on-wood signature
-layer. Rooms and timbres change around that invariant match cut. Generated room
-beds contain no captured speech, wildlife or language.
+layer. The two room ambiences are supplied and compressed separately; this
+builder deliberately leaves them untouched.
 """
 
 from __future__ import annotations
@@ -402,9 +402,7 @@ def build(output_dir: Path, source_cache: Path) -> None:
         ceramic = decode_segment(paths["ceramic"], scratch, 0, 0.32)
         knock = decode_segment(paths["knock"], scratch, 2.203, 0.32)
         outputs = {
-            "first-run-origin-room.wav": historical_tavern_room(),
             "first-run-origin-motif.wav": era_motif(True, cards, coin, ceramic),
-            "first-run-present-room.wav": present_lounge_room(),
             "first-run-present-motif.wav": era_motif(False, cards, coin, ceramic),
             "first-run-signature-contact.wav": signature_contact(knock),
             "first-run-time-noise.wav": broadband_time_grain(),

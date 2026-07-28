@@ -111,8 +111,8 @@ struct CardFace: View {
             // Die historischen Druckassets bleiben unverändert. Auf dem dunklen
             // Tisch erhalten rote Farben nur im Display-Compositing etwas mehr
             // Farbdichte, damit Herz/Karo nicht verwaschen wirken.
-            .saturation(card.suit.isRed ? 1.55 : 1)
-            .contrast(card.suit.isRed ? 1.04 : 1)
+            .saturation(card.suit.isRed ? 1.72 : 1.20)
+            .contrast(1.06)
     }
 
     // MARK: - Zahlkarten 7-10 (code-gerendert)
