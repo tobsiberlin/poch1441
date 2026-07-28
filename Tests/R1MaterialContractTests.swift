@@ -11,12 +11,17 @@ struct R1MaterialContractTests {
         let components = try source(at: "App/PlayComponents.swift")
         let layout = try source(at: "App/R1TokenLayout.swift")
         let effects = try source(at: "App/Effects.swift")
+        let contactAudio = try source(at: "App/R1ContactAudio.swift")
         let ring = try source(at: "App/PochRing.swift")
         let content = try source(at: "App/ContentView.swift")
         let impactFlight = try source(at: "App/ImpactFlight.swift")
         let dealOverlay = try source(at: "App/DealOverlay.swift")
         let tokens = try source(at: "App/DesignTokens.swift")
         let generator = try source(at: "tools/build_r1_ceramic_assets.py")
+        let audioBuilder = try source(at: "tools/build_r1_contact_audio.py")
+        let audioReceipt = try source(
+            at: "tasks/reviews/r1-contact-audio-v2/Evidence/audio-fingerprint-receipt.json"
+        )
 
         try r1RendererUsesTheReferencePalette(components, generator: generator)
         try r1AssetsShareTheCanonicalSilhouette(tokens: tokens, generator: generator)
@@ -25,12 +30,14 @@ struct R1MaterialContractTests {
         try saturatedPilesRevealTheirPublicValue(components)
         try r1ScaleAndLightingStayPhysical(components, generator: generator)
         try restingPosesAreStableAndVaried(layout)
-        try contactFeedbackIsImpactBoundAndBundled(effects)
+        try contactFeedbackIsImpactBoundAndBundled(effects, audio: contactAudio)
         try fundingMotionRemainsPhysicalAndInterruptible(content: content,
                                                          impactFlight: impactFlight,
                                                          effects: effects,
                                                          dealOverlay: dealOverlay)
-        try ceramicAudioVariantsMeetTheRuntimeContract(effects)
+        try ceramicAudioVariantsMeetTheRuntimeContract(contactAudio,
+                                                        builder: audioBuilder,
+                                                        receipt: audioReceipt)
 
         FileHandle.standardOutput.write(Data("R1MaterialContractTests: PASS\n".utf8))
     }
@@ -420,15 +427,23 @@ struct R1MaterialContractTests {
                "R1 piles must not repeat one cloned rosette")
     }
 
-    private static func contactFeedbackIsImpactBoundAndBundled(_ source: String) throws {
+    private static func contactFeedbackIsImpactBoundAndBundled(
+        _ source: String,
+        audio: String
+    ) throws {
         expect(source.contains(".onChange(of: trigger)"),
                "Ceramic sound must be bound to the impact trigger")
         expect(source.contains("R1ContactDynamics.resolve(surface: surface,"),
                "Surface and group size must share one contact mapping")
         expect(source.contains("groupSize: groupSize"),
                "The bundled group size must reach audio and haptics")
-        expect(source.contains("now - lastContactTime >= 0.12"),
-               "Rapid subordinate contacts must remain throttled")
+        expect(audio.contains("struct EventKey: Hashable")
+            && audio.contains("register(eventKey)")
+            && audio.contains("private static let voiceCount = 6"),
+               "Accepted contacts need identity deduplication and overlapping voices")
+        expect(!audio.contains("lastContactTime")
+            && !audio.contains("systemUptime"),
+               "Distinct physical contacts must never be discarded by wall time")
 
         let feedback = try section(in: source,
                                    from: "struct R1ContactFeedback: ViewModifier",
@@ -487,7 +502,11 @@ struct R1MaterialContractTests {
                "The R1 shadow must not pop to a new paint state before contact")
     }
 
-    private static func ceramicAudioVariantsMeetTheRuntimeContract(_ source: String) throws {
+    private static func ceramicAudioVariantsMeetTheRuntimeContract(
+        _ source: String,
+        builder: String,
+        receipt: String
+    ) throws {
         let expression = try NSRegularExpression(
             pattern: #"r1-ceramic-(?:outer|center|stack)-0[1-3]"#
         )
@@ -500,8 +519,16 @@ struct R1MaterialContractTests {
                "R1 requires three variants for outer well, center well, and player stack")
 
         expect(source.contains("case .playerStack:")
-               && source.contains("variants = stackVariants"),
-               "Player-stack contacts need their own softer ceramic-on-ceramic family")
+               && source.contains("return (stackVariants"),
+               "Player-stack contacts need their own ceramic-on-ceramic family")
+        expect(builder.contains("real clay/ceramic poker chips")
+            && builder.contains("fartheststar")
+            && !builder.contains("coin(s) spin drop")
+            && !builder.contains("coin drop into coins"),
+               "Every R1 family must derive from real clay/ceramic chip Foley")
+        expect(receipt.contains(#""technicalVerdict": "GREEN""#)
+            && receipt.contains("PENDING_NEW_CERAMIC_FOLEY_TESTFLIGHT"),
+               "Objective audio must be green while the physical-iPhone gate stays explicit")
 
         for name in names {
             let url = root.appendingPathComponent("App/Audio/\(name).caf")

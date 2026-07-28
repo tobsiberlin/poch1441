@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Poch 1441 - GOTY 2026 Live-Status</title>
+  <title>Poch 1441 - Aktueller Stand</title>
   <style>
     :root {
       color-scheme: dark;
@@ -18,6 +18,9 @@
       --ink: #f0f1ef;
       --muted: #9ba7b4;
       --quiet: #6f7d8b;
+      --success: #86bda6;
+      --review: #c5a76b;
+      --blocked: #c87c72;
       --radius: 14px;
     }
 
@@ -33,6 +36,15 @@
     }
     img { display: block; max-width: 100%; }
     a { color: inherit; }
+    .selection-link {
+      display: inline-block;
+      margin-top: 12px;
+      color: var(--metal-bright);
+      font-weight: 620;
+      text-decoration-color: var(--quiet);
+      text-underline-offset: 4px;
+    }
+    .selection-link:hover { text-decoration-color: var(--metal-bright); }
     code {
       color: var(--metal-bright);
       font: 12px/1.5 "SFMono-Regular", ui-monospace, monospace;
@@ -44,6 +56,307 @@
       margin: 0 auto;
       padding: clamp(18px, 3.2vw, 46px);
     }
+
+    .live-now {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(150px, .48fr) minmax(0, 1.52fr);
+      gap: 18px;
+      margin: calc(clamp(18px, 3.2vw, 46px) * -1) calc(clamp(18px, 3.2vw, 46px) * -1) 26px;
+      padding: 14px clamp(18px, 3.2vw, 46px);
+      border-bottom: 1px solid var(--line);
+      background: rgb(9 16 24 / .94);
+      box-shadow: 0 12px 34px rgb(0 0 0 / .22);
+      backdrop-filter: blur(18px) saturate(.8);
+    }
+    .live-now-heading {
+      align-self: center;
+      color: var(--metal-bright);
+      font-size: 13px;
+      font-weight: 680;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .live-now-heading::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #7db69f;
+      box-shadow: 0 0 0 4px rgb(125 182 159 / .10);
+      vertical-align: 1px;
+    }
+    .live-now.red .live-now-heading::before {
+      background: var(--blocked);
+      box-shadow: 0 0 0 4px rgb(200 124 114 / .12);
+    }
+    .live-now.red .next-action {
+      border-left-color: var(--review);
+      background: rgb(197 167 107 / .07);
+    }
+    .live-now-body { min-width: 0; }
+    .live-now-body strong {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      font-weight: 620;
+    }
+    .live-now-body p {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .live-now-link {
+      display: inline-block;
+      margin: 5px 14px 0 0;
+      color: var(--metal-bright);
+      font-size: 12px;
+      font-weight: 650;
+      text-underline-offset: 3px;
+    }
+    .human-progress {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .human-card {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--line-quiet);
+      border-radius: 11px;
+      background: rgb(21 31 43 / .72);
+    }
+    .human-card span {
+      display: block;
+      color: var(--quiet);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .human-card strong {
+      margin-top: 2px;
+      color: var(--ink);
+      font-size: 12px;
+    }
+    .human-card.active { border-color: rgb(197 167 107 / .56); }
+    .human-card.active span { color: var(--review); }
+    .human-card.complete { border-color: rgb(134 189 166 / .48); }
+    .human-card.complete span { color: var(--success); }
+    .human-card.waiting span { color: var(--muted); }
+    .next-action {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-left: 2px solid var(--success);
+      border-radius: 0 9px 9px 0;
+      background: rgb(134 189 166 / .07);
+      color: var(--metal-bright);
+      font-size: 12px;
+      font-weight: 620;
+    }
+    .technical-links { margin-top: 8px; }
+    .technical-links summary,
+    .technical-archive > summary {
+      width: fit-content;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      text-decoration: underline;
+      text-decoration-color: var(--quiet);
+      text-underline-offset: 3px;
+    }
+    .technical-links[open] summary,
+    .technical-archive[open] > summary { color: var(--metal-bright); }
+    .technical-archive {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+    .technical-archive > summary {
+      margin: 20px 0;
+      list-style-position: inside;
+    }
+    .technical-archive-body { min-width: 0; }
+    .goty-timeline {
+      padding: 4px 0 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .timeline-head {
+      display: grid;
+      grid-template-columns: minmax(230px, .72fr) minmax(0, 1.28fr);
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    .timeline-head p {
+      max-width: 72ch;
+      color: var(--muted);
+    }
+    .timeline-count {
+      margin-top: 8px;
+      color: var(--metal-bright);
+      font: 11px/1.4 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .timeline-rail {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .timeline-step {
+      position: relative;
+      min-width: 0;
+      padding: 18px 14px 0 0;
+      border-top: 1px solid var(--line);
+    }
+    .timeline-step::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: 0;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--canvas);
+      border-radius: 50%;
+      background: var(--quiet);
+      box-shadow: 0 0 0 1px var(--line);
+    }
+    .timeline-step-complete::before { background: var(--success); }
+    .timeline-step-review::before { background: var(--review); }
+    .timeline-step-blocked::before { background: var(--blocked); }
+    .timeline-step-final::before {
+      background: var(--metal-bright);
+      box-shadow: 0 0 0 1px var(--metal), 0 0 18px rgb(224 228 232 / .18);
+    }
+    .timeline-state {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--quiet);
+      font: 10px/1.35 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .055em;
+      text-transform: uppercase;
+    }
+    .timeline-step-complete .timeline-state { color: var(--success); }
+    .timeline-step-review .timeline-state { color: var(--review); }
+    .timeline-step-blocked .timeline-state { color: var(--blocked); }
+    .timeline-step strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 640;
+      line-height: 1.25;
+    }
+    .timeline-step p {
+      margin-top: 5px;
+      padding-right: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .timeline-current {
+      display: grid;
+      grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr);
+      gap: 20px;
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-left: 2px solid var(--blocked);
+      background: rgb(21 31 43 / .55);
+    }
+    .timeline-current strong {
+      color: var(--metal-bright);
+      font-weight: 640;
+    }
+    .timeline-current p { color: var(--muted); }
+    .timeline-note {
+      margin-top: 10px;
+      color: var(--quiet);
+      font-size: 11px;
+    }
+    .latest-feed {
+      padding: 0 0 26px;
+      border-bottom: 1px solid var(--line);
+    }
+    .latest-feed-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+    .latest-feed-head p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .latest-grid {
+      display: grid;
+      grid-template-columns: 1.45fr .78fr .78fr;
+      gap: 12px;
+    }
+    .latest-card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-quiet);
+      border-radius: 10px;
+      background: var(--surface-deep);
+    }
+    .latest-card a { display: block; text-decoration: none; }
+    .latest-card img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-bottom: 1px solid var(--line-quiet);
+    }
+    .latest-card-portrait img { object-position: center 46%; }
+    .latest-card-contain img { object-fit: contain; background: #171311; }
+    .latest-copy { padding: 10px 12px 12px; }
+    .latest-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+      color: var(--quiet);
+      font: 10px/1.4 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .latest-copy strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 620;
+      line-height: 1.25;
+    }
+    .latest-tech {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1px;
+      margin-top: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line-quiet);
+      border-radius: 10px;
+      background: var(--line-quiet);
+    }
+    .latest-tech article {
+      min-width: 0;
+      padding: 11px 12px;
+      background: var(--surface-deep);
+    }
+    .latest-tech time {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--quiet);
+      font: 10px/1.4 "SFMono-Regular", ui-monospace, monospace;
+      text-transform: uppercase;
+    }
+    .latest-tech strong { display: block; font-size: 12px; font-weight: 620; }
+    .latest-tech span { color: var(--muted); font-size: 11px; }
 
     .masthead {
       display: grid;
@@ -298,7 +611,13 @@
 
     @media (max-width: 820px) {
       .shell { padding: 18px; }
-      .masthead, .reference-copy, .r1-northstar, .section-head, .lower-grid, .risk-strip, footer { grid-template-columns: 1fr; }
+      .live-now, .timeline-head, .timeline-current, .masthead, .reference-copy, .r1-northstar, .section-head, .lower-grid, .risk-strip, footer { grid-template-columns: 1fr; }
+      .live-now { gap: 3px; margin: -18px -18px 26px; }
+      .timeline-head { gap: 8px; }
+      .timeline-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 22px; }
+      .latest-grid { grid-template-columns: 1fr 1fr; }
+      .latest-card:first-child { grid-column: 1 / -1; }
+      .latest-tech { grid-template-columns: 1fr; }
       .masthead-state { padding: 12px 0 0; border-left: 0; border-top: 1px solid var(--line-quiet); }
       .reference { grid-template-columns: 1fr; padding: 34px 0; }
       .reference-copy { gap: 10px; }
@@ -312,6 +631,21 @@
 
     @media (max-width: 520px) {
       h1 { font-size: 34px; }
+      .human-progress { grid-template-columns: 1fr; gap: 7px; }
+      .timeline-rail { display: block; }
+      .timeline-step {
+        min-height: 76px;
+        padding: 0 0 18px 24px;
+        border-top: 0;
+        border-left: 1px solid var(--line);
+      }
+      .timeline-step:last-child { min-height: 0; border-left-color: transparent; }
+      .timeline-step::before { top: 0; left: -5px; }
+      .timeline-current { gap: 4px; }
+      .latest-feed-head { display: block; }
+      .latest-feed-head p { margin-top: 3px; }
+      .latest-grid { grid-template-columns: 1fr; }
+      .latest-card:first-child { grid-column: auto; }
       .evidence-grid { grid-template-columns: 1fr; }
       .evidence-feature { grid-row: auto; }
       .evidence-feature .image-well { aspect-ratio: .92; }
@@ -326,6 +660,388 @@
 </head>
 <body>
 <main class="shell">
+  <aside class="live-now red" aria-live="polite" aria-label="Aktueller Entwicklungsstand">
+    <div class="live-now-heading">InternalQA-Veröffentlichung läuft · Stand 28.07.2026, 22:26</div>
+    <div class="live-now-body">
+      <strong>Der Hardware-Kandidat wird jetzt veröffentlicht</strong>
+      <p>Der frühere 1,3-pt-P0 im Auszahlungs-Schritt ist geschlossen: Die Hochzeit wird in zwei Sätzen erklärt, die Portrait-Komposition reserviert 18 pt zwischen Coach und Kartenhand, und der echte 402-x-874-Simulatorlauf besteht den 12-pt-Mindestabstand. Verbindung, Auszahlung und Abschluss sind als drei aktuelle PNG-Belege visuell geprüft. Große Schrift, Rotation und die vier SE-Ausspiel-Gates sind grün: Portrait und 667-x-375-Querformat trennen Anleitung, Gegner, Brett, ausgespielte Karten und Hand; freie Kartenwahl funktioniert, und die nächste Aktion wird erst nach Kartenlandung freigeschaltet. Die vollständigen 390-x-844-Flows sind mit normaler Bewegung und Reduced Motion grün. Trumpf-Hero, echtes Karo-König-Ziel, R1- und Poch-Chipkontakte, schnelle Übergänge, Live-Reduced-Motion und Reaktions-FIFO sind ebenfalls grün. Der frische Simulator-Build, 64 PochKit-Tests, Stringkatalog mit sieben Sprachen und Diff-Check bestehen.</p>
+      <div class="next-action"><strong>Jetzt:</strong> den ausdrücklich freigegebenen Gesamt-Worktree committen und pushen, anschließend einen neuen InternalQA-Archive-Build erstellen, binär prüfen und intern zu TestFlight hochladen. Danach bleiben Human-Audio, Haptik und reale Audio-/Bild-Synchronität als physische iPhone-Gates offen.</div>
+      <a class="live-now-link" href="tutorial-regie-build12-review/index.html">Regie- und Textreferenz ansehen</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-meld-connect-402x874.png">Melden-Verbindung</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-meld-payout-402x874.png">Auszahlung</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-meld-release-402x874.png">Melden-Abschluss</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-axxxl-se-portrait-375x667.png">AX XXXL · SE-Portrait</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-axxxl-se-landscape-667x375.png">AX XXXL · SE-Querformat</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-result-hold-390x844.png">Ergebnis-Hold · 390 × 844</a>
+      <a class="live-now-link" href="goty-2026-live-assets/tutorial-completion-390x844.png">Tutorial-Abschluss · 390 × 844</a>
+      <div class="human-progress" aria-label="Arbeitsfortschritt">
+        <div class="human-card complete"><span>Grün</span><strong>Kompletter Tutorialflow, große Schrift, Rotation, Reduced Motion und SE-Zonen</strong></div>
+        <div class="human-card complete"><span>Grün</span><strong>Trumpf-, Karten-, Chip-, Reaktions-, Build-, Logik- und String-Gates</strong></div>
+        <div class="human-card active"><span>Hardware offen</span><strong>Human-Audio, Haptik und reale AV-Synchronität auf einem physischen iPhone</strong></div>
+      </div>
+    </div>
+  </aside>
+  <details class="technical-archive">
+    <summary>Komplette technische Historie - nur bei Bedarf öffnen</summary>
+    <div class="technical-archive-body">
+  <section class="goty-timeline" aria-labelledby="timeline-heading">
+    <div class="timeline-head">
+      <div>
+        <h2 id="timeline-heading">Qualitätszeitstrahl bis GOTY 2026</h2>
+        <div class="timeline-count">2 Gates grün · 2 aktiv · 2 gesperrt</div>
+      </div>
+      <p>Der Kern und der Phasenraum tragen. Materialwelt und Game Feel laufen gleichzeitig, aber keine Bewegung passiert das Gate ohne glaubwürdige Perspektive, Masse und Kontakt.</p>
+    </div>
+    <ol class="timeline-rail">
+      <li class="timeline-step timeline-step-complete">
+        <span class="timeline-state">Grün</span>
+        <strong>Regelkern</strong>
+        <p>PochKit, deterministische Abläufe und 63 von 63 Tests.</p>
+      </li>
+      <li class="timeline-step timeline-step-complete">
+        <span class="timeline-state">Grün</span>
+        <strong>Spielraum</strong>
+        <p>Phase 2, AX XXXL, Landscape, Reduced Motion und Übergang.</p>
+      </li>
+      <li class="timeline-step timeline-step-review">
+        <span class="timeline-state">Im Review</span>
+        <strong>Materialwelt</strong>
+        <p>Track A, Track B, Brett, Karten, Münzen, Licht und Patina.</p>
+      </li>
+      <li class="timeline-step timeline-step-blocked" aria-current="step">
+        <span class="timeline-state">Jetzt blockiert</span>
+        <strong>Game Feel</strong>
+        <p>Münzwurf, Kartengeben, Kontakt, Audio, Haptik und Kamera.</p>
+      </li>
+      <li class="timeline-step">
+        <span class="timeline-state">Danach</span>
+        <strong>Release Candidate</strong>
+        <p>Vollspiel, Geräte-Matrix, Performance, Lokalisierung und QA.</p>
+      </li>
+      <li class="timeline-step timeline-step-final">
+        <span class="timeline-state">Endgate</span>
+        <strong>GOTY 2026</strong>
+        <p>Ein veröffentlichungsreifer Kandidat mit eigener Identität.</p>
+      </li>
+    </ol>
+    <div class="timeline-current">
+      <strong>Kritischer Pfad: schwerer Kontakt statt flacher Translation</strong>
+      <p>Exit-Kriterium: Der enge Coin-Beweis besteht zusätzlich Human-Audio, On-device-Haptik und die 240-fps/96-kHz-Synchronmessung. Erst danach darf die Produktionsintegration beginnen.</p>
+    </div>
+    <p class="timeline-note">GOTY 2026 ist das Qualitäts-Endgate. Ein Award-Ergebnis kann nicht versprochen werden, Kandidatenreife und kompromisslose Ausführung schon.</p>
+  </section>
+  <section class="latest-feed" aria-labelledby="latest-heading">
+    <div class="latest-feed-head">
+      <h2 id="latest-heading">Neu erstellt und gerade geprüft</h2>
+      <p>Chronologisch · neuester Stand zuerst</p>
+    </div>
+    <div class="latest-grid">
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-material-v2-product-red.png">
+          <img src="goty-2026-live-assets/card-material-v2-product-red.png?v=1" alt="Card Material V2 beim korrekten Erstkantenkontakt; W2 ist echt, wirkt im Zielmaßstab aber noch wie ein schwarzes UI-Rechteck">
+          <div class="latest-copy"><div class="latest-meta"><span>13:10 · Card Material V2</span><span>Tech pass / Product red</span></div><strong>Plane Lock trägt, Karton, Patina und Trennschatten noch nicht</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/coin-material-v2-crop-red.png">
+          <img src="goty-2026-live-assets/coin-material-v2-crop-red.png?v=1" alt="Unvergrößerter Zielcrop von Coin Material V2; Kupfersilhouette ist sichtbar, Prägung und Patina kollabieren jedoch im realen Maßstab">
+          <div class="latest-copy"><div class="latest-meta"><span>13:10 · Coin Material V2</span><span>Material red</span></div><strong>Kupferform lesbar, aber statisches Relief überlebt 19,8 Pixel nicht</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-plane-lock-v1-contact-review.png">
+          <img src="goty-2026-live-assets/card-plane-lock-v1-contact-review.png?v=1" alt="Card Plane Lock V1 beim technisch korrekten Erstkantenkontakt in der großen Track-B-Mittelfläche; Diagnosematerial ist noch nicht produktreif">
+          <div class="latest-copy"><div class="latest-meta"><span>09:36 · Card Plane Lock V1</span><span>Tech green / Product block</span></div><strong>Raum und Kontakt stimmen, echtes W2-Kartenmaterial fehlt noch</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/coin-transcript-v1-visual-red.png">
+          <img src="goty-2026-live-assets/coin-transcript-v1-visual-red.png?v=1" alt="Erster und einziger erlaubter 402 mal 874 Coin-Transcript-Gesamtscreen; die technisch korrekte Cent-Münze liest sich visuell als kleiner orangefarbener Puck">
+          <div class="latest-copy"><div class="latest-meta"><span>08:39 · Coin Transcript V1</span><span>Tech green / Visual red</span></div><strong>106 Checks grün, aber Kupfer, Relief und Weltlicht gehen verloren</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-native-v4-contact-block.png">
+          <img src="goty-2026-live-assets/card-motion-native-v4-contact-block.png?v=1" alt="Enger Card-V4-Kontaktbeleg mit frontal stehender Kartenebene vor der stark geneigten Track-B-Dose">
+          <div class="latest-copy"><div class="latest-meta"><span>07:05 · Card V4</span><span>Visual block</span></div><strong>Technik grün, aber Perspektive und Bodenkontakt bleiben falsch</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-native-v4-deal-block.png">
+          <img src="goty-2026-live-assets/card-motion-native-v4-deal-block.png?v=1" alt="Echte Wallclock-Sequenz von acht Card-V4-Deals mit maximal zwei Flugkarten und weiterhin zu gleichförmiger diagonaler Bahn">
+          <div class="latest-copy"><div class="latest-meta"><span>07:05 · Card V4</span><span>9/9 Tech</span></div><strong>Parallelität beherrscht, physische Einbettung noch nicht</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-native-v3-deal-red.png">
+          <img src="goty-2026-live-assets/card-motion-native-v3-deal-red.png?v=1" alt="Echte Wallclock-Sequenz von zehn nativen Deals; maximal fünf Flugkarten bilden eine mechanische diagonale Förderkette">
+          <div class="latest-copy"><div class="latest-meta"><span>06:02 · Native Card V3</span><span>RED</span></div><strong>Echter Beleg, falsches Gefühl: mechanisches Karten-Förderband</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-native-v3-return-review.png">
+          <img src="goty-2026-live-assets/card-motion-native-v3-return-review.png?v=1" alt="Ungeschnittene Controller-Wallclock-Sequenz für Play, Abbruch bei 0,58 und Return mit kaum lesbarem Schatten">
+          <div class="latest-copy"><div class="latest-meta"><span>06:02 · Play/Return V3</span><span>BLOCK</span></div><strong>Impuls verbessert, aber Schatten, Kontakt und Surface-Wechsel bleiben falsch</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/actual-meld-payout-flight.png?v=9">
+          <img src="goty-2026-live-assets/actual-meld-payout-flight.png?v=9" alt="Aktueller Produktionspfad mit flachen R1-Ansichten ohne Eigenrotation, getrennten Bodenschatten oder sichtbaren Materialkontakt">
+          <div class="latest-copy"><div class="latest-meta"><span>01:24 · Produktionsaudit</span><span>P0 BLOCK</span></div><strong>Aktuelle Münzbewegung: flache 2D-Translation statt schwerer Körper</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/coin-realitykit-visual-v3-red.png">
+          <img src="goty-2026-live-assets/coin-realitykit-visual-v3-red.png?v=1" alt="Chronologischer RealityKit-V3-Kontaktbeleg; die Münze bleibt im Phone-Frame winzig und vier von sechs Läufen verfehlen das Pixelgate">
+          <div class="latest-copy"><div class="latest-meta"><span>01:12 · RealityKit V3</span><span>verworfen</span></div><strong>Münzwurf: physikalisch und dramaturgisch nicht glaubwürdig</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-native-v2-realtime.png">
+          <img src="goty-2026-live-assets/card-motion-native-v2-realtime.png?v=1" alt="64 chronologische native iPhone-Frames der getrennten Deal-, Reveal-, Play- und Return-Segmente mit kartengeformtem Tischschatten">
+          <div class="latest-copy"><div class="latest-meta"><span>00:20 · Native V2</span><span>Visual Review</span></div><strong>Kartenbewegung segmentiert - technischer Kontakt grün, Ästhetik noch offen</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-native-v1-strip.png">
+          <img src="goty-2026-live-assets/card-motion-native-v1-strip.png?v=1" alt="Fünf feste native iPhone-Frames des ersten SwiftUI-Kartenspikes mit Deal, Reveal und Play; der technische Beleg zeigt zugleich den zu runden Schatten und die zu große Zielkarte">
+          <div class="latest-copy"><div class="latest-meta"><span>23:50 · Native Sichtprüfung</span><span>visuell blockiert</span></div><strong>Karten-Native-V1: Technik grün, Schatten und Zielkontakt noch falsch</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-v3-landscape-contact-sheet.png">
+          <img src="goty-2026-live-assets/card-motion-v3-landscape-contact-sheet.png?v=1" alt="Kartenbewegung V3 in sechzehn chronologischen Landscape-Frames mit ruhigerem Deal, korrekter Reveal-Ebene, Ausspiel und Rücknahme">
+          <div class="latest-copy"><div class="latest-meta"><span>22:58 · unabhängig geprüft</span><span>V3 Kandidat</span></div><strong>Karten-V3: Schatten, Tiefenfolge und Rückkehr technisch grün</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/coin-realitykit-v1-red.png">
+          <img src="goty-2026-live-assets/coin-realitykit-v1-red.png?v=1" alt="Diagnostischer iPhone-Lauf des echten RealityKit-Münzspikes mit vier roten Kontaktfällen">
+          <div class="latest-copy"><div class="latest-meta"><span>22:42 · echter 3D-Lauf</span><span>RED</span></div><strong>RealityKit-Münze: echte Rotation, Kontaktvertrag noch verletzt</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-motion-v2-contact-sheet.png">
+          <img src="goty-2026-live-assets/card-motion-v2-contact-sheet.png?v=1" alt="32 chronologische Frames der Kartenbewegung V2 von der physischen Deckentnahme über Fächer, Aufdecken und Ausspiel bis zur Rücknahme">
+          <div class="latest-copy"><div class="latest-meta"><span>22:27 · Frameprüfung</span><span>V2 blockiert</span></div><strong>Kartenbewegung: Schatten, Tiefenfolge und Rhythmus physikalisch falsch</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-back-camping-v11-atlas.png">
+          <img src="goty-2026-live-assets/card-back-camping-v11-atlas.png?v=1" alt="Zehn W2-Kartenrücken mit gleichmäßiger Druckermüdung, gebrochenem Kantenabrieb und seltenen physischen Gebrauchsspuren">
+          <div class="latest-copy"><div class="latest-meta"><span>20:17 · Lead-Sichtprüfung</span><span>V11 Review</span></div><strong>20 Jahre Camping statt aufgesetzter Kratzer</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-back-camping-v11-phone-gate.png">
+          <img src="goty-2026-live-assets/card-back-camping-v11-phone-gate.png?v=1" alt="W2-Camping-Alterung im direkten Vergleich bei großen und realen kleinen Phone-Kartengrößen">
+          <div class="latest-copy"><div class="latest-meta"><span>20:17 · Phone-Gate</span><span>104 und 52 pt</span></div><strong>Alterung bleibt der zweite Blick, W2 der erste</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-back-damage-veto-correction.png">
+          <img src="goty-2026-live-assets/card-back-damage-veto-correction.png?v=1" alt="Nutzerkorrektur: Das farbige W2-Grunddesign bleibt, die aufgesetzten Kratz- und Damage-Spuren werden verworfen">
+          <div class="latest-copy"><div class="latest-meta"><span>19:32 · Nutzerkorrektur</span><span>W2 bleibt</span></div><strong>Grunddesign richtig - Damage materiell falsch</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-back-w3-veto.png">
+          <img src="goty-2026-live-assets/card-back-w3-veto.png?v=1" alt="Nutzerbeleg: sechs beige Kartenrücken mit dünnen, beliebigen Ornamentmustern ohne glaubwürdige historische Druckwirkung">
+          <div class="latest-copy"><div class="latest-meta"><span>19:15 · gestoppt</span><span>Missverständnis</span></div><strong>Unnötige Grunddesign-Exploration verworfen</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-back-w2-generic-veto.png">
+          <img src="goty-2026-live-assets/card-back-w2-generic-veto.png?v=1" alt="Nutzerbeleg: zehn schwarze Kartenrücken mit buntem zentralem Karo wirken modern und generisch">
+          <div class="latest-copy"><div class="latest-meta"><span>18:59 · korrigiert</span><span>Damage verworfen</span></div><strong>W2-Grunddesign bleibt - Spuren werden ersetzt</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-back-damage-v10-2-crops.png">
+          <img src="goty-2026-live-assets/card-back-damage-v10-2-crops.png?v=1" alt="V10.2-Rückseitendetails mit unregelmäßigen unterbrochenen Rissen, dunklem transparentem Reparaturfilm und Eckstauchung">
+          <div class="latest-copy"><div class="latest-meta"><span>18:30 · Lead-Prüfung</span><span>Back V10.2</span></div><strong>Risse und Reparaturen im schwarzen Kartenmaterial</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-coin-visual-proof.png">
+          <img src="goty-2026-live-assets/track-b-coin-visual-proof.png?v=1" alt="Unverfälschte 390-Pixel-Crops aller fünf belegten Mulden mit kompakten Münzstapeln und sichtbar freiem Bodenring">
+          <div class="latest-copy"><div class="latest-meta"><span>18:27 · Lead-Nachprüfung</span><span>5/5 · 390 px</span></div><strong>Kompakte Münzstapel mit sichtbarem Bodenabstand</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-clean-mug-v3-proof.png">
+          <img src="goty-2026-live-assets/track-b-clean-mug-v3-proof.png?v=1" alt="Vorher-Nachher-Beleg: gerasterter Bechertext vollständig durch neutrale matte Steinzeugoberfläche ersetzt">
+          <div class="latest-copy"><div class="latest-meta"><span>17:46 · Lead-Prüfung</span><span>lokal grün</span></div><strong>Clean-Mug V3 · kein Text, kein Logo</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-front-damage-v10-atlas.png">
+          <img src="goty-2026-live-assets/card-front-damage-v10-atlas.png?v=1" alt="V10-Schadensatlas mit kontrolliert verteilten Stresslinien, Reparaturfilm, Eckfaltungen und kleinen Ecksplittern">
+          <div class="latest-copy"><div class="latest-meta"><span>17:45 · Lead-Prüfung</span><span>Front V10</span></div><strong>Karten mit individuellen Gebrauchsgeschichten</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-coin-plane-proof.png">
+          <img src="goty-2026-live-assets/track-b-coin-plane-proof.png?v=10" alt="Neuer Coin-Proof: fünf flache Bodenpolygone, erodierte sichere Ankerzonen und vollständig enthaltene Münz- plus Schatten-Footprints">
+          <div class="latest-copy"><div class="latest-meta"><span>17:39 · Lead-Nachprüfung</span><span>5/5 messbar grün</span></div><strong>Coin-Footprints vollständig auf dem Muldenboden</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-card-plane-proof.png">
+          <img src="goty-2026-live-assets/track-b-card-plane-proof.png?v=1" alt="Vorher-Nachher-Proof: Phase-3-Karten vom schwebenden UI-Stapel auf die perspektivische Dosenebene gesetzt">
+          <div class="latest-copy"><div class="latest-meta"><span>17:38 · Lead-Nachprüfung</span><span>V9 Tray-Ebene</span></div><strong>Ausspielkarten liegen auf der Dosenebene</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-coin-rim-veto.png">
+          <img src="goty-2026-live-assets/track-b-coin-rim-veto.png?v=1" alt="Nutzerbeleg: obere rechte Münzgruppe liegt auf der Wandkrone zwischen zwei Mulden">
+          <div class="latest-copy"><div class="latest-meta"><span>17:26 · Nutzer-Veto</span><span>P0 · alle Anker verworfen</span></div><strong>Münzen liegen auf der Muldenwand</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-mug-text-veto.png">
+          <img src="goty-2026-live-assets/track-b-mug-text-veto.png?v=1" alt="Nutzerbeleg: missglückte gerasterte Blockschrift auf dem Track-B-Keramikbecher">
+          <div class="latest-copy"><div class="latest-meta"><span>17:06 · Nutzer-Veto</span><span>P0 · Inpainting läuft</span></div><strong>Bechertext wird vollständig entfernt</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/track-b-coin-wall-veto.png">
+          <img src="goty-2026-live-assets/track-b-coin-wall-veto.png?v=1" alt="Nutzerbeleg: linke Münzgruppen schneiden die ansteigende Kunststoffflanke statt vollständig auf dem flachen Muldenboden zu liegen">
+          <div class="latest-copy"><div class="latest-meta"><span>17:01 · Nutzer-Veto</span><span>P0 · in Arbeit</span></div><strong>Münzfootprint liegt teilweise auf der Muldenwand</strong></div>
+        </a>
+      </article>
+      <article class="latest-card">
+        <a href="track-b-three-phases-mockup.html">
+          <img src="goty-2026-live-assets/track-b-three-phases-current.png?v=10" alt="Aktuelle interaktive Vorschau mit V9-Kartenebene und vollständig neu verankerten Münzgruppen">
+          <div class="latest-copy"><div class="latest-meta"><span>17:39 · interaktiv grün</span><span>V9 · Coin Safe-Zones</span></div><strong>Aktuelle drei Spielphasen</strong></div>
+        </a>
+      </article>
+      <article class="latest-card latest-card-contain">
+        <a href="goty-2026-live-assets/card-patina-original-v8.png">
+          <img src="goty-2026-live-assets/card-patina-original-v8.png?v=1" alt="V8-Kartenmaterial mit neutralgrauem Elfenbein, matter Handling-Zone und gedecktem Druck">
+          <div class="latest-copy"><div class="latest-meta"><span>16:28 · Lead-Nachprüfung</span><span>V8 im Screen</span></div><strong>Kartenpatina V8 · Track-B-Materialton</strong></div>
+        </a>
+      </article>
+    </div>
+    <div class="latest-tech" aria-label="Neueste technische Elemente">
+      <article><time>22:19 · Lokale Tutorial-Qualifizierung grün</time><strong>Auszahlungsruhe, vollständige Flows, Materialkontakte und SE-Zonen bestanden</strong><span>Normaler und reduzierter 390-x-844-Film bis Ergebnis-Hold und 3/3 grün; AX XXXL, Rotation, Trumpf-Hero, echtes Kartenziel, R1-/Poch-Kontakte, Reaktions-FIFO und vier SE-Ausspiel-Gates grün. 64 PochKit-Tests, frischer Simulator-Build, sieben Sprachen und Diff-Check grün. Kein Commit, Push oder TestFlight; Human-Audio, Haptik und reale AV-Synchronität bleiben Hardware-Gates</span></article>
+      <article><time>06:35 · Build 10 verteilt</time><strong>Tutorial-Premiere für den echten iPhone-Test bereit</strong><span>App Store Connect VALID und intern verteilt; 8/8 Tutorial-Flows, drei Accessibility-XXXL-Größen und beide Produktbreiten grün. Exportierte IPA ohne DeveloperToolsSupport, Debug-Dylib oder Metal-Quellpfade. Physischer Start, Human-Audio, Haptik und Sync bleiben pending; Produktion bleibt gesperrt</span></article>
+      <article><time>13:36 · Build 9 verteilt</time><strong>Tutorial- und Produktpass für den echten iPhone-Test bereit</strong><span>App Store Connect VALID und IN_BETA_TESTING; signierte IPA ohne DeveloperToolsSupport, Debug-Dylib oder Metal-Quellpfade. Unabhängiger visueller Audit ohne P0/P1. Physischer Start, Audio, Haptik und Sync bleiben pending; Produktion bleibt gesperrt</span></article>
+      <article><time>20:56 · Build 8 verteilt</time><strong>Release-basierter InternalQA-Startfix bereit</strong><span>Optimiert mit ausschließlich INTERNAL_QA, ohne DeveloperToolsSupport oder Debug-Dylib; neun normale Starts, 3/3 QA-Flows, signiertes Archiv, Export, Apple-Verarbeitung und interne Verteilung grün. Physischer Start-Retest pending</span></article>
+      <article><time>19:04 · Build 7 ROT und ersetzt</time><strong>ITMS-90730 behoben, aber physischer Start fehlgeschlagen</strong><span>Nutzer meldete sofortiges Beenden auf dem iPhone. Kein Geräte-Crashlog verfügbar; Artefaktaudit belegt das falsche Debug-Preset mit DeveloperToolsSupport. Build 7 nicht mehr testen</span></article>
+      <article><time>18:34 · TestFlight intern verteilt</time><strong>Build 0.1.0 (6) für kabellose Hardwareprüfung bereit</strong><span>Separates InternalQA-Scheme, 3/3 UI-Flows einschließlich Reduced Motion, Archiv, Export, Apple-Verarbeitung und interne Verteilung grün; testFlightInternalTestingOnly verhindert externe oder App-Store-Nutzung. Alle Hardware-Gates bleiben pending</span></article>
+      <article><time>17:34 · Integration Stufe 4 Hardware PENDING</time><strong>Technischer und visueller Queen-Drop-Beweis grün</strong><span>Hashgebundenes 240-Hz-6DoF-Transcript, V3-Materialatlas, exakter Lifecycle, 3/3 UI-Flows und ein gemeinsamer Host-Tick für Audio und Haptik; ohne Gerät bleiben Human-Audio und 240-fps/96-kHz-Sync gesperrt</span></article>
+      <article><time>17:33 · Audio technisch GREEN</time><strong>Eigenständiger 96-kHz-Kupfer-auf-Polycarbonat-Fingerprint</strong><span>Bytegenau reproduzierbar, keine Clips, 20,8-µs-Onset und mindestens 27,66 dB spektraler RMSE-Abstand zu den sechs Keramikassets; Lautsprecherurteil pending</span></article>
+      <article><time>17:32 · Visual GREEN / erster Kandidat bewahrt RED</time><strong>V3-Relief und echte Queen-Frontlippe tragen im Runtime-Flow</strong><span>Finaler 31,178-s-Clip vollständig geprüft; genau ein Cent, kohärente Orientierung und stabiler Ruhepunkt. Der flache orange Erstkandidat bleibt als aufgelöstes rotes Evidence erhalten</span></article>
+      <article><time>16:46 · Integration Stufe 3 GREEN</time><strong>Ein FlyingBack-Transcript hinter DEBUG-Schalter</strong><span>3/3 echte Simulatorflows grün: acht Kontakte, maximal zwei Karten einschließlich Settle, Reduced Motion ohne Raumflug und Skip ohne späten State-Write; Release-Default bleibt ImpactFlight</span></article>
+      <article><time>16:42 · Human Visual GREEN</time><strong>Standard und Reduced Motion vollständig in QuickTime geprüft</strong><span>7,68-s-Standardclip aufrecht und räumlich kohärent; 5,59-s-Reduced-Motion-Clip ohne räumliche Flugkarte; Stage 4 darf beginnen</span></article>
+      <article><time>16:31 · roter Testlauf aufgelöst</time><strong>Exakter Accessibility-Zwischenstand war zu flüchtig</strong><span>Produkt lief bereits bis 23/31 und 26/31; numerisches größer-gleich-acht ersetzt den fehlerhaften Exact-Match, ohne Produktcode zu ändern</span></article>
+      <article><time>16:13 · Integration Stufe 2 GREEN</time><strong>Transcript Player technisch und menschlich freigegeben</strong><span>7/7 Tests, 60/80/120-Hz-Wallclock, monotone Cancel-Pose, synchrones Reduced Motion und dekodierte aufrechte Pixel-Evidence</span></article>
+      <article><time>15:49 · Integration Stufe 1 GREEN</time><strong>Regelneutrale Motion-Transcript-Datennaht</strong><span>Sendable/Codable Samples, Kontakt, Ruhefenster und committed Cancel-Policy; neun deterministische Varianten ohne Wiederholung in acht Transfers; Strict-Concurrency-Test und App-Build grün</span></article>
+      <article><time>15:41 · Lead Product GREEN</time><strong>Wallclock V4 besteht drei QuickTime-Sequenzen</strong><span>Standard, Reduced Motion und Cancellation sind aufrecht; fünf committed Karten laufen vollständig aus, drei zukünftige bleiben im Deck</span></article>
+      <article><time>15:41 · Lead Material GREEN</time><strong>Card Material V5 vollständig freigegeben</strong><span>Quelle, Freiflug, Kontakt und Ruhe bleiben in QuickTime aufrecht; Faser-, Kanten-, Schatten- und Materialsignal sind kohärent</span></article>
+      <article><time>15:26 · Reparatur isoliert aktiv</time><strong>Card V5 und Wallclock V4 normalisieren nur den Encode</strong><span>Model, Scheduler, Cancel-Semantik, Material, Stage und W2 bleiben eingefroren; decodierte Frames müssen gegen aufrechte PNG-Evidence bestehen</span></article>
+      <article><time>15:25 · Lead Product RED</time><strong>Card Material V4 statisch knapp grün, MP4 gespiegelt</strong><span>Neues Faser-/Kantenmaterial entfernt das V3-Ovalmuster; QuickTime zeigt den verpflichtenden 82-Frame-Wallclock-Beleg jedoch an der horizontalen Achse gespiegelt</span></article>
+      <article><time>15:23 · Lead Product RED</time><strong>Wallclock V3 korrigiert Cancel, nicht den Encode</strong><span>Committed Karten laufen kausal bis Kontakt, Settle und Ruhe aus; zukünftige Peels bleiben aus. Alle drei MP4s bleiben dennoch vertikal gespiegelt</span></article>
+      <article><time>15:05 · Lead Product RED</time><strong>Wallclock V2 zertifiziert die falsche Cancel-Semantik</strong><span>196, 82 und 97 Videoframes sind technisch vollständig; der Abbruch retargetet committed Karten jedoch in 140 ms zur Quelle und blendet sie aus</span></article>
+      <article><time>14:53 · Lead Material GREEN</time><strong>Coin Material V3 trägt bei 19,8 Pixel</strong><span>Zeitlich gekoppelte Kupferkante, Glanz, Relief, Roughness, Oxidation und Bodenschatten lesen als Metall; die Ziffer ist ausdrücklich kein Gate</span></article>
+      <article><time>14:50 · Product RED</time><strong>Card Material V3 bleibt blockiert</strong><span>Geometrie und Timing sind grün, aber die niederfrequente Tooth-Schicht kollabiert im echten Kartenmaßstab zu ovalen Polka-Flecken; V4 entfernt nur diese Materiallage</span></article>
+      <article><time>13:38 · Lead abgeschlossen</time><strong>Produktionsnaht festgelegt</strong><span>Regelneutrale Transcripts liefern Start, Kontakt und Ruhe; bestehende Card- und Coin-Gates bleiben unverändert, SwiftUI-Completion ist nicht länger der physische Beweis</span></article>
+      <article><time>13:10 · Vertrag GREEN</time><strong>Deal Rhythm V1</strong><span>512 Seeds, adversariale Dauern, 60/80/120 Hz, Settle als Bewegung und in jedem Sample höchstens zwei Karten</span></article>
+      <article><time>13:10 · aktiv</time><strong>Card Material V3</strong><span>Nur Stock-Tooth, Druckdeckung, dunkle Kante, stärkerer Trennschatten und leicht unperfekter Quellstapel</span></article>
+      <article><time>13:10 · aktiv</time><strong>Coin Material V3</strong><span>Materialread über zeitlich wanderndes Kantenlicht, Normal, Roughness und Oxidation statt statisch lesbarer Ziffer</span></article>
+      <article><time>13:10 · aktiv</time><strong>Deal Rhythm Wallclock V2</strong><span>Acht Karten, echte Capturezeit, sichtbares Settle, Abbruch und Reduced Motion im isolierten nativen Harness</span></article>
+      <article><time>09:36 · 11/11 GREEN</time><strong>Card Plane Lock V1</strong><span>Homografie, richtiges Ziel, Erstkantenkontakt, konstantes Weltlicht und 28 Ruheframes technisch belegt</span></article>
+      <article><time>09:36 · aktiv</time><strong>Card Material Lock V2</strong><span>Echtes W2-Material, Phone-Maßstab, Kartonkante und Bodenschatten ohne Diagnosegrafik</span></article>
+      <article><time>09:36 · aktiv</time><strong>Coin Material Lock V2</strong><span>Grüne V1-Physik bleibt eingefroren; Kupfer, Relief, Patina, Kantenlicht und Weltkontakt werden isoliert geprüft</span></article>
+      <article><time>09:36 · aktiv</time><strong>Deal Rhythm Contract V1</strong><span>Settle zählt als Bewegung; Karte i wartet auf das Ruhefenster von i minus 2</span></article>
+      <article><time>08:27 · 7 Tests GREEN</time><strong>Motion Sync Contract</strong><span>Tatsächliche Displayintervalle, getrennte 120-, 80- und 60-Hz-Segmente sowie konkretes 240-fps-Hardwareprotokoll</span></article>
+      <article><time>08:39 · Coin Visual RED</time><strong>Physik reicht nicht als Materialbeweis</strong><span>106 von 106 Checks grün, aber der einzige erlaubte Gesamtscreen liest sich als orangefarbener Puck statt gealtertes Kupfer</span></article>
+      <article><time>08:18 · Blueprint V2</time><strong>Material wird zur Identität</strong><span>R1-Keramik auf Samt, Cent-Kupfer in Rauchpolycarbonat und steifer elfenbeingrauer Kartenkarton sind verbindlich</span></article>
+      <article><time>08:18 · Motion Direction</time><strong>Signature ohne Aufmerksamkeitssuche</strong><span>R1-Rim-Catch, Cent-Präzession, einmalige Kartenentspannung, Deal-Rhythmus und ein WorldLightProfile je Tischwelt</span></article>
+      <article><time>08:18 · Vertragskorrektur</time><strong>120 Hz, Cancel und Kadenz gehärtet</strong><span>8,33-ms-p99 bei 120 Hz, kein Mid-Flight-Retarget und Karte i wartet auf die Ruhe von i minus 2</span></article>
+      <article><time>07:34 · aktiv</time><strong>Card Plane Lock V1</strong><span>Eine Karte, richtige Track-B-Mittelfläche, vier projizierte Ecken, eigener Bodenschatten und Erstkantenkontakt</span></article>
+      <article><time>07:34 · aktiv</time><strong>Coin Transcript Gate V1</strong><span>Zwölf Seeds passieren Energie-, Penetrations- und Ruhevertrag vor jedem visuellen Export</span></article>
+      <article><time>07:34 · aktiv</time><strong>Motion Sync Contract</strong><span>Gemeinsame Kontaktzeit für Bild, AVAudioEngine und Core Haptics mit echtem Messprotokoll</span></article>
+      <article><time>07:25 · Signature-Architektur</time><strong>Ein Kontaktmarker für alle Sinne</strong><span>Bild, Zustand, AVAudioEngine und Core Haptics teilen dieselbe physische Zeitbasis; keine nachträgliche Effektkette</span></article>
+      <article><time>07:25 · Card Blueprint</time><strong>Plane Lock vor vollständigem Deal</strong><span>Kalibrierter 2,5D-Tischraum, Erstkantenkontakt, maximal zwei Flüge und pixelidentische Übergabe statt Viewport-Prozenten</span></article>
+      <article><time>07:25 · Coin Blueprint</time><strong>Zertifizierte 6-DoF-Transcripts</strong><span>Physikalische Build-Time-Bibliothek, echte Lippen-Occlusion, eigener Bodenschatten und harte Energie- und Ruhegates</span></article>
+      <article><time>06:24 · Coin V5.1 RED</time><strong>Vor dem Render am Modellgate gestoppt</strong><span>7 Tests: 5 grün, 2 Testfälle/101 Assertions rot · 100/100 Seeds gewinnen Energie beim Erstkontakt · Ruherotation 0,00715 statt &lt;0,002 rad/s · kein Export</span></article>
+      <article><time>06:24 · Card V4 aktiv</time><strong>Vier sichtbare Blocker, ein 402×874-Gate</strong><span>Kein Surface-Teleport · Schatten auf echtem Track-B-Tisch · sichtbarer 70-100-ms-Kontakt ohne Scale-Squash · maximal zwei deterministisch variierte Deals</span></article>
+      <article><time>06:21 · unabhängig GREEN</time><strong>Phase 2 vollständig bestätigt</strong><span>Portrait, Landscape und Reduced Motion PASS · beide echte Übergänge zu Phase 3 · arm64-Simulatorbuild grün · temporäre Testumgebung entfernt</span></article>
+      <article><time>04:05 · Abbruchgate</time><strong>Native Evidence darf nicht hängen</strong><span>Coin V5 und Card V3 beenden ihre laufenden Exportprozesse kontrolliert · unvollständige Wallclock-Sequenz wird RED, nicht nachträglich grün erklärt</span></article>
+      <article><time>04:05 · Re-Test</time><strong>Phase-2-Projektion nach Lead-Review</strong><span>Portrait, Landscape und Reduced Motion zuvor 3/3 grün · Board-Ursprung nutzt jetzt ebenfalls sichtbare layoutFrame-Höhe · unabhängiger Frischlauf aktiv</span></article>
+      <article><time>01:24 · Produktions-P0</time><strong>ImpactFlight blockiert</strong><span>Keine Münzrotation · Schatten an der Münze statt auf dem Tisch · kein Erstkontakt/Nachlauf · feste Bildschirmraum-Offsets statt Safe-Zone-Ruhepose</span></article>
+      <article><time>01:19 · aktiv</time><strong>Coin Motion Presentation V5</strong><span>Echte Spielgröße · Flug, Erstkontakt, Nachlauf und Ruhe getrennt · keine Zielplatzierung · 8-12 Seeds und drei Zielviewports als visuelles Gate</span></article>
+      <article><time>01:19 · aktiv</time><strong>Native Card Motion V3</strong><span>Controller-Wallclock statt synthetischem Progress · Schatten unter Karten · Erstkontakt mit Gewicht · Abbruch erhält Position und Geschwindigkeit</span></article>
+      <article><time>01:12 · BLOCK</time><strong>Native Card Motion V2 unabhängig auditiert</strong><span>Echtzeitbeleg umgeht Controller · doppelte Deckoberkarte · Schatten über statt unter Karten · schwebender Nullgeschwindigkeitskontakt · Abbruch vernichtet Impuls · keine Integration</span></article>
+      <article><time>01:12 · Visual RED</time><strong>RealityKit Coin V3 verworfen</strong><span>4/6 Läufe über 0,5 projizierten Pixeln · bis 1,644 px beziehungsweise 1,264 mm · Wurf in Originalgröße ohne lesbares Gewicht · physisches RED unverändert</span></article>
+      <article><time>00:47 · STOP/REWRITE</time><strong>V4-Solver unabhängig auditiert</strong><span>Rotations-CCD verpasst Restschritt-Kontakt · Lippenpatch springt von ∞ auf tief negativ · Warm Start mehrfach pro Step · kein Positionssolver · kein weiterer Tuning-Pass</span></article>
+      <article><time>00:22 · Manifold V4 RED</time><strong>Dritter Physiksolver blockiert</strong><span>geneigt 1,324-1,359 mm · Lippe 6,598 mm · 248/1.000 Startlagen rot · 9-Münzen-Performance grün · unabhängiger SALVAGE/STOP-Audit aktiv</span></article>
+      <article><time>00:20 · 13/13, Visual RED</time><strong>Native Card Motion V2</strong><span>Deal, Reveal, Play und Return getrennt · Endposen exakt · 100 % 60-Hz-Simulatorbudget · menschliche Schatten-/Kontaktabnahme noch nicht bestanden</span></article>
+      <article><time>23:51 · Jolt RED</time><strong>5.400 deterministische Läufe</strong><span>iOS-17-arm64 Link grün · geneigt mindestens 2,205 mm · Lippe 0,993 mm ohne Kontakt · keine Integration · nachfolgender V4-Solver ebenfalls rot</span></article>
+      <article><time>23:50 · technisch grün, visuell BLOCK</time><strong>Native Card Motion V1</strong><span>8/8 Verträge und 99,697 % 60-Hz-Simulatorframes · aber runder Schattenblob und übergroße Zielkarte · App-Approval weiterhin rot · V2 aktiv</span></article>
+      <article><time>23:24 · P0 rot</time><strong>Phase-2-XXXL-Kompaktportrait</strong><span>375 × 667 · Ergebnis x = -114 · Weiter x = -106 bei 403,5 pt Breite · Disc nur 36 % sichtbar · falscher lokaler Landscape-Zweig · Produktionsfix aktiv</span></article>
+      <article><time>23:24 · PASS</time><strong>Reduced-Motion-Payout</strong><span>Kein Warten auf unsichtbaren Flug · Auszahlung settelt sichtbar · Phase 3 erscheint nach Weiter</span></article>
+      <article><time>23:08 · RealityKit RED</time><strong>Kontaktkalibrierung V2</strong><span>Event- und Transformmessung stimmen bis 0,0062 mm überein · geneigt 0,359-0,366 mm · Box 0,483 mm · kein Margin-Artefakt · nächster Enginevergleich aktiv</span></article>
+      <article><time>23:04 · 3/3 grün</time><strong>First-Run-Produktionsfix</strong><span>Safe-Area-Seitenverhältnis statt width &gt; height · 742 × 608 Bühnenraum im 402 × 874 Portrait korrekt klassifiziert · 1× und danach 3/3 ohne Fehler</span></article>
+      <article><time>22:59 · 63/63</time><strong>PochKit-Regelkern</strong><span>Alle 54 XCTest- und 9 Swift-Testing-Fälle grün · Regeln, Bots, Deals, Meldungen und Ausspiel unverändert stabil</span></article>
+      <article><time>22:58 · Kandidat</time><strong>Card Motion V3</strong><span>26/26 je Zielviewport · 5/5 deckungsgleiche Extraktionen · Schattenprojektion maximal 0,003 px · Reveal und Rückkehr über dem Fächer · Reduced Motion grün</span></article>
+      <article><time>22:42 · RED</time><strong>RealityKit Coin V1</strong><span>Ruhe, 3D-Rotation, Energie, Containment und Lippe grün · gemeldete Kontaktüberlappung 0,980-1,616 mm statt maximal 0,150 mm · Kalibrierung aktiv</span></article>
+      <article><time>22:30 · 0/3</time><strong>First-Run-Layout reproduzierbar rot</strong><span>402 × 874 Portrait stabil · drei Gegner vollständig bei x ≈ -120 pt · 54/54 erwartete Geometriefehler · Produktionsfix aktiv</span></article>
+      <article><time>22:29 · BLOCK</time><strong>Card Motion V2 verworfen</strong><span>Schatten folgt fälschlich der Flughöhe · Reveal unter Nachbarkarten · Drawer-Ease kriecht ins Ziel · Fünffach-Kaskade zu mechanisch · V3 aktiv</span></article>
+      <article><time>22:28 · Architektur</time><strong>Echte Münzphysik statt Zielanimation</strong><span>iOS-17-kompatibler RealityKit-Spike mit ARView(.nonAR) · maßhaltige Münze, Mulde, Lippe, Kamera und harte Energie-/Kontaktgates</span></article>
+      <article><time>22:17 · Build grün</time><strong>P0-Vertrauensfix</strong><span>Neue Partie mit Bestätigung · Phase 2 ohne ungültige Rundentaste · Haptik-Gates vollständig · Phase-2-Vertrag PASS</span></article>
+      <article><time>22:17 · 123/123</time><strong>Lokalisierungen</strong><span>DE, EN, FR, IT, ES, NL und PL vollständig · neue Bestätigungsdialoge enthalten</span></article>
+      <article><time>22:17 · RED</time><strong>Coin Motion V3</strong><span>18/352 Gates rot · bis 10,169 mm Rohpenetration · kein Renderer · kein Multi-Coin · Architekturspike läuft</span></article>
+      <article><time>22:17 · irreführend grün</time><strong>Card Motion V2 Automatik</strong><span>22/22 Checks bei 390 × 844 und 667 × 375, aber visuelle Kernfehler nicht gemessen · Gate wird in V3 erweitert</span></article>
+      <article><time>22:17 · Annahme widerlegt</time><strong>First-Run L1</strong><span>Portrait vor jedem Relaunch und stabiler Fensterframe grün · Gegner bleiben dennoch deterministisch außerhalb</span></article>
+      <article><time>21:02 · BLOCK</time><strong>Münzphysik V2 nicht belastbar</strong><span>PASS reproduziert, aber 89 % Winkelenergie durch globale Kontaktdämpfung gelöscht · Sleep setzt Geschwindigkeit hart auf null · Penetrationsreport falsch</span></article>
+      <article><time>21:02 · verworfen</time><strong>Münzwurf V1</strong><span>7,18 s Settle · 5.533 Kontakte · Bildschirmraum statt echter 3D-Geometrie · nachträgliche Zielplatzierung · falscher Viewport-Beleg</span></article>
+      <article><time>21:02 · BLOCK</time><strong>Kartenbewegung V1</strong><span>falscher finaler Z-Stack · Schatten durch paint containment fast unsichtbar · Deal materialisiert halbtransparent · Reduced Motion springt 18,5-25,2 px</span></article>
+      <article><time>21:02 · P0 bestätigt</time><strong>Neue Runde + Haptik-Vertrag</strong><span>Phase-2-„Neue Runde“ ist wirkungslos · Haptik AUS wird bei Poch, Auszahlung und Slider-Limit umgangen · isolierte Fixpfade definiert</span></article>
+      <article><time>21:02 · Audit</time><strong>GOTY-Baseline</strong><span>63 PochKit-Tests + Build + 120 Lokalisierungsschlüssel grün · First-Run-Smoke rot mit 18 Layoutfehlern</span></article>
+      <article><time>20:17 · 4 Stränge gestartet</time><strong>Parallele GOTY-Pipeline</strong><span>Lead: Material · Worker: Coin Motion · Card Motion · Gap Audit · cmux-Jobs für QA</span></article>
+      <article><time>20:17 · Review-Gate</time><strong>Camping-Damage V11</strong><span>10 neutrale Varianten · W2 unverändert · Damage nach Druck · 52/104-pt-Beleg</span></article>
+      <article><time>19:37 · aktiv</time><strong>W2 Camping-Damage</strong><span>20 Jahre Nutzung · Kantenabrieb · Druckausbleichung · Kartonalterung · physische statt dekorative Spuren</span></article>
+      <article><time>19:32 · korrigiert</time><strong>Grunddesign-Entscheidung</strong><span>W2 bleibt · W3/W4-Erkundung gestoppt · nur Damage wird neu aufgebaut</span></article>
+      <article><time>19:20 · Audit-Finding</time><strong>Back-Composite-Vertrag</strong><span>Damage 00...08 aktuell nicht 180°-symmetrisch · Phase-2-Call-Site nutzt neutralen Fallback</span></article>
+      <article><time>19:15 · verworfen</time><strong>W3-Back-Auswahl</strong><span>unnötig, da W2-Basis nicht zur Disposition stand · keine Produktionsintegration</span></article>
+      <article><time>19:08 · technisch grün</time><strong>V10-App-Integration</strong><span>Fronten + Damage-Overlays + Materialplan · 3 Contracts · arm64-Build PASS</span></article>
+      <article><time>18:30 · Review-Gate</time><strong>Back-Schäden V10.2</strong><span>10 Varianten · 1 Alpha-Hash · Phone-lesbar · Contract PASS</span></article>
+      <article><time>18:29 · integriert</time><strong>BackMaterialPlan</strong><span>10 Varianten · runden-/slotbasiert · keine Kartenidentität · Swift 6 PASS</span></article>
+      <article><time>18:27 · visuell in Nachprüfung</time><strong>Coin-Visual-Gate</strong><span>31 × 31 Stack · echte 3-Coin-Union · Minimum 5,498 px · 390-px-Crops</span></article>
+      <article><time>18:26 · integriert</time><strong>Clean-Mug-Weltmaster</strong><span>V3 aktiv · keine V2-/KAFFEE-Referenz · Browser-QA grün</span></article>
+      <article><time>17:49 · aktiv</time><strong>Back-Schäden V10.1</strong><span>Phone-lesbare Risse/Reparaturen · identitätsneutral · gleiche Alpha-Silhouette</span></article>
+      <article><time>17:46 · lokal grün</time><strong>Clean-Mug V3</strong><span>941 × 1672 · nur Becherregion geändert · Rest pixelidentisch</span></article>
+      <article><time>17:45 · Review-Gate</time><strong>Front-Schäden V10</strong><span>6 Stresslinien · 3 Reparaturen · 5 Eckfaltungen · 2 Splitter · PASS</span></article>
+      <article><time>17:39 · geometrisch grün</time><strong>Coin-Safe-Zones</strong><span>5/5 Footprints enthalten · engster Slack 2,49 px · TR-Beleg enthalten</span></article>
+      <article><time>17:38 · interaktiv grün</time><strong>V9-Kartenebene</strong><span>perspektivische Verkürzung · kurzer Kontaktschatten · keine UI-Kollision</span></article>
+      <article><time>17:28 · gemessen</time><strong>Coin-Footprint-Audit</strong><span>5/5 alte Anker ungültig · TL/ML bis 13,36 px in Wand · Scale 0,82</span></article>
+      <article><time>17:25 · integriert</time><strong>Visuelle Informationsgrenze</strong><span>neutrale Flight-ID · stabile Hitfläche · 2 Tests + arm64-Build PASS</span></article>
+      <article><time>17:21 · aktiv</time><strong>Back-Schadenssystem</strong><span>8-12 Varianten · keine Rank/Suit-Bindung · identische Alpha-Silhouette</span></article>
+      <article><time>17:20 · aktiv</time><strong>Front-Schadenssystem V10</strong><span>Riss · matte Reparatur · Eckstauchung · kleiner Splitter · kontrollierte Verteilung</span></article>
+      <article><time>17:07 · aktiv</time><strong>Clean-Mug V3</strong><span>Nur lokale Steinzeugfläche · kein Text/Logo · Weltgeometrie unverändert</span></article>
+      <article><time>17:03 · aktiv</time><strong>Coin-Safe-Zone</strong><span>Bodenpolygon minus Münzradius minus Schattenmarge · Kartenpromotion blockiert</span></article>
+      <article><time>16:38 · Gesamtcheck</time><strong>PochKit</strong><span>63 Tests · 0 Fehler</span></article>
+      <article><time>16:36 · geprüft</time><strong>V8-Produktionsaudit</strong><span>128 Ziele · deterministisches Stage · Promotion noch gesperrt</span></article>
+      <article><time>16:32 · interaktiv grün</time><strong>V8-Drei-Phasen</strong><span>390 × 844 + 667 × 375 · kein Overflow · 32/32 Assets</span></article>
+      <article><time>16:26 · Gesamtcheck</time><strong>Simulator-Build</strong><span>Kartenruntime + Phase-3-Außenring · BUILD SUCCEEDED</span></article>
+      <article><time>16:25 · Review-Gate</time><strong>V8-Vollsatz</strong><span>32/32 · neutraler Papiergrund · keine großen Dropouts · PASS</span></article>
+      <article><time>16:06 · integriert</time><strong>Kartenmaterial-Runtime</strong><span>Kein sauberer Vektorrahmen über Asset-Patina · Build PASS</span></article>
+      <article><time>16:03 · Review-Gate</time><strong>V6-Vollsatz</strong><span>32/32 · RGBA/Alpha/Abmessungen PASS · V7 angefordert</span></article>
+      <article><time>15:30 · integriert</time><strong>Phase-2-Actions</strong><span>AX XXXL · 667 × 375 · kein Textüberlauf</span></article>
+      <article><time>15:20 · integriert</time><strong>W2-Runtime-Material</strong><span>180° symmetrisch · keine Identitätsquelle · PASS</span></article>
+      <article><time>15:19 · integriert</time><strong>Deal-Generation</strong><span>Stale/Cancel inert · kein Doppelkontakt · PASS</span></article>
+      <article><time>15:10 · integriert</time><strong>Phase-3-Generation</strong><span>Stale Callbacks inert · Live Reduce Motion · PASS</span></article>
+      <article><time>14:47 · integriert</time><strong>Phase-2-Abbruch</strong><span>Generation · Cancel ohne Economy-Mutation · PASS</span></article>
+      <article><time>14:43 · integriert</time><strong>Deal-Physik</strong><span>Kein Doppelbild · gemeinsame Pose · weicher Kontakt</span></article>
+      <article><time>14:16 · Gesamtcheck</time><strong>Simulator-Build</strong><span>App-Build + 5 Contracttests PASS</span></article>
+      <article><time>14:13 · integriert</time><strong>TravelTrayProfile</strong><span>9 Mulden · 12 Restplätze · Swift 6 PASS</span></article>
+      <article><time>14:09 · integriert</time><strong>ResilientActionLabel</strong><span>AX XXXL · 44 pt · App-Build PASS</span></article>
+      <article><time>14:05 · integriert</time><strong>CoinTransferPlan</strong><span>Exactly-once Impact · Reduce Motion · PASS</span></article>
+    </div>
+  </section>
   <header class="masthead">
     <div>
       <p class="kicker">GOTY 2026 Integrationssicht</p>
@@ -333,7 +1049,7 @@
     </div>
     <div class="masthead-state">
       <strong>Materialkorrektur nach Nutzer-Veto</strong>
-      <p class="meta">Stand 18.07.2026. Diese Ansicht aktualisiert sich alle 30 Sekunden.</p>
+      <p class="meta">Stand 20.07.2026, 20:56 Uhr · Qualitätszeitstrahl, Track B und Bewegungsverträge. Diese Ansicht aktualisiert sich alle 30 Sekunden.</p>
     </div>
   </header>
 
@@ -347,8 +1063,8 @@
       <figcaption><span class="caption-role">Verbindliches Soll</span><code class="caption-path">SCR-20260718-jszw.png</code></figcaption>
     </figure>
     <figure class="previous-image">
-      <div class="image-well"><img src="goty-2026-live-assets/actual-phase1-portrait.png?v=22" alt="Vollständiger V13-Simulatorframe; Außenmulden vermessen, Innenmulde weiterhin in Geometriekalibrierung"></div>
-      <figcaption><span class="caption-role">Zwischenstand V13 - nicht freigegeben</span><code class="caption-path">Außenprofil gemessen · Innenmulde offen</code></figcaption>
+      <div class="image-well"><img src="goty-2026-live-assets/actual-phase1-portrait.png?v=35" alt="Vollständiger V35-Simulatorframe mit 40,5-Punkt-R1, materialabhängiger Blindprägung und gerichteten Stapelschatten"></div>
+      <figcaption><span class="caption-role">Aktueller Simulatorstand V35 - nicht freigegeben</span><code class="caption-path">lesbare Blindprägung · 128-Zahn-Rändelung · Höhe als nächster Einzelpass</code></figcaption>
     </figure>
   </section>
 
@@ -366,30 +1082,81 @@
 
   <section class="workstreams" aria-labelledby="streams-heading">
     <div class="section-head">
-      <h2 id="streams-heading">Sieben sichtbare Spuren</h2>
-      <p>Materialkorrektur, Hintergrund und QA arbeiten getrennt. Ein read-only Gate vermisst Muldenlicht und Flor, während der mineralische Spieltisch-Untergrund separat entsteht; die Integration bleibt beim Lead. Das Statusfenster bleibt dieselbe Browserfläche.</p>
+      <h2 id="streams-heading">GOTY-Spuren im Qualitätsgate</h2>
+      <p>Unabhängige Worker-Audits liefern Gegenbeweise statt Selbstbestätigung. Der Lead übernimmt nur verifizierte Ergebnisse; alle Münzspikes bis V5.1 und die nativen Kartenprototypen V1-V4 bleiben blockiert. Integration, visuelle Freigabe und das dauerhaft aktuelle Cockpit bleiben beim Lead.</p>
     </div>
     <div class="stream-list">
-      <article class="stream"><h3>poch-lead</h3><span class="stream-state">Integriert</span><p>39-pt-R1, gemessene 8+1-Assetanker, Melde-/Poch-Auszahlung, Gegner-Tendenz und responsive Phase-2-Aktionen zusammengeführt</p></article>
-      <article class="stream"><h3>poch-material</h3><span class="stream-state">Muldenlicht aktiv</span><p>Die abgelehnte Rundum-Abdunklung ist entfernt. Außenmulden erhalten gerichteten Schatten von oben und helleren Flor nach unten; die Innenmulde wird separat dunkler kalibriert.</p></article>
-      <article class="stream"><h3>poch-qa</h3><span class="stream-state">Geometrie grün</span><p>Maßstab, 8+1-Anker und Containment bleiben stabil; eine neue visuelle Freigabe existiert noch nicht</p></article>
-      <article class="stream"><h3>poch-rules-opponents</h3><span class="stream-state">Informationsgrenze grün</span><p>Einmalige öffentliche Tendenz ohne Botparameter, Handdaten oder Aktionsvorhersage</p></article>
-      <article class="stream"><h3>poch-opponents</h3><span class="stream-state">1 von 1 grün</span><p>Beobachteter Gegner, lokalisierter Titel, Erklärung und Caveat im echten Poch-Flow</p></article>
-      <article class="stream"><h3>poch-dynamic-type</h3><span class="stream-state">3 von 3 grün</span><p>AX XXXL reflowt sichtbar; 56-pt-Aktionen bleiben von Gegnern und Hand getrennt</p></article>
-      <article class="stream"><h3>poch-status</h3><span class="stream-state">Dauerhaft</span><p>Diese wiederverwendete cmux-Browserfläche mit direktem Soll-/Ist-Vergleich</p></article>
+      <article class="stream"><h3>poch-lead</h3><span class="stream-state">P0 Build grün</span><p>Bestätigung, Phase-2-Vertrag, Haptik und 123 Lokalisierungsschlüssel grün; Integration bleibt beim Lead</p></article>
+      <article class="stream"><h3>track-b-three-phases</h3><span class="stream-state">First Run + Phase 2 GREEN</span><p>Portrait, Landscape, Reduced Motion, Übergang zu Phase 3 und arm64-Build unabhängig bestätigt</p></article>
+      <article class="stream"><h3>board-space-projection</h3><span class="stream-state">RealityKit V3 RED</span><p>Technische Laufspur vollständig, aber 4/6 Pixelgates rot und Originalgrößen-Wurf ohne überzeugendes Gewicht; Strang beendet</p></article>
+      <article class="stream"><h3>coin-solver-audit</h3><span class="stream-state">V4 STOP/REWRITE</span><p>Kein einzelner Fix reicht; geschlossene Lippe, rotierendes konservatives CCD und gekoppelter Positionssolver wären ein Neubau</p></article>
+      <article class="stream"><h3>coin-motion-presentation-v5</h3><span class="stream-state">V5.1 Modell RED</span><p>Energiegewinn in 100/100 Seeds und zu hohe Ruherotation; richtiger Abbruch vor jedem visuellen Export</p></article>
+      <article class="stream"><h3>card-motion-native-v4</h3><span class="stream-state">Tech GREEN / Visual RED</span><p>9 von 9 Tests grün; Zielmulde, Kartenebene, Bodenkontakt, Aufprall und Bahnvariation blockieren jede Integration</p></article>
+      <article class="stream"><h3>signature-motion-blueprints</h3><span class="stream-state">Architektur abgeschlossen</span><p>Coin 6-DoF-Transcripts und Card 2,5D-Plane-Lock definiert; als Nächstes nur je ein enger vollständiger Einzelbeweis</p></article>
+      <article class="stream"><h3>card-plane-lock-v1</h3><span class="stream-state">Tech GREEN / Product BLOCK</span><p>11 von 11 Tests und korrekter Kontakt grün; Diagnosematerial, Maßstab und materielle Lesbarkeit sind nicht freigegeben</p></article>
+      <article class="stream"><h3>coin-transcript-gate-v1</h3><span class="stream-state">Tech GREEN / Visual RED</span><p>106 von 106 Checks und zwölf Transcripts grün; Material, Relief, Kantenlicht und Weltkontakt blockieren jede Integration</p></article>
+      <article class="stream"><h3>motion-sync-contract</h3><span class="stream-state">Vertrag GREEN</span><p>Host-Time, 120-, 80- und 60-Hz-Segmente sowie das physische 240-fps-Messprotokoll sind testgedeckt</p></article>
+      <article class="stream"><h3>transcript-coin-feedback-stage4</h3><span class="stream-state">Tech + Visual GREEN / Hardware PENDING</span><p>Ein DEBUG-Queen-Drop besteht 6DoF-, Lifecycle-, Material-, Audio-Fingerprint- und UI-Gates; Human-Audio, On-device-Haptik und 240-fps/96-kHz-Sync blockieren Produktion</p></article>
+      <article class="stream"><h3>material-lock-v2</h3><span class="stream-state">Card + Coin RED</span><p>Karte bleibt schwarzes UI-Rechteck; Münzrelief kollabiert bei 19,8 Pixel. Geometrie und Physik bleiben eingefroren</p></article>
+      <article class="stream"><h3>deal-rhythm-contract-v1</h3><span class="stream-state">Scheduler GREEN</span><p>Hörbare Pulsform, echtes Zwei-Körper-Limit, Wiederholungsabstand und Reduced Motion sind deterministisch testgedeckt</p></article>
+      <article class="stream"><h3>material-lock-v3</h3><span class="stream-state">Coin GREEN · Card RED</span><p>Gealtertes Kupfer trägt zeitlich im echten Maßstab; der ovale Card-Tooth bleibt ein harter visueller Blocker</p></article>
+      <article class="stream"><h3>card-material-lock-v4</h3><span class="stream-state">Material-only aktiv</span><p>V1-V3-Bewegung bleibt hashgebunden; ausschließlich die Polka-Tooth-Schicht wird entfernt und neu im Phone-Maßstab geprüft</p></article>
+      <article class="stream"><h3>deal-rhythm-wallclock-v2</h3><span class="stream-state">Tech PASS · Product RED</span><p>Standard und Reduced Motion tragen; Cancellation verletzt den committed Freiflug durch Rückflug und Fade-out</p></article>
+      <article class="stream"><h3>deal-rhythm-wallclock-v3</h3><span class="stream-state">Cancel-Fix aktiv</span><p>Keine neuen Peels nach Cancel; bereits gestartete Karten müssen kausal bis Kontakt, Settle und Ruhe weiterlaufen</p></article>
+      <article class="stream"><h3>poch-status</h3><span class="stream-state">Dauerhaft aktuell</span><p>Dieselbe cmux-Browserfläche; erledigte Hilfs-Tabs werden nach Ergebnisübernahme geschlossen</p></article>
+    </div>
+  </section>
+
+  <section class="evidence" aria-labelledby="track-b-heading">
+    <div class="section-head">
+      <h2 id="track-b-heading">Track B - Unterwegs</h2>
+      <p>Die Auswahl umfasst jetzt elf verschließbare Typologien. Kandidat 04 führt als mobile Rauchglas-Scharnierbox; Kandidat 11 ergänzt eine jahrzehntealte Keksdose mit glaubwürdig separat eingesetzter 8+1-Schale. Beide bleiben handfrei und textneutral; Beschriftung entsteht lokalisierbar über dem Material. <a class="selection-link" href="track-b-snackbox-selection.html">Elf Track-B-Ansätze öffnen</a></p>
+    </div>
+    <div class="evidence-grid">
+      <figure class="evidence-card evidence-feature">
+        <div class="image-well"><img src="goty-2026-live-assets/track-b-world-master-v2.png?v=1" alt="Aktueller vertikaler Track-B-Weltmaster mit geöffneter rauchklarer 8+1-Scharnierbox, Werkbank, Akku-Leuchte und Becher"></div>
+        <figcaption><span class="caption-role">Aktueller Weltmaster V2</span><code class="caption-path">941 × 1672 · handfrei · ein Mittelfeld-Label</code></figcaption>
+        <small class="evidence-note">Produktive Münzen, Karten und lokalisierte Beschriftung werden separat darüber gerendert.</small>
+      </figure>
+      <figure class="evidence-card evidence-landscape">
+        <div class="image-well"><img src="goty-2026-live-assets/track-b-readability-matrix-v2.png?v=1" alt="Track-B-Lesbarkeitsmatrix mit 360, 180, 120 und 64 Pixel großen Rendern"></div>
+        <figcaption><span class="caption-role">Lesbarkeitsmatrix</span><code class="caption-path">360 · 180 · 120 · 64 px</code></figcaption>
+      </figure>
+      <figure class="evidence-card evidence-landscape">
+        <div class="image-well"><img src="goty-2026-live-assets/track-b-biscuit-tin-v1.png?v=1" alt="Alternative Track-B-Keksdose mit stark patiniertem Deckel und separat eingesetzter 8+1-Schale"></div>
+        <figcaption><span class="caption-role">Kandidat 11 - Keksdose</span><code class="caption-path">echte Dose · separater Einsatz · Deckeltext später als Vektor</code></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="evidence" aria-labelledby="cardback-heading">
+    <div class="section-head">
+      <h2 id="cardback-heading">Beibehaltenes W2-Grunddesign</h2>
+      <p>Die farbige Facettenraute, das schwarze Grundmaterial und die ruhige Rahmenarchitektur bleiben. Neu aufgebaut wird ausschließlich die Alterung: glaubwürdige 20-Jahre-Camping-Nutzung statt isolierter, aufgesetzter Kratzlinien.</p>
+    </div>
+    <div class="evidence-grid">
+      <figure class="evidence-card evidence-feature">
+        <div class="image-well"><img src="goty-2026-live-assets/current-cardback-single.png?v=1" alt="Aktueller W2-Kartenrücken als einzelne hochformatige Karte mit schwarzer Lederfläche und punktsymmetrischer Facettenraute"></div>
+        <figcaption><span class="caption-role">W2 - Basis bleibt</span><code class="caption-path">Damage wird ersetzt</code></figcaption>
+        <small class="evidence-note">Form, Signet und Farbfassung bleiben · Materialalterung in Arbeit</small>
+      </figure>
+      <figure class="evidence-card evidence-landscape">
+        <div class="image-well"><img src="goty-2026-live-assets/current-cardback-fan.png?v=1" alt="Fünf überlappende aktuelle W2-Kartenrücken mit Graphitkanten und Kontaktschatten"></div>
+        <figcaption><span class="caption-role">W2 im Fächer - Basis bleibt</span><code class="caption-path">neues Camping-Damage folgt</code></figcaption>
+      </figure>
     </div>
   </section>
 
   <section class="evidence" aria-labelledby="evidence-heading">
     <div class="section-head">
       <h2 id="evidence-heading">Poch-Auszahlung als physischer Vorgang</h2>
-      <p>Der Siegerwert springt nicht mehr vor der sichtbaren Materie. Erst der letzte R1-Kontakt schaltet Stack und Folgeaktionen frei. Die Flugbahn wird in jedem Frame räumlich berechnet; Reduced Motion setzt denselben Zustand ohne unsichtbare Wartezeit.</p>
+      <p>Der Siegerwert springt nicht mehr vor der sichtbaren Materie. Erst der letzte R1-Kontakt schaltet Stack und Folgeaktionen frei. Diese Bilder sind Interaktionsbelege aus dem früheren Materialstand; für aktuelle Farbe, Prägung und Höhe gilt ausschließlich der V34-Simulatorframe oben.</p>
     </div>
     <div class="evidence-grid">
       <figure class="evidence-card evidence-feature">
         <div class="image-well"><img src="goty-2026-live-assets/actual-phase2-material-portrait.png?v=11" alt="Aktuelle Phase-2-Portraitkomposition mit neutraler echter Poch-Mulde und einer im freien Raum zwischen Regler und rechtem Rand zentrierten Disc"></div>
         <figcaption><span class="caption-role">Material im kompakten Board</span><code class="caption-path">750 x 1334 · echte Simulatoraufnahme</code></figcaption>
-        <small class="evidence-note">Dasselbe 39-pt-Maß skaliert gemeinsam mit der Disc; keine zweite Miniatur-Jetonfamilie</small>
+        <small class="evidence-note">Dasselbe 40,5-pt-Maß skaliert gemeinsam mit der Disc; keine zweite Miniatur-Jetonfamilie</small>
       </figure>
       <figure class="evidence-card">
         <div class="image-well"><img src="goty-2026-live-assets/actual-poch-payout-settled.png?v=9" alt="Gesetzter Phase-2-Ergebniszustand nach vollständiger Poch-Auszahlung"></div>
@@ -409,7 +1176,7 @@
   <section class="evidence" aria-labelledby="meld-evidence-heading">
     <div class="section-head">
       <h2 id="meld-evidence-heading">Meld-Auszahlung ohne Geisterstein</h2>
-      <p>Ein Meld-Gewinn verlässt seine Mulde als einzelne schwere R1. Die Lehrlinie verschwindet im Materialmoment; der sichtbare Gewinnerstand folgt erst dem letzten Kontakt. Live Reduced Motion setzt denselben Zustand sofort, ein schneller Aktwechsel verwirft jeden alten Rückruf.</p>
+      <p>Ein Meld-Gewinn verlässt seine Mulde als einzelne schwere R1. Die Lehrlinie verschwindet im Materialmoment; der sichtbare Gewinnerstand folgt erst dem letzten Kontakt. Diese Bilder belegen den Ablauf, nicht den aktuellen V34-Materialstand.</p>
     </div>
     <div class="evidence-grid">
       <figure class="evidence-card evidence-feature">
@@ -461,24 +1228,24 @@
   <section class="lower-grid">
     <div aria-labelledby="proof-heading">
       <h2 id="proof-heading">Belastbarer Ausgangspunkt</h2>
-      <div class="proof"><span class="proof-label">Repository</span><span class="proof-value"><code>main = origin/main = 502cf6f</code></span></div>
+      <div class="proof"><span class="proof-label">Repository</span><span class="proof-value"><code>Checkpoint d678b37 auf origin/main</code>; V35 bleibt bewusst uncommitted und nicht freigegeben</span></div>
       <div class="proof"><span class="proof-label">Materialverträge</span><span class="proof-value">R1TokenLayoutTests und R1MaterialContractTests bestanden</span></div>
       <div class="proof"><span class="proof-label">Simulator</span><span class="proof-value">Phase 1/2, Portrait/Landscape, Gegner-Tendenz und Dynamic Type bestanden; aktuelle Belege nach finaler Geometrie</span></div>
-      <div class="proof"><span class="proof-label">Visuelle QA</span><span class="proof-value">Ein physischer R1-Durchmesser für Außen und Mitte; Zweiergruppen nutzen fast die volle Textilbreite; kein ruhendes Alpha liegt auf dem Metallrand</span></div>
-      <div class="proof"><span class="proof-label">Samtboden</span><span class="proof-value">Erneut geöffnet: gerichteter oberer Schatten statt Rundum-AO, ruhigerer Flor ohne Mittelpunkt-Spot und separate Dunkelstufe für die Innenmulde</span></div>
+      <div class="proof"><span class="proof-label">Visuelle QA</span><span class="proof-value">Ein physischer R1-Durchmesser für Außen und Mitte; gerichtete Alpha-Schatten, sichtbare Seitenwände und muldenspezifische Stapelöffnung; kein ruhendes Alpha liegt auf dem Metallrand</span></div>
+      <div class="proof"><span class="proof-label">Samtboden</span><span class="proof-value">Innenmulde live registriert: Boden-SSIM <code>0,8915</code>, ΔE <code>1,57</code>, Lichtfehler <code>2,4/255</code>; kein Mittelpunkt-Spot und keine digitale Muldenbeschriftung</span></div>
       <div class="proof"><span class="proof-label">Sättigung</span><span class="proof-value"><code>SEQ · 13</code> erscheint ruhig ab der ersten nicht mehr physisch darstellbaren Stufe; UI-Test 1/1 grün</span></div>
       <div class="proof"><span class="proof-label">Ante-Motion</span><span class="proof-value">Echte R1-Wellen statt Goldlinie; lineare ballistische Bahn, transformbasierte Translation und Keramikkontakt im letzten Aufprallframe</span></div>
       <div class="proof"><span class="proof-label">Poch-Auszahlung</span><span class="proof-value">Fünf R1 auf per-frame berechneter quadratischer Bahn; Stack und Aktionen wechseln erst am letzten Kontakt</span></div>
       <div class="proof"><span class="proof-label">Abbruch und Reduced Motion</span><span class="proof-value">Run-Generation verhindert Geisterkontakte; Reduced Motion wartet keine unsichtbare Welle ab; UI-Tests 2/2 grün</span></div>
       <div class="proof"><span class="proof-label">Phase-2-UI-Tests</span><span class="proof-value">Auszahlung, Reduced Motion und 667-x-375-Landscape: 3/3 grün, 0 Fehler</span></div>
       <div class="proof"><span class="proof-label">Phase-1-UI-Tests</span><span class="proof-value">Meld-Flug, Live Reduced Motion und schneller Landscape-Aktwechsel: 3/3 grün, 0 Fehler</span></div>
-      <div class="proof"><span class="proof-label">R1-Hüllkurve</span><span class="proof-value"><code>294 x 308 px</code>, gemessener Radius <code>157,678 px</code>; Faktor <code>1.085</code>, voller R1 <code>39 pt</code>, sichtbar <code>0,1074 D</code></span></div>
+      <div class="proof"><span class="proof-label">R1-Hüllkurve</span><span class="proof-value"><code>294 x 317 px</code>, gemessener Maximalradius <code>167,887 px</code>; Faktor <code>1.085</code>, voller R1 <code>40,5 pt</code>, sichtbare Breite <code>0,1039 D</code></span></div>
       <div class="proof"><span class="proof-label">Muldenlage</span><span class="proof-value">Gemessene 8+1-Zentren aus dem 1254er Asset; vollständiger normalisierter Metallring liegt über der Kreisgrenze, ohne die R1-Hülle zu stutzen</span></div>
-      <div class="proof"><span class="proof-label">Keramikbasis</span><span class="proof-value">Deterministischer Build-Time-Generator, mindestens 16 Alpha-Stufen, keine Glanzspitze über 92 % und messbare Mineralvariation auch nach 39-pt-Downsampling</span></div>
+      <div class="proof"><span class="proof-label">Keramikbasis</span><span class="proof-value">Deterministischer Build-Time-Generator, mindestens 16 Alpha-Stufen, keine Glanzspitze über 92 % und messbare Mineralvariation auch nach 40,5-pt-Downsampling</span></div>
       <div class="proof"><span class="proof-label">Gegner-Tendenz</span><span class="proof-value">Endliche IDs, strikte Evidenzbasis, einmalige Freigabe, 7 Sprachen und echter UI-Flow: 1/1 grün</span></div>
       <div class="proof"><span class="proof-label">Dynamic Type</span><span class="proof-value">SE3 Standard/AX XXXL, 667-x-375-Landscape und 402-pt-Portrait: 3/3 ausgeführte Gates grün</span></div>
       <div class="proof"><span class="proof-label">Gesamtbuild</span><span class="proof-value">Phase 1/2 Portrait und Landscape: 1/1 grün; zusätzliche source-synchrone Material-Portraits Phase 1 und 2 jeweils 1/1 grün</span></div>
-      <div class="proof"><span class="proof-label">Ergebnisbundles</span><span class="proof-value"><code>/tmp/poch-phase1-material-v6.xcresult</code>, <code>/tmp/poch-phase2-material-v6.xcresult</code> und <code>/tmp/poch-phase2-material-centering-v5.xcresult</code></span></div>
+      <div class="proof"><span class="proof-label">Ergebnisbundles</span><span class="proof-value"><code>/tmp/poch-center-v17-empty.xcresult</code> und <code>/tmp/poch-r1-depth-v35.xcresult</code>; aktueller Screenshot aus dem V35-Bundle exportiert</span></div>
     </div>
     <div aria-labelledby="sequence-heading">
       <h2 id="sequence-heading">Nächste Integration</h2>
@@ -497,12 +1264,12 @@
   <section class="risk-strip" aria-labelledby="risks-heading">
     <h2 id="risks-heading">Was nach dem Pass noch offen bleibt</h2>
     <div class="risk-grid">
-      <p><strong>Maßstab</strong>Geschlossen: 39 pt ergeben sichtbar 0,1074 Disc-Durchmesser; die Referenz liegt im selben Korridor.</p>
+      <p><strong>Maßstab</strong>Geschlossen: 40,5 pt ergeben sichtbar 0,1039 Disc-Durchmesser; die Referenz liegt im selben Korridor.</p>
       <p><strong>Containment</strong>Geschlossen: gemessene Assetanker, Kreisgrenze und vollständiger echter Metallring fassen die große Hüllkurve ohne Rückskalierung oder harte Kerbe.</p>
       <p><strong>Materialgewicht</strong>Technisch belegt: größere projizierte Seitenwand, engere Kontaktfuge und echte 294-x-308-Alpha-Hüllkurve; menschliche Wertigkeitsabnahme bleibt offen.</p>
       <p><strong>Keramikoberfläche</strong>Im Prüfstand: feine Mineralporen, dunkle Seitenwand und vereinfachtes W2-Relief ersetzen die wolkige Kunststoffanmutung.</p>
-      <p><strong>Samtboden</strong>Offen nach Nahvergleich: kein Rundum-AO; oberer Wandwurf, unterer Flor und dunklere Innenmulde werden gegen das Soll vermessen.</p>
-      <p><strong>Asset-Pipeline</strong>Offen für diesen Pass: Graphit und Außenmetall bleiben deterministisch; Muldenwand, Samtlicht und mineralischer Spieltisch-Untergrund werden neu integriert.</p>
+      <p><strong>Samtboden</strong>Technisch eng am Soll: gerichteter oberer Wandwurf, feinerer Mittelmuldenflor und dunkle Materialstufe sind live vermessen; menschliche Abnahme bleibt offen.</p>
+      <p><strong>Asset-Pipeline</strong>Deterministisch integriert: Graphit, Außenmetall, 8 Außenmulden und die separat erhöhte Innenmulde werden Build-Time erzeugt.</p>
       <p><strong>Lesbarkeit</strong>Beobachten: Gravuren sind absichtlich sekundär, Werte müssen dennoch eindeutig bleiben.</p>
       <p><strong>Dynamic Type</strong>Geschlossen für Phase-2-Ergebnis: echter Reflow auf SE3, 667-x-375 und 402-pt-Portrait.</p>
       <p><strong>Wertsemantik</strong>Geschlossen: erst oberhalb der physischen Kapazität ergänzt die Gravur den öffentlichen Wert.</p>
@@ -511,9 +1278,11 @@
   </section>
 
   <footer>
-    <strong>Menschliche Materialabnahme bleibt offen.</strong>
-    <p>Bindend bleibt die bestätigte Referenz. Die technische Größen- und Containmentkorrektur ist belegt; das GOTY-2026-Goal läuft danach autonom weiter.</p>
+    <strong>Build 9 ist ersetzt. Build 10 ist intern verteilt. Produktion bleibt gesperrt.</strong>
+    <p>Jetzt folgt der echte iPhone-Test von Build 10. Human-Audio, Haptik und die 240-fps-/96-kHz-Synchronmessung bleiben Pflicht; vollständige Lokalisierung und alle historischen roten Gates bleiben unverändert dokumentiert.</p>
   </footer>
+    </div>
+  </details>
 </main>
 <script>
   const statusScrollKey = "poch-goty-live-scroll";

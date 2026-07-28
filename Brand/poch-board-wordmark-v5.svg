@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1430 288">
+  <title>POCH 1441 compact board wordmark v5</title>
+  <desc>Cultivated monoline wordmark with evenly spaced provenance numerals.</desc>
+  <rect width="1430" height="288" fill="#101821"/>
+  <g transform="translate(28 28) scale(.225)">
+    <circle cx="512" cy="512" r="390" fill="#31414D" stroke="#F4F0E8" stroke-width="20"/>
+    <g fill="#0A1118">
+      <circle cx="512" cy="262" r="64"/><circle cx="689" cy="335" r="64"/>
+      <circle cx="762" cy="512" r="64"/><circle cx="689" cy="689" r="64"/>
+      <circle cx="512" cy="762" r="64"/><circle cx="335" cy="689" r="64"/>
+      <circle cx="262" cy="512" r="64"/><circle cx="335" cy="335" r="64"/>
+      <circle cx="512" cy="512" r="114"/>
+    </g>
+    <circle cx="512" cy="262" r="38" fill="#C8A35A"/>
+    <circle cx="762" cy="512" r="38" fill="#8D74AA"/>
+    <circle cx="335" cy="689" r="38" fill="#6F9B8B"/>
+    <path d="M512 476L548 512L512 548L476 512Z" fill="#C96E55"/>
+  </g>
+  <g fill="none" stroke="#F4F0E8" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M330 226V82H398C437 82 459 102 459 136C459 170 437 190 398 190H330"/>
+    <circle cx="560" cy="154" r="72"/>
+    <path d="M795 101C778 82 756 72 730 72C679 72 648 106 648 154C648 202 679 236 730 236C756 236 779 226 796 207"/>
+    <path d="M842 82V226M942 82V226M842 154H942"/>
+  </g>
+  <g fill="none" stroke="#C8A35A" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(1030)"><path d="M25 118L55 92V220"/></g>
+    <g transform="translate(1120)"><path d="M58 92L8 178H72M58 92V220"/></g>
+    <g transform="translate(1210)"><path d="M58 92L8 178H72M58 92V220"/></g>
+    <g transform="translate(1300)"><path d="M25 118L55 92V220"/></g>
+  </g>
+</svg>

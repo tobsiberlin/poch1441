@@ -118,53 +118,99 @@ struct FirstRunCinematic: View {
                    value: scene)
     }
 
+    @ViewBuilder
     private func cinematicLayout(size: CGSize,
                                  safeArea: EdgeInsets) -> some View {
         let landscape = size.width > size.height
         let compactHeight = !landscape && size.height < 720
-        let boardDiameter = min(
-            landscape ? size.height * 0.60 : size.width * (compactHeight ? 0.62 : 0.695),
-            landscape ? size.width * 0.40 : size.height * (compactHeight ? 0.31 : 0.38),
-            330
-        )
-        let stageCenter = CGPoint(
-            x: landscape ? size.width * 0.64 : size.width * 0.5,
-            y: landscape ? size.height * 0.52 : size.height * (compactHeight ? 0.36 : 0.43)
-        )
+        if landscape {
+            let left = max(safeArea.leading, 10) + 18
+            let right = max(safeArea.trailing, 10) + 18
+            let top = safeArea.top + 12
+            let bottom = max(safeArea.bottom, 8) + 10
+            let contentHeight = max(280, size.height - top - bottom)
+            let decisionWidth = min(330, max(250, size.width * 0.38))
+            let gutter: CGFloat = 20
+            let stageMinX = left + decisionWidth + gutter
+            let stageWidth = max(218, size.width - right - stageMinX)
+            let opponentRailHeight: CGFloat = 76
+            let boardDiameter = min(250,
+                                    stageWidth - 12,
+                                    contentHeight - opponentRailHeight - 18)
+            let stageCenter = CGPoint(
+                x: stageMinX + stageWidth / 2,
+                y: top + opponentRailHeight + 9 + boardDiameter / 2
+            )
 
-        return ZStack {
-            cinematicHeader(safeArea: safeArea)
+            ZStack {
+                cinematicHeader(safeArea: safeArea)
 
-            tableStage(diameter: boardDiameter,
-                       center: stageCenter,
-                       landscape: landscape)
-                .cameraTransform(scene: scene,
-                                 reduceMotion: reduceMotion,
-                                 landscape: landscape)
-                .zIndex(1)
+                tableStage(diameter: boardDiameter,
+                           center: stageCenter,
+                           landscape: true,
+                           opponentsY: top + 32)
+                    .cameraTransform(scene: scene,
+                                     reduceMotion: reduceMotion,
+                                     landscape: true)
+                    .zIndex(1)
 
-            if isReady {
-                invitationPanel
-                    .frame(width: min(360, size.width - 38))
-                    .position(
-                        x: landscape ? size.width * 0.23 : size.width * 0.5,
-                        y: landscape
-                            ? size.height * 0.50
-                            : size.height - safeArea.bottom - (compactHeight ? 104 : 116)
-                    )
-                    .transition(reduceMotion
-                                ? .opacity
-                                : .move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(5)
+                if isReady {
+                    invitationPanel
+                        .frame(width: decisionWidth)
+                        .position(x: left + decisionWidth / 2,
+                                  y: top + contentHeight / 2)
+                        .transition(reduceMotion
+                                    ? .opacity
+                                    : .move(edge: .bottom).combined(with: .opacity))
+                        .zIndex(5)
+                }
+
+                sceneProbe
             }
+        } else {
+            let boardDiameter = min(
+                size.width * (compactHeight ? 0.62 : 0.695),
+                size.height * (compactHeight ? 0.31 : 0.38),
+                330
+            )
+            let stageCenter = CGPoint(
+                x: size.width * 0.5,
+                y: size.height * (compactHeight ? 0.36 : 0.43)
+            )
 
-            sceneProbe
+            ZStack {
+                cinematicHeader(safeArea: safeArea)
+
+                tableStage(diameter: boardDiameter,
+                           center: stageCenter,
+                           landscape: false,
+                           opponentsY: nil)
+                    .cameraTransform(scene: scene,
+                                     reduceMotion: reduceMotion,
+                                     landscape: false)
+                    .zIndex(1)
+
+                if isReady {
+                    invitationPanel
+                        .frame(width: min(360, size.width - 38))
+                        .position(x: size.width * 0.5,
+                                  y: size.height - safeArea.bottom
+                                    - (compactHeight ? 104 : 116))
+                        .transition(reduceMotion
+                                    ? .opacity
+                                    : .move(edge: .bottom).combined(with: .opacity))
+                        .zIndex(5)
+                }
+
+                sceneProbe
+            }
         }
     }
 
     private func tableStage(diameter: CGFloat,
                             center: CGPoint,
-                            landscape: Bool) -> some View {
+                            landscape: Bool,
+                            opponentsY: CGFloat?) -> some View {
         ZStack {
             Circle()
                 .fill(Tokens.jewelGold.opacity(scene == .contact ? 0.12 : 0.035))
@@ -181,7 +227,8 @@ struct FirstRunCinematic: View {
 
             opponentArc(boardDiameter: diameter,
                         center: center,
-                        landscape: landscape)
+                        landscape: landscape,
+                        explicitY: opponentsY)
 
             cinematicDeck(diameter: diameter)
                 .position(x: center.x - diameter * 0.34,
@@ -195,7 +242,8 @@ struct FirstRunCinematic: View {
 
     private func opponentArc(boardDiameter: CGFloat,
                              center: CGPoint,
-                             landscape: Bool) -> some View {
+                             landscape: Bool,
+                             explicitY: CGFloat?) -> some View {
         let names = Array(opponentNames.prefix(3))
         let horizontalSpacing = landscape
             ? boardDiameter * 0.42
@@ -211,7 +259,13 @@ struct FirstRunCinematic: View {
                     mood: opponentMood(index: index),
                     size: index == 0 ? 64 : 56,
                     showsText: showsPeople,
-                    morph: morph,
+                    // The cinematic and the table can coexist during the
+                    // hand-off. Sharing the table namespace here produced
+                    // duplicate `tokenN` sources and let SwiftUI teleport only
+                    // the portrait image while its label stayed on the board.
+                    // The people enter locally; only the invitation chip owns
+                    // a cross-screen morph.
+                    morph: nil,
                     reduceMotionOverride: reduceMotion
                 )
                 .frame(width: horizontalSpacing)
@@ -232,7 +286,8 @@ struct FirstRunCinematic: View {
         }
         .frame(width: boardDiameter * 1.20)
         .position(x: center.x,
-                  y: center.y - boardDiameter * (landscape ? 0.54 : 0.68))
+                  y: explicitY
+                    ?? center.y - boardDiameter * (landscape ? 0.76 : 0.68))
     }
 
     private func opponentMood(index: Int) -> OpponentMood {
@@ -404,7 +459,7 @@ struct FirstRunCinematic: View {
                                          mood: index == 0 ? .winning : .neutral,
                                          size: 54,
                                          showsText: true,
-                                         morph: morph,
+                                         morph: nil,
                                          reduceMotionOverride: true)
                     }
                 }

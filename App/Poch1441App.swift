@@ -89,11 +89,9 @@ private struct PochLaunchRoot: View {
                 Color(hex: 0x101821)
                     .ignoresSafeArea()
                     .overlay {
-                        // Match LaunchScreen.storyboard exactly: its 200 × 44
-                        // aspect-fit frame renders the 1180:220 wordmark at
-                        // 200 × 37.3 points. Any other geometry visibly jumps
-                        // when iOS hands the first frame to SwiftUI.
-                        PochBrandWordmark(height: 200 * 220 / 1180)
+                        // Continue the quiet native launch mark without using
+                        // an unfinished experimental logo asset.
+                        PochBrandWordmark(height: 26)
                             .accessibilityHidden(true)
                     }
                     .transition(.opacity)

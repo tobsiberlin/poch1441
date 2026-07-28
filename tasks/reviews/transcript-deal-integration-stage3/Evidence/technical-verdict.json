@@ -1,0 +1,35 @@
+{
+  "status": "TECHNICAL_GREEN",
+  "stage": 3,
+  "scope": "One FlyingBack transcript consumer behind DEBUG launch arguments",
+  "verifiedAt": "2026-07-20T16:42:30+02:00",
+  "gates": {
+    "admittedStage2PlanUnchanged": true,
+    "debugOnlySelection": true,
+    "impactFlightFallbackPresent": true,
+    "contactExactlyOnce": true,
+    "restDistinctFromContact": true,
+    "maximumMovingCardsIncludingSettle": 2,
+    "standardEightContactUIFlow": true,
+    "reducedMotionEightContactUIFlow": true,
+    "skipHasNoLateStateWrite": true,
+    "generationIdentityRetained": true,
+    "gameStateIndependentOfPlayer": true,
+    "pochKitChanged": false,
+    "audioOrHapticsIntegrated": false
+  },
+  "checks": [
+    "TranscriptMotionPlayerTests: PASS",
+    "TranscriptDealIntegrationContractTests: PASS",
+    "ImpactFlightContractTests: PASS",
+    "Phase1MeldPresentationContractTests: PASS",
+    "CardVisualInformationBoundaryContractTests: PASS",
+    "CardBackMaterialPlanTests: PASS",
+    "TranscriptDealUITests: 3/3 PASS",
+    "Generic iOS Simulator build: BUILD SUCCEEDED for arm64 and x86_64"
+  ],
+  "knownBuildNote": "Xcode skipped AppIntents metadata extraction because the app has no AppIntents.framework dependency.",
+  "stage4Allowed": true,
+  "broadProductionIntegrationAllowed": false
+}
+

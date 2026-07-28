@@ -48,7 +48,43 @@ private enum Phase2PortraitLayout {
     static let guidedPreludeDecisionHeight: CGFloat = 170
     static let guidedCompactPreludeDecisionHeight: CGFloat = 170
     static let guidedDecisionHeight: CGFloat = 142
-    static let guidedResultDecisionHeight: CGFloat = 156
+    static let guidedResultDecisionHeight: CGFloat = 212
+}
+
+private enum Phase2PayoutAnchor: Hashable {
+    case board
+    case human
+    case opponent(Int)
+}
+
+private struct Phase2PayoutFramePreferenceKey: PreferenceKey {
+    static let defaultValue: [Phase2PayoutAnchor: CGRect] = [:]
+
+    static func reduce(value: inout [Phase2PayoutAnchor: CGRect],
+                       nextValue: () -> [Phase2PayoutAnchor: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, latest in latest })
+    }
+}
+
+private struct Phase2PayoutFrameModifier: ViewModifier {
+    let anchor: Phase2PayoutAnchor
+
+    func body(content: Content) -> some View {
+        content.background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: Phase2PayoutFramePreferenceKey.self,
+                    value: [anchor: proxy.frame(in: .named("phase2.payout.stage"))]
+                )
+            }
+        }
+    }
+}
+
+private extension View {
+    func phase2PayoutAnchor(_ anchor: Phase2PayoutAnchor) -> some View {
+        modifier(Phase2PayoutFrameModifier(anchor: anchor))
+    }
 }
 
 /// Phase 2 (Pochen) - der psychologische Kern (§6b) im Kompressions-Layout (§5b, Akt 2):
@@ -62,6 +98,11 @@ struct Phase2View: View {
         case range
         case actions
         case opponents
+    }
+
+    private struct PresentedReaction: Equatable {
+        let seat: Int
+        let action: SeatAction
     }
 
     let game: GameState
@@ -84,8 +125,13 @@ struct Phase2View: View {
     @State private var payoutPresentationActive = false
     @State private var payoutPresentationCompleted = false
     @State private var payoutPresentationGeneration = 0
+    @State private var payoutStartScheduled = false
     @State private var payoutImpact = 0
     @State private var guidedPreludeStep = 0
+    @State private var featuredReaction: PresentedReaction?
+    @State private var queuedReactions: [PresentedReaction] = []
+    @State private var reactionPresentationGeneration = 0
+    @State private var payoutAnchorFrames: [Phase2PayoutAnchor: CGRect] = [:]
     #if DEBUG || INTERNAL_QA
     @State private var qaPochFlight = 0
     @State private var qaCoinTranscriptContact = 0
@@ -118,6 +164,13 @@ struct Phase2View: View {
                     .position(x: stage.layoutFrame.midX, y: stage.layoutFrame.midY)
             }
         }
+        .coordinateSpace(name: "phase2.payout.stage")
+        .onPreferenceChange(Phase2PayoutFramePreferenceKey.self) { frames in
+            // Ein Sitz kann im Schnitt/Gegenschnitt kurz aus der sichtbaren
+            // Komposition verschwinden. Sein zuletzt tatsächlich gemessener
+            // Rahmen bleibt deshalb bis zum Rundenende das Auszahlungsziel.
+            payoutAnchorFrames.merge(frames, uniquingKeysWith: { _, latest in latest })
+        }
         .onAppear {
             resetBid()
             presentedPot = game.pot
@@ -148,6 +201,20 @@ struct Phase2View: View {
         .onChange(of: game.stage) { _, _ in
             startPayoutPresentationIfNeeded()
         }
+        .onChange(of: game.seatActions) { previous, current in
+            enqueueOpponentReactions(previous: previous, current: current)
+        }
+        .onChange(of: game.pochShock) { previous, current in
+            guard soundEnabled,
+                  previous != current,
+                  game.lastBetKind.isPoch else { return }
+            TableFoleyAudio.shared.playPochGesture(
+                sequence: current,
+                generation: game.betTransfer,
+                seat: game.lastBetActor ?? game.turnIndex,
+                playerCount: game.playerCount
+            )
+        }
         .onChange(of: phase2ReduceMotion) { _, isReduced in
             guard isReduced else { return }
             transferPresentationActive = game.betTransfer > settledBetTransfer
@@ -161,7 +228,11 @@ struct Phase2View: View {
             pendingPot = nil
             transferPresentationActive = false
             payoutPresentationActive = false
+            payoutStartScheduled = false
             payoutPresentationGeneration += 1
+            featuredReaction = nil
+            queuedReactions.removeAll()
+            reactionPresentationGeneration += 1
         }
         .sensoryFeedback(trigger: game.pochShock) { previous, current in
             guard hapticsEnabled, previous != current else { return nil }
@@ -190,17 +261,24 @@ struct Phase2View: View {
                let result = game.pochResult {
                 let generation = payoutPresentationGeneration
                 PochPayoutFlight(winner: result.winner,
+                                 winnerName: result.winner == 0
+                                    ? String(localized: "phase2.result.you",
+                                             defaultValue: "Du")
+                                    : game.name(of: result.winner),
                                  amount: result.pot + result.pochPool,
                                  generation: generation,
                                  reduceMotion: phase2ReduceMotion,
                                  world: theme,
                                  activeSeats: game.activeUISeats,
+                                 sourceFrame: payoutAnchorFrames[.board],
+                                 targetFrame: payoutAnchorFrames[result.winner == 0
+                                    ? .human
+                                    : .opponent(result.winner)],
                                  onImpact: {
                                      commitPayoutImpact(generation: generation)
                                  })
                     .id("poch-payout-\(generation)-\(phase2ReduceMotion)")
                     .allowsHitTesting(false)
-                    .accessibilityHidden(true)
             }
             #if DEBUG || INTERNAL_QA
             if theme == .unterwegs,
@@ -266,7 +344,7 @@ struct Phase2View: View {
         // The guided prelude owns more copy than the free table. On short
         // phones a fixed Y-stage inevitably puts its action row into the hand.
         // Use the same measured vertical flow as Dynamic Type instead.
-        if dynamicTypeSize.isAccessibilitySize || (isGuidedRound && h < 720) {
+        if dynamicTypeSize.isAccessibilitySize || h < 720 {
             accessibilityPortraitStage(width: w, height: h)
         } else {
             fixedPortraitStage(width: w, height: h)
@@ -275,14 +353,17 @@ struct Phase2View: View {
 
     private func accessibilityPortraitStage(width w: CGFloat,
                                             height h: CGFloat) -> some View {
-        let socialFocus = game.stage == .betting
-            && (transferPresentationActive || game.turnIndex != 0)
-        let boardHeight: CGFloat = 200
+        let socialFocus = featuredReaction != nil || (game.stage == .betting
+            && (transferPresentationActive || game.turnIndex != 0))
+        let boardHeight: CGFloat = 224
         return ScrollView(.vertical) {
             VStack(spacing: 24) {
                 topArea
                     .frame(width: w, height: boardHeight)
-                    .scaleEffect(0.88)
+                    // Auf kurzen Telefonen erzeugt der Kontaktschatten sonst
+                    // einen optischen Zusammenstoß mit der Erklärung. Die
+                    // Disc bleibt dominant, erhält aber eine klare Atemzone.
+                    .scaleEffect(0.82)
                     .modifier(TableShake(
                         amplitude: phase2ReduceMotion ? 0 : Tokens.pochShakeAmp,
                         animatableData: CGFloat(game.pochShock)))
@@ -304,16 +385,16 @@ struct Phase2View: View {
                         .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("phase2.decision")
 
-                    actionArea
-                        .frame(width: min(336, w - 28), alignment: .top)
-                        .accessibilityElement(children: .contain)
-                        .accessibilityIdentifier("phase2.actions")
-                        .allowsHitTesting(!isGuidedRound || guidedFocus == .actions)
-                        .opacity(isGuidedRound && guidedFocus != .actions ? 0 : 1)
-                        .accessibilityHidden(isGuidedRound && guidedFocus != .actions)
+                    if !isGuidedRound || guidedFocus == .actions {
+                        actionArea
+                            .frame(width: min(336, w - 28), alignment: .top)
+                            .accessibilityElement(children: .contain)
+                            .accessibilityIdentifier("phase2.actions")
+                            .allowsHitTesting(!isGuidedRound || guidedFocus == .actions)
+                    }
                 }
 
-                if game.stage != .betting {
+                if game.stage != .betting && !socialFocus {
                     portraitsRow(maxPanelWidth: 112)
                         .frame(width: w, alignment: .top)
                         .frame(minHeight: 132, alignment: .top)
@@ -321,6 +402,10 @@ struct Phase2View: View {
 
                 handFan(cardScale: 1.28)
                     .frame(width: w - 8, height: 164, alignment: .bottom)
+                    // Die Hand bleibt als Kontext bereits neben der
+                    // Voraussetzung sichtbar. Versteckte Aktionsflächen
+                    // dürfen sie nicht unter den ersten Viewport drücken.
+                    .offset(y: isGuidedRound && guidedFocus != .actions ? -60 : -28)
                     .allowsHitTesting(false)
             }
             .frame(maxWidth: .infinity)
@@ -338,8 +423,8 @@ struct Phase2View: View {
             && dynamicTypeSize.isAccessibilitySize
         let accessibilityBetting = game.stage == .betting
             && dynamicTypeSize.isAccessibilitySize
-        let opponentFocus = game.stage == .betting
-            && (transferPresentationActive || game.turnIndex != 0)
+        let opponentFocus = featuredReaction != nil || (game.stage == .betting
+            && (transferPresentationActive || game.turnIndex != 0))
         // Phase 2 is staged as a shot/reverse-shot sequence. During the human
         // decision the board, rule and hand own the frame. Once somebody else
         // reacts, the copy gives way to a social close-up instead of squeezing
@@ -501,7 +586,7 @@ struct Phase2View: View {
                 return game.stage == .betting ? 154 : 176
             }
             if guidedPreludeActive { return 144 }
-            if isGuidedRound, game.stage != .betting { return 124 }
+            if isGuidedRound, game.stage != .betting { return 198 }
             return isGuidedRound ? 108 : 98
         }()
         let actionGap: CGFloat = dynamicTypeSize.isAccessibilitySize ? 10 : 8
@@ -517,14 +602,23 @@ struct Phase2View: View {
                 ))
                 .opacity(isGuidedRound && guidedPreludeStep < 2 ? 0 : 1)
 
+            let landscapeBoardScale: CGFloat = 0.92
             compactRing
-                .scaleEffect(0.80)
-                .position(x: w - boardDiameter * 0.80 / 2 - 28,
-                          y: boardDiameter / 2 + 2)
+                .scaleEffect(landscapeBoardScale)
+                .position(x: w - boardDiameter * landscapeBoardScale / 2 - 26,
+                          y: boardDiameter * landscapeBoardScale / 2 + 8)
                 .modifier(TableShake(
                     amplitude: phase2ReduceMotion ? 0 : Tokens.pochShakeAmp,
                     animatableData: CGFloat(game.pochShock)))
                 .animation(.linear(duration: Tokens.pochShake), value: game.pochShock)
+
+            trumpTableCard
+                .scaleEffect(0.88)
+                .position(
+                    x: w - boardDiameter * landscapeBoardScale - 50,
+                    y: 54
+                )
+                .zIndex(3)
 
             pochenDecisionCard
                 .frame(width: decisionWidth,
@@ -588,6 +682,65 @@ struct Phase2View: View {
         pendingPot = value
     }
 
+    /// Jede öffentliche Gegnerentscheidung bekommt einen eigenen Auftritt. Die
+    /// Engine darf mehrere Bots schnell nacheinander auflösen; die UI bewahrt
+    /// trotzdem Reihenfolge, Sitz und mindestens 1,8 Sekunden Lesezeit.
+    private func enqueueOpponentReactions(previous: [SeatAction],
+                                           current: [SeatAction]) {
+        let additions = current.indices.compactMap { seat -> PresentedReaction? in
+            guard seat != 0,
+                  previous.indices.contains(seat),
+                  previous[seat] != current[seat],
+                  isSettledReaction(current[seat]) else { return nil }
+            return PresentedReaction(seat: seat, action: current[seat])
+        }
+        guard !additions.isEmpty else { return }
+        queuedReactions.append(contentsOf: additions)
+        startReactionSequenceIfNeeded()
+    }
+
+    private func startReactionSequenceIfNeeded() {
+        guard featuredReaction == nil, !queuedReactions.isEmpty else { return }
+        reactionPresentationGeneration += 1
+        let generation = reactionPresentationGeneration
+        featuredReaction = queuedReactions.removeFirst()
+        scheduleReactionAdvance(generation: generation)
+    }
+
+    private func scheduleReactionAdvance(generation: Int) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(isGuidedRound ? 2.15 : 1.85))
+            guard generation == reactionPresentationGeneration else { return }
+
+            if queuedReactions.isEmpty {
+                withAnimation(phase2ReduceMotion ? nil : .easeOut(duration: 0.24)) {
+                    featuredReaction = nil
+                }
+                if game.stage != .betting {
+                    startPayoutPresentationIfNeeded()
+                }
+                return
+            }
+
+            // Der alte Sitz blendet aus, während der neue am tatsächlichen Sitz
+            // aufblendet. Kein leeres Zwischenbild, kein springender Sammeltext.
+            let next = queuedReactions.removeFirst()
+            withAnimation(phase2ReduceMotion ? nil : .easeInOut(duration: 0.24)) {
+                featuredReaction = next
+            }
+            scheduleReactionAdvance(generation: generation)
+        }
+    }
+
+    private func isSettledReaction(_ action: SeatAction) -> Bool {
+        switch action {
+        case .passed, .opened, .called, .raised:
+            return true
+        case .none, .thinking:
+            return false
+        }
+    }
+
     private func commitBetImpact(transfer: Int) {
         guard transfer == game.betTransfer,
               transfer > settledBetTransfer else { return }
@@ -618,11 +771,26 @@ struct Phase2View: View {
             payoutPresentationCompleted = true
             return
         }
-        guard !payoutPresentationActive, !payoutPresentationCompleted else { return }
-        pendingPot = nil
-        transferPresentationActive = false
-        payoutPresentationGeneration += 1
-        payoutPresentationActive = true
+        guard !payoutPresentationActive,
+              !payoutPresentationCompleted,
+              !payoutStartScheduled else { return }
+        payoutStartScheduled = true
+        Task { @MainActor in
+            // Einen Renderzyklus abwarten: So können der letzte öffentliche
+            // Gegnerzug und die gemessenen Sitzanker zuerst am Tisch ankommen.
+            try? await Task.sleep(for: .milliseconds(140))
+            payoutStartScheduled = false
+            guard game.stage != .betting,
+                  game.betTransfer == settledBetTransfer,
+                  featuredReaction == nil,
+                  queuedReactions.isEmpty,
+                  !payoutPresentationActive,
+                  !payoutPresentationCompleted else { return }
+            pendingPot = nil
+            transferPresentationActive = false
+            payoutPresentationGeneration += 1
+            payoutPresentationActive = true
+        }
     }
 
     private func commitPayoutImpact(generation: Int) {
@@ -677,14 +845,21 @@ struct Phase2View: View {
             return String(format: format, responder)
         }
         if game.stage != .betting {
-            return "Der Poch-Pott ist entschieden. Als Nächstes spielt ihr eure Karten in Reihen aus."
+            return String(localized: "phase2.hint.resolved",
+                          defaultValue: "Der Poch-Pott ist entschieden. Als Nächstes spielt ihr eure Karten in Reihen aus.")
         }
         if game.turnIndex == 0 {
-            return game.humanComboRank == nil
-                ? "Du hast kein Paar. Tippe Passen - so behältst du deine Chips."
-                : "Poche um \(Int(bid)) Chip. Wer mitgeht, bleibt im Rennen um den Poch-Pott."
+            if game.humanComboRank == nil {
+                return String(localized: "phase2.hint.noPair",
+                              defaultValue: "Du hast kein Paar. Tippe Passen - so behältst du deine Chips.")
+            }
+            let format = String(localized: "phase2.hint.open",
+                                defaultValue: "Poche um %d Chips. Wer mitgeht, bleibt im Rennen um den Poch-Pott.")
+            return String(format: format, Int(bid))
         }
-        return "\(game.name(of: game.turnIndex)) entscheidet jetzt: mitspielen oder aussteigen."
+        let format = String(localized: "phase2.hint.opponentTurn",
+                            defaultValue: "%@ entscheidet jetzt: mitgehen, erhöhen oder passen.")
+        return String(format: format, game.name(of: game.turnIndex))
     }
 
     /// Kompakter Mockup-Status statt grosser Coach-Box: Phase 2 soll wie ein
@@ -703,7 +878,7 @@ struct Phase2View: View {
                 .contentTransition(.opacity)
             if let detail = status.detail {
                 Text(detail)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 12.5, weight: .semibold))
                     .tracking(1.0)
                     .foregroundStyle(Tokens.slate.opacity(0.76))
                     .lineLimit(1)
@@ -741,9 +916,16 @@ struct Phase2View: View {
         }
         if game.turnIndex == 0 {
             guard let combo = game.humanCombo else {
-                return ("PASSEN", "KEIN PAAR", Tokens.slate)
+                return (String(localized: "phase2.status.pass",
+                               defaultValue: "PASSEN"),
+                        String(localized: "phase2.status.noPair",
+                               defaultValue: "KEIN PAAR"),
+                        Tokens.slate)
             }
-            return ("DU BIST DRAN", localizedCombo(combo).uppercased(), pochAccent)
+            return (String(localized: "phase2.status.yourTurn",
+                           defaultValue: "DU BIST DRAN"),
+                    localizedCombo(combo).uppercased(),
+                    pochAccent)
         }
         let action = actionPresentation(for: game.turnIndex)
         return (action.text.uppercased(), game.name(of: game.turnIndex).uppercased(), action.tone)
@@ -751,7 +933,6 @@ struct Phase2View: View {
 
     private var pochenDecisionCard: some View {
         let status = pochenStatus
-        let cap = game.capHolder.map { game.name(of: $0) } ?? "offen"
         let committed = game.humanCommitted
         return VStack(alignment: .leading, spacing: 7) {
             VStack(alignment: .leading, spacing: 7) {
@@ -796,7 +977,7 @@ struct Phase2View: View {
                 Text(isGuidedRound ? guidedDecisionBody : freeDecisionBody)
                     .font(dynamicTypeSize.isAccessibilitySize
                           ? .body.weight(.semibold)
-                          : .system(size: isGuidedRound ? 11.4 : 11.2,
+                          : .system(size: isGuidedRound ? 13.2 : 13.0,
                                     weight: .semibold))
                     .foregroundStyle(Tokens.jewelPlatin.opacity(isGuidedRound ? 0.92 : 0.76))
                     .lineSpacing(isGuidedRound ? 1.8 : 1.2)
@@ -821,12 +1002,16 @@ struct Phase2View: View {
 
                 if game.stage == .betting, !isGuidedRound {
                     HStack(spacing: 8) {
-                        pressureMetric(String(localized: "EINSATZ"),
+                        pressureMetric(String(localized: "phase2.metric.yourBid",
+                                              defaultValue: "DEIN GEBOT"),
                                        "\(Int(bid))",
                                        pochAccent)
-                        pressureMetric("POCH", "+\(game.pochPool)", Tokens.jewelGold)
-                        pressureMetric("LIMIT", cap, Tokens.slate, muted: true)
-                        pressureMetric("DU", "\(committed)", theme.isTravelTable ? Tokens.jewelSmaragd : Tokens.smaragdText)
+                        pressureMetric(String(localized: "phase2.metric.inPoch",
+                                              defaultValue: "IM POTT"),
+                                       "\(game.pot + game.pochPool)", Tokens.jewelGold)
+                        pressureMetric(String(localized: "phase2.metric.fromYou",
+                                              defaultValue: "VON DIR"),
+                                       "\(committed)", theme.isTravelTable ? Tokens.jewelSmaragd : Tokens.smaragdText)
                     }
                 }
 
@@ -894,59 +1079,100 @@ struct Phase2View: View {
 
         return HStack(spacing: 8) {
             showdownComboBadge(name: winnerName,
+                               seat: summary.winner,
                                combo: summary.winningCombo,
                                tint: Tokens.jewelGold)
             Image(systemName: "chevron.right.2")
                 .font(.system(size: 10, weight: .heavy))
                 .foregroundStyle(Tokens.jewelGold.opacity(0.86))
             showdownComboBadge(name: runnerName,
+                               seat: runnerUp,
                                combo: runnerUpCombo,
                                tint: Tokens.slate)
         }
         .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(winnerName): \(localizedCombo(summary.winningCombo)) schlägt \(runnerName): \(localizedCombo(runnerUpCombo))")
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(String(
+            format: String(localized: "phase2.showdown.accessibility",
+                           defaultValue: "%1$@: %2$@ schlägt %3$@: %4$@"),
+            winnerName,
+            localizedCombo(summary.winningCombo),
+            runnerName,
+            localizedCombo(runnerUpCombo)
+        ))
     }
 
     private func showdownComboBadge(name: String,
+                                    seat: Int,
                                     combo: Combo,
                                     tint: Color) -> some View {
-        HStack(spacing: 5) {
+        let cards = showdownCards(seat: seat, combo: combo)
+        return VStack(spacing: 4) {
             Text(name)
                 .font(.system(size: 8.5, weight: .heavy))
                 .tracking(0.8)
                 .foregroundStyle(tint.opacity(0.9))
-            HStack(spacing: 2) {
-                ForEach(0..<comboCardCount(combo.kind), id: \.self) { _ in
-                    Text(comboRankGlyph(combo.rank))
-                        .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(Tokens.bgDeep)
-                        .frame(width: 21, height: 25)
-                        .background(RoundedRectangle(cornerRadius: 5).fill(tint))
+
+            HStack(spacing: -16) {
+                ForEach(Array(cards.enumerated()), id: \.offset) { index, card in
+                    ZStack {
+                        CardFace(card: card,
+                                 highlighted: seat == 0,
+                                 scale: 0.74,
+                                 isAccessibilityHidden: true)
+                        Color.clear
+                            .frame(width: 52 * 0.74, height: 74 * 0.74)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("\(card.rank.index)\(card.suit.symbol)")
+                            .accessibilityAddTraits(.isImage)
+                            .accessibilityIdentifier(
+                                "phase2.showdown.\(seat).card.\(card.suit.rawValue).\(card.rank.index)"
+                            )
+                    }
+                        .rotationEffect(.degrees(showdownCardAngle(index: index,
+                                                                  count: cards.count)),
+                                        anchor: .bottom)
+                        .zIndex(Double(index))
                 }
             }
+            .accessibilityElement(children: .contain)
+
+            Text(localizedCombo(combo))
+                .font(.system(size: 8.2, weight: .bold))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.72))
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
         }
+        .frame(maxWidth: .infinity)
+        .phase2PayoutAnchor(.opponent(seat))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("phase2.showdown.\(seat)")
     }
 
-    private func comboCardCount(_ kind: Combo.Kind) -> Int {
+    /// Gegnerkarten verlassen die Informationsgrenze erst nach dem öffentlichen
+    /// Showdown. Dann werden exakt die Karten gezeigt, aus denen die verglichene
+    /// Kombination tatsächlich besteht.
+    private func showdownCards(seat: Int, combo: Combo) -> [Card] {
+        guard game.stage != .betting,
+              game.pochShowdownSummary != nil,
+              let roundSeat = game.roundSeat(forUISeat: seat),
+              game.round.deal.hands.indices.contains(roundSeat) else { return [] }
+        return Array(game.round.deal.hands[roundSeat]
+            .filter { $0.rank == combo.rank }
+            .prefix(showdownCardCount(combo.kind)))
+    }
+
+    private func showdownCardCount(_ kind: Combo.Kind) -> Int {
         switch kind {
-        case .pair: return 2
-        case .triple: return 3
-        case .quad: return 4
+        case .pair: 2
+        case .triple: 3
+        case .quad: 4
         }
     }
 
-    private func comboRankGlyph(_ rank: Rank) -> String {
-        switch rank {
-        case .seven: return "7"
-        case .eight: return "8"
-        case .nine: return "9"
-        case .ten: return "10"
-        case .jack: return "J"
-        case .queen: return "Q"
-        case .king: return "K"
-        case .ace: return "A"
-        }
+    private func showdownCardAngle(index: Int, count: Int) -> Double {
+        guard count > 1 else { return 0 }
+        return -4 + (8 * Double(index) / Double(count - 1))
     }
 
     private var freeDecisionBody: String {
@@ -1020,12 +1246,19 @@ struct Phase2View: View {
         }
         if game.betting.currentBet > 0 {
             let callCost = max(0, game.betting.currentBet - game.humanCommitted)
-            let format = String(localized: "tutorial.bidding.reply.body",
-                                defaultValue: "Mitgehen: +%d Chip zum Einsatz. Wenn du passt, steigst du aus; dein bisheriger Einsatz bleibt im Poch-Pott.")
+            let reply: String
+            if callCost == 1 {
+                reply = String(localized: "tutorial.bidding.reply.body.one",
+                               defaultValue: "Zahle 1 weiteren Chip, um im Gebot zu bleiben. Passt du, bist du raus; dein bisheriger Einsatz bleibt im Poch-Pott.")
+            } else {
+                let format = String(localized: "tutorial.bidding.reply.body.many",
+                                    defaultValue: "Zahle %d weitere Chips, um im Gebot zu bleiben. Passt du, bist du raus; dein bisheriger Einsatz bleibt im Poch-Pott.")
+                reply = String(format: format, callCost)
+            }
             return (
                 "arrow.left.arrow.right.circle.fill",
                 String(localized: "tutorial.bidding.reply.title", defaultValue: "Mitgehen oder passen?"),
-                String(format: format, callCost),
+                reply,
                 pochAccent
             )
         }
@@ -1045,7 +1278,7 @@ struct Phase2View: View {
                 "rectangle.on.rectangle.angled",
                 String(format: titleFormat, localizedCombo(humanCombo)),
                 String(localized: "tutorial.bidding.combo.body",
-                       defaultValue: "Mindestens zwei gleiche Karten bringen dich ins Bieten. Drei gleiche schlagen zwei, vier gleiche schlagen drei."),
+                       defaultValue: "Mit mindestens zwei Karten desselben Werts darfst du pochen. Ein Drilling schlägt jedes Paar; ein Vierling jeden Drilling."),
                 pochAccent
             )
         case 1:
@@ -1257,7 +1490,9 @@ struct Phase2View: View {
                 .shadow(color: status.tint.opacity(active ? 0.16 : 0.04), radius: 10, y: 5)
 
             VStack(spacing: -1) {
-                Text(active ? "SETZE" : "POCH")
+                Text(active
+                     ? String(localized: "phase2.stakeDial.set", defaultValue: "SETZE")
+                     : String(localized: "phase2.metric.poch", defaultValue: "POCH"))
                     .font(.system(size: 7, weight: .heavy))
                     .tracking(1.2)
                     .foregroundStyle(status.tint.opacity(0.82))
@@ -1271,7 +1506,13 @@ struct Phase2View: View {
             }
         }
         .frame(width: 68, height: 68)
-        .accessibilityLabel(active ? "Einsatz \(Int(bid))" : "Poch \(presentedPot)")
+        .accessibilityLabel(active
+                            ? String(format: String(localized: "phase2.accessibility.stake",
+                                                    defaultValue: "Einsatz %d"),
+                                     Int(bid))
+                            : String(format: String(localized: "phase2.accessibility.poch",
+                                                    defaultValue: "Poch %d"),
+                                     presentedPot))
     }
 
     private var pochenHintPill: some View {
@@ -1306,6 +1547,10 @@ struct Phase2View: View {
             let freeStageCenterX = sliderVisualRightEdge
                 + (proxy.size.width - sliderVisualRightEdge) / 2
             let boardCenterX = isGuidedRound ? proxy.size.width / 2 : freeStageCenterX
+            let boardLeftEdge = boardCenterX - compactRingDiameter / 2
+            let trumpCenterX = isGuidedRound
+                ? max(34, boardLeftEdge / 2)
+                : sliderVisualRightEdge + (boardLeftEdge - sliderVisualRightEdge) / 2
             ZStack {
                 sliderPanel
                     .position(x: 36, y: proxy.size.height / 2 + 1)
@@ -1324,9 +1569,38 @@ struct Phase2View: View {
                         isRelevant: isGuidedRound || guidedFocus == .opponents,
                         reduceMotion: phase2ReduceMotion
                     ))
+
+                trumpTableCard
+                    .position(x: trumpCenterX,
+                              y: min(54, proxy.size.height * 0.28))
+                    .zIndex(3)
             }
         }
         .frame(maxHeight: .infinity)
+    }
+
+    /// Die offene Tischkarte bleibt auch beim Pochen als physische Karte im
+    /// Bild. So muss niemand eine winzige Rang-Kapsel im globalen HUD entziffern.
+    private var trumpTableCard: some View {
+        VStack(spacing: 0) {
+            CardFace(card: game.upcard,
+                     highlighted: false,
+                     scale: 0.80,
+                     isAccessibilityHidden: true)
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(hex: 0x0B0910).opacity(0.88))
+                .overlay(RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Tokens.jewelGold.opacity(0.34), lineWidth: 1))
+                .shadow(color: .black.opacity(0.34), radius: 9, y: 5)
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Trumpf", defaultValue: "Trumpf"))
+        .accessibilityValue("\(game.upcard.rank.index)\(game.upcard.suit.symbol)")
+        .accessibilityIdentifier("phase2.trump.card")
     }
 
     /// Vertikaler Biet-Slider links: Drehtrick (.rotationEffect), Track als gefräste Rille.
@@ -1336,8 +1610,8 @@ struct Phase2View: View {
         let atWall = sliderRange.map { Int(bid) >= $0.upperBound } ?? false
 
         return VStack(spacing: 6) {
-            Text("EINSATZ")
-                .font(.system(size: 10, weight: .semibold)).tracking(2.5)
+            Text(String(localized: "phase2.metric.yourBid", defaultValue: "DEIN GEBOT"))
+                .font(.system(size: 11.5, weight: .semibold)).tracking(1.8)
                 .foregroundStyle(Tokens.slate)
 
             ZStack {
@@ -1418,7 +1692,7 @@ struct Phase2View: View {
                     }
             )
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("Einsatz"))
+            .accessibilityLabel(Text(String(localized: "Einsatz")))
             .accessibilityValue(Text("\(Int(bid))"))
             .accessibilityAdjustableAction { direction in
                 guard isActive else { return }
@@ -1472,9 +1746,11 @@ struct Phase2View: View {
         }
         .frame(width: d, height: d)
         .tableWorldSpatialPresentation(world: theme, diameter: d)
+        .phase2PayoutAnchor(.board)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "phase2.board.accessibility",
                                    defaultValue: "Poch-Brett"))
+        .accessibilityAddTraits(.isImage)
         .accessibilityIdentifier("table.world.phase2.board")
     }
 
@@ -1507,7 +1783,7 @@ struct Phase2View: View {
                                 : .scale(scale: 0.72).combined(with: .opacity))
             }
 
-            Text("POCH")
+            Text(String(localized: "phase2.metric.poch", defaultValue: "POCH"))
                 .font(.system(size: 5.8, weight: .heavy, design: .rounded))
                 .tracking(0.8)
                 .foregroundStyle(theme.isTravelTable
@@ -1571,26 +1847,33 @@ struct Phase2View: View {
     private func token(seat: Int, width: CGFloat) -> some View {
         let s = game.bettingSeat(of: seat)
         let isTurn = game.turnIndex == seat && game.stage == .betting
-        let reaction = actionPresentation(for: seat)
+        let featured = featuredReaction?.seat == seat ? featuredReaction : nil
+        let publicAction = featured?.action ?? game.seatActions[seat]
+        let reaction = actionPresentation(action: publicAction, seat: seat)
         let resultSettled = game.stage != .betting
         let didWin = game.pochResult?.winner == seat
         let mood = didWin ? OpponentMood.winning
-            : moodPresentation(for: seat, isTurn: isTurn)
+            : moodPresentation(for: seat, action: publicAction, isTurn: isTurn)
         return OpponentPanel(seat: seat,
                              name: game.name(of: seat),
                              stack: presentedStack(of: seat),
                              cards: game.displayedCardCount(of: seat),
-                             actionText: resultSettled ? "bereit" : reaction.text,
-                             actionTint: resultSettled ? .clear : reaction.tone,
+                             actionText: resultSettled && featured == nil ? "" : reaction.text,
+                             actionTint: resultSettled && featured == nil ? .clear : reaction.tone,
                              isActive: s?.isActive ?? false,
-                             isFocus: isTurn || didWin,
+                             isFocus: isTurn || didWin || featured != nil,
                              mood: mood,
                              width: width,
                              tendencyTitle: tendencyTitle(for: seat),
-                             showsSpeechBubble: false,
+                             showsSpeechBubble: featured != nil
+                                || (game.stage == .betting
+                                    && featuredReaction == nil
+                                        && isTurn
+                                        && game.seatActions[seat] == .thinking),
                              morph: morph,
                              reduceMotionOverride: phase2ReduceMotion)
             .accessibilityIdentifier("phase2.opponent.\(seat)")
+            .phase2PayoutAnchor(.opponent(seat))
     }
 
     private func tendencyTitle(for seat: Int) -> String? {
@@ -1612,27 +1895,47 @@ struct Phase2View: View {
 
     /// Auftritt = Reaktion auf den öffentlichen Spielstand (§6b) - nie ein Hand-Leak.
     private func actionPresentation(for seat: Int) -> (text: String, tone: Color) {
+        actionPresentation(action: game.seatActions[seat], seat: seat)
+    }
+
+    private func actionPresentation(action: SeatAction,
+                                    seat: Int) -> (text: String, tone: Color) {
         let s = game.bettingSeat(of: seat)
-        switch game.seatActions[seat] {
-        case .thinking: return ("überlegt …", Tokens.slate)
-        case .passed: return ("passt", Tokens.slate)
-        case .opened(let n): return ("pocht \(n)!", pochAccent)
-        case .called: return ("geht mit", Tokens.jewelGold)
-        case .raised(let n): return ("erhöht auf \(n)", pochAccent)
+        switch action {
+        case .thinking:
+            return (String(localized: "phase2.reaction.thinking",
+                           defaultValue: "überlegt …"), Tokens.slate)
+        case .passed:
+            return (String(localized: "phase2.reaction.passed",
+                           defaultValue: "passt"), Tokens.slate)
+        case .opened(let n):
+            return (String(format: String(localized: "phase2.reaction.opened",
+                                          defaultValue: "pocht %d!"), n),
+                    pochAccent)
+        case .called:
+            return (String(localized: "phase2.reaction.called",
+                           defaultValue: "geht mit"), Tokens.jewelGold)
+        case .raised(let n):
+            return (String(format: String(localized: "phase2.reaction.raised",
+                                          defaultValue: "erhöht auf %d"), n),
+                    pochAccent)
         case .none:
-            let committed = s?.committed ?? 0
-            return committed > 0 ? ("setzt \(committed)", Tokens.jewelGold) : ("bereit", Tokens.slate.opacity(0.62))
+            return ("", (s?.committed ?? 0) > 0
+                    ? Tokens.jewelGold
+                    : Tokens.slate.opacity(0.62))
         }
     }
 
-    private func moodPresentation(for seat: Int, isTurn: Bool) -> OpponentMood {
+    private func moodPresentation(for seat: Int,
+                                  action: SeatAction,
+                                  isTurn: Bool) -> OpponentMood {
         if isTurn,
            transferPresentationActive,
            game.lastBetKind == .raise,
            game.lastBetActor != seat {
             return .surprised
         }
-        switch game.seatActions[seat] {
+        switch action {
         case .thinking:
             return .thinking
         case .passed:
@@ -1687,37 +1990,68 @@ struct Phase2View: View {
     private func handFan(cardScale: CGFloat) -> some View {
         let cards = game.humanHand
         let isHighlighted = game.stage == .betting
+        let combo = isHighlighted ? game.humanCombo : nil
         let N = cards.count
         let spreadDeg = min(Double(N) * 7.0, 38.0)
         let totalW: CGFloat = min(CGFloat(N) * 30, 224) * (cardScale / 1.62)
-        return ZStack {
-            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
-                let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
-                let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
-                let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
-                CardFace(card: card,
-                         highlighted: isHighlighted && card.rank == game.humanComboRank,
-                         scale: cardScale)
-                    .offset(x: xOff)
-                    .rotationEffect(.degrees(angle), anchor: .bottom)
-                    .zIndex(Double(i))
+        return VStack(spacing: 7) {
+            if let combo {
+                Text(String(
+                    format: String(localized: "phase2.hand.combo",
+                                   defaultValue: "%@ - deine stärkste Gruppe"),
+                    localizedCombo(combo)
+                ))
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(Tokens.jewelPlatin.opacity(0.96))
+                .padding(.horizontal, 11)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(pochAccent.opacity(0.24))
+                        .overlay(Capsule().strokeBorder(pochAccent.opacity(0.62), lineWidth: 1))
+                )
+                .accessibilityIdentifier("phase2.hand.combo")
+                .transition(phase2ReduceMotion ? .opacity : .scale(scale: 0.94).combined(with: .opacity))
             }
+
+            ZStack {
+                ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
+                    let t: CGFloat = N > 1 ? CGFloat(i) / CGFloat(N - 1) : 0.5
+                    let angle = N > 1 ? -spreadDeg / 2 + Double(t) * spreadDeg : 0.0
+                    let xOff: CGFloat = N > 1 ? -totalW / 2 + t * totalW : 0
+                    let belongsToCombo = isHighlighted && card.rank == game.humanComboRank
+                    CardFace(card: card,
+                             highlighted: belongsToCombo,
+                             scale: cardScale)
+                        .offset(x: xOff)
+                        .rotationEffect(.degrees(angle), anchor: .bottom)
+                        .zIndex(Double(i))
+                        .accessibilityIdentifier(belongsToCombo
+                            ? "phase2.hand.combo.card.\(card.suit.rawValue).\(card.rank.index)"
+                            : "phase2.hand.card.\(card.suit.rawValue).\(card.rank.index)")
+                        .accessibilityAddTraits(belongsToCombo ? .isSelected : [])
+                }
+            }
+            .frame(height: 74 * cardScale * 0.62)
         }
-        .frame(height: 74 * cardScale * 0.62)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("phase2.hand")
+        .phase2PayoutAnchor(.human)
     }
 
     // MARK: - Aktions-Buttons (2-spaltig)
 
     private var tensionBar: some View {
-        let cap = game.capHolder.map { game.name(of: $0) } ?? "offen"
-        let committed = game.humanCommitted
         return HStack(spacing: 8) {
-            wagerMetric("EINSATZ", "\(presentedPot)", pochAccent)
-            wagerMetric("POTT", "+\(game.pochPool)", Tokens.jewelGold)
-            wagerMetric("LIMIT", cap, Tokens.slate, muted: true)
-            wagerMetric("DU", "\(committed)", Tokens.jewelSmaragd)
+            wagerMetric(String(localized: "phase2.metric.yourBid",
+                               defaultValue: "DEIN GEBOT"),
+                        "\(Int(bid))", pochAccent)
+            wagerMetric(String(localized: "phase2.metric.inPoch",
+                               defaultValue: "IM POTT"),
+                        "\(game.pot + game.pochPool)", Tokens.jewelGold)
+            wagerMetric(String(localized: "phase2.metric.fromYou",
+                               defaultValue: "VON DIR"),
+                        "\(game.humanCommitted)", Tokens.jewelSmaragd)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
@@ -1732,12 +2066,12 @@ struct Phase2View: View {
                              muted: Bool = false) -> some View {
         VStack(spacing: 2) {
             Text(title)
-                .font(.system(size: 7, weight: .bold))
-                .tracking(1.1)
+                .font(.system(size: 9.5, weight: .heavy))
+                .tracking(0.65)
                 .foregroundStyle(Tokens.slate.opacity(0.72))
                 .lineLimit(1)
             Text(value)
-                .font(.system(size: value.count > 5 ? 10 : 13, weight: .heavy))
+                .font(.system(size: value.count > 5 ? 11 : 14, weight: .heavy))
                 .foregroundStyle(muted ? Tokens.jewelPlatin.opacity(0.72) : tint)
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
@@ -1750,12 +2084,12 @@ struct Phase2View: View {
                                 muted: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(title)
-                .font(.system(size: 6.7, weight: .heavy))
-                .tracking(1.0)
+                .font(.system(size: 9.5, weight: .heavy))
+                .tracking(0.65)
                 .foregroundStyle(Tokens.slate.opacity(0.66))
                 .lineLimit(1)
             Text(value)
-                .font(.system(size: value.count > 5 ? 9.2 : 12.6, weight: .heavy))
+                .font(.system(size: value.count > 5 ? 11 : 14, weight: .heavy))
                 .foregroundStyle(muted ? Tokens.jewelPlatin.opacity(0.72) : tint)
                 .lineLimit(1)
                 .minimumScaleFactor(0.62)
@@ -1786,31 +2120,32 @@ struct Phase2View: View {
         let canRaise = legal.raiseRange != nil
         HStack(spacing: 7) {
             if legal.canPass {
-                actionButton("Passen", style: .quiet,
+                actionButton(String(localized: "phase2.action.pass",
+                                    defaultValue: "Passen"), style: .quiet,
+                             systemImage: "xmark",
                              identifier: "phase2.action.pass") { game.humanPass() }
             }
             if legal.canCall {
-                actionButton(isGuidedRound
-                             ? (callCost > 0 ? "+\(callCost) mitgehen" : "Mitgehen")
-                             : (callCost > 0 ? "Mitgehen \(callCost)" : "Mitgehen"),
+                actionButton(callActionTitle(cost: callCost),
                              style: .gold,
+                             systemImage: "arrow.left.arrow.right",
                              identifier: "phase2.action.call") { game.humanCall() }
             }
             if canRaise {
-                actionButton(isGuidedRound
-                             ? "Auf \(Int(bid)) erhöhen"
-                             : "Erhöhen \(Int(bid))", style: .amethyst,
+                actionButton(String(format: String(localized: "phase2.action.raise",
+                                                   defaultValue: "Auf %d erhöhen"),
+                                    Int(bid)), style: .amethyst,
+                             systemImage: "arrow.up",
                              identifier: "phase2.action.raise") {
                     if let raise = legal.raiseRange {
                         game.humanRaise(to: Int(bid).clamped(to: raise))
                     }
                 }
             } else if canOpen {
-                actionButton(isGuidedRound
-                             ? (Int(bid) == 1
-                                ? "Mit 1 Chip pochen"
-                                : "Mit \(Int(bid)) Chips pochen")
-                             : "Pochen \(Int(bid))", style: .amethyst,
+                actionButton(String(format: String(localized: "phase2.action.open",
+                                                   defaultValue: "Mit %d Chips pochen"),
+                                    Int(bid)), style: .amethyst,
+                             systemImage: "hand.tap.fill",
                              identifier: "phase2.action.open") {
                     if let open = legal.openRange {
                         game.humanOpen(Int(bid).clamped(to: open))
@@ -1819,15 +2154,40 @@ struct Phase2View: View {
             }
         }
         .padding(.horizontal, 2)
+        .animation(phase2ReduceMotion ? nil : .easeInOut(duration: 0.20),
+                   value: game.betting.currentBet)
+    }
+
+    private func callActionTitle(cost: Int) -> String {
+        guard cost > 0 else {
+            return String(localized: "phase2.action.call", defaultValue: "Mitgehen")
+        }
+        if cost == 1 {
+            return String(localized: "phase2.action.call.cost.one",
+                          defaultValue: "Für 1 Chip mitgehen")
+        }
+        let format = String(localized: "phase2.action.call.cost.many",
+                            defaultValue: "Für %d Chips mitgehen")
+        return String(format: format, cost)
     }
 
     private func wallLabel(_ range: ClosedRange<Int>) -> some View {
         let holder = game.capHolder
         let text: String = {
-            guard let holder else { return "Höchster Einsatz: \(range.upperBound) Chips" }
-            return holder == 0
-                ? "Maximal \(range.upperBound) Chips - dein Vorrat setzt die Grenze"
-                : "Maximal \(range.upperBound) Chips - mehr kann \(game.name(of: holder)) nicht mitgehen"
+            guard let holder else {
+                return String(format: String(localized: "phase2.wall.highest",
+                                             defaultValue: "Höchster Einsatz: %d Chips"),
+                              range.upperBound)
+            }
+            if holder == 0 {
+                return String(format: String(localized: "phase2.wall.you",
+                                             defaultValue: "Maximal %d Chips - dein Vorrat setzt die Grenze"),
+                              range.upperBound)
+            }
+            return String(format: String(localized: "phase2.wall.opponent",
+                                         defaultValue: "Maximal %1$d Chips - mehr kann %2$@ nicht mitgehen"),
+                          range.upperBound,
+                          game.name(of: holder))
         }()
         return Text(text)
             .font(.system(size: 11, weight: .medium))
@@ -1874,7 +2234,7 @@ struct Phase2View: View {
     }
 
     private var payoutControlsEnabled: Bool {
-        phase2ReduceMotion || game.pochResult == nil || payoutPresentationCompleted
+        game.pochResult == nil || payoutPresentationCompleted
     }
 
     // MARK: - Bausteine
@@ -1944,31 +2304,41 @@ struct Phase2View: View {
 
 private struct PochPayoutFlight: View {
     let winner: Int
+    let winnerName: String
     let amount: Int
     let generation: Int
     let reduceMotion: Bool
     let world: TableWorld
     let activeSeats: [Int]
+    let sourceFrame: CGRect?
+    let targetFrame: CGRect?
     let onImpact: () -> Void
 
     @State private var landed = false
+    @State private var completionScheduled = false
     @State private var transaction: CoinTransferTransaction
 
     init(
         winner: Int,
+        winnerName: String,
         amount: Int,
         generation: Int,
         reduceMotion: Bool,
         world: TableWorld,
         activeSeats: [Int],
+        sourceFrame: CGRect?,
+        targetFrame: CGRect?,
         onImpact: @escaping () -> Void
     ) {
         self.winner = winner
+        self.winnerName = winnerName
         self.amount = amount
         self.generation = generation
         self.reduceMotion = reduceMotion
         self.world = world
         self.activeSeats = activeSeats
+        self.sourceFrame = sourceFrame
+        self.targetFrame = targetFrame
         self.onImpact = onImpact
         _transaction = State(initialValue: CoinTransferTransaction(
             eventID: Self.eventID(generation: generation),
@@ -1982,11 +2352,56 @@ private struct PochPayoutFlight: View {
             let stage = Phase2StageGeometry.resolve(in: proxy.size,
                                                     safeArea: proxy.safeAreaInsets,
                                                     globalFrame: proxy.frame(in: .global))
-            let origin = boardCenter(in: stage)
-            let target = winnerPoint(in: stage)
+            let origin = sourceFrame.map { CGPoint(x: $0.midX, y: $0.midY) }
+                ?? boardCenter(in: stage)
+            let target = targetFrame.map { frame in
+                CGPoint(x: frame.midX,
+                        y: winner == 0 ? frame.minY + 12 : frame.midY)
+            } ?? winnerPoint(in: stage)
             let tokenCount = min(max(amount, 1), 5)
 
             ZStack {
+                #if DEBUG || INTERNAL_QA
+                if landed,
+                   ProcessInfo.processInfo.arguments.contains("-pochPayoutQA") {
+                    Color.clear
+                        .frame(width: 1, height: 1)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("QA payout landed")
+                        .accessibilityIdentifier("phase2.payout.landed")
+                }
+                #endif
+
+                HStack(spacing: 7) {
+                    Circle()
+                        .fill(world.tint(.poch).opacity(0.22))
+                        .overlay(Circle().strokeBorder(world.tint(.poch).opacity(0.72),
+                                                       lineWidth: 1.2))
+                        .frame(width: 28, height: 28)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(winnerName.uppercased())
+                            .font(.system(size: 11, weight: .heavy))
+                            .tracking(0.9)
+                            .foregroundStyle(Tokens.jewelPlatin.opacity(0.74))
+                        Text("+\(amount)")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(world.tint(.poch))
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .background(
+                    Capsule()
+                        .fill(Color(hex: 0x0B0910).opacity(0.92))
+                        .overlay(Capsule().strokeBorder(world.tint(.poch).opacity(0.34),
+                                                        lineWidth: 1))
+                )
+                .position(x: target.x, y: target.y - 26)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(winnerName)
+                .accessibilityValue("+\(amount)")
+                .accessibilityIdentifier("phase2.payout.target")
+
                 ForEach(0..<tokenCount, id: \.self) { index in
                     let offset = landingOffset(index: index)
                     ImpactFlight(
@@ -2031,9 +2446,10 @@ private struct PochPayoutFlight: View {
             guard transaction.performReducedMotionTransfer(
                 eventID: eventID,
                 generation: generation,
-                applyAtomically: { onImpact() }
+                applyAtomically: {}
             ) == .accepted else { return }
             landed = true
+            scheduleCompletionHold()
             return
         }
         guard transaction.depart(eventID: eventID, generation: generation) == .accepted else {
@@ -2047,11 +2463,24 @@ private struct PochPayoutFlight: View {
         guard transaction.registerImpact(
             eventID: eventID,
             generation: generation,
-            applyAtomically: { onImpact() }
+            applyAtomically: {}
         ) == .accepted else { return }
         landed = true
         _ = transaction.beginSettling(eventID: eventID, generation: generation)
-        _ = transaction.complete(eventID: eventID, generation: generation)
+        scheduleCompletionHold()
+    }
+
+    private func scheduleCompletionHold() {
+        guard !completionScheduled else { return }
+        completionScheduled = true
+        Task { @MainActor in
+            // Der Empfänger bleibt nach der Landung bewusst stehen. Auch ohne
+            // Flugbewegung ist Ursache -> Ziel damit lesbar statt nur korrekt.
+            try? await Task.sleep(for: .seconds(1.85))
+            let eventID = Self.eventID(generation: generation)
+            _ = transaction.complete(eventID: eventID, generation: generation)
+            onImpact()
+        }
     }
 
     private func cancelTransaction() {

@@ -14,19 +14,15 @@ final class TableFoleyAudio {
         "card-deal-02",
         "card-deal-03"
     ]
-    private let centerChipVariants = [
-        "r1-ceramic-center-01",
-        "r1-ceramic-center-02",
-        "r1-ceramic-center-03"
-    ]
-    private let stackChipVariants = [
-        "r1-ceramic-stack-01",
-        "r1-ceramic-stack-02",
-        "r1-ceramic-stack-03"
+    private let pochGestureVariants = [
+        "table-knock-01",
+        "table-knock-02",
+        "table-knock-03"
     ]
     private var voices: [String: [AVAudioPlayer]] = [:]
     private var nextVoice: [String: Int] = [:]
     private var previousVariant: [String: Int] = [:]
+    private var sessionPrepared = false
 
     private static var isAvailableInCurrentRuntime: Bool {
         #if targetEnvironment(simulator)
@@ -38,17 +34,27 @@ final class TableFoleyAudio {
 
     func prepare() {
         guard Self.isAvailableInCurrentRuntime else { return }
-        do {
-            try PochAudioSession.prepareAmbientMixing()
-        } catch {
-            Self.log.error(
-                "Unable to prepare ambient audio session: \(error.localizedDescription, privacy: .public)"
-            )
-            return
-        }
-        for name in cardVariants + centerChipVariants + stackChipVariants {
+        guard prepareSessionIfNeeded() else { return }
+        for name in cardVariants + pochGestureVariants {
             _ = players(named: name)
         }
+        R1ContactAudio.shared.prepare()
+    }
+
+    /// The semantic Poch gesture: a centered knuckle-on-solid-wood table knock,
+    /// deliberately separate from the chip transfer that may follow it.
+    func playPochGesture(sequence: Int,
+                         generation: Int,
+                         seat: Int,
+                         playerCount: Int) {
+        guard Self.isAvailableInCurrentRuntime else { return }
+        play(family: "pochGesture",
+             variants: pochGestureVariants,
+             seed: sequence &+ generation &* 59,
+             salt: 0xB00D_1441,
+             volume: 0.46,
+             pan: TableFoleySpatialModel.pan(seat: seat,
+                                             playerCount: playerCount))
     }
 
     func playCardDeal(sequence: Int,
@@ -100,14 +106,18 @@ final class TableFoleyAudio {
                          playerCount: Int,
                          isPayout: Bool) {
         guard Self.isAvailableInCurrentRuntime else { return }
-        let family = isPayout ? "payout" : "bet"
-        play(family: family,
-             variants: isPayout ? stackChipVariants : centerChipVariants,
-             seed: sequence &+ generation &* 53,
-             salt: isPayout ? 0x57AC_1441 : 0xCE17_1441,
-             volume: isPayout ? 0.40 : 0.32,
-             pan: TableFoleySpatialModel.pan(seat: seat,
-                                             playerCount: playerCount))
+        let eventNamespace = isPayout ? "phase2.payout" : "phase2.bet"
+        R1ContactAudio.shared.play(
+            surface: isPayout ? .playerStack : .centerWell,
+            groupSize: 1,
+            variantSeed: sequence &+ generation &* 53,
+            eventKey: R1ContactAudio.EventKey(namespace: eventNamespace,
+                                              generation: generation,
+                                              sequence: sequence),
+            pan: TableFoleySpatialModel.pan(seat: seat,
+                                            playerCount: playerCount),
+            volumeOverride: isPayout ? 0.42 : 0.34
+        )
     }
 
     private func play(family: String,
@@ -116,6 +126,7 @@ final class TableFoleyAudio {
                       salt: UInt64,
                       volume: Float,
                       pan: Float) {
+        guard prepareSessionIfNeeded() else { return }
         let index = R1ContactVariantResolver.resolve(
             variantCount: variants.count,
             seed: seed,
@@ -154,6 +165,20 @@ final class TableFoleyAudio {
                 "Unable to prepare table Foley: \(error.localizedDescription, privacy: .public)"
             )
             return nil
+        }
+    }
+
+    private func prepareSessionIfNeeded() -> Bool {
+        if sessionPrepared { return true }
+        do {
+            try PochAudioSession.prepareAmbientMixing()
+            sessionPrepared = true
+            return true
+        } catch {
+            Self.log.error(
+                "Unable to prepare table Foley audio session: \(error.localizedDescription, privacy: .public)"
+            )
+            return false
         }
     }
 }

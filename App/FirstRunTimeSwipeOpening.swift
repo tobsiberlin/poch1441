@@ -283,17 +283,21 @@ struct FirstRunTimeSwipeOpening: View {
 
     private func timeSeam(size: CGSize,
                           progress: Double) -> some View {
-        let x = FirstRunTimeSwipeProjection.handleCenterX(
+        let handleX = FirstRunTimeSwipeProjection.handleCenterX(
             progress: progress,
             width: Double(size.width)
         )
         let handleSymbol = FirstRunTimeSwipeProjection
             .handleSymbolName(progress: progress)
         return ZStack {
+            // The visible seam and its handle share one axis. At the two
+            // endpoints the image reveal still reaches the true edge, while
+            // the control remains fully visible inside the safe inset.
             Capsule()
                 .fill(Color(hex: 0xD8B466).opacity(0.64))
                 .frame(width: 2, height: size.height * 0.66)
-                .rotationEffect(.degrees(7))
+                .shadow(color: Color(hex: 0xD8B466).opacity(0.16), radius: 8)
+                .position(x: CGFloat(handleX), y: size.height * 0.42)
 
             Image(systemName: handleSymbol)
                 .font(.system(size: 12, weight: .bold))
@@ -305,8 +309,8 @@ struct FirstRunTimeSwipeOpening: View {
                         .overlay(Circle().strokeBorder(Color(hex: 0xD8B466).opacity(0.55)))
                 )
                 .shadow(color: .black.opacity(0.36), radius: 12, y: 6)
+                .position(x: CGFloat(handleX), y: size.height * 0.42)
         }
-        .position(x: CGFloat(x), y: size.height * 0.42)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

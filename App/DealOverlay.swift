@@ -81,16 +81,10 @@ struct DealOverlay: View {
                     let generation = game.meldPresentationGeneration
                     let from = poolPosition(pool, deck: boardCenter)
                     let to = playerTarget(meld.player, w: w, h: h)
-                    MeldPayoutTarget(name: game.name(of: meld.player),
-                                     amount: meld.chips,
-                                     world: theme,
-                                     pool: pool,
-                                     tokenDiameter: tokenDiameter)
-                        .position(to)
-                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
-                        .accessibilityIdentifier("phase1.meld.target")
+                    let landing = payoutLandingPoint(target: to,
+                                                     tokenDiameter: tokenDiameter)
                     CoinStream(from: from,
-                               to: to,
+                               to: landing,
                                world: theme,
                                pool: pool,
                                tokenDiameter: tokenDiameter,
@@ -103,6 +97,20 @@ struct DealOverlay: View {
                         .accessibilityElement(children: .ignore)
                         .accessibilityValue("\(meld.chips)")
                         .accessibilityIdentifier("phase1.meld.flight")
+                        .zIndex(1)
+                    // Name, Betrag und neuer Stand bleiben über dem
+                    // Materialflug lesbar. Die Chips landen vollständig links
+                    // neben der Kapsel statt deren Anker oder Text zu verdecken.
+                    MeldPayoutTarget(name: game.name(of: meld.player),
+                                     amount: meld.chips,
+                                     total: game.displayedStack(of: meld.player) + meld.chips,
+                                     world: theme,
+                                     pool: pool,
+                                     tokenDiameter: tokenDiameter)
+                        .position(to)
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        .accessibilityIdentifier("phase1.meld.target")
+                        .zIndex(2)
                 }
             }
             .accessibilityElement(children: .contain)
@@ -159,12 +167,24 @@ struct DealOverlay: View {
             generation: game.meldPresentationGeneration
         )
         return CGPoint(x: target.x + offset.width,
-                       y: target.y + offset.height)
+                       y: target.y + offset.height + Tokens.phase1OpponentCardsOffsetY)
     }
 
     private func playerTarget(_ seat: Int, w: CGFloat, h: CGFloat) -> CGPoint {
-        seat == 0 ? CGPoint(x: w / 2, y: h - 158)
-                  : opponentTarget(seat, w: w, h: h)
+        // Human payouts land in the quiet score rail above the hand. Landing
+        // inside the fan made the chips look lost and hid the counter update.
+        if seat == 0 {
+            return CGPoint(x: w / 2, y: h * 0.67)
+        }
+        let target = opponentTarget(seat, w: w, h: h)
+        return CGPoint(x: target.x,
+                       y: target.y + Tokens.phase1OpponentPayoutOffsetY)
+    }
+
+    private func payoutLandingPoint(target: CGPoint,
+                                    tokenDiameter: CGFloat) -> CGPoint {
+        CGPoint(x: target.x - max(78, tokenDiameter * 1.72),
+                y: target.y)
     }
 
     private func totalSlots(for seat: Int) -> Int {
@@ -174,11 +194,22 @@ struct DealOverlay: View {
     private func opponentTarget(_ seat: Int, w: CGFloat, h: CGFloat) -> CGPoint {
         let count = max(1, game.playerCount - 1)
         let idx = CGFloat(seat - 1)
+        if w / max(h, 1) >= 4.0 / 3.0 {
+            let usable = max(1, h - 116)
+            let spacing = count > 1 ? min(82, usable / CGFloat(count - 1)) : 0
+            return CGPoint(x: min(78, max(58, w * 0.09)),
+                           y: 58 + idx * spacing)
+        }
         let center = CGFloat(count - 1) / 2
         let spacing = min(CGFloat(126), w / CGFloat(max(count, 2)) * 0.88)
         let arc = abs(idx - center) * 14
+        // `DealOverlay` is stage-local. The anchor sits between the landed fan
+        // and the portrait, inside the opponent rail. Card pose already carries
+        // its own -39 pt fan lift; adding another large negative screen offset
+        // was what pushed every fan into the brand header.
+        let railAnchorY = min(96, max(78, h * 0.125))
         return CGPoint(x: w / 2 + (idx - center) * spacing,
-                       y: h * 0.155 + arc * 0.18)
+                       y: railAnchorY + arc * 0.18)
     }
 
     private func poolPosition(_ pool: Pool, deck: CGPoint) -> CGPoint {
@@ -213,6 +244,7 @@ struct DealOverlay: View {
 private struct MeldPayoutTarget: View {
     let name: String
     let amount: Int
+    let total: Int
     let world: TableWorld
     let pool: Pool
     let tokenDiameter: CGFloat
@@ -242,7 +274,7 @@ private struct MeldPayoutTarget: View {
                     .tracking(0.9)
                     .foregroundStyle(Tokens.jewelPlatin.opacity(0.72))
                     .lineLimit(1)
-                Text("+\(amount)")
+                Text("+\(amount)  ·  \(total)")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(tint)
             }
@@ -258,7 +290,7 @@ private struct MeldPayoutTarget: View {
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(name))
-        .accessibilityValue(Text("+\(amount)"))
+        .accessibilityValue(Text("\(name), +\(amount), \(total)"))
     }
 }
 
@@ -303,6 +335,7 @@ private struct DealSeatTargets: View {
                         .shadow(color: .black.opacity(0.62), radius: 8, y: 5)
                     }
                 }
+                .offset(y: Tokens.phase1OpponentCardsOffsetY)
             } else {
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
                     .strokeBorder(Tokens.jewelPlatin.opacity(0.12),
@@ -319,18 +352,19 @@ private struct DealSeatTargets: View {
                                  size: DealCardPose.opponentPortraitSize,
                                  showsText: false,
                                  morph: nil)
+                    .offset(y: Tokens.phase1OpponentPortraitOffsetY)
 
-                Text(game.name(of: seat).uppercased())
+                Text("\(game.name(of: seat).uppercased())  ·  \(game.displayedStack(of: seat))")
                     .font(.system(size: 8.5, weight: .heavy))
                     .tracking(1.0)
                     .foregroundStyle(Tokens.jewelPlatin.opacity(dealt > 0 ? 0.76 : 0.38))
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(Capsule().fill(Color.black.opacity(0.46)))
-                    .offset(y: 48)
+                    .offset(y: Tokens.phase1OpponentLabelOffsetY)
             }
         }
-        .frame(width: 108, height: 120)
+        .frame(width: 108, height: Tokens.phase1OpponentSeatHeight)
         .position(point)
         .opacity(dealt == 0 ? 0.48 : 1)
         .accessibilityElement(children: .ignore)
@@ -385,11 +419,18 @@ private struct DealSeatTargets: View {
     private func opponentPoint(_ seat: Int) -> CGPoint {
         let count = max(1, game.playerCount - 1)
         let idx = CGFloat(seat - 1)
+        if w / max(h, 1) >= 4.0 / 3.0 {
+            let usable = max(1, h - 116)
+            let spacing = count > 1 ? min(82, usable / CGFloat(count - 1)) : 0
+            return CGPoint(x: min(78, max(58, w * 0.09)),
+                           y: 58 + idx * spacing)
+        }
         let center = CGFloat(count - 1) / 2
         let spacing = min(CGFloat(126), w / CGFloat(max(count, 2)) * 0.88)
         let arc = abs(idx - center) * 14
+        let railAnchorY = min(96, max(78, h * 0.125))
         return CGPoint(x: w / 2 + (idx - center) * spacing,
-                       y: h * 0.155 + arc * 0.18)
+                       y: railAnchorY + arc * 0.18)
     }
 }
 

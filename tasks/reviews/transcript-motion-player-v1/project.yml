@@ -1,0 +1,54 @@
+name: TranscriptMotionPlayerV1
+options:
+  bundleIdPrefix: com.tobc.reviews
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    TARGETED_DEVICE_FAMILY: "1"
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0"
+targets:
+  TranscriptMotionPlayerV1:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+      - path: ../../../App/MotionPlaybackPlan.swift
+        group: ProductionContract
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tobc.reviews.transcript-motion-player-v1
+        PRODUCT_NAME: TranscriptMotionPlayerV1
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Transcript Player V1
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        CODE_SIGNING_ALLOWED: NO
+  TranscriptMotionPlayerV1Tests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Tests
+    dependencies:
+      - target: TranscriptMotionPlayerV1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tobc.reviews.transcript-motion-player-v1.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+schemes:
+  TranscriptMotionPlayerV1:
+    build:
+      targets:
+        TranscriptMotionPlayerV1: all
+        TranscriptMotionPlayerV1Tests: [test]
+    test:
+      targets:
+        - TranscriptMotionPlayerV1Tests
+    run:
+      config: Debug

@@ -20,8 +20,8 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
     func testFrozenHistoricalStatesStayReadable() {
         let states: [(progress: String, title: String, name: String)] = [
             ("0", "1441: Ein Tisch, drei Chancen.", "origin"),
-            ("0.55", "Poch hinterlässt Spuren im Poker.", "branch"),
-            ("1", "Jetzt bist du dran.", "today")
+            ("0.55", "Pokers älterer Verwandter.", "branch"),
+            ("1", "Jetzt beginnt deine erste Runde.", "today")
         ]
 
         for state in states {
@@ -87,8 +87,8 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
         XCTAssertTrue(primary.waitForExistence(timeout: 3))
         primary.tap()
 
-        XCTAssertTrue(app.buttons["firstRun.openingToken"].waitForExistence(timeout: 5),
-                      "The new opening must hand off to the actual guided table.")
+        XCTAssertTrue(app.otherElements["firstRun.boardTour"].waitForExistence(timeout: 5),
+                      "The opening must hand off to the guided board tour before play.")
     }
 
     @MainActor
@@ -103,7 +103,7 @@ final class FirstRunTimeSwipeUITests: XCTestCase {
         XCTAssertTrue(next.waitForExistence(timeout: 2))
         next.tap()
         XCTAssertEqual(app.descendants(matching: .any)["firstRun.timeSwipe.title"].label,
-                       "Poch hinterlässt Spuren im Poker.")
+                       "Pokers älterer Verwandter.")
         next.tap()
         XCTAssertTrue(app.buttons["firstRun.intro.primary"].waitForExistence(timeout: 2))
     }

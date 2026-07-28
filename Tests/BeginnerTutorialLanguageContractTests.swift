@@ -51,13 +51,14 @@ struct BeginnerTutorialLanguageContractTests {
                "Phase 3 must not expose the unexplained Kette läuft status")
         expect(!phase3.contains("RISS \\(marker)"),
                "Phase 3 must name the visible end instead of a Riss")
-        expect(phase3.contains("KARTENFARBE: HERZ")
-               && phase3.contains("Starte mit dem Herz-Buben"),
-               "Phase 3 must identify the first concrete action")
-        expect(phase3.contains("Kartenfarbe")
-               && phase3.contains("Herz-Buben")
-               && phase3.contains("Herz-Dame"),
-               "Phase 3 must define suit and teach the first concrete heart row")
+        expect(phase3.contains("guidedOpeningChoices")
+               && phase3.contains("game.canHumanPlay($0, guided: false)")
+               && phase3.contains("playHumanCard"),
+               "Phase 3 must offer a real legal opening choice instead of a scripted card")
+        expect(phase3.contains("phase3.guided.opening.choice.title")
+               && localizations.contains("Jede Handkarte darf eröffnen")
+               && localizations.contains("nächsthöhere Karte derselben Farbe"),
+               "Phase 3 must explain the opening choice and the same-suit ascending row")
         expect(phase3.contains("REIHE ENDET BEI \\(marker)"),
                "Phase 3 must make the end of a card row visible")
         expect(phase3.contains("1 Chip für jede Restkarte")
@@ -100,10 +101,10 @@ struct BeginnerTutorialLanguageContractTests {
         expect(localizations.contains("Trumpffarbe Karo")
                && localizations.contains("die Karte bleibt in deiner Hand"),
                "Melding must not imply that the card leaves the hand")
-        expect(localizations.contains("König und Dame - das ist die Hochzeit")
-               && localizations.contains("gemeinsam gewinnen beide zusätzlich die Hochzeit"),
+        expect(localizations.contains("König und Dame bilden die Hochzeit")
+               && localizations.contains("gemeinsam gewinnen beide zusätzlich das Hochzeitsfeld"),
                "King and Queen must use an explained everyday name")
-        expect(localizations.contains("Wer zuerst keine Karten mehr vor sich hat"),
+        expect(localizations.contains("Wer seine Hand zuerst leerspielt"),
                "The first action must explain why the center matters")
         expect(!localizations.contains("Ziehe den Stein in die Mitte"),
                "Beginner copy must use Chip consistently")

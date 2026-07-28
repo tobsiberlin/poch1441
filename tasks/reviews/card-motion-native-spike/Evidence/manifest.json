@@ -1,0 +1,100 @@
+{
+  "frames" : [
+    {
+      "file" : "390x844-progress-000.png",
+      "height" : 844,
+      "progress" : 0,
+      "width" : 390
+    },
+    {
+      "file" : "390x844-progress-025.png",
+      "height" : 844,
+      "progress" : 0.25,
+      "width" : 390
+    },
+    {
+      "file" : "390x844-progress-050.png",
+      "height" : 844,
+      "progress" : 0.5,
+      "width" : 390
+    },
+    {
+      "file" : "390x844-progress-075.png",
+      "height" : 844,
+      "progress" : 0.75,
+      "width" : 390
+    },
+    {
+      "file" : "390x844-progress-100.png",
+      "height" : 844,
+      "progress" : 1,
+      "width" : 390
+    },
+    {
+      "file" : "667x375-progress-000.png",
+      "height" : 375,
+      "progress" : 0,
+      "width" : 667
+    },
+    {
+      "file" : "667x375-progress-025.png",
+      "height" : 375,
+      "progress" : 0.25,
+      "width" : 667
+    },
+    {
+      "file" : "667x375-progress-050.png",
+      "height" : 375,
+      "progress" : 0.5,
+      "width" : 667
+    },
+    {
+      "file" : "667x375-progress-075.png",
+      "height" : 375,
+      "progress" : 0.75,
+      "width" : 667
+    },
+    {
+      "file" : "667x375-progress-100.png",
+      "height" : 375,
+      "progress" : 1,
+      "width" : 667
+    },
+    {
+      "file" : "402x874-progress-000.png",
+      "height" : 874,
+      "progress" : 0,
+      "width" : 402
+    },
+    {
+      "file" : "402x874-progress-025.png",
+      "height" : 874,
+      "progress" : 0.25,
+      "width" : 402
+    },
+    {
+      "file" : "402x874-progress-050.png",
+      "height" : 874,
+      "progress" : 0.5,
+      "width" : 402
+    },
+    {
+      "file" : "402x874-progress-075.png",
+      "height" : 874,
+      "progress" : 0.75,
+      "width" : 402
+    },
+    {
+      "file" : "402x874-progress-100.png",
+      "height" : 874,
+      "progress" : 1,
+      "width" : 402
+    }
+  ],
+  "generatedAt" : "2026-07-19T21:36:32Z",
+  "sourceAssets" : [
+    "App\/CardBack.swift + App\/CardMaterialContract.swift (W2 geometry)",
+    "App\/Assets.xcassets\/CardBackDamage\/card_back_damage_04.imageset",
+    "App\/Assets.xcassets\/Cards\/card_hearts_ace.imageset (public V10 face)"
+  ]
+}

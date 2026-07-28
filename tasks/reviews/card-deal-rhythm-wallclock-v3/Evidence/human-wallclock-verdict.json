@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-07-20T15:12:00+02:00",
+  "overallVerdict": "RED",
+  "integrationApproved": false,
+  "technicalVerification": "PASS",
+  "gates": {
+    "standardRhythm": "GREEN",
+    "reducedMotion": "GREEN",
+    "cancellationSemantics": "GREEN",
+    "maximumTwoMovingBodies": "GREEN",
+    "v1SourceProvenance": "GREEN",
+    "w2NeutralBody": "GREEN_NO_MATERIAL_CLAIM",
+    "uncutVideoOrientation": "RED"
+  },
+  "cancellation": {
+    "seconds": 1.176197159949348,
+    "committedCardIndices": [0, 1, 2, 3, 4],
+    "activeAtCancellationCardIndices": [3, 4],
+    "futureCardIndices": [5, 6, 7],
+    "postCancelPeelCount": 0,
+    "drainCompleteSeconds": 1.710632874808307,
+    "committedPostCancelPhaseOrder": ["travel", "contact", "settle", "rest"]
+  },
+  "blockingFinding": "Alle drei encodierten MP4-Dateien sind in Quick Look und direktem Frame-Decode an der horizontalen Achse gespiegelt. Die vor dem Encoding erzeugten Kontaktbögen stehen korrekt. Die eingefrorene Capture-Pipeline wurde in V3 nicht still verändert.",
+  "authoritativeRule": "Dieser menschliche Receipt hat Vorrang vor verification.json und verified.complete für jede Produkt- oder Integrationsfreigabe."
+}

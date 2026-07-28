@@ -169,7 +169,7 @@ final class TableWorldStageUITests: XCTestCase {
             .matching(identifier: "firstRun.learningState").firstMatch
         XCTAssertTrue(learningState.waitForExistence(timeout: 2))
         let settled = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "value == %@", "Jetzt du"),
+            predicate: NSPredicate(format: "value == %@", "DEIN ZUG"),
             object: learningState
         )
         XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 2), .completed)
@@ -221,6 +221,15 @@ final class TableWorldStageUITests: XCTestCase {
                        "Alle fünf Gewinnerstacks dürfen erst am Materialkontakt aufholen.")
         XCTAssertFalse(flight.exists,
                        "Nach der vollständigen Abrechnung darf kein R1-Flug übrig bleiben.")
+        let hand = app.descendants(matching: .any)
+            .matching(identifier: "firstRun.learningHand").firstMatch
+        let nextAction = app.buttons["firstRun.coachAction"]
+        XCTAssertTrue(hand.waitForExistence(timeout: 2))
+        XCTAssertTrue(nextAction.waitForExistence(timeout: 2))
+        XCTAssertTrue(app.windows.firstMatch.frame.contains(nextAction.frame),
+                      "Der Übergang zum Pochen muss vollständig im Fenster liegen: \(nextAction.frame)")
+        XCTAssertFalse(nextAction.frame.intersects(hand.frame),
+                       "Der Übergang zum Pochen darf nicht von der Hand verdeckt werden. CTA: \(nextAction.frame), Hand: \(hand.frame)")
         attachScreenshot(of: app, named: "meld-payout-heavy-r1-settled")
     }
 
@@ -302,8 +311,20 @@ final class TableWorldStageUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 2.22)
         attachImmediateScreenshot(named: "poch-payout-heavy-r1-flight")
 
+        let landed = app.otherElements["phase2.payout.landed"]
+        XCTAssertTrue(landed.waitForExistence(timeout: 12),
+                      "Die Auszahlung muss ihren tatsächlichen Kontakt veröffentlichen.")
+        let payoutTarget = app.otherElements["phase2.payout.target"]
+        XCTAssertTrue(payoutTarget.exists,
+                      "Die Poch-Auszahlung muss ihren benannten Empfänger zeigen.")
+        XCTAssertFalse(payoutTarget.label.isEmpty)
+        XCTAssertTrue(payoutTarget.value as? String != nil)
+        Thread.sleep(forTimeInterval: 0.65)
+        XCTAssertTrue(payoutTarget.exists,
+                      "Der benannte Empfänger muss nach der Landung lesbar stehen bleiben.")
+
         let continueButton = app.buttons["phase2.continue"]
-        XCTAssertTrue(continueButton.waitForExistence(timeout: 2),
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 12),
                       "Die echte Bietrunde muss das Phase-2-Ergebnis zeigen.")
 
         let settled = XCTNSPredicateExpectation(
@@ -337,15 +358,69 @@ final class TableWorldStageUITests: XCTestCase {
         assertBoard("table.world.phase2.board", in: app)
         Thread.sleep(forTimeInterval: 2.22)
 
+        let landed = app.otherElements["phase2.payout.landed"]
+        XCTAssertTrue(landed.waitForExistence(timeout: 12))
+        let payoutTarget = app.otherElements["phase2.payout.target"]
+        XCTAssertTrue(payoutTarget.exists)
         let continueButton = app.buttons["phase2.continue"]
-        XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
-        XCTAssertTrue(continueButton.isEnabled,
-                      "Reduced Motion darf keine unsichtbare Auszahlung abwarten.")
+        XCTAssertTrue(continueButton.exists)
+        XCTAssertFalse(continueButton.isEnabled,
+                       "Auch ohne Flug muss der benannte Empfänger zunächst lesbar bleiben.")
+        Thread.sleep(forTimeInterval: 0.65)
+        XCTAssertTrue(payoutTarget.exists,
+                      "Reduced Motion darf den mindestens 1,2-sekündigen Ziel-Hold nicht entfernen.")
+        let settled = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "isEnabled == true"),
+            object: continueButton
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 4), .completed)
         attachScreenshot(of: app, named: "poch-payout-reduced-motion")
 
         continueButton.tap()
         let phase3 = app.descendants(matching: .any)["table.world.phase3"]
         XCTAssertTrue(phase3.waitForExistence(timeout: 3))
+    }
+
+    @MainActor
+    func testPochOpponentReactionsKeepTheirSeatAndFIFOReadingTime() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = localizedArguments([
+            "-pochenStart",
+            "-pochPayoutQA",
+            "-coachOff",
+            "-players=4",
+            "-sound", "false",
+            "-haptics", "false"
+        ])
+        app.launch()
+
+        let reactions = app.descendants(matching: .any).matching(
+            NSPredicate(format:
+                "identifier BEGINSWITH %@ AND (label CONTAINS[c] %@ OR label CONTAINS[c] %@ OR label CONTAINS[c] %@ OR label CONTAINS[c] %@)",
+                "phase2.opponent.", "passt", "geht mit", "erhöht auf", "pocht")
+        )
+        let first = reactions.firstMatch
+        XCTAssertTrue(first.waitForExistence(timeout: 8),
+                      "Die erste Bot-Entscheidung muss an ihrem echten Sitz erscheinen.")
+        let firstIdentifier = first.identifier
+        let firstLabel = first.label
+        Thread.sleep(forTimeInterval: 0.65)
+        XCTAssertEqual(app.otherElements[firstIdentifier].label, firstLabel,
+                       "Eine Reaktion darf nicht sofort von der nächsten überschrieben werden.")
+
+        let switched = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            for index in 0..<reactions.count {
+                let candidate = reactions.element(boundBy: index)
+                if candidate.identifier != firstIdentifier, candidate.exists {
+                    return true
+                }
+            }
+            return false
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [switched], timeout: 3.5), .completed,
+                       "Die FIFO muss danach zum nächsten realen Sitz weiterblenden.")
+        attachScreenshot(of: app, named: "poch-reaction-fifo-next-seat")
     }
 
     @MainActor
@@ -442,7 +517,7 @@ final class TableWorldStageUITests: XCTestCase {
             predicate: NSPredicate(format: "isEnabled == true"),
             object: continueButton
         )
-        XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 2), .completed)
+        XCTAssertEqual(XCTWaiter.wait(for: [settled], timeout: 10), .completed)
         assertPhase2ResultZones(in: app)
         attachScreenshot(of: app, named: "poch-payout-landscape-settled")
     }

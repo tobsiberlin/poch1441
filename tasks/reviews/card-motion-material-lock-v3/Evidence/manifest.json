@@ -1,0 +1,854 @@
+{
+  "captureFramesPerSecond" : 60,
+  "contactShadowOffsetPixels" : 0.55,
+  "diagnosticGraphicsVisible" : false,
+  "firstContactFrameIndex" : 47,
+  "fixedStepSeconds" : 0.004166666666666667,
+  "frames" : [
+    {
+      "captureWallclock" : 297255.1605397084,
+      "file" : "402x874-material-lock-v3-000.png",
+      "fixedStepIndex" : 0,
+      "frameIndex" : 0,
+      "hasContacted" : false,
+      "height" : 0,
+      "phase" : "source",
+      "simulationTime" : 0
+    },
+    {
+      "captureWallclock" : 297255.1840968334,
+      "file" : "402x874-material-lock-v3-001.png",
+      "fixedStepIndex" : 5,
+      "frameIndex" : 1,
+      "hasContacted" : false,
+      "height" : 3.474712293088139,
+      "phase" : "flight",
+      "simulationTime" : 0.020833333333333332
+    },
+    {
+      "captureWallclock" : 297255.19440512505,
+      "file" : "402x874-material-lock-v3-002.png",
+      "fixedStepIndex" : 8,
+      "frameIndex" : 2,
+      "hasContacted" : false,
+      "height" : 5.345362856864029,
+      "phase" : "flight",
+      "simulationTime" : 0.03333333333333333
+    },
+    {
+      "captureWallclock" : 297255.2111619167,
+      "file" : "402x874-material-lock-v3-003.png",
+      "fixedStepIndex" : 12,
+      "frameIndex" : 3,
+      "hasContacted" : false,
+      "height" : 7.7353120743308095,
+      "phase" : "flight",
+      "simulationTime" : 0.05
+    },
+    {
+      "captureWallclock" : 297255.2278888334,
+      "file" : "402x874-material-lock-v3-004.png",
+      "fixedStepIndex" : 16,
+      "frameIndex" : 4,
+      "hasContacted" : false,
+      "height" : 10.030279270696107,
+      "phase" : "flight",
+      "simulationTime" : 0.06666666666666667
+    },
+    {
+      "captureWallclock" : 297255.24432487506,
+      "file" : "402x874-material-lock-v3-005.png",
+      "fixedStepIndex" : 20,
+      "frameIndex" : 5,
+      "hasContacted" : false,
+      "height" : 12.239193067217874,
+      "phase" : "flight",
+      "simulationTime" : 0.08333333333333333
+    },
+    {
+      "captureWallclock" : 297255.2609960001,
+      "file" : "402x874-material-lock-v3-006.png",
+      "fixedStepIndex" : 24,
+      "frameIndex" : 6,
+      "hasContacted" : false,
+      "height" : 14.363757483778679,
+      "phase" : "flight",
+      "simulationTime" : 0.1
+    },
+    {
+      "captureWallclock" : 297255.27835241676,
+      "file" : "402x874-material-lock-v3-007.png",
+      "fixedStepIndex" : 28,
+      "frameIndex" : 7,
+      "hasContacted" : false,
+      "height" : 16.40240020511512,
+      "phase" : "flight",
+      "simulationTime" : 0.11666666666666667
+    },
+    {
+      "captureWallclock" : 297255.2950600834,
+      "file" : "402x874-material-lock-v3-008.png",
+      "fixedStepIndex" : 32,
+      "frameIndex" : 8,
+      "hasContacted" : false,
+      "height" : 18.35188031716259,
+      "phase" : "flight",
+      "simulationTime" : 0.13333333333333333
+    },
+    {
+      "captureWallclock" : 297255.31162904174,
+      "file" : "402x874-material-lock-v3-009.png",
+      "fixedStepIndex" : 36,
+      "frameIndex" : 9,
+      "hasContacted" : false,
+      "height" : 20.208074225275055,
+      "phase" : "flight",
+      "simulationTime" : 0.15
+    },
+    {
+      "captureWallclock" : 297255.3283055417,
+      "file" : "402x874-material-lock-v3-010.png",
+      "fixedStepIndex" : 40,
+      "frameIndex" : 10,
+      "hasContacted" : false,
+      "height" : 21.966410699045255,
+      "phase" : "flight",
+      "simulationTime" : 0.16666666666666666
+    },
+    {
+      "captureWallclock" : 297255.3449888334,
+      "file" : "402x874-material-lock-v3-011.png",
+      "fixedStepIndex" : 44,
+      "frameIndex" : 11,
+      "hasContacted" : false,
+      "height" : 23.622135108544157,
+      "phase" : "flight",
+      "simulationTime" : 0.18333333333333332
+    },
+    {
+      "captureWallclock" : 297255.3614737084,
+      "file" : "402x874-material-lock-v3-012.png",
+      "fixedStepIndex" : 48,
+      "frameIndex" : 12,
+      "hasContacted" : false,
+      "height" : 25.170482080118873,
+      "phase" : "flight",
+      "simulationTime" : 0.2
+    },
+    {
+      "captureWallclock" : 297255.3784054584,
+      "file" : "402x874-material-lock-v3-013.png",
+      "fixedStepIndex" : 52,
+      "frameIndex" : 13,
+      "hasContacted" : false,
+      "height" : 26.606795171099794,
+      "phase" : "flight",
+      "simulationTime" : 0.21666666666666667
+    },
+    {
+      "captureWallclock" : 297255.39452629176,
+      "file" : "402x874-material-lock-v3-014.png",
+      "fixedStepIndex" : 56,
+      "frameIndex" : 14,
+      "hasContacted" : false,
+      "height" : 27.926613885852312,
+      "phase" : "flight",
+      "simulationTime" : 0.23333333333333334
+    },
+    {
+      "captureWallclock" : 297255.4116679584,
+      "file" : "402x874-material-lock-v3-015.png",
+      "fixedStepIndex" : 60,
+      "frameIndex" : 15,
+      "hasContacted" : false,
+      "height" : 29.125739405840708,
+      "phase" : "flight",
+      "simulationTime" : 0.25
+    },
+    {
+      "captureWallclock" : 297255.42835312505,
+      "file" : "402x874-material-lock-v3-016.png",
+      "fixedStepIndex" : 64,
+      "frameIndex" : 16,
+      "hasContacted" : false,
+      "height" : 30.200285717472422,
+      "phase" : "flight",
+      "simulationTime" : 0.26666666666666666
+    },
+    {
+      "captureWallclock" : 297255.4443003334,
+      "file" : "402x874-material-lock-v3-017.png",
+      "fixedStepIndex" : 68,
+      "frameIndex" : 17,
+      "hasContacted" : false,
+      "height" : 31.146720225404774,
+      "phase" : "flight",
+      "simulationTime" : 0.2833333333333333
+    },
+    {
+      "captureWallclock" : 297255.4617340834,
+      "file" : "402x874-material-lock-v3-018.png",
+      "fixedStepIndex" : 72,
+      "frameIndex" : 18,
+      "hasContacted" : false,
+      "height" : 31.96189643382788,
+      "phase" : "flight",
+      "simulationTime" : 0.3
+    },
+    {
+      "captureWallclock" : 297255.4783097917,
+      "file" : "402x874-material-lock-v3-019.png",
+      "fixedStepIndex" : 76,
+      "frameIndex" : 19,
+      "hasContacted" : false,
+      "height" : 32.643080370649436,
+      "phase" : "flight",
+      "simulationTime" : 0.31666666666666665
+    },
+    {
+      "captureWallclock" : 297255.4949975001,
+      "file" : "402x874-material-lock-v3-020.png",
+      "fixedStepIndex" : 80,
+      "frameIndex" : 20,
+      "hasContacted" : false,
+      "height" : 33.18797186320589,
+      "phase" : "flight",
+      "simulationTime" : 0.3333333333333333
+    },
+    {
+      "captureWallclock" : 297255.51164591673,
+      "file" : "402x874-material-lock-v3-021.png",
+      "fixedStepIndex" : 84,
+      "frameIndex" : 21,
+      "hasContacted" : false,
+      "height" : 33.59472140965205,
+      "phase" : "flight",
+      "simulationTime" : 0.35
+    },
+    {
+      "captureWallclock" : 297255.52740291675,
+      "file" : "402x874-material-lock-v3-022.png",
+      "fixedStepIndex" : 88,
+      "frameIndex" : 22,
+      "hasContacted" : false,
+      "height" : 33.86194314846507,
+      "phase" : "flight",
+      "simulationTime" : 0.36666666666666664
+    },
+    {
+      "captureWallclock" : 297255.5448175834,
+      "file" : "402x874-material-lock-v3-023.png",
+      "fixedStepIndex" : 92,
+      "frameIndex" : 23,
+      "hasContacted" : false,
+      "height" : 33.98872426294289,
+      "phase" : "flight",
+      "simulationTime" : 0.3833333333333333
+    },
+    {
+      "captureWallclock" : 297255.5615839584,
+      "file" : "402x874-material-lock-v3-024.png",
+      "fixedStepIndex" : 96,
+      "frameIndex" : 24,
+      "hasContacted" : false,
+      "height" : 33.9746310396221,
+      "phase" : "flight",
+      "simulationTime" : 0.4
+    },
+    {
+      "captureWallclock" : 297255.5779627917,
+      "file" : "402x874-material-lock-v3-025.png",
+      "fixedStepIndex" : 100,
+      "frameIndex" : 25,
+      "hasContacted" : false,
+      "height" : 33.81971171085025,
+      "phase" : "flight",
+      "simulationTime" : 0.4166666666666667
+    },
+    {
+      "captureWallclock" : 297255.59501625004,
+      "file" : "402x874-material-lock-v3-026.png",
+      "fixedStepIndex" : 104,
+      "frameIndex" : 26,
+      "hasContacted" : false,
+      "height" : 33.52449613978924,
+      "phase" : "flight",
+      "simulationTime" : 0.43333333333333335
+    },
+    {
+      "captureWallclock" : 297255.6112749584,
+      "file" : "402x874-material-lock-v3-027.png",
+      "fixedStepIndex" : 108,
+      "frameIndex" : 27,
+      "hasContacted" : false,
+      "height" : 33.089992341479764,
+      "phase" : "flight",
+      "simulationTime" : 0.45
+    },
+    {
+      "captureWallclock" : 297255.62834329176,
+      "file" : "402x874-material-lock-v3-028.png",
+      "fixedStepIndex" : 112,
+      "frameIndex" : 28,
+      "hasContacted" : false,
+      "height" : 32.51767976815588,
+      "phase" : "flight",
+      "simulationTime" : 0.4666666666666667
+    },
+    {
+      "captureWallclock" : 297255.6440435834,
+      "file" : "402x874-material-lock-v3-029.png",
+      "fixedStepIndex" : 116,
+      "frameIndex" : 29,
+      "hasContacted" : false,
+      "height" : 31.809499212518176,
+      "phase" : "flight",
+      "simulationTime" : 0.48333333333333334
+    },
+    {
+      "captureWallclock" : 297255.66171216674,
+      "file" : "402x874-material-lock-v3-030.png",
+      "fixedStepIndex" : 120,
+      "frameIndex" : 30,
+      "hasContacted" : false,
+      "height" : 30.96783908927233,
+      "phase" : "flight",
+      "simulationTime" : 0.5
+    },
+    {
+      "captureWallclock" : 297255.6782900834,
+      "file" : "402x874-material-lock-v3-031.png",
+      "fixedStepIndex" : 124,
+      "frameIndex" : 31,
+      "hasContacted" : false,
+      "height" : 29.995517729480355,
+      "phase" : "flight",
+      "simulationTime" : 0.5166666666666666
+    },
+    {
+      "captureWallclock" : 297255.69496491674,
+      "file" : "402x874-material-lock-v3-032.png",
+      "fixedStepIndex" : 128,
+      "frameIndex" : 32,
+      "hasContacted" : false,
+      "height" : 28.895761144203473,
+      "phase" : "flight",
+      "simulationTime" : 0.5333333333333333
+    },
+    {
+      "captureWallclock" : 297255.7116425001,
+      "file" : "402x874-material-lock-v3-033.png",
+      "fixedStepIndex" : 132,
+      "frameIndex" : 33,
+      "hasContacted" : false,
+      "height" : 27.67217545214948,
+      "phase" : "flight",
+      "simulationTime" : 0.55
+    },
+    {
+      "captureWallclock" : 297255.72831091675,
+      "file" : "402x874-material-lock-v3-034.png",
+      "fixedStepIndex" : 136,
+      "frameIndex" : 34,
+      "hasContacted" : false,
+      "height" : 26.328712768935183,
+      "phase" : "flight",
+      "simulationTime" : 0.5666666666666667
+    },
+    {
+      "captureWallclock" : 297255.7449683751,
+      "file" : "402x874-material-lock-v3-035.png",
+      "fixedStepIndex" : 140,
+      "frameIndex" : 35,
+      "hasContacted" : false,
+      "height" : 24.869628734839246,
+      "phase" : "flight",
+      "simulationTime" : 0.5833333333333334
+    },
+    {
+      "captureWallclock" : 297255.7617750001,
+      "file" : "402x874-material-lock-v3-036.png",
+      "fixedStepIndex" : 144,
+      "frameIndex" : 36,
+      "hasContacted" : false,
+      "height" : 23.299428856583415,
+      "phase" : "flight",
+      "simulationTime" : 0.6
+    },
+    {
+      "captureWallclock" : 297255.77829404175,
+      "file" : "402x874-material-lock-v3-037.png",
+      "fixedStepIndex" : 148,
+      "frameIndex" : 37,
+      "hasContacted" : false,
+      "height" : 21.62279916571841,
+      "phase" : "flight",
+      "simulationTime" : 0.6166666666666667
+    },
+    {
+      "captureWallclock" : 297255.79498316674,
+      "file" : "402x874-material-lock-v3-038.png",
+      "fixedStepIndex" : 152,
+      "frameIndex" : 38,
+      "hasContacted" : false,
+      "height" : 19.844513785763127,
+      "phase" : "flight",
+      "simulationTime" : 0.6333333333333333
+    },
+    {
+      "captureWallclock" : 297255.81175625004,
+      "file" : "402x874-material-lock-v3-039.png",
+      "fixedStepIndex" : 156,
+      "frameIndex" : 39,
+      "hasContacted" : false,
+      "height" : 17.969306689543465,
+      "phase" : "flight",
+      "simulationTime" : 0.65
+    },
+    {
+      "captureWallclock" : 297255.82829562505,
+      "file" : "402x874-material-lock-v3-040.png",
+      "fixedStepIndex" : 160,
+      "frameIndex" : 40,
+      "hasContacted" : false,
+      "height" : 16.00168466506312,
+      "phase" : "flight",
+      "simulationTime" : 0.6666666666666666
+    },
+    {
+      "captureWallclock" : 297255.84485600004,
+      "file" : "402x874-material-lock-v3-041.png",
+      "fixedStepIndex" : 164,
+      "frameIndex" : 41,
+      "hasContacted" : false,
+      "height" : 13.9456372242798,
+      "phase" : "flight",
+      "simulationTime" : 0.6833333333333333
+    },
+    {
+      "captureWallclock" : 297255.86166125006,
+      "file" : "402x874-material-lock-v3-042.png",
+      "fixedStepIndex" : 168,
+      "frameIndex" : 42,
+      "hasContacted" : false,
+      "height" : 11.80415093625823,
+      "phase" : "flight",
+      "simulationTime" : 0.7
+    },
+    {
+      "captureWallclock" : 297255.87747954176,
+      "file" : "402x874-material-lock-v3-043.png",
+      "fixedStepIndex" : 172,
+      "frameIndex" : 43,
+      "hasContacted" : false,
+      "height" : 9.57831272847191,
+      "phase" : "flight",
+      "simulationTime" : 0.7166666666666667
+    },
+    {
+      "captureWallclock" : 297255.8950616667,
+      "file" : "402x874-material-lock-v3-044.png",
+      "fixedStepIndex" : 176,
+      "frameIndex" : 44,
+      "hasContacted" : false,
+      "height" : 7.265418644560331,
+      "phase" : "flight",
+      "simulationTime" : 0.7333333333333333
+    },
+    {
+      "captureWallclock" : 297255.9116459584,
+      "file" : "402x874-material-lock-v3-045.png",
+      "fixedStepIndex" : 180,
+      "frameIndex" : 45,
+      "hasContacted" : false,
+      "height" : 4.854098727248008,
+      "phase" : "flight",
+      "simulationTime" : 0.75
+    },
+    {
+      "captureWallclock" : 297255.9283364584,
+      "file" : "402x874-material-lock-v3-046.png",
+      "fixedStepIndex" : 184,
+      "frameIndex" : 46,
+      "hasContacted" : false,
+      "height" : 2.3061169987442063,
+      "phase" : "flight",
+      "simulationTime" : 0.7666666666666666
+    },
+    {
+      "captureWallclock" : 297255.9449638334,
+      "file" : "402x874-material-lock-v3-047.png",
+      "fixedStepIndex" : 188,
+      "frameIndex" : 47,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "firstEdgeContact",
+      "simulationTime" : 0.7833333333333333
+    },
+    {
+      "captureWallclock" : 297255.9612717917,
+      "file" : "402x874-material-lock-v3-048.png",
+      "fixedStepIndex" : 192,
+      "frameIndex" : 48,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "settling",
+      "simulationTime" : 0.8
+    },
+    {
+      "captureWallclock" : 297255.97834487504,
+      "file" : "402x874-material-lock-v3-049.png",
+      "fixedStepIndex" : 196,
+      "frameIndex" : 49,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "settling",
+      "simulationTime" : 0.8166666666666667
+    },
+    {
+      "captureWallclock" : 297255.99501912505,
+      "file" : "402x874-material-lock-v3-050.png",
+      "fixedStepIndex" : 200,
+      "frameIndex" : 50,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "settling",
+      "simulationTime" : 0.8333333333333334
+    },
+    {
+      "captureWallclock" : 297256.01149616676,
+      "file" : "402x874-material-lock-v3-051.png",
+      "fixedStepIndex" : 204,
+      "frameIndex" : 51,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "settling",
+      "simulationTime" : 0.85
+    },
+    {
+      "captureWallclock" : 297256.02825275005,
+      "file" : "402x874-material-lock-v3-052.png",
+      "fixedStepIndex" : 208,
+      "frameIndex" : 52,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "settling",
+      "simulationTime" : 0.8666666666666667
+    },
+    {
+      "captureWallclock" : 297256.04471091676,
+      "file" : "402x874-material-lock-v3-053.png",
+      "fixedStepIndex" : 212,
+      "frameIndex" : 53,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "settling",
+      "simulationTime" : 0.8833333333333333
+    },
+    {
+      "captureWallclock" : 297256.06161850004,
+      "file" : "402x874-material-lock-v3-054.png",
+      "fixedStepIndex" : 216,
+      "frameIndex" : 54,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 0.9
+    },
+    {
+      "captureWallclock" : 297256.07744612504,
+      "file" : "402x874-material-lock-v3-055.png",
+      "fixedStepIndex" : 220,
+      "frameIndex" : 55,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 0.9166666666666666
+    },
+    {
+      "captureWallclock" : 297256.0947608334,
+      "file" : "402x874-material-lock-v3-056.png",
+      "fixedStepIndex" : 224,
+      "frameIndex" : 56,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 0.9333333333333333
+    },
+    {
+      "captureWallclock" : 297256.1116407501,
+      "file" : "402x874-material-lock-v3-057.png",
+      "fixedStepIndex" : 228,
+      "frameIndex" : 57,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 0.95
+    },
+    {
+      "captureWallclock" : 297256.12798091676,
+      "file" : "402x874-material-lock-v3-058.png",
+      "fixedStepIndex" : 232,
+      "frameIndex" : 58,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 0.9666666666666667
+    },
+    {
+      "captureWallclock" : 297256.1440498751,
+      "file" : "402x874-material-lock-v3-059.png",
+      "fixedStepIndex" : 236,
+      "frameIndex" : 59,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 0.9833333333333333
+    },
+    {
+      "captureWallclock" : 297256.16168091673,
+      "file" : "402x874-material-lock-v3-060.png",
+      "fixedStepIndex" : 240,
+      "frameIndex" : 60,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1
+    },
+    {
+      "captureWallclock" : 297256.17829775007,
+      "file" : "402x874-material-lock-v3-061.png",
+      "fixedStepIndex" : 244,
+      "frameIndex" : 61,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.0166666666666666
+    },
+    {
+      "captureWallclock" : 297256.19496779173,
+      "file" : "402x874-material-lock-v3-062.png",
+      "fixedStepIndex" : 248,
+      "frameIndex" : 62,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.0333333333333332
+    },
+    {
+      "captureWallclock" : 297256.2116622917,
+      "file" : "402x874-material-lock-v3-063.png",
+      "fixedStepIndex" : 252,
+      "frameIndex" : 63,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.05
+    },
+    {
+      "captureWallclock" : 297256.22832491674,
+      "file" : "402x874-material-lock-v3-064.png",
+      "fixedStepIndex" : 256,
+      "frameIndex" : 64,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.0666666666666667
+    },
+    {
+      "captureWallclock" : 297256.24500491674,
+      "file" : "402x874-material-lock-v3-065.png",
+      "fixedStepIndex" : 260,
+      "frameIndex" : 65,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.0833333333333333
+    },
+    {
+      "captureWallclock" : 297256.2611050417,
+      "file" : "402x874-material-lock-v3-066.png",
+      "fixedStepIndex" : 264,
+      "frameIndex" : 66,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.1
+    },
+    {
+      "captureWallclock" : 297256.2783405001,
+      "file" : "402x874-material-lock-v3-067.png",
+      "fixedStepIndex" : 268,
+      "frameIndex" : 67,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.1166666666666667
+    },
+    {
+      "captureWallclock" : 297256.29499629175,
+      "file" : "402x874-material-lock-v3-068.png",
+      "fixedStepIndex" : 272,
+      "frameIndex" : 68,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.1333333333333333
+    },
+    {
+      "captureWallclock" : 297256.3116353334,
+      "file" : "402x874-material-lock-v3-069.png",
+      "fixedStepIndex" : 276,
+      "frameIndex" : 69,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.15
+    },
+    {
+      "captureWallclock" : 297256.3281008751,
+      "file" : "402x874-material-lock-v3-070.png",
+      "fixedStepIndex" : 280,
+      "frameIndex" : 70,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.1666666666666667
+    },
+    {
+      "captureWallclock" : 297256.34497587505,
+      "file" : "402x874-material-lock-v3-071.png",
+      "fixedStepIndex" : 284,
+      "frameIndex" : 71,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.1833333333333333
+    },
+    {
+      "captureWallclock" : 297256.36125166673,
+      "file" : "402x874-material-lock-v3-072.png",
+      "fixedStepIndex" : 288,
+      "frameIndex" : 72,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.2
+    },
+    {
+      "captureWallclock" : 297256.3783225417,
+      "file" : "402x874-material-lock-v3-073.png",
+      "fixedStepIndex" : 292,
+      "frameIndex" : 73,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.2166666666666666
+    },
+    {
+      "captureWallclock" : 297256.39495329175,
+      "file" : "402x874-material-lock-v3-074.png",
+      "fixedStepIndex" : 296,
+      "frameIndex" : 74,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.2333333333333334
+    },
+    {
+      "captureWallclock" : 297256.41168829176,
+      "file" : "402x874-material-lock-v3-075.png",
+      "fixedStepIndex" : 300,
+      "frameIndex" : 75,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.25
+    },
+    {
+      "captureWallclock" : 297256.4282797917,
+      "file" : "402x874-material-lock-v3-076.png",
+      "fixedStepIndex" : 304,
+      "frameIndex" : 76,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.2666666666666666
+    },
+    {
+      "captureWallclock" : 297256.4445711667,
+      "file" : "402x874-material-lock-v3-077.png",
+      "fixedStepIndex" : 308,
+      "frameIndex" : 77,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.2833333333333332
+    },
+    {
+      "captureWallclock" : 297256.4617027084,
+      "file" : "402x874-material-lock-v3-078.png",
+      "fixedStepIndex" : 312,
+      "frameIndex" : 78,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.3
+    },
+    {
+      "captureWallclock" : 297256.4783477084,
+      "file" : "402x874-material-lock-v3-079.png",
+      "fixedStepIndex" : 312,
+      "frameIndex" : 79,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.3
+    },
+    {
+      "captureWallclock" : 297256.4949135834,
+      "file" : "402x874-material-lock-v3-080.png",
+      "fixedStepIndex" : 312,
+      "frameIndex" : 80,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.3
+    },
+    {
+      "captureWallclock" : 297256.51162104175,
+      "file" : "402x874-material-lock-v3-081.png",
+      "fixedStepIndex" : 312,
+      "frameIndex" : 81,
+      "hasContacted" : true,
+      "height" : 0,
+      "phase" : "stableRest",
+      "simulationTime" : 1.3
+    }
+  ],
+  "frozenContractReference" : "card-motion-material-lock-v2",
+  "frozenControllerSHA256" : "018504e26ab18f5605be1221d6d1022fcaf348ad943fa5d66c7ce7dbf9f075c6",
+  "frozenModelSHA256" : "57898a7157ca5e8c987021f4b412ca20d6daa402d84be066d732ffc07b59c32e",
+  "frozenW2ContractSHA256" : "8d44945cd1b304442f331cd328bc34d94cf3ae5d907a457c8148e9e628a83573",
+  "fullSequenceVideo" : "wallclock-material-lock-v3-402x874.mp4",
+  "generatedAt" : "2026-07-20T11:44:56Z",
+  "homographyCalibrationRMSPixels" : 6.355287432313019e-14,
+  "productMaterial" : "Production W2 CardBack unchanged; low-frequency stock tooth, uneven matte ink, subtle camping patina, thin dark exposed stock edge",
+  "productMaterialVariant" : 0,
+  "stableRestCornerDeviationPixels" : 0,
+  "stableRestFrameCount" : 28,
+  "storedMaterialCurlAtStableRestMillimeters" : 0,
+  "storedMaterialCurlBeforeContactMillimeters" : 1.1,
+  "surfaceAfterContact" : "cardBack",
+  "surfaceBeforeContact" : "cardBack",
+  "syntheticProgressUsed" : false,
+  "targetCardShortEdgePixels" : 54.85065110795071,
+  "targetRegion" : "Track-B large central compartment",
+  "timingSource" : "CACurrentMediaTime monotonic wallclock -> 240 Hz fixed-step accumulator shared by CADisplayLink and evidence recorder",
+  "viewport" : "402x874",
+  "worldLightKeyDirection" : {
+    "x" : -0.57,
+    "y" : -0.82
+  },
+  "worldLightProfileID" : "track-b-lamp-upper-left-v1"
+}

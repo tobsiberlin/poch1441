@@ -1,0 +1,25 @@
+{
+  "coinAsset" : "App\/Assets.xcassets\/TravelCent0.imageset\/travel-cent-0.png",
+  "frontLipOcclusionRecomposited" : true,
+  "lightProfile" : {
+    "ambientStrength" : 0.22,
+    "id" : "track-b-lamp-left-v1",
+    "keyDirectionScreen" : {
+      "x" : -0.72,
+      "y" : -0.58,
+      "z" : 0.38
+    },
+    "shadowBlurPixels" : 2.2,
+    "shadowOffsetPixels" : {
+      "x" : 2.4,
+      "y" : 3.2,
+      "z" : 0
+    }
+  },
+  "materialSignature" : "aged real copper on aged smoke-clear polycarbonate",
+  "output" : "Evidence\/402x874-track-b-queen-contact.png",
+  "separateGroundShadowLayer" : true,
+  "viewportHeight" : 874,
+  "viewportWidth" : 402,
+  "worldAsset" : "track-b-screen-mockup-assets\/world-master-snackbox-v3-clean-mug.png"
+}

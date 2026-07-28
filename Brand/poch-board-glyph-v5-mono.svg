@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 compact board glyph v5 monochrome</title>
+  <desc>One-color engraving and embossing master with recessed wells.</desc>
+  <defs>
+    <mask id="poch-board-v5-cutouts">
+      <rect width="1024" height="1024" fill="#000000"/>
+      <circle cx="512" cy="512" r="390" fill="#FFFFFF"/>
+      <g fill="#000000">
+        <circle cx="512" cy="262" r="64"/><circle cx="689" cy="335" r="64"/>
+        <circle cx="762" cy="512" r="64"/><circle cx="689" cy="689" r="64"/>
+        <circle cx="512" cy="762" r="64"/><circle cx="335" cy="689" r="64"/>
+        <circle cx="262" cy="512" r="64"/><circle cx="335" cy="335" r="64"/>
+        <circle cx="512" cy="512" r="114"/>
+      </g>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="#000000" mask="url(#poch-board-v5-cutouts)"/>
+  <g fill="#000000">
+    <circle cx="512" cy="262" r="38"/>
+    <circle cx="762" cy="512" r="38"/>
+    <circle cx="335" cy="689" r="38"/>
+    <path d="M512 476L548 512L512 548L476 512Z"/>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+{
+  "decision": "RED",
+  "gate": "CARD_MATERIAL_PRODUCT_LOCK",
+  "greenSubgates": [
+    "STATIC_REAL_SCALE_MATERIAL",
+    "V3_OVAL_PATTERN_REMOVAL",
+    "FROZEN_MOTION_CONTRACT",
+    "FRAME_AND_METADATA_CORRESPONDENCE"
+  ],
+  "redSubgates": [
+    "ENCODED_VIDEO_ORIENTATION"
+  ],
+  "reviewedAt": "2026-07-20T15:25:11+02:00",
+  "reviewer": "Lead",
+  "reason": "The upright static evidence narrowly passes the material hypothesis, but QuickTime displays the mandatory uncut wallclock MP4 vertically mirrored while the pre-encode strips are upright. The complete material product lock therefore remains red."
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" shape-rendering="geometricPrecision">
+  <title>POCH 1441 app icon master v6.1</title>
+  <desc>Full-bleed 1024 pixel app icon master without a rounded platform mask.</desc>
+  <defs>
+    <mask id="ring-mask">
+      <rect width="1024" height="1024" fill="black"/>
+      <ellipse cx="512" cy="512" rx="340" ry="326" fill="white"/>
+      <ellipse cx="512" cy="512" rx="174" ry="166" fill="black"/>
+      <path d="M760 220L824 280L770 302Z" fill="black"/>
+    </mask>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#0B0E14"/>
+  <ellipse cx="512" cy="512" rx="168" ry="160" fill="#07060A"/>
+  <rect width="1024" height="1024" fill="#F4F0E8" mask="url(#ring-mask)"/>
+  <rect x="247" y="371" width="84" height="36" rx="18" fill="#C5A059" transform="rotate(-60 289 389)"/>
+  <rect x="341" y="707" width="84" height="36" rx="18" fill="#1A5E4E" transform="rotate(30 383 725)"/>
+  <rect x="693" y="617" width="84" height="36" rx="18" fill="#4A2E65" transform="rotate(-60 735 635)"/>
+  <path d="M512 476L548 512L512 548L476 512Z" fill="#C96E55"/>
+</svg>

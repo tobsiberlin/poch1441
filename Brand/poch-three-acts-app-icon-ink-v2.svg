@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 Three Acts ink print app icon</title>
+  <defs>
+    <radialGradient id="ink" cx="38%" cy="30%" r="78%">
+      <stop offset="0" stop-color="#1B2834"/>
+      <stop offset="1" stop-color="#0C131B"/>
+    </radialGradient>
+    <filter id="press" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#000812" flood-opacity=".8"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#ink)"/>
+  <g transform="translate(92 92) scale(3.5)" filter="url(#press)">
+    <path d="M60.27 58.13A86 86 0 0 1 179.73 58.13" fill="none" stroke="#C8A35A" stroke-width="24" stroke-linecap="round"/>
+    <path d="M203.45 99.19A86 86 0 0 1 143.70 202.67" fill="none" stroke="#8873A0" stroke-width="24" stroke-linecap="round"/>
+    <path d="M96.30 202.67A86 86 0 0 1 36.55 99.19" fill="none" stroke="#6D9588" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="120" cy="120" r="38" fill="#101821" stroke="#F4F0E8" stroke-width="15"/>
+    <path fill="#D1745D" d="M120 102L138 120L120 138L102 120Z"/>
+  </g>
+</svg>

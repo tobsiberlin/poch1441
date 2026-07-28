@@ -1,0 +1,52 @@
+{
+  "schema": "poch.stage4.testflight-startcrash.v1",
+  "recordedAt": "2026-07-20T20:57:03+02:00",
+  "report": {
+    "build": "7",
+    "source": "USER_ON_PHYSICAL_IPHONE_VIA_TESTFLIGHT",
+    "symptom": "APP_TERMINATES_IMMEDIATELY_ON_OPEN",
+    "deviceCrashLogAvailable": false,
+    "exactCrashFrame": "UNKNOWN"
+  },
+  "build7ArtifactAudit": {
+    "configurationPreset": "debug",
+    "swiftCompilationConditions": [
+      "DEBUG",
+      "INTERNAL_QA"
+    ],
+    "swiftOptimizationLevel": "-Onone",
+    "enableTestability": true,
+    "enableDebugDylib": true,
+    "linkedDeveloperToolsSupport": true,
+    "metalDebugInformation": "NO"
+  },
+  "build8Correction": {
+    "configurationPreset": "release",
+    "swiftCompilationConditions": [
+      "INTERNAL_QA"
+    ],
+    "swiftOptimizationLevel": "-O",
+    "enableTestability": false,
+    "enableDebugDylib": false,
+    "linkedDeveloperToolsSupport": false,
+    "debugDylibInArchive": false,
+    "metalDebugInformation": "NO",
+    "normalReleaseConfigurationChanged": false
+  },
+  "build8Verification": {
+    "defaultLaunchSmoke": "9/9 PASS",
+    "internalQAUITests": "3/3 PASS",
+    "swiftWarningsAsErrors": "PASS",
+    "archive": "PASS",
+    "export": "PASS",
+    "exportedSignature": "PASS",
+    "exportedGetTaskAllow": false,
+    "upload": "PASS",
+    "processing": "PASS",
+    "internalDistribution": "PASS",
+    "physicalDeviceLaunchRetest": "PENDING"
+  },
+  "interpretation": "No device crash log was available, so the exact crashing frame is not claimed. Build 7's inappropriate debug delivery mode was an independently verified artifact defect and the principal simulator-versus-TestFlight difference. Build 8 removes that defect and is the only permitted retest candidate.",
+  "build7Disposition": "BLOCKED_SUPERSEDED_DO_NOT_TEST",
+  "build8Disposition": "INTERNAL_TESTFLIGHT_DEVICE_LAUNCH_RETEST_REQUIRED"
+}

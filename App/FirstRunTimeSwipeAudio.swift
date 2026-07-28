@@ -2,19 +2,21 @@ import AVFoundation
 import os
 import UIKit
 
-/// Four natural scene layers stay phase-aligned while the retired transition
-/// player remains silent for resource compatibility. No audio is restarted
-/// during scrubbing, so reversing the gesture reverses the rooms immediately.
+/// Four era layers, one invariant signature contact and a centered broadband
+/// time texture stay phase-aligned.
+/// No audio is restarted during scrubbing, so reversing the gesture reverses
+/// both real-world gains immediately and the seam remains finger-bound.
 @MainActor
 final class FirstRunTimeSwipeAudio {
     private static let log = Logger(subsystem: "com.tobc.poch1441",
                                     category: "FirstRunTimeSwipeAudio")
 
-    private enum Layer: String, CaseIterable {
+    private enum Layer: String, CaseIterable, Sendable {
         case originRoom = "first-run-origin-room"
         case originMotif = "first-run-origin-motif"
         case presentRoom = "first-run-present-room"
         case presentMotif = "first-run-present-motif"
+        case signatureContact = "first-run-signature-contact"
         case timeNoise = "first-run-time-noise"
     }
 
@@ -23,6 +25,8 @@ final class FirstRunTimeSwipeAudio {
     private var isPlaying = false
     private var masterGain: Float = 0
     private var currentMix: FirstRunTimeSwipeAudioMix?
+    private var pendingStartProgress: Double?
+    private var preparationTask: Task<Void, Never>?
     private var startTask: Task<Void, Never>?
     private var stopTask: Task<Void, Never>?
 
@@ -40,76 +44,44 @@ final class FirstRunTimeSwipeAudio {
             return
         }
         guard Self.isAvailableInCurrentRuntime else { return }
-        do {
-            stopTask?.cancel()
-            stopTask = nil
-            try prepareIfNeeded()
-            if !isPlaying {
-                currentMix = mixState(progress: progress)
-                let startTime = (players.values.map(\.deviceCurrentTime).max() ?? 0) + 0.05
-                players.values.forEach {
-                    $0.currentTime = 0
-                    $0.numberOfLoops = -1
-                    $0.volume = 0
-                    $0.play(atTime: startTime)
-                }
-                isPlaying = true
-                masterGain = 0
-                applyCurrentMix(fadeDuration: 0)
-                startTask?.cancel()
-                startTask = Task { @MainActor [weak self] in
-                    // Keep the ambience silent until the phase-aligned players
-                    // actually begin, then raise only the master. Finger progress
-                    // remains live throughout this perceptual fade.
-                    try? await Task.sleep(for: .milliseconds(50))
-                    let frameCount = 40
-                    for frame in 1...frameCount {
-                        guard let self, !Task.isCancelled else { return }
-                        let linear = Float(frame) / Float(frameCount)
-                        self.masterGain = linear * linear * (3 - 2 * linear)
-                        self.applyCurrentMix(fadeDuration: 0.02)
-                        try? await Task.sleep(for: .milliseconds(16))
-                    }
-                    self?.masterGain = 1
-                    self?.applyCurrentMix(fadeDuration: 0.02)
-                    self?.startTask = nil
-                }
-            } else {
-                update(progress: progress)
-            }
-        } catch {
-            Self.log.error("Unable to start time-swipe audio: \(error.localizedDescription, privacy: .public)")
+        stopTask?.cancel()
+        stopTask = nil
+        if isPrepared {
+            startPrepared(progress: progress)
+        } else {
+            pendingStartProgress = progress
+            beginPreparationIfNeeded()
         }
     }
 
     func update(progress: Double) {
-        guard isPlaying else { return }
         currentMix = mixState(progress: progress)
-        applyCurrentMix(fadeDuration: 0.02)
+        if pendingStartProgress != nil {
+            pendingStartProgress = progress
+        }
+        guard isPlaying else { return }
+        applyCurrentMix(fadeDuration: 0.008)
     }
 
-    /// Decode and prepare the five layers while the silent prelude is visible.
-    /// Any failure is logged when playback is actually requested.
+    /// Reads every PCM layer on a utility executor while the silent prelude is
+    /// visible. Timeline entry never performs synchronous file I/O.
     func prepare() {
         guard Self.isAvailableInCurrentRuntime else { return }
-        do {
-            try prepareIfNeeded()
-        } catch {
-            Self.log.error("Unable to prepare time-swipe audio: \(error.localizedDescription, privacy: .public)")
-        }
+        beginPreparationIfNeeded()
     }
 
     func stop() {
+        pendingStartProgress = nil
         guard isPlaying else { return }
         startTask?.cancel()
         startTask = nil
         stopTask?.cancel()
         players.values.forEach {
-            $0.setVolume(0, fadeDuration: 0.18)
+            $0.setVolume(0, fadeDuration: 0.12)
         }
         let activePlayers = Array(players.values)
         stopTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .milliseconds(220))
+            try? await Task.sleep(for: .milliseconds(140))
             guard !Task.isCancelled else { return }
             activePlayers.forEach { $0.stop() }
             self?.isPlaying = false
@@ -121,16 +93,62 @@ final class FirstRunTimeSwipeAudio {
         }
     }
 
-    private func prepareIfNeeded() throws {
+    private func beginPreparationIfNeeded() {
+        guard !isPrepared, preparationTask == nil else { return }
+        var resources: [(Layer, URL)] = []
+        for layer in Layer.allCases {
+            guard let url = Bundle.main.url(forResource: layer.rawValue,
+                                            withExtension: "wav") else {
+                Self.log.error("Missing first-run audio layer \(layer.rawValue, privacy: .public)")
+                return
+            }
+            resources.append((layer, url))
+        }
+
+        preparationTask = Task { @MainActor [weak self] in
+            let dataByLayer = await Task.detached(priority: .utility) {
+                var loaded: [Layer: Data] = [:]
+                for (layer, url) in resources {
+                    guard let data = try? Data(contentsOf: url,
+                                               options: [.mappedIfSafe]) else {
+                        return Optional<[Layer: Data]>.none
+                    }
+                    loaded[layer] = data
+                }
+                return Optional(loaded)
+            }.value
+            guard let self, !Task.isCancelled else { return }
+            self.preparationTask = nil
+            guard let dataByLayer else {
+                Self.log.error("Unable to read first-run audio layers")
+                self.pendingStartProgress = nil
+                return
+            }
+            do {
+                try self.finishPreparation(dataByLayer)
+                if let progress = self.pendingStartProgress {
+                    self.pendingStartProgress = nil
+                    self.startPrepared(progress: progress)
+                }
+            } catch {
+                Self.log.error(
+                    "Unable to prepare time-swipe audio: \(error.localizedDescription, privacy: .public)"
+                )
+                self.pendingStartProgress = nil
+            }
+        }
+    }
+
+    private func finishPreparation(_ dataByLayer: [Layer: Data]) throws {
         guard !isPrepared else { return }
         var preparedPlayers: [Layer: AVAudioPlayer] = [:]
 
         for layer in Layer.allCases {
-            guard let url = Bundle.main.url(forResource: layer.rawValue,
-                                            withExtension: "wav") else {
+            guard let data = dataByLayer[layer] else {
                 throw AudioError.missingLayer(layer.rawValue)
             }
-            let player = try AVAudioPlayer(contentsOf: url)
+            let player = try AVAudioPlayer(data: data,
+                                           fileTypeHint: AVFileType.wav.rawValue)
             player.volume = 0
             if layer == .timeNoise {
                 player.enableRate = true
@@ -143,6 +161,40 @@ final class FirstRunTimeSwipeAudio {
         try PochAudioSession.prepareAmbientMixing()
         players = preparedPlayers
         isPrepared = true
+    }
+
+    private func startPrepared(progress: Double) {
+        guard isPrepared else { return }
+        if isPlaying {
+            update(progress: progress)
+            return
+        }
+        currentMix = mixState(progress: progress)
+        let startTime = (players.values.map(\.deviceCurrentTime).max() ?? 0) + 0.02
+        players.values.forEach {
+            $0.currentTime = 0
+            $0.numberOfLoops = -1
+            $0.volume = 0
+            $0.play(atTime: startTime)
+        }
+        isPlaying = true
+        masterGain = 0
+        applyCurrentMix(fadeDuration: 0)
+        startTask?.cancel()
+        startTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(20))
+            let frameCount = 12
+            for frame in 1...frameCount {
+                guard let self, !Task.isCancelled else { return }
+                let linear = Float(frame) / Float(frameCount)
+                self.masterGain = linear * linear * (3 - 2 * linear)
+                self.applyCurrentMix(fadeDuration: 0.008)
+                try? await Task.sleep(for: .milliseconds(12))
+            }
+            self?.masterGain = 1
+            self?.applyCurrentMix(fadeDuration: 0.008)
+            self?.startTask = nil
+        }
     }
 
     private func mixState(progress: Double) -> FirstRunTimeSwipeAudioMix {
@@ -162,10 +214,13 @@ final class FirstRunTimeSwipeAudio {
                                          fadeDuration: fadeDuration)
         players[.presentMotif]?.setVolume(mix.presentMotifVolume * masterGain,
                                           fadeDuration: fadeDuration)
+        players[.signatureContact]?.setVolume(mix.signatureContactVolume * masterGain,
+                                              fadeDuration: fadeDuration)
         players[.originRoom]?.pan = mix.originRoomPan
         players[.originMotif]?.pan = mix.originMotifPan
         players[.presentRoom]?.pan = mix.presentRoomPan
         players[.presentMotif]?.pan = mix.presentMotifPan
+        players[.signatureContact]?.pan = mix.signatureContactPan
         players[.timeNoise]?.rate = mix.timeNoiseRate
         players[.timeNoise]?.pan = 0
         players[.timeNoise]?.setVolume(mix.timeNoiseVolume * masterGain,

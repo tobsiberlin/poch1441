@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>POCH 1441 - eigenständige Logo-Shortlist</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #101821;
+      --panel: #151f29;
+      --panel-2: #1a2631;
+      --ivory: #f4f0e8;
+      --muted: #aab2ba;
+      --line: rgba(244, 240, 232, .13);
+      --brass: #c8a35a;
+      --copper: #c96e55;
+      --plum: #8d74aa;
+      --sage: #6f9b8b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 78% 4%, rgba(111, 155, 139, .11), transparent 31rem),
+        var(--ink);
+      color: var(--ivory);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    }
+
+    main {
+      width: min(1480px, calc(100% - 40px));
+      margin: auto;
+      padding: 52px 0 80px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
+      gap: 48px;
+      align-items: end;
+      padding-bottom: 34px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      max-width: 880px;
+      margin: 0;
+      font-size: clamp(44px, 6.4vw, 92px);
+      line-height: .94;
+      letter-spacing: -.06em;
+    }
+
+    header p, .intro p, .candidate-copy p, footer {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.48;
+    }
+
+    .veto {
+      display: inline-flex;
+      margin-bottom: 18px;
+      padding: 7px 10px;
+      border: 1px solid rgba(201, 110, 85, .55);
+      border-radius: 999px;
+      color: #e8a18f;
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: 1fr minmax(280px, 520px);
+      gap: 30px;
+      align-items: baseline;
+      margin: 56px 0 22px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(30px, 3.6vw, 52px);
+      letter-spacing: -.045em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    article {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+    }
+
+    article.recommended { border-color: rgba(200, 163, 90, .62); }
+
+    .candidate-copy {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      padding: 25px 27px 22px;
+    }
+
+    h3 {
+      margin: 0 0 6px;
+      font-size: 25px;
+      letter-spacing: -.03em;
+    }
+
+    .tag {
+      align-self: start;
+      padding: 7px 10px;
+      border: 1px solid currentColor;
+      border-radius: 8px;
+      color: var(--brass);
+      font-size: 11px;
+      font-weight: 780;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .stage {
+      min-height: 430px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      margin: 0 18px 18px;
+      overflow: hidden;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(244, 240, 232, .07), transparent 42%),
+        #111a24;
+    }
+
+    .symbol-wrap {
+      display: grid;
+      place-items: center;
+      padding: 34px;
+    }
+
+    .symbol {
+      width: min(54%, 245px);
+      filter: drop-shadow(0 20px 28px rgba(0, 0, 0, .28));
+    }
+
+    .lockup {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-height: 96px;
+      padding: 18px 24px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, .018);
+    }
+
+    .lockup .mini { width: 42px; height: 42px; }
+
+    .word {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      color: var(--ivory);
+      font-size: clamp(28px, 3vw, 43px);
+      font-weight: 820;
+      letter-spacing: -.045em;
+    }
+
+    .year {
+      color: var(--brass);
+      font-size: .63em;
+      font-weight: 670;
+      letter-spacing: .19em;
+    }
+
+    .applications {
+      display: grid;
+      grid-template-columns: .7fr 1.3fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .application {
+      min-height: 600px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+    }
+
+    .card {
+      width: min(62%, 315px);
+      aspect-ratio: .69;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(200, 163, 90, .54);
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, transparent 48%, rgba(200, 163, 90, .12) 48% 52%, transparent 52%),
+        linear-gradient(45deg, transparent 48%, rgba(201, 110, 85, .1) 48% 52%, transparent 52%),
+        #152331;
+      box-shadow: 0 32px 70px rgba(0, 0, 0, .36), inset 0 0 0 18px #152331, inset 0 0 0 19px rgba(244, 240, 232, .15);
+    }
+
+    .card .symbol { width: 58%; }
+
+    .board {
+      width: min(72%, 590px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(244, 240, 232, .22);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 47% 37%, rgba(244, 240, 232, .08), transparent 23%),
+        #17232e;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, .4), inset 0 0 0 12px rgba(0, 0, 0, .18);
+    }
+
+    .board .symbol { width: 54%; }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 820px) {
+      main { width: min(100% - 24px, 680px); padding-top: 30px; }
+      header, .intro, .grid, .applications { grid-template-columns: 1fr; }
+      header { gap: 20px; }
+      .stage { min-height: 390px; }
+      .candidate-copy { grid-template-columns: 1fr; }
+      .tag { justify-self: start; }
+      .application { min-height: 500px; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="eight-one" viewBox="0 0 240 240">
+        <circle cx="120" cy="22" r="13" fill="#c8a35a"/>
+        <circle cx="189" cy="51" r="13" fill="#c8a35a"/>
+        <circle cx="218" cy="120" r="13" fill="#8d74aa"/>
+        <circle cx="189" cy="189" r="13" fill="#8d74aa"/>
+        <circle cx="120" cy="218" r="13" fill="#6f9b8b"/>
+        <circle cx="51" cy="189" r="13" fill="#6f9b8b"/>
+        <circle cx="22" cy="120" r="13" fill="#6f9b8b"/>
+        <circle cx="51" cy="51" r="13" fill="#c8a35a"/>
+        <circle cx="120" cy="120" r="54" fill="none" stroke="#f4f0e8" stroke-width="22"/>
+        <path d="M120 102L138 120L120 138L102 120Z" fill="#c96e55"/>
+      </symbol>
+
+      <symbol id="three-acts" viewBox="0 0 240 240">
+        <path d="M60.27 58.13A86 86 0 0 1 179.73 58.13" fill="none" stroke="#c8a35a" stroke-width="24" stroke-linecap="round"/>
+        <path d="M203.45 99.19A86 86 0 0 1 143.70 202.67" fill="none" stroke="#8d74aa" stroke-width="24" stroke-linecap="round"/>
+        <path d="M96.30 202.67A86 86 0 0 1 36.55 99.19" fill="none" stroke="#6f9b8b" stroke-width="24" stroke-linecap="round"/>
+        <circle cx="120" cy="120" r="39" fill="none" stroke="#f4f0e8" stroke-width="17"/>
+        <path d="M120 102L138 120L120 138L102 120Z" fill="#c96e55"/>
+      </symbol>
+
+      <symbol id="impact" viewBox="0 0 240 240">
+        <path d="M54 45C27 72 18 112 31 148C44 184 78 210 116 214" fill="none" stroke="#f4f0e8" stroke-width="24" stroke-linecap="round"/>
+        <path d="M147 207C177 198 200 174 210 145" fill="none" stroke="#6f9b8b" stroke-width="16" stroke-linecap="round"/>
+        <path d="M213 111C210 86 197 64 178 49" fill="none" stroke="#8d74aa" stroke-width="12" stroke-linecap="round"/>
+        <path d="M146 34C136 31 126 29 116 29" fill="none" stroke="#c8a35a" stroke-width="8" stroke-linecap="round"/>
+        <path d="M112 91L141 120L112 149L83 120Z" fill="#c96e55"/>
+        <circle cx="112" cy="120" r="53" fill="none" stroke="#f4f0e8" stroke-width="7" opacity=".38"/>
+      </symbol>
+
+      <symbol id="table-glyph" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="91" fill="none" stroke="#f4f0e8" stroke-width="16"/>
+        <g fill="#101821" stroke="#f4f0e8" stroke-width="7">
+          <circle cx="120" cy="31" r="20"/><circle cx="183" cy="57" r="20"/>
+          <circle cx="209" cy="120" r="20"/><circle cx="183" cy="183" r="20"/>
+          <circle cx="120" cy="209" r="20"/><circle cx="57" cy="183" r="20"/>
+          <circle cx="31" cy="120" r="20"/><circle cx="57" cy="57" r="20"/>
+        </g>
+        <circle cx="120" cy="120" r="45" fill="#f4f0e8"/>
+        <path d="M120 102L138 120L120 138L102 120Z" fill="#c96e55"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <main>
+    <header>
+      <div>
+        <span class="veto">Otelo-Kollision entfernt</span>
+        <h1>Vier Zeichen, die nur POCH gehören.</h1>
+      </div>
+      <p>Keine Kerbe im abgerundeten Quadrat, kein Otelo-Echo. Alle Kandidaten behalten den Einsatzkern, funktionieren einfarbig auf dem physischen Brett und gewinnen digital durch die drei Phasenfarben.</p>
+    </header>
+
+    <div class="intro">
+      <h2>Neue Shortlist</h2>
+      <p>Der Vergleich zeigt nicht nur das Symbol, sondern immer auch Wortmarke, App-Icon-Wirkung und Skalierung. 01 ist die stärkste Produktmarke, 02 die mutigste digitale Richtung.</p>
+    </div>
+
+    <section class="grid" aria-label="Vier eigenständige Logo-Kandidaten">
+      <article class="recommended">
+        <div class="candidate-copy"><div><h3>01 Acht um Eins</h3><p>Die unverwechselbare Topologie des Poch-Bretts: acht Einsätze, eine Mitte. Sofort produktnah und trotzdem abstrakt.</p></div><span class="tag">Empfehlung</span></div>
+        <div class="stage">
+          <div class="symbol-wrap"><svg class="symbol"><use href="#eight-one"/></svg></div>
+          <div class="lockup"><svg class="mini"><use href="#eight-one"/></svg><div class="word"><span>POCH</span><span class="year">1441</span></div></div>
+        </div>
+      </article>
+
+      <article>
+        <div class="candidate-copy"><div><h3>02 Drei Akte</h3><p>Melden, Pochen, Ausspielen als drei körperliche Bögen. Farbe und Motion sind bereits im Zeichen angelegt.</p></div><span class="tag">Digital</span></div>
+        <div class="stage">
+          <div class="symbol-wrap"><svg class="symbol"><use href="#three-acts"/></svg></div>
+          <div class="lockup"><svg class="mini"><use href="#three-acts"/></svg><div class="word"><span>POCH</span><span class="year">1441</span></div></div>
+        </div>
+      </article>
+
+      <article>
+        <div class="candidate-copy"><div><h3>03 Der Schlag</h3><p>Ein schwerer Impuls bringt den ruhigen Tisch aus der Achse. Eigenständig, cineastisch und stark für Soundbranding.</p></div><span class="tag">Motion</span></div>
+        <div class="stage">
+          <div class="symbol-wrap"><svg class="symbol"><use href="#impact"/></svg></div>
+          <div class="lockup"><svg class="mini"><use href="#impact"/></svg><div class="word"><span>POCH</span><span class="year">1441</span></div></div>
+        </div>
+      </article>
+
+      <article>
+        <div class="candidate-copy"><div><h3>04 Das Brett</h3><p>Die direkteste Übersetzung des Spiels. Sehr eigen, sehr klar, dafür weniger reduziert als die anderen Kandidaten.</p></div><span class="tag">Objekt</span></div>
+        <div class="stage">
+          <div class="symbol-wrap"><svg class="symbol"><use href="#table-glyph"/></svg></div>
+          <div class="lockup"><svg class="mini"><use href="#table-glyph"/></svg><div class="word"><span>POCH</span><span class="year">1441</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="intro">
+      <h2>Im Produkt</h2>
+      <p>„Acht um Eins“ bleibt im Kern einfarbig gravierbar. Auf Karten und dem digitalen Brett dürfen die Mulden die drei Phasen tragen.</p>
+    </div>
+
+    <section class="applications" aria-label="Acht um Eins auf Kartenrücken und Brett">
+      <div class="application"><div class="card"><svg class="symbol"><use href="#eight-one"/></svg></div></div>
+      <div class="application"><div class="board"><svg class="symbol"><use href="#eight-one"/></svg></div></div>
+    </section>
+
+    <footer>Klare Empfehlung: „Acht um Eins“ als neue Kernmarke weiterzeichnen. Die Farben sind im App-Icon und auf Karten sichtbar, während die gleiche Geometrie als einfarbige Gravur auf Holz, Metall und Karton funktioniert.</footer>
+  </main>
+</body>
+</html>

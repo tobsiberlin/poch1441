@@ -1,0 +1,310 @@
+{
+  "cases" : [
+    {
+      "bodyKind" : "coin-convex-12",
+      "collisionMeshSegments" : 12,
+      "collisionRadialSagittaMeters" : 0.00037481590878926955,
+      "contactCount" : 2,
+      "failures" : [
+        "maximale Transform-Geometrieüberlappung 0.153 mm > 0.150 mm"
+      ],
+      "finalGeometry" : {
+        "floorTopYMeters" : -0.09800000488758087,
+        "overlapMeters" : 2.2351741790771484e-07,
+        "signedGapMeters" : -2.2351741790771484e-07,
+        "supportBottomYMeters" : -0.09800022840499878
+      },
+      "finalTransform" : {
+        "centerPositionMeters" : {
+          "x" : -0.09962399303913116,
+          "y" : -0.09690023213624954,
+          "z" : -0.3372139036655426
+        },
+        "orientationXYZW" : {
+          "w" : 0.9917563199996948,
+          "x" : -2.941975799330976e-05,
+          "y" : 0.1281382292509079,
+          "z" : -3.283580736024305e-05
+        }
+      },
+      "firstContact" : {
+        "reportedPenetrationMeters" : 0,
+        "timeSeconds" : 0.2,
+        "transformGeometrySignedGapMeters" : -0.0001527145504951477
+      },
+      "lastReportedContact" : {
+        "reportedPenetrationMeters" : 1.5979167073965073e-06,
+        "timeSeconds" : 0.933332622796297,
+        "transformGeometrySignedGapMeters" : -2.2351741790771484e-07
+      },
+      "maximumReportedContact" : {
+        "reportedPenetrationMeters" : 0.0001489811111241579,
+        "timeSeconds" : 0.2,
+        "transformGeometrySignedGapMeters" : -3.762543201446533e-06
+      },
+      "minimumTransformGeometrySignedGapMeters" : -0.0001527145504951477,
+      "name" : "coin-convex12-face",
+      "nominalDimensionsMeters" : {
+        "x" : 0.02199999988079071,
+        "y" : 0.002199999988079071,
+        "z" : 0.02199999988079071
+      },
+      "passed" : false,
+      "penetrationSampleCount" : 92,
+      "settledReportedContact" : {
+        "reportedPenetrationMeters" : 1.5979167073965073e-06,
+        "timeSeconds" : 0.9500056643038988,
+        "transformGeometrySignedGapMeters" : -2.2351741790771484e-07
+      },
+      "sustainedRestSeconds" : 0.7500056643038988,
+      "visualMeshSegments" : 64
+    },
+    {
+      "bodyKind" : "coin-convex-48",
+      "collisionMeshSegments" : 48,
+      "collisionRadialSagittaMeters" : 2.355184424774361e-05,
+      "contactCount" : 2,
+      "failures" : [
+
+      ],
+      "finalGeometry" : {
+        "floorTopYMeters" : -0.09800000488758087,
+        "overlapMeters" : 0,
+        "signedGapMeters" : 2.9802322387695312e-08,
+        "supportBottomYMeters" : -0.09799997508525848
+      },
+      "finalTransform" : {
+        "centerPositionMeters" : {
+          "x" : -0.04999734088778496,
+          "y" : -0.09689997136592865,
+          "z" : -0.34000587463378906
+        },
+        "orientationXYZW" : {
+          "w" : 1,
+          "x" : -4.8102410801220685e-05,
+          "y" : 2.6710060865298146e-06,
+          "z" : -2.0249830413376912e-05
+        }
+      },
+      "firstContact" : {
+        "reportedPenetrationMeters" : 0,
+        "timeSeconds" : 0.05003520846366882,
+        "transformGeometrySignedGapMeters" : -2.6173889636993408e-05
+      },
+      "lastReportedContact" : {
+        "reportedPenetrationMeters" : 2.504132226022193e-07,
+        "timeSeconds" : 0.7999982070177794,
+        "transformGeometrySignedGapMeters" : 2.9802322387695312e-08
+      },
+      "maximumReportedContact" : {
+        "reportedPenetrationMeters" : 2.626751665957272e-05,
+        "timeSeconds" : 0.06667724996805191,
+        "transformGeometrySignedGapMeters" : -1.341104507446289e-07
+      },
+      "minimumTransformGeometrySignedGapMeters" : -2.6173889636993408e-05,
+      "name" : "coin-convex48-face",
+      "nominalDimensionsMeters" : {
+        "x" : 0.02199999988079071,
+        "y" : 0.002199999988079071,
+        "z" : 0.02199999988079071
+      },
+      "passed" : true,
+      "penetrationSampleCount" : 92,
+      "settledReportedContact" : {
+        "reportedPenetrationMeters" : 2.504132226022193e-07,
+        "timeSeconds" : 0.8166601657867432,
+        "transformGeometrySignedGapMeters" : 2.9802322387695312e-08
+      },
+      "sustainedRestSeconds" : 0.7666249573230743,
+      "visualMeshSegments" : 64
+    },
+    {
+      "bodyKind" : "coin-convex-12",
+      "collisionMeshSegments" : 12,
+      "collisionRadialSagittaMeters" : 0.00037481590878926955,
+      "contactCount" : 2,
+      "failures" : [
+        "gemeldete Kontaktpenetration 0.359 mm > 0.150 mm",
+        "maximale Transform-Geometrieüberlappung 0.366 mm > 0.150 mm"
+      ],
+      "finalGeometry" : {
+        "floorTopYMeters" : -0.09800000488758087,
+        "overlapMeters" : 0,
+        "signedGapMeters" : 8.940696716308594e-08,
+        "supportBottomYMeters" : -0.09799991548061371
+      },
+      "finalTransform" : {
+        "centerPositionMeters" : {
+          "x" : -0.0036475996021181345,
+          "y" : -0.09689991921186447,
+          "z" : -0.34141647815704346
+        },
+        "orientationXYZW" : {
+          "w" : 0.9832431077957153,
+          "x" : -3.774142896872945e-06,
+          "y" : 0.18229922652244568,
+          "z" : -8.254880413005594e-06
+        }
+      },
+      "firstContact" : {
+        "reportedPenetrationMeters" : 0,
+        "timeSeconds" : 0.04998787306249142,
+        "transformGeometrySignedGapMeters" : -0.00036562979221343994
+      },
+      "lastReportedContact" : {
+        "reportedPenetrationMeters" : 2.6814873876901402e-08,
+        "timeSeconds" : 0.8000477887690067,
+        "transformGeometrySignedGapMeters" : 8.940696716308594e-08
+      },
+      "maximumReportedContact" : {
+        "reportedPenetrationMeters" : 0.000359436497092247,
+        "timeSeconds" : 0.06666308082640171,
+        "transformGeometrySignedGapMeters" : 3.725290298461914e-07
+      },
+      "minimumTransformGeometrySignedGapMeters" : -0.00036562979221343994,
+      "name" : "coin-convex12-tilt3",
+      "nominalDimensionsMeters" : {
+        "x" : 0.02199999988079071,
+        "y" : 0.002199999988079071,
+        "z" : 0.02199999988079071
+      },
+      "passed" : false,
+      "penetrationSampleCount" : 92,
+      "settledReportedContact" : {
+        "reportedPenetrationMeters" : 2.6814873876901402e-08,
+        "timeSeconds" : 0.816675204783678,
+        "transformGeometrySignedGapMeters" : 8.940696716308594e-08
+      },
+      "sustainedRestSeconds" : 0.7500121239572763,
+      "visualMeshSegments" : 64
+    },
+    {
+      "bodyKind" : "coin-convex-48",
+      "collisionMeshSegments" : 48,
+      "collisionRadialSagittaMeters" : 2.355184424774361e-05,
+      "contactCount" : 2,
+      "failures" : [
+        "gemeldete Kontaktpenetration 0.364 mm > 0.150 mm",
+        "maximale Transform-Geometrieüberlappung 0.365 mm > 0.150 mm"
+      ],
+      "finalGeometry" : {
+        "floorTopYMeters" : -0.09800000488758087,
+        "overlapMeters" : 3.7550926208496094e-06,
+        "signedGapMeters" : -3.7550926208496094e-06,
+        "supportBottomYMeters" : -0.09800375998020172
+      },
+      "finalTransform" : {
+        "centerPositionMeters" : {
+          "x" : 0.04681937023997307,
+          "y" : -0.09689996391534805,
+          "z" : -0.3408980071544647
+        },
+        "orientationXYZW" : {
+          "w" : 0.9878580570220947,
+          "x" : -2.559429958637338e-06,
+          "y" : 0.15535902976989746,
+          "z" : -6.189080522744916e-06
+        }
+      },
+      "firstContact" : {
+        "reportedPenetrationMeters" : 0,
+        "timeSeconds" : 0.05000837333500385,
+        "transformGeometrySignedGapMeters" : -0.0003652721643447876
+      },
+      "lastReportedContact" : {
+        "reportedPenetrationMeters" : 1.0244548320770264e-07,
+        "timeSeconds" : 0.8000281229615211,
+        "transformGeometrySignedGapMeters" : -3.7550926208496094e-06
+      },
+      "maximumReportedContact" : {
+        "reportedPenetrationMeters" : 0.0003644311800599098,
+        "timeSeconds" : 0.06667524762451649,
+        "transformGeometrySignedGapMeters" : 2.980232238769531e-07
+      },
+      "minimumTransformGeometrySignedGapMeters" : -0.0003652721643447876,
+      "name" : "coin-convex48-tilt3",
+      "nominalDimensionsMeters" : {
+        "x" : 0.02199999988079071,
+        "y" : 0.002199999988079071,
+        "z" : 0.02199999988079071
+      },
+      "passed" : false,
+      "penetrationSampleCount" : 92,
+      "settledReportedContact" : {
+        "reportedPenetrationMeters" : 1.0244548320770264e-07,
+        "timeSeconds" : 0.8167092055082321,
+        "transformGeometrySignedGapMeters" : -3.7550926208496094e-06
+      },
+      "sustainedRestSeconds" : 0.7500339578837156,
+      "visualMeshSegments" : 64
+    },
+    {
+      "bodyKind" : "box-control",
+      "contactCount" : 2,
+      "failures" : [
+        "gemeldete Kontaktpenetration 0.483 mm > 0.150 mm",
+        "maximale Transform-Geometrieüberlappung 0.483 mm > 0.150 mm"
+      ],
+      "finalGeometry" : {
+        "floorTopYMeters" : -0.09800000488758087,
+        "overlapMeters" : 1.475214958190918e-06,
+        "signedGapMeters" : -1.475214958190918e-06,
+        "supportBottomYMeters" : -0.09800148010253906
+      },
+      "finalTransform" : {
+        "centerPositionMeters" : {
+          "x" : 0.10047250986099243,
+          "y" : -0.09689989686012268,
+          "z" : -0.33992454409599304
+        },
+        "orientationXYZW" : {
+          "w" : 0.999983549118042,
+          "x" : -2.7304040486342274e-05,
+          "y" : 0.005731085315346718,
+          "z" : 4.463314689928666e-05
+        }
+      },
+      "firstContact" : {
+        "reportedPenetrationMeters" : 0,
+        "timeSeconds" : 0.04996712505817413,
+        "transformGeometrySignedGapMeters" : -0.0004830285906791687
+      },
+      "lastReportedContact" : {
+        "reportedPenetrationMeters" : 5.266629159450531e-07,
+        "timeSeconds" : 0.7999584171921015,
+        "transformGeometrySignedGapMeters" : -1.475214958190918e-06
+      },
+      "maximumReportedContact" : {
+        "reportedPenetrationMeters" : 0.00048303153016604483,
+        "timeSeconds" : 0.06661158427596092,
+        "transformGeometrySignedGapMeters" : -4.120171070098877e-06
+      },
+      "minimumTransformGeometrySignedGapMeters" : -0.0004830285906791687,
+      "name" : "box-control-face",
+      "nominalDimensionsMeters" : {
+        "x" : 0.02199999988079071,
+        "y" : 0.002199999988079071,
+        "z" : 0.02199999988079071
+      },
+      "passed" : false,
+      "penetrationSampleCount" : 92,
+      "settledReportedContact" : {
+        "reportedPenetrationMeters" : 5.266629159450531e-07,
+        "timeSeconds" : 0.8166998755186796,
+        "transformGeometrySignedGapMeters" : -1.475214958190918e-06
+      },
+      "sustainedRestSeconds" : 0.7500882912427187
+    }
+  ],
+  "commands" : [
+    "xcodegen generate --spec project.yml",
+    "xcodebuild -project CoinRealityKitCalibration.xcodeproj -scheme CoinRealityKitCalibration -sdk iphonesimulator -destination 'platform=iOS Simulator,id=<UDID>' -derivedDataPath .derived build",
+    "xcrun simctl install <UDID> .derived\/Build\/Products\/Debug-iphonesimulator\/CoinRealityKitCalibration.app",
+    "xcrun simctl launch <UDID> com.tobc.reviews.coin-realitykit-calibration"
+  ],
+  "finding" : "transiente Solverüberlappung bestätigt: Eventmaximum und transformbasierte Maximalüberlappung stimmen überein; kein persistenter Collision-Margin",
+  "frameP95Milliseconds" : 16.702165827155113,
+  "penetrationLimitMeters" : 0.00015,
+  "sdkRuntime" : "26.2",
+  "verdict" : "RED"
+}

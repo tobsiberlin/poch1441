@@ -1,0 +1,8 @@
+tag=v5.6.0
+commit=e77f175595e64cb44218cc9d9d56fc365ad0e36a
+license=MIT
+license_sha256=800abe35d64ad9defd636ff1ee8c961e06f0ebca3ef8d10083e8aa0e8ef86ac3
+compiler=Apple clang version 17.0.0 (clang-1700.6.3.2)
+macos_runtime_status=1
+ios_compile_link_status=0
+temporary_build_removed_on_exit=true

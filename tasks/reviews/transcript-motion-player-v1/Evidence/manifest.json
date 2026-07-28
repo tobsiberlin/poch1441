@@ -1,0 +1,1170 @@
+{
+  "audioIncluded" : false,
+  "cancellation" : {
+    "beforeReleaseCallbackCount" : 1,
+    "beforeReleaseContactCount" : 0,
+    "beforeReleaseRestCount" : 0,
+    "committedCallbackNames" : [
+      "onContact",
+      "onRest"
+    ],
+    "committedCancelIgnored" : true,
+    "committedFinalPhase" : "resting",
+    "committedFinalPosition" : {
+      "x" : 0.9,
+      "y" : 0.86
+    }
+  },
+  "contactSheetFile" : "402x874-standard-wallclock-contact-sheet.png",
+  "generatedAt" : "2026-07-20T14:08:43Z",
+  "hapticsIncluded" : false,
+  "instantiatedPlanCount" : 1,
+  "planStableID" : "card.deal.track-b.transcript-player.v1",
+  "planValid" : true,
+  "productContractCompiledDirectly" : true,
+  "productContractPath" : "App\/MotionPlaybackPlan.swift",
+  "productContractSHA256" : "8f50b68ff3141ad45f7d9eb751913c9c40af99678c15570a52821413561f6f16",
+  "productHooksIncluded" : false,
+  "rateSegments" : [
+    {
+      "callbackNames" : [
+        "onContact",
+        "onRest"
+      ],
+      "finalPhase" : "resting",
+      "finalPosition" : {
+        "x" : 0.9,
+        "y" : 0.86
+      },
+      "measuredIntervalsSeconds" : [
+        0.014094208308961242,
+        0.017721750016789883,
+        0.015707124955952168,
+        0.01764666667440906,
+        0.015773124992847443,
+        0.01751258334843442,
+        0.01659766666125506,
+        0.016692916688043624,
+        0.01606058335164562,
+        0.017329166643321514,
+        0.01659741665935144,
+        0.016630166675895452,
+        0.015681374992709607,
+        0.017709666688460857,
+        0.01563637499930337,
+        0.01766037498600781,
+        0.016601708310190588,
+        0.0166654167114757,
+        0.016659916669595987,
+        0.016355208295863122,
+        0.017046625027433038,
+        0.016662791662383825,
+        0.016652208345476538,
+        0.016226791660301387,
+        0.017137666640337557,
+        0.01661854167468846,
+        0.016667833318933845,
+        0.01667570834979415,
+        0.01665983331622556,
+        0.01671441667713225,
+        0.016680791683029383,
+        0.016647125012241304,
+        0.016653583326842636,
+        0.01670187496347353,
+        0.016662708367221057,
+        0.016563708311878145,
+        0.016759708349127322,
+        0.015659374999813735,
+        0.017666208324953914,
+        0.016670416691340506,
+        0.016644458286464214,
+        0.01665866666007787,
+        0.01624837500276044,
+        0.016992541670333594,
+        0.016778958379290998,
+        0.016586208308581263,
+        0.0167373750009574,
+        0.016650124976877123
+      ],
+      "requestedFramesPerSecond" : 60,
+      "targetIntervalSeconds" : 0.016666666666666666
+    },
+    {
+      "callbackNames" : [
+        "onContact",
+        "onRest"
+      ],
+      "finalPhase" : "resting",
+      "finalPosition" : {
+        "x" : 0.9,
+        "y" : 0.86
+      },
+      "measuredIntervalsSeconds" : [
+        0.011216374987270683,
+        0.013393666711635888,
+        0.01250749995233491,
+        0.012465291714761406,
+        0.012519333336967975,
+        0.011739041656255722,
+        0.013285791676025838,
+        0.012500458280555904,
+        0.012535000045318156,
+        0.012420916638802737,
+        0.012490416702348739,
+        0.012516666669398546,
+        0.012519208306912333,
+        0.012461083359085023,
+        0.012250708299688995,
+        0.01283970836084336,
+        0.012480125005822629,
+        0.012488958309404552,
+        0.012511708308011293,
+        0.011573375028092414,
+        0.013361291668843478,
+        0.012515250011347234,
+        0.012510749977082014,
+        0.0124935416970402,
+        0.012567833298817277,
+        0.012106541660614312,
+        0.012823416676837951,
+        0.012481249985285103,
+        0.012494791706558317,
+        0.012177958327811211,
+        0.012814791640266776,
+        0.012530041683930904,
+        0.011841083352919668,
+        0.013210874982178211,
+        0.012418291647918522,
+        0.012504166690632701,
+        0.012514333298895508,
+        0.012465541658457369,
+        0.012580333335790783,
+        0.012436500051990151,
+        0.012497333285864443,
+        0.012428500049281865,
+        0.01256324996938929,
+        0.012505416641943157,
+        0.012134208343923092,
+        0.012863875017501414,
+        0.012492166657466441,
+        0.011741333350073546,
+        0.013254583347588778,
+        0.012522458331659436,
+        0.012517291645053774,
+        0.012495875009335577,
+        0.012489333341363817,
+        0.012490624969359487,
+        0.012345625029411167,
+        0.012675000005401671,
+        0.012549916631542146,
+        0.012444458319805562,
+        0.012504333339165896,
+        0.012515750015154481,
+        0.012473958311602473,
+        0.012524666672106832,
+        0.012249125051312149,
+        0.012129208305850625
+      ],
+      "requestedFramesPerSecond" : 80,
+      "targetIntervalSeconds" : 0.0125
+    },
+    {
+      "callbackNames" : [
+        "onContact",
+        "onRest"
+      ],
+      "finalPhase" : "resting",
+      "finalPosition" : {
+        "x" : 0.9,
+        "y" : 0.86
+      },
+      "measuredIntervalsSeconds" : [
+        0.006645458284765482,
+        0.00831812503747642,
+        0.008351625001523644,
+        0.008307541662361473,
+        0.008370708324946463,
+        0.008302333357278258,
+        0.008328083320520818,
+        0.008013000013306737,
+        0.00865549995796755,
+        0.0083196249906905,
+        0.008341583365108818,
+        0.008324208320118487,
+        0.008329791657160968,
+        0.008349666662979871,
+        0.008300041663460433,
+        0.008380458340980113,
+        0.008335916674695909,
+        0.00832187500782311,
+        0.008329833333846182,
+        0.008317333355080336,
+        0.008369291666895151,
+        0.008304958289954811,
+        0.00833420833805576,
+        0.008324333350174129,
+        0.00834729167399928,
+        0.008324916649144143,
+        0.007470958342310041,
+        0.009195875027216971,
+        0.00834579166257754,
+        0.008343499968759716,
+        0.007538333360571414,
+        0.009108249971177429,
+        0.007687125005759299,
+        0.008988291665446013,
+        0.007625458354596049,
+        0.009042833291459829,
+        0.008317250001709908,
+        0.008348541683517396,
+        0.00769904168555513,
+        0.008963833330199122,
+        0.007658333342988044,
+        0.008520291652530432,
+        0.008320458349771798,
+        0.008841833332553506,
+        0.008332208322826773,
+        0.008344125002622604,
+        0.00794858334120363,
+        0.008754541631788015,
+        0.008251458348240703,
+        0.008368125010747463,
+        0.007926124962978065,
+        0.008731791691388935,
+        0.008345333335455507,
+        0.00832949997857213,
+        0.007960874994751066,
+        0.008684041677042842,
+        0.008349041687324643,
+        0.00837120832875371,
+        0.007987499993760139,
+        0.008651499985717237,
+        0.00834933336591348,
+        0.008311666664667428,
+        0.008128458342980593,
+        0.00856745830969885,
+        0.008295583364088088,
+        0.008379749953746796,
+        0.008198291703592986,
+        0.008421874954365194,
+        0.008342416724190116,
+        0.007682333292905241,
+        0.008873749990016222,
+        0.00846075004665181,
+        0.00830279162619263,
+        0.008309875032864511,
+        0.008330583339557052,
+        0.008375624951440841,
+        0.008333166711963713,
+        0.00773549999576062,
+        0.008953250013291836,
+        0.00833604164654389,
+        0.008308666641823947,
+        0.008333416655659676,
+        0.008334833371918648,
+        0.00832820835057646,
+        0.00834987498819828,
+        0.008293749997392297,
+        0.00834837497677654,
+        0.007922083314042538,
+        0.008761666715145111,
+        0.008286583295557648,
+        0.008365333371330053,
+        0.007580708304885775,
+        0.009086625010240823,
+        0.00833120831521228,
+        0.008302625035867095,
+        0.0076339999795891345
+      ],
+      "requestedFramesPerSecond" : 120,
+      "targetIntervalSeconds" : 0.008333333333333333
+    }
+  ],
+  "reducedMotion" : {
+    "callbackNames" : [
+      "onContact",
+      "onRest"
+    ],
+    "finalPhase" : "resting",
+    "finalPosition" : {
+      "x" : 0.9,
+      "y" : 0.86
+    },
+    "releaseLatencySeconds" : 1.5416298992931843e-06
+  },
+  "rendererNeutralPlayer" : true,
+  "schemaVersion" : 1,
+  "videoFile" : "402x874-standard-wallclock-uncut-60fps.mp4",
+  "viewport" : "402x874",
+  "wallclock" : {
+    "callbacks" : [
+      {
+        "elapsedSeconds" : 0.6512076666695066,
+        "name" : "onContact"
+      },
+      {
+        "elapsedSeconds" : 0.834530166699551,
+        "name" : "onRest"
+      }
+    ],
+    "frames" : [
+      {
+        "captureElapsedSeconds" : 0.002670666668564081,
+        "contactDelivered" : false,
+        "frameIndex" : 0,
+        "moving" : false,
+        "normalizedTime" : 0,
+        "phase" : "prepared",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0
+      },
+      {
+        "captureElapsedSeconds" : 0.017708333325572312,
+        "contactDelivered" : false,
+        "frameIndex" : 1,
+        "moving" : false,
+        "normalizedTime" : 0,
+        "phase" : "prepared",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.016666666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.034256374987307936,
+        "contactDelivered" : false,
+        "frameIndex" : 2,
+        "moving" : false,
+        "normalizedTime" : 0,
+        "phase" : "prepared",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.03333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.050925749994348735,
+        "contactDelivered" : false,
+        "frameIndex" : 3,
+        "moving" : false,
+        "normalizedTime" : 0,
+        "phase" : "prepared",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.05
+      },
+      {
+        "captureElapsedSeconds" : 0.06776512501528487,
+        "contactDelivered" : false,
+        "frameIndex" : 4,
+        "moving" : false,
+        "normalizedTime" : 0,
+        "phase" : "prepared",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.06666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.08441533334553242,
+        "contactDelivered" : false,
+        "frameIndex" : 5,
+        "moving" : false,
+        "normalizedTime" : 0,
+        "phase" : "prepared",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.08333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.10037616669433191,
+        "contactDelivered" : false,
+        "frameIndex" : 6,
+        "moving" : true,
+        "normalizedTime" : 0,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.18,
+          "y" : 0.15
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.1
+      },
+      {
+        "captureElapsedSeconds" : 0.11766649998025969,
+        "contactDelivered" : false,
+        "frameIndex" : 7,
+        "moving" : true,
+        "normalizedTime" : 0.024014351786010794,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.19600956785734053,
+          "y" : 0.16500896986625674
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.11666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.13442762498743832,
+        "contactDelivered" : false,
+        "frameIndex" : 8,
+        "moving" : true,
+        "normalizedTime" : 0.0472936920737589,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.2115291280491726,
+          "y" : 0.1795585575460993
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.13333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.15110187500249594,
+        "contactDelivered" : false,
+        "frameIndex" : 9,
+        "moving" : true,
+        "normalizedTime" : 0.07045237265022783,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.22696824843348523,
+          "y" : 0.1940327329063924
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.15
+      },
+      {
+        "captureElapsedSeconds" : 0.16775737499119714,
+        "contactDelivered" : false,
+        "frameIndex" : 10,
+        "moving" : true,
+        "normalizedTime" : 0.09358501152342392,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.24239000768228264,
+          "y" : 0.20849063220213995
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.16666666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.18443954165559262,
+        "contactDelivered" : false,
+        "frameIndex" : 11,
+        "moving" : true,
+        "normalizedTime" : 0.11675468744619542,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.2578364582974636,
+          "y" : 0.22297167965387216
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.18333333333333332
+      },
+      {
+        "captureElapsedSeconds" : 0.20111374999396503,
+        "contactDelivered" : false,
+        "frameIndex" : 12,
+        "moving" : true,
+        "normalizedTime" : 0.13991331013837932,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.2732755400922529,
+          "y" : 0.23744581883648708
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.2
+      },
+      {
+        "captureElapsedSeconds" : 0.21777516667498276,
+        "contactDelivered" : false,
+        "frameIndex" : 13,
+        "moving" : true,
+        "normalizedTime" : 0.16305416663979283,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.2887027777598619,
+          "y" : 0.2519088541498705
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.21666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.23449008335592225,
+        "contactDelivered" : false,
+        "frameIndex" : 14,
+        "moving" : true,
+        "normalizedTime" : 0.18626932869665325,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.3041795524644355,
+          "y" : 0.2664183304354083
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.23333333333333334
+      },
+      {
+        "captureElapsedSeconds" : 0.2511194166727364,
+        "contactDelivered" : false,
+        "frameIndex" : 15,
+        "moving" : true,
+        "normalizedTime" : 0.20936562497000624,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.3195770833133375,
+          "y" : 0.28085351560625393
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.25
+      },
+      {
+        "captureElapsedSeconds" : 0.26777620834764093,
+        "contactDelivered" : false,
+        "frameIndex" : 16,
+        "moving" : true,
+        "normalizedTime" : 0.2325000578518181,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.33500003856787874,
+          "y" : 0.2953125361573863
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.26666666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.2845351666910574,
+        "contactDelivered" : false,
+        "frameIndex" : 17,
+        "moving" : true,
+        "normalizedTime" : 0.25577638888434095,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.35628530465480357,
+          "y" : 0.318320967736654
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.2833333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.30109066667500883,
+        "contactDelivered" : false,
+        "frameIndex" : 18,
+        "moving" : true,
+        "normalizedTime" : 0.27877013886205126,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.3800207885027626,
+          "y" : 0.3450233870656079
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.3
+      },
+      {
+        "captureElapsedSeconds" : 0.3177621666691266,
+        "contactDelivered" : false,
+        "frameIndex" : 19,
+        "moving" : true,
+        "normalizedTime" : 0.3019249999649926,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.40392258060902464,
+          "y" : 0.3719129031851527
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.31666666666666665
+      },
+      {
+        "captureElapsedSeconds" : 0.33442037500208244,
+        "contactDelivered" : false,
+        "frameIndex" : 20,
+        "moving" : true,
+        "normalizedTime" : 0.3250614004274313,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.42780531657025167,
+          "y" : 0.39878098114153315
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.3333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.3510924583533779,
+        "contactDelivered" : false,
+        "frameIndex" : 21,
+        "moving" : true,
+        "normalizedTime" : 0.34821707174867494,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.4517079450308903,
+          "y" : 0.4256714381597515
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.35
+      },
+      {
+        "captureElapsedSeconds" : 0.3678584999870509,
+        "contactDelivered" : false,
+        "frameIndex" : 22,
+        "moving" : true,
+        "normalizedTime" : 0.37150324068433194,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.4757452807064072,
+          "y" : 0.45271344079470804
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.36666666666666664
+      },
+      {
+        "captureElapsedSeconds" : 0.38448549999156967,
+        "contactDelivered" : false,
+        "frameIndex" : 23,
+        "moving" : true,
+        "normalizedTime" : 0.39459629624616355,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.4995832735444269,
+          "y" : 0.47953118273748024
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.3833333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.4012091250042431,
+        "contactDelivered" : false,
+        "frameIndex" : 24,
+        "moving" : true,
+        "normalizedTime" : 0.41782355320821,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.5235597968600878,
+          "y" : 0.5065047714675988
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.4
+      },
+      {
+        "captureElapsedSeconds" : 0.41806454164907336,
+        "contactDelivered" : false,
+        "frameIndex" : 25,
+        "moving" : true,
+        "normalizedTime" : 0.4412338541038076,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.5477252687523175,
+          "y" : 0.5336909273463573
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.4166666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.43447820836445317,
+        "contactDelivered" : false,
+        "frameIndex" : 26,
+        "moving" : true,
+        "normalizedTime" : 0.464030613430724,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.5712574074123602,
+          "y" : 0.5601645833389053
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.43333333333333335
+      },
+      {
+        "captureElapsedSeconds" : 0.45114670833572745,
+        "contactDelivered" : false,
+        "frameIndex" : 27,
+        "moving" : true,
+        "normalizedTime" : 0.4871813078352716,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.595154898410603,
+          "y" : 0.5870492607119283
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.45
+      },
+      {
+        "captureElapsedSeconds" : 0.4678131666732952,
+        "contactDelivered" : false,
+        "frameIndex" : 28,
+        "moving" : true,
+        "normalizedTime" : 0.510329166637449,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.6190494623354312,
+          "y" : 0.6139306451273601
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.4666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.4844652499887161,
+        "contactDelivered" : false,
+        "frameIndex" : 29,
+        "moving" : true,
+        "normalizedTime" : 0.5334570601310892,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.6429234169095114,
+          "y" : 0.6407888440232004
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.48333333333333334
+      },
+      {
+        "captureElapsedSeconds" : 0.5011542916763574,
+        "contactDelivered" : false,
+        "frameIndex" : 30,
+        "moving" : true,
+        "normalizedTime" : 0.5566362846972577,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.6659726562275319,
+          "y" : 0.6653090277578061
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.5
+      },
+      {
+        "captureElapsedSeconds" : 0.5178707499871962,
+        "contactDelivered" : false,
+        "frameIndex" : 31,
+        "moving" : true,
+        "normalizedTime" : 0.5798535879067559,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.6868682291160803,
+          "y" : 0.6838828703254047
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.5166666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.5345005833660252,
+        "contactDelivered" : false,
+        "frameIndex" : 32,
+        "moving" : true,
+        "normalizedTime" : 0.6029505787106852,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.7076555208396167,
+          "y" : 0.7023604629685481
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.5333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.5511529999785125,
+        "contactDelivered" : false,
+        "frameIndex" : 33,
+        "moving" : true,
+        "normalizedTime" : 0.6260789351169176,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.7284710416052258,
+          "y" : 0.720863148093534
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.55
+      },
+      {
+        "captureElapsedSeconds" : 0.5678169583552517,
+        "contactDelivered" : false,
+        "frameIndex" : 34,
+        "moving" : true,
+        "normalizedTime" : 0.6492233217512775,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.7493009895761498,
+          "y" : 0.7393786574010219
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.5666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.5845151250250638,
+        "contactDelivered" : false,
+        "frameIndex" : 35,
+        "moving" : true,
+        "normalizedTime" : 0.6724152199037943,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.7701736979134148,
+          "y" : 0.7579321759230354
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.5833333333333334
+      },
+      {
+        "captureElapsedSeconds" : 0.6011657083290629,
+        "contactDelivered" : false,
+        "frameIndex" : 36,
+        "moving" : true,
+        "normalizedTime" : 0.6955410300482375,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.7909869270434138,
+          "y" : 0.7764328240385899
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.6
+      },
+      {
+        "captureElapsedSeconds" : 0.6178204166935757,
+        "contactDelivered" : false,
+        "frameIndex" : 37,
+        "moving" : true,
+        "normalizedTime" : 0.7186725694433942,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.8118053124990547,
+          "y" : 0.7949380555547153
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.6166666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.6344886666629463,
+        "contactDelivered" : false,
+        "frameIndex" : 38,
+        "moving" : true,
+        "normalizedTime" : 0.7418229166230756,
+        "phase" : "inFlight",
+        "position" : {
+          "x" : 0.8326406249607681,
+          "y" : 0.8134583332984605
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.6333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.6511964999954216,
+        "contactDelivered" : true,
+        "frameIndex" : 39,
+        "moving" : true,
+        "normalizedTime" : 0.765028240695958,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8450094135653193,
+          "y" : 0.8235065894957235
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.65
+      },
+      {
+        "captureElapsedSeconds" : 0.667858958360739,
+        "contactDelivered" : true,
+        "frameIndex" : 40,
+        "moving" : true,
+        "normalizedTime" : 0.7881705439811211,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8527235146603737,
+          "y" : 0.8289064602622616
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.6666666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.684497874986846,
+        "contactDelivered" : true,
+        "frameIndex" : 41,
+        "moving" : true,
+        "normalizedTime" : 0.8112801504062696,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8604267168020898,
+          "y" : 0.8342987017614628
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.6833333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.7011669999919832,
+        "contactDelivered" : true,
+        "frameIndex" : 42,
+        "moving" : true,
+        "normalizedTime" : 0.8344317129134046,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8681439043044682,
+          "y" : 0.8397007330131276
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.7
+      },
+      {
+        "captureElapsedSeconds" : 0.717814041650854,
+        "contactDelivered" : true,
+        "frameIndex" : 43,
+        "moving" : true,
+        "normalizedTime" : 0.8575526041062808,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8758508680354269,
+          "y" : 0.8450956076247989
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.7166666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.7344881666940637,
+        "contactDelivered" : true,
+        "frameIndex" : 44,
+        "moving" : true,
+        "normalizedTime" : 0.8807111111107386,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8835703703702462,
+          "y" : 0.8504992592591724
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.7333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.7511503333225846,
+        "contactDelivered" : true,
+        "frameIndex" : 45,
+        "moving" : true,
+        "normalizedTime" : 0.9038530092059066,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8903853009205906,
+          "y" : 0.8551926504602954
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.75
+      },
+      {
+        "captureElapsedSeconds" : 0.767796250001993,
+        "contactDelivered" : true,
+        "frameIndex" : 46,
+        "moving" : true,
+        "normalizedTime" : 0.9269723379273072,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8926972337927307,
+          "y" : 0.8563486168963653
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.7666666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.7844989166478626,
+        "contactDelivered" : true,
+        "frameIndex" : 47,
+        "moving" : true,
+        "normalizedTime" : 0.9501704860465705,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.895017048604657,
+          "y" : 0.8575085243023285
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.7833333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.80116916669067,
+        "contactDelivered" : true,
+        "frameIndex" : 48,
+        "moving" : true,
+        "normalizedTime" : 0.973323611106025,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.8973323611106025,
+          "y" : 0.8586661805553012
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.8
+      },
+      {
+        "captureElapsedSeconds" : 0.8178097500349395,
+        "contactDelivered" : true,
+        "frameIndex" : 49,
+        "moving" : true,
+        "normalizedTime" : 0.9964355324175106,
+        "phase" : "settling",
+        "position" : {
+          "x" : 0.899643553241751,
+          "y" : 0.8598217766208756
+        },
+        "restDelivered" : false,
+        "targetElapsedSeconds" : 0.8166666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.8345244166557677,
+        "contactDelivered" : true,
+        "frameIndex" : 50,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.8333333333333334
+      },
+      {
+        "captureElapsedSeconds" : 0.8511498750303872,
+        "contactDelivered" : true,
+        "frameIndex" : 51,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.85
+      },
+      {
+        "captureElapsedSeconds" : 0.8678800416528247,
+        "contactDelivered" : true,
+        "frameIndex" : 52,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.8666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.8844770833384246,
+        "contactDelivered" : true,
+        "frameIndex" : 53,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.8833333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.9012262083124369,
+        "contactDelivered" : true,
+        "frameIndex" : 54,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.9
+      },
+      {
+        "captureElapsedSeconds" : 0.9178150416701101,
+        "contactDelivered" : true,
+        "frameIndex" : 55,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.9166666666666666
+      },
+      {
+        "captureElapsedSeconds" : 0.934476624999661,
+        "contactDelivered" : true,
+        "frameIndex" : 56,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.9333333333333333
+      },
+      {
+        "captureElapsedSeconds" : 0.9511987916775979,
+        "contactDelivered" : true,
+        "frameIndex" : 57,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.95
+      },
+      {
+        "captureElapsedSeconds" : 0.9678413749788888,
+        "contactDelivered" : true,
+        "frameIndex" : 58,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.9666666666666667
+      },
+      {
+        "captureElapsedSeconds" : 0.984531624999363,
+        "contactDelivered" : true,
+        "frameIndex" : 59,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 0.9833333333333333
+      },
+      {
+        "captureElapsedSeconds" : 1.0011635000118986,
+        "contactDelivered" : true,
+        "frameIndex" : 60,
+        "moving" : false,
+        "normalizedTime" : 1,
+        "phase" : "resting",
+        "position" : {
+          "x" : 0.9,
+          "y" : 0.86
+        },
+        "restDelivered" : true,
+        "targetElapsedSeconds" : 1
+      }
+    ],
+    "releaseElapsedSeconds" : 0.10037616669433191,
+    "requestedFramesPerSecond" : 60,
+    "timingSource" : "CACurrentMediaTime sampled against an absolute 60 Hz target grid; rendering deferred"
+  }
+}

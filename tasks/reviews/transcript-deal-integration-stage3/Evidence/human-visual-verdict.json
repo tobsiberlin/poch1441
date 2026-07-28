@@ -1,0 +1,33 @@
+{
+  "status": "HUMAN_VISUAL_GREEN",
+  "stage": 3,
+  "reviewedAt": "2026-07-20T16:42:04+02:00",
+  "reviewer": "lead",
+  "reviewMethod": "QuickTime review of the complete uncut standard and Reduced Motion simulator captures plus final eight-contact screenshots",
+  "standardCapture": {
+    "durationSeconds": 7.68,
+    "pixelSize": "1206x2622",
+    "codec": "H.264",
+    "observations": [
+      "All visible backs and W2 marks remain upright.",
+      "Source, table crossing, opponent targets and human hand targets remain spatially coherent.",
+      "Contact transfers into the target stack or hand without teleport, reversal or duplicate visible card.",
+      "The short settle remains readable after contact.",
+      "No more than two cards are visibly moving, including settle."
+    ]
+  },
+  "reducedMotionCapture": {
+    "durationSeconds": 5.591666666666667,
+    "pixelSize": "1206x2622",
+    "codec": "H.264",
+    "observations": [
+      "No spatial flight remains visible.",
+      "Cards reach the same target stacks and hand state through the causal contact route.",
+      "The board and targets remain stable and readable."
+    ]
+  },
+  "stage3ProductGate": "GREEN",
+  "stage4Allowed": true,
+  "broadProductionIntegrationAllowed": false
+}
+
