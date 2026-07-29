@@ -1,0 +1,24 @@
+{
+  "decision": "GREEN",
+  "stage": "SIGNATURE_MOTION_INTEGRATION_STAGE_1",
+  "completedAt": "2026-07-20T15:52:30+02:00",
+  "prerequisiteHumanGates": {
+    "coinMaterialV3": "3585269a11ad7eb8507e4877f23af5c26c456bbb58ae253684eb34764f66fa96",
+    "cardMaterialV5": "469ec048c4df3125c98f5882d2c6c17cfb4eaffbb1047c3c8e40d2b36a9b0095",
+    "dealWallclockV4": "344b7ddd3a4d5398ea197b62674fa7277873ed7f5c3b54aa0de71340800c2b39"
+  },
+  "sourceSHA256": {
+    "App/MotionPlaybackPlan.swift": "8f50b68ff3141ad45f7d9eb751913c9c40af99678c15570a52821413561f6f16",
+    "Tests/MotionPlaybackPlanTests.swift": "7f80851aba04ce597fac98950dd670a8cc53ddafdf6409f7324c42a9e6986623"
+  },
+  "checks": {
+    "strictConcurrencyWarningsAsErrors": "PASS",
+    "deterministicCanonicalSerialization": "PASS",
+    "nineVariantEightTransferNonRepeat": "PASS",
+    "dealRhythmIminus2RestWindow": "PASS",
+    "ruleNeutrality": "PASS",
+    "iosSimulatorBuildArm64AndX8664": "PASS"
+  },
+  "viewOrGameStateHookAdded": false,
+  "productionMotionEnabled": false
+}

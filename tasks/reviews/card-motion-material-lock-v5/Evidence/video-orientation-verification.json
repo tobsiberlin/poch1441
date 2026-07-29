@@ -1,0 +1,20 @@
+{
+  "audioTrackCount" : 0,
+  "bestOrientation" : "identity",
+  "decodedFirstFrame" : "decoded-first-frame-v5-402x874.png",
+  "decodedFrameCount" : 82,
+  "durationSeconds" : 1.3666666666666667,
+  "height" : 874,
+  "identityMargin" : 19.898865702001054,
+  "meanAbsoluteRGBError" : {
+    "horizontalMirror" : 26.20720197638808,
+    "identity" : 6.3083362743870275,
+    "rotate180" : 33.60557244289612,
+    "verticalMirror" : 31.72936613651802
+  },
+  "nominalFrameRate" : 60,
+  "referenceFrame" : "402x874-material-lock-v5-000.png",
+  "status" : "PASS",
+  "video" : "wallclock-material-lock-v5-402x874.mp4",
+  "width" : 402
+}

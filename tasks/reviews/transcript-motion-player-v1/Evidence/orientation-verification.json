@@ -1,0 +1,51 @@
+{
+  "comparison": "18 decoded H.264 frames versus frame-matched pre-encode contact-sheet cells",
+  "decodedOrientation": "upright",
+  "maximumUprightMeanAbsoluteError": 5.0,
+  "minimumWinningMargin": 2.0,
+  "result": "PASS",
+  "sampledFrameIndices": [
+    0,
+    4,
+    7,
+    11,
+    14,
+    18,
+    21,
+    25,
+    28,
+    32,
+    35,
+    39,
+    42,
+    46,
+    49,
+    53,
+    56,
+    60
+  ],
+  "schemaVersion": 1,
+  "scores": {
+    "horizontalFlip": {
+      "maximumAbsoluteError": 3.6622300148010254,
+      "meanAbsoluteError": 3.3813677496380277,
+      "p95AbsoluteError": 3.6588949084281923
+    },
+    "rotate180": {
+      "maximumAbsoluteError": 6.742498874664307,
+      "meanAbsoluteError": 6.483548800150554,
+      "p95AbsoluteError": 6.72185595035553
+    },
+    "upright": {
+      "maximumAbsoluteError": 1.3486946821212769,
+      "meanAbsoluteError": 1.3027659588389926,
+      "p95AbsoluteError": 1.3413050413131713
+    },
+    "verticalFlip": {
+      "maximumAbsoluteError": 7.012540340423584,
+      "meanAbsoluteError": 6.649075614081489,
+      "p95AbsoluteError": 6.991897416114807
+    }
+  },
+  "winningMargin": 2.078601790799035
+}

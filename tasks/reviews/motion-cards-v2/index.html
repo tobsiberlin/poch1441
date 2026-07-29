@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Poch 1441 - Kartenbewegung V2 REVIEW</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="prototype" id="prototype" data-motion="normal" data-phase="ready" data-completed="false">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Poch 1441 · Motionstudie V2</p>
+        <h1>Karten mit Gewicht</h1>
+      </div>
+      <div class="review-state">
+        <span class="review-badge">Review</span>
+        <span class="phase-readout" aria-live="polite">
+          <span class="phase-dot" aria-hidden="true"></span>
+          <span id="phaseLabel">Bereit</span>
+        </span>
+      </div>
+    </header>
+
+    <main class="table" id="table" aria-label="Interaktive Kartenbewegungsstudie">
+      <div class="table-light" aria-hidden="true"></div>
+      <div class="play-slot" aria-hidden="true"><span>Ausspiel</span></div>
+      <div class="hand-rail" aria-hidden="true"></div>
+      <div class="deck" id="deck" aria-hidden="true"></div>
+      <div class="cards" id="cards" aria-hidden="true"></div>
+      <ol class="phase-track" aria-label="Bewegungsphasen">
+        <li>Deal</li><li>Fächer</li><li>Reveal</li><li>Ausspiel</li><li>Rücknahme</li>
+      </ol>
+    </main>
+
+    <aside class="controls" aria-label="Prototyp-Steuerung">
+      <div class="motion-mode" role="group" aria-label="Bewegungsmodus">
+        <button type="button" class="mode-button is-active" id="normalMode" aria-pressed="true">Normal</button>
+        <button type="button" class="mode-button" id="reducedMode" aria-pressed="false">Reduziert</button>
+      </div>
+      <div class="transport">
+        <button type="button" class="transport-button primary" id="playButton">Play</button>
+        <button type="button" class="transport-button" id="pauseButton" disabled>Pause</button>
+        <button type="button" class="transport-button icon-button" id="replayButton" aria-label="Sequenz wiederholen">↺</button>
+      </div>
+      <p class="hint" id="motionHint">Raum, Kontakt und Kartenflex bleiben sichtbar.</p>
+    </aside>
+  </div>
+  <script src="motion.js"></script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+{
+  "comparison": "decoded H.264 frames versus pre-encode rendered contact-sheet cells",
+  "maximumUprightMeanAbsoluteError": 5.0,
+  "minimumWinningMargin": 2.0,
+  "result": "PASS",
+  "sampleCountPerSequence": 24,
+  "schemaVersion": 1,
+  "sequences": [
+    {
+      "decodedOrientation": "upright",
+      "referenceContactSheetFile": "402x874-standard-contact-sheet.png",
+      "result": "PASS",
+      "sampledFrameIndices": [
+        0,
+        8,
+        17,
+        25,
+        34,
+        42,
+        51,
+        59,
+        68,
+        76,
+        85,
+        93,
+        102,
+        110,
+        119,
+        127,
+        136,
+        144,
+        153,
+        161,
+        170,
+        178,
+        187,
+        195
+      ],
+      "scores": {
+        "horizontalFlip": {
+          "maximumAbsoluteError": 8.01143741607666,
+          "meanAbsoluteError": 7.42942229906718,
+          "p95AbsoluteError": 7.990557551383972
+        },
+        "rotate180": {
+          "maximumAbsoluteError": 12.706877708435059,
+          "meanAbsoluteError": 11.934970577557882,
+          "p95AbsoluteError": 12.536554431915283
+        },
+        "upright": {
+          "maximumAbsoluteError": 3.49076771736145,
+          "meanAbsoluteError": 3.086646854877472,
+          "p95AbsoluteError": 3.4768245458602904
+        },
+        "verticalFlip": {
+          "maximumAbsoluteError": 12.54623794555664,
+          "meanAbsoluteError": 11.83576480547587,
+          "p95AbsoluteError": 12.302263069152831
+        }
+      },
+      "sequence": "standard",
+      "videoFile": "402x874-standard-uncut-60fps.mp4",
+      "winningMargin": 4.342775444189708
+    },
+    {
+      "decodedOrientation": "upright",
+      "referenceContactSheetFile": "402x874-reducedMotion-contact-sheet.png",
+      "result": "PASS",
+      "sampledFrameIndices": [
+        0,
+        4,
+        7,
+        11,
+        14,
+        18,
+        21,
+        25,
+        28,
+        32,
+        35,
+        39,
+        42,
+        46,
+        49,
+        53,
+        56,
+        60,
+        63,
+        67,
+        70,
+        74,
+        77,
+        81
+      ],
+      "scores": {
+        "horizontalFlip": {
+          "maximumAbsoluteError": 7.764220237731934,
+          "meanAbsoluteError": 7.141159375508626,
+          "p95AbsoluteError": 7.74775755405426
+        },
+        "rotate180": {
+          "maximumAbsoluteError": 12.232805252075195,
+          "meanAbsoluteError": 11.755651275316874,
+          "p95AbsoluteError": 12.221781587600708
+        },
+        "upright": {
+          "maximumAbsoluteError": 3.601374626159668,
+          "meanAbsoluteError": 3.118342320124308,
+          "p95AbsoluteError": 3.443169367313385
+        },
+        "verticalFlip": {
+          "maximumAbsoluteError": 11.988306045532227,
+          "meanAbsoluteError": 11.63662842909495,
+          "p95AbsoluteError": 11.975453519821167
+        }
+      },
+      "sequence": "reducedMotion",
+      "videoFile": "402x874-reducedMotion-uncut-60fps.mp4",
+      "winningMargin": 4.022817055384317
+    },
+    {
+      "decodedOrientation": "upright",
+      "referenceContactSheetFile": "402x874-cancellation-contact-sheet.png",
+      "result": "PASS",
+      "sampledFrameIndices": [
+        0,
+        5,
+        10,
+        16,
+        21,
+        26,
+        31,
+        37,
+        42,
+        47,
+        52,
+        57,
+        63,
+        68,
+        73,
+        78,
+        83,
+        89,
+        94,
+        99,
+        104,
+        110,
+        115,
+        120
+      ],
+      "scores": {
+        "horizontalFlip": {
+          "maximumAbsoluteError": 8.478689193725586,
+          "meanAbsoluteError": 7.879221737384796,
+          "p95AbsoluteError": 8.329720258712769
+        },
+        "rotate180": {
+          "maximumAbsoluteError": 13.352516174316406,
+          "meanAbsoluteError": 12.623210708300272,
+          "p95AbsoluteError": 13.126102447509766
+        },
+        "upright": {
+          "maximumAbsoluteError": 3.4862542152404785,
+          "meanAbsoluteError": 3.011768251657486,
+          "p95AbsoluteError": 3.4681591153144837
+        },
+        "verticalFlip": {
+          "maximumAbsoluteError": 13.088141441345215,
+          "meanAbsoluteError": 12.572185118993124,
+          "p95AbsoluteError": 13.01448941230774
+        }
+      },
+      "sequence": "cancellation",
+      "videoFile": "402x874-cancellation-uncut-60fps.mp4",
+      "winningMargin": 4.86745348572731
+    }
+  ]
+}

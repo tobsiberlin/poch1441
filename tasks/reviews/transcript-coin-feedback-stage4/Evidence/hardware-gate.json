@@ -1,0 +1,14 @@
+{
+  "schema": "poch.stage4.hardware-gate.v1",
+  "recordedAt": "2026-07-20T17:33:38+02:00",
+  "verdict": "PENDING",
+  "reason": "xctrace reports the Mac and simulators only; no physical iPhone is connected.",
+  "requiredProof": [
+    "240 fps physical-device video spanning visual contact",
+    "96 kHz physical-device audio capture spanning the same contact",
+    "measured audio-to-visual contact offset against the product threshold",
+    "on-device Core Haptics character and settings-off verification",
+    "human speaker verdict for the copper-on-polycarbonate fingerprint"
+  ],
+  "productionIntegration": "BLOCKED_UNTIL_GREEN"
+}

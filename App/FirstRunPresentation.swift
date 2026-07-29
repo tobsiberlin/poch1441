@@ -140,15 +140,24 @@ struct FirstRunStageZones: Equatable {
         }
 
         let top = safeArea.top + 8
-        let handTop = size.height - safeArea.bottom - 126
+        // Die Kartenhand ist eine eigene untere Bühne. 110 pt halten die
+        // Karten lesbar, ohne dass ihre Oberkante in Erklärung oder CTA ragt.
+        let handHeight: CGFloat = 112
+        let handTop = size.height - safeArea.bottom - handHeight
         let boardY = top + 160
+        // The compact portrait must reserve enough height for a complete
+        // explanation. A slightly tighter disc is preferable to clipped copy:
+        // the reveal beat can still bring the trump card forward as the hero.
         let boardSide = min(usableWidth - 24,
-                            max(180, handTop - boardY - 190),
-                            max(228, size.height * 0.39),
-                            Tokens.guidedMeldLearningBoardMax)
+                            max(180, handTop - boardY - 202),
+                            max(228, size.height * 0.37),
+                            258)
         let boardX = safeArea.leading + (usableWidth - boardSide) / 2
-        let decisionY = boardY + boardSide + 16
-        let decisionHeight = max(110, min(146, handTop - decisionY - 18))
+        let decisionY = boardY + boardSide + 12
+        let decisionHeight = min(
+            190,
+            max(0, handTop - decisionY - Tokens.guidedMeldCoachHandClearance)
+        )
         return FirstRunStageZones(
             header: CGRect(x: safeArea.leading + 18,
                            y: top,
@@ -169,7 +178,7 @@ struct FirstRunStageZones: Equatable {
             hand: CGRect(x: safeArea.leading + 8,
                          y: handTop,
                          width: usableWidth - 16,
-                         height: 126),
+                         height: handHeight),
             isLandscape: false
         )
     }

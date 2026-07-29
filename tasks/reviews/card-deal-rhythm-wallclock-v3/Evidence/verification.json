@@ -1,0 +1,79 @@
+{
+  "sequences": [
+    {
+      "sequence": "standard",
+      "capturedFrames": 196,
+      "videoFrames": 196,
+      "videoDurationSeconds": 3.263333333333333,
+      "nominalFrameRate": 60.0616,
+      "medianCaptureIntervalMilliseconds": 16.663874965161085,
+      "p95CaptureIntervalMilliseconds": 17.409374995622784,
+      "maximumCaptureIntervalMilliseconds": 17.730999970808625,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    },
+    {
+      "sequence": "reducedMotion",
+      "capturedFrames": 82,
+      "videoFrames": 82,
+      "videoDurationSeconds": 1.3633333333333333,
+      "nominalFrameRate": 60.148514,
+      "medianCaptureIntervalMilliseconds": 16.66316663613543,
+      "p95CaptureIntervalMilliseconds": 17.410541709978133,
+      "maximumCaptureIntervalMilliseconds": 17.694875015877187,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    },
+    {
+      "sequence": "cancellation",
+      "capturedFrames": 121,
+      "videoFrames": 121,
+      "videoDurationSeconds": 2.0166666666666666,
+      "nominalFrameRate": 60,
+      "medianCaptureIntervalMilliseconds": 16.667354153469205,
+      "p95CaptureIntervalMilliseconds": 17.357833334244788,
+      "maximumCaptureIntervalMilliseconds": 17.75141671532765,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0,
+      "cancellation": {
+        "committedCardIndices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "futureCardIndices": [
+          5,
+          6,
+          7
+        ],
+        "drainCompleteSeconds": 1.710632874808307,
+        "postCancelPhaseTraces": {
+          "3": [
+            "travel",
+            "contact",
+            "settle",
+            "rest"
+          ],
+          "4": [
+            "travel",
+            "contact",
+            "settle",
+            "rest"
+          ]
+        },
+        "postCancelPeelCount": 0
+      }
+    }
+  ],
+  "result": "PASS",
+  "sourceContractSHA256": "2294f03d7fa1079b737ff6274aad36555d1a3acad018b8f0f0659a3251e8487c",
+  "viewport": "402x874",
+  "syntheticProgressUsed": false,
+  "productAudioIncluded": false,
+  "materialApprovalClaimed": false
+}

@@ -1,0 +1,286 @@
+{
+  "base_design_unchanged": true,
+  "damage_composited_after_print": true,
+  "forbidden": [
+    "decorative scratch field",
+    "brown dirt",
+    "grease stain",
+    "identity assignment"
+  ],
+  "source": "tasks/reviews/goty-2026-live-assets/current-cardback-single.png",
+  "story": "20 years of cared-for camping-table use; worn, never filthy",
+  "variant_count": 10,
+  "variants": [
+    {
+      "alpha_coverage": 0.94343,
+      "alpha_max": 95,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.007,
+          "max_alpha": 0.3754,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1532,
+          "name": "oxidised_surface_haze"
+        }
+      ],
+      "name": "top_bottom_wear",
+      "variant": 0
+    },
+    {
+      "alpha_coverage": 0.94904,
+      "alpha_max": 110,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00676,
+          "max_alpha": 0.3907,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1525,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.0841,
+          "max_alpha": 0.0612,
+          "name": "left_grip_wear"
+        }
+      ],
+      "name": "left_grip_wear",
+      "variant": 1
+    },
+    {
+      "alpha_coverage": 0.94883,
+      "alpha_max": 111,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00594,
+          "max_alpha": 0.3722,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1561,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.0837,
+          "max_alpha": 0.0585,
+          "name": "right_grip_wear"
+        }
+      ],
+      "name": "right_grip_wear",
+      "variant": 2
+    },
+    {
+      "alpha_coverage": 0.9465,
+      "alpha_max": 89,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00688,
+          "max_alpha": 0.3495,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1517,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.01505,
+          "max_alpha": 0.15,
+          "name": "corner_softening"
+        }
+      ],
+      "name": "corner_softening",
+      "variant": 3
+    },
+    {
+      "alpha_coverage": 0.94319,
+      "alpha_max": 105,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00792,
+          "max_alpha": 0.3479,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.167,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.13312,
+          "max_alpha": 0.0518,
+          "name": "shuffle_burnish"
+        }
+      ],
+      "name": "shuffle_burnish",
+      "variant": 4
+    },
+    {
+      "alpha_coverage": 0.94122,
+      "alpha_max": 97,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00566,
+          "max_alpha": 0.3407,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1665,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.22792,
+          "max_alpha": 0.055,
+          "name": "local_print_fade"
+        }
+      ],
+      "name": "local_print_fade",
+      "variant": 5
+    },
+    {
+      "alpha_coverage": 0.94322,
+      "alpha_max": 89,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00688,
+          "max_alpha": 0.3446,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.16,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.00148,
+          "max_alpha": 0.1453,
+          "name": "flex_core"
+        },
+        {
+          "coverage_over_1_percent": 0.00355,
+          "max_alpha": 0.0585,
+          "name": "flex_highlight"
+        },
+        {
+          "coverage_over_1_percent": 0.00354,
+          "max_alpha": 0.0421,
+          "name": "flex_shadow"
+        }
+      ],
+      "name": "shallow_flex_a",
+      "variant": 6
+    },
+    {
+      "alpha_coverage": 0.94241,
+      "alpha_max": 106,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00788,
+          "max_alpha": 0.3664,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1535,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.00166,
+          "max_alpha": 0.1714,
+          "name": "flex_core"
+        },
+        {
+          "coverage_over_1_percent": 0.00419,
+          "max_alpha": 0.07,
+          "name": "flex_highlight"
+        },
+        {
+          "coverage_over_1_percent": 0.00419,
+          "max_alpha": 0.0515,
+          "name": "flex_shadow"
+        }
+      ],
+      "name": "shallow_flex_b",
+      "variant": 7
+    },
+    {
+      "alpha_coverage": 0.94356,
+      "alpha_max": 120,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00659,
+          "max_alpha": 0.3883,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1567,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.00143,
+          "max_alpha": 0.1843,
+          "name": "fibre_lip"
+        },
+        {
+          "coverage_over_1_percent": 0.0007,
+          "max_alpha": 0.0391,
+          "name": "delamination_shadow"
+        }
+      ],
+      "name": "edge_delamination",
+      "variant": 8
+    },
+    {
+      "alpha_coverage": 0.94271,
+      "alpha_max": 94,
+      "layers": [
+        {
+          "coverage_over_1_percent": 0.00719,
+          "max_alpha": 0.3461,
+          "name": "exposed_edge_fibre"
+        },
+        {
+          "coverage_over_1_percent": 0.93542,
+          "max_alpha": 0.1654,
+          "name": "oxidised_surface_haze"
+        },
+        {
+          "coverage_over_1_percent": 0.00166,
+          "max_alpha": 0.1714,
+          "name": "flex_core"
+        },
+        {
+          "coverage_over_1_percent": 0.00419,
+          "max_alpha": 0.07,
+          "name": "flex_highlight"
+        },
+        {
+          "coverage_over_1_percent": 0.00419,
+          "max_alpha": 0.0515,
+          "name": "flex_shadow"
+        },
+        {
+          "coverage_over_1_percent": 0.02077,
+          "max_alpha": 0.075,
+          "name": "aged_cellulose_repair"
+        },
+        {
+          "coverage_over_1_percent": 0.00032,
+          "max_alpha": 0.0453,
+          "name": "repair_light_edge"
+        }
+      ],
+      "name": "repaired_flex",
+      "variant": 9
+    }
+  ],
+  "version": "V11-review"
+}

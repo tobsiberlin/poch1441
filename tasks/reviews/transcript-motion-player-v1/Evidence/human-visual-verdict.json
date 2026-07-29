@@ -1,0 +1,22 @@
+{
+  "status": "HUMAN_VISUAL_GREEN",
+  "technicalGate": "GREEN",
+  "humanVisualGate": "GREEN",
+  "stage2ProductGate": "GREEN",
+  "stage3DebugHookAllowed": true,
+  "broadProductionIntegrationAllowed": false,
+  "reviewedAt": "2026-07-20T16:13:39+02:00",
+  "reviewer": "lead",
+  "reviewMethod": "QuickTime native-size uncut playback plus frame-accurate start, inflight, contact-settle and rest inspection",
+  "observations": [
+    "Die ungeschnittene Standardaufnahme läuft in QuickTime durchgehend aufrecht.",
+    "Quelle, Flug, Kontakt, Settle und Ruhe lesen sich bei nativer Größe als eine zusammenhängende räumliche Bahn ohne Sprung oder Rücklauf.",
+    "Der Kontaktmarker schaltet am Ziel und die kurze Settle-Bewegung endet stabil in derselben Ruhepose.",
+    "Die funktionale Debug-Diagnostik ist lesbar und verdeckt weder Quelle noch Ziel.",
+    "Das 18-Frame-Kontaktblatt bestätigt denselben aufrechten und kohärenten Verlauf."
+  ],
+  "remainingGates": [
+    "Stage 3 muss Standard, Reduced Motion, Generationwechsel und Skip im echten FlyingBack-Debug-Flow separat belegen.",
+    "Eine breite Produktionsintegration bleibt bis zu den nachfolgenden Stage-3- und Stage-4-Gates gesperrt."
+  ]
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <title>POCH 1441 Knock Groove symbol</title>
+  <desc>A closed rounded O with one shallow diagonal knock groove. Monochrome manufacturing master.</desc>
+  <defs>
+    <mask id="knock-groove" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+      <rect width="200" height="200" fill="#ffffff"/>
+      <path d="M151-4L183 17L151 52L134 42Z" fill="#000000"/>
+    </mask>
+  </defs>
+  <path fill="#000000" fill-rule="evenodd" mask="url(#knock-groove)" d="
+    M58 12
+    C29 12 12 31 12 60
+    V140
+    C12 169 31 188 60 188
+    H140
+    C169 188 188 169 188 140
+    V60
+    C188 31 169 12 140 12
+    Z
+
+    M76 58
+    C64 58 58 66 58 78
+    V122
+    C58 134 66 142 78 142
+    H122
+    C134 142 142 134 142 122
+    V78
+    C142 66 134 58 122 58
+    Z"/>
+  <path fill="#000000" d="M100 86L114 100L100 114L86 100Z"/>
+</svg>

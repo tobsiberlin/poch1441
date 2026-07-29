@@ -108,11 +108,13 @@ struct CardFace: View {
             .resizable()
             .interpolation(.high)
             .aspectRatio(contentMode: .fit)
-            // Die historischen Druckassets bleiben unverändert. Auf dem dunklen
-            // Tisch erhalten rote Farben nur im Display-Compositing etwas mehr
-            // Farbdichte, damit Herz/Karo nicht verwaschen wirken.
-            .saturation(card.suit.isRed ? 1.55 : 1)
-            .contrast(card.suit.isRed ? 1.04 : 1)
+            // Die gebackene Patina reduziert die Drucksättigung bewusst. Auf
+            // dem fast schwarzen Tisch braucht das Display-Compositing deshalb
+            // einen klaren Gegenakzent: dichtes Karmin, neutrales Tiefschwarz
+            // und helles Papier statt eines grauen, milchigen Fächers.
+            .saturation(card.suit.isRed ? 2.32 : 1.42)
+            .contrast(1.18)
+            .brightness(0.06)
     }
 
     // MARK: - Zahlkarten 7-10 (code-gerendert)

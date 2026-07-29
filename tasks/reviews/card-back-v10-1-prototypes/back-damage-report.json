@@ -1,0 +1,140 @@
+{
+  "canvas": [
+    1000,
+    1400
+  ],
+  "distribution": {
+    "edge_compression": 2,
+    "quiet": 1,
+    "repair_film": 3,
+    "stress_line": 4
+  },
+  "phone_variant_order": [
+    8,
+    1,
+    5,
+    2,
+    6,
+    3,
+    9
+  ],
+  "source_alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+  "variant_count": 10,
+  "variants": [
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        315,
+        298,
+        561,
+        382
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "16ba460290ce7c79c5c7a9b999eebce235d40aac1b4501b7a877a88e2ff79b67",
+      "variant": 1
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        395,
+        345,
+        617,
+        429
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "a289f05e16fce65e2246b0ec20aa95e31a04c505ab4c9d5c8c8084b0a172fbc9",
+      "variant": 2
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        404,
+        303,
+        636,
+        387
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "cdb9d89dfc3eff4c6d7c18ffb7111968aa6cc1905baca470ddff458b8bf7c736",
+      "variant": 3
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        323,
+        289,
+        551,
+        373
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "f35540460c7ae7702ca5ed72243778c8e2c52d04aa3866ef2c238cb4de144523",
+      "variant": 4
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        195,
+        182,
+        497,
+        394
+      ],
+      "primary_damage": "repair_film",
+      "sha256": "003c8c5b4cbb89b8e9ff9a1e6075bc63161a663e954bb9b050a53adaed39a7e3",
+      "variant": 5
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        301,
+        231,
+        625,
+        427
+      ],
+      "primary_damage": "repair_film",
+      "sha256": "58f00b49338bdebe4aa4f6916f01d1b0d174d1f20b17d00358c901e3f7ce11e9",
+      "variant": 6
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        472,
+        187,
+        778,
+        379
+      ],
+      "primary_damage": "repair_film",
+      "sha256": "f4b1056ff84c52cedf92ce0d106ee2869d9904cccc14121a65424954692dbd7a",
+      "variant": 7
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        140,
+        1195,
+        780,
+        1400
+      ],
+      "primary_damage": "edge_compression",
+      "sha256": "880daeaaed9d8671767d2721c9bc961c0e7376442f3c064d429dace1ffc979f4",
+      "variant": 8
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        820,
+        448,
+        1000,
+        1148
+      ],
+      "primary_damage": "edge_compression",
+      "sha256": "caec8b28cda60b08bdfcde14546632c7f7e3599b66c8beaa17567102860440b6",
+      "variant": 9
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": null,
+      "primary_damage": "quiet",
+      "sha256": "61e8418fe9ff38af3cbc8a3aba51be6476ddc1edb7ec79a70f1a2ac24c34d535",
+      "variant": 10
+    }
+  ]
+}

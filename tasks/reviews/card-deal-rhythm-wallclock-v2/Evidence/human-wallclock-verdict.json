@@ -1,0 +1,21 @@
+{
+  "decision": "RED",
+  "gate": "WALLCLOCK_PRODUCT_LOCK",
+  "greenSubgates": [
+    "STANDARD_RHYTHM",
+    "REDUCED_MOTION_RHYTHM",
+    "UNCUT_FRAME_CORRESPONDENCE",
+    "MAX_TWO_ACTIVE_BODIES"
+  ],
+  "redSubgates": [
+    "COMMITTED_FREE_FLIGHT_CANCELLATION",
+    "ENCODED_VIDEO_ORIENTATION"
+  ],
+  "reviewedAt": "2026-07-20T14:57:10+02:00",
+  "reviewer": "Lead",
+  "technicalVerification": {
+    "result": "PASS",
+    "verificationSHA256": "e3ce7c842b8cec02ab004487d0feb632d30535c8137bc55286c3df142114f867"
+  },
+  "reason": "The cancellation proof retargets already released cards back to source and fades them out within 140 ms. Free flight is committed and may not gain a new spatial exit path. Separately, all three encoded MP4 files are vertically mirrored in QuickTime although the pre-encode contact sheets are upright."
+}

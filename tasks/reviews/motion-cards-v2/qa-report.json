@@ -1,0 +1,62 @@
+{
+  "status": "REVIEW",
+  "approved": false,
+  "deterministic": true,
+  "automatedPass": true,
+  "scope": "tasks/reviews/motion-cards-v2/**",
+  "assets": {
+    "cardBack": {
+      "revision": "W2",
+      "path": "../goty-2026-live-assets/current-cardback-single.png",
+      "sha256": "a9425eb499bdbd47d2ed45176a7e62041bf673dc8439d6f2f2342488a1dcf137"
+    },
+    "cardFronts": {
+      "revision": "V10",
+      "paths": [
+        "../card-patina-v10-full-set/AH.png",
+        "../card-patina-v10-full-set/KD.png",
+        "../card-patina-v10-full-set/QS.png",
+        "../card-patina-v10-full-set/10C.png",
+        "../card-patina-v10-full-set/7D.png"
+      ]
+    }
+  },
+  "viewports": [
+    {
+      "size": "390x844",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "flightDurationsMs": [580, 580, 580, 580, 580, 573, 573],
+      "returnedCardZStack": [20, 21, 22, 23, 24],
+      "reducedNeighborJumpPx": 0,
+      "reducedTeleportOpacities": [0, 0],
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    },
+    {
+      "size": "667x375",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "flightDurationsMs": [580, 580, 546, 501, 458, 420, 420],
+      "returnedCardZStack": [20, 21, 22, 23, 24],
+      "reducedNeighborJumpPx": 0,
+      "reducedTeleportOpacities": [0, 0],
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    }
+  ],
+  "verifiedContracts": [
+    "Ground-plane shadows are siblings of cards and contain no rotateX or rotateY transform.",
+    "Deck layer and in-flight card back use the same W2 source and object-fit contain crop.",
+    "Deck extraction hides the matching layer while the in-flight card is fully opaque.",
+    "Free-flight transform origin is 50% 50%; fan grip origin is 50% 82%.",
+    "Deal, play, and return flight durations are distance-derived and clamped to 420-580 ms.",
+    "Returned cards restore z-index values 20, 21, 22, 23, 24.",
+    "Reduced motion leaves all neighboring cards fixed and performs selected-card spatial retargets at opacity 0.",
+    "A live prefers-reduced-motion change retargets and completes the running sequence."
+  ],
+  "command": "PLAYWRIGHT_CORE_PATH=<path> CHROMIUM_EXECUTABLE_PATH=<path> node tasks/reviews/motion-cards-v2/qa.mjs",
+  "decision": "REVIEW - automated contract checks passed; external motion review is still required."
+}

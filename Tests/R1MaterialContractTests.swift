@@ -11,12 +11,17 @@ struct R1MaterialContractTests {
         let components = try source(at: "App/PlayComponents.swift")
         let layout = try source(at: "App/R1TokenLayout.swift")
         let effects = try source(at: "App/Effects.swift")
+        let contactAudio = try source(at: "App/R1ContactAudio.swift")
         let ring = try source(at: "App/PochRing.swift")
         let content = try source(at: "App/ContentView.swift")
         let impactFlight = try source(at: "App/ImpactFlight.swift")
         let dealOverlay = try source(at: "App/DealOverlay.swift")
         let tokens = try source(at: "App/DesignTokens.swift")
         let generator = try source(at: "tools/build_r1_ceramic_assets.py")
+        let audioBuilder = try source(at: "tools/build_r1_contact_audio.py")
+        let audioReceipt = try source(
+            at: "tasks/reviews/r1-contact-audio-v2/Evidence/audio-fingerprint-receipt.json"
+        )
 
         try r1RendererUsesTheReferencePalette(components, generator: generator)
         try r1AssetsShareTheCanonicalSilhouette(tokens: tokens, generator: generator)
@@ -25,12 +30,14 @@ struct R1MaterialContractTests {
         try saturatedPilesRevealTheirPublicValue(components)
         try r1ScaleAndLightingStayPhysical(components, generator: generator)
         try restingPosesAreStableAndVaried(layout)
-        try contactFeedbackIsImpactBoundAndBundled(effects)
+        try contactFeedbackIsImpactBoundAndBundled(effects, audio: contactAudio)
         try fundingMotionRemainsPhysicalAndInterruptible(content: content,
                                                          impactFlight: impactFlight,
                                                          effects: effects,
                                                          dealOverlay: dealOverlay)
-        try ceramicAudioVariantsMeetTheRuntimeContract(effects)
+        try ceramicAudioVariantsMeetTheRuntimeContract(contactAudio,
+                                                        builder: audioBuilder,
+                                                        receipt: audioReceipt)
 
         FileHandle.standardOutput.write(Data("R1MaterialContractTests: PASS\n".utf8))
     }
@@ -52,8 +59,8 @@ struct R1MaterialContractTests {
                "The old runtime brightness duplicate must not return")
         expect(!components.contains(".brightness(Tokens.pochDiscWellFloorLift)"),
                "Velvet must be built once, not brightened at runtime")
-        expect(components.contains("PochDiscSuitEngravingOverlay(size: size)"),
-               "The satin outer frame needs the dark vector suit engravings")
+        expect(!components.contains("PochDiscSuitEngravingOverlay(size: size)"),
+               "The warm board must not add unrelated suit marks around its outer rim")
     }
 
     private static func r1RendererUsesTheReferencePalette(
@@ -88,8 +95,8 @@ struct R1MaterialContractTests {
                "R1 must not substitute arbitrary chevron, square, or diamond marks")
         expect(source.contains("static func resolve(compartment: TravelCompartment, index: Int)"),
                "R1 needs a deterministic material resolver tied to the physical well")
-        expect(source.contains("case .jack: palette = [.ochre]"),
-               "The reference ochre material must reach the jack well")
+        expect(source.contains("return .naturalWhite"),
+               "Equal-value R1 tokens must use one calm ivory colorway")
     }
 
     private static func r1AssetsShareTheCanonicalSilhouette(
@@ -310,8 +317,8 @@ struct R1MaterialContractTests {
                                through: "private struct TableWorldSpatialPresentation")
         expect(base.contains("PochDiscMaterialImage(size: diameter)"),
                "Track A board base must use the normalized shared material image")
-        expect(base.contains("Image(\"PochDiscCleanBase\")"),
-               "Track A must use the halo-free build-time body while retaining source detail")
+        expect(base.contains("Image(\"PochDiscWarmBoard\")"),
+               "Track A must use the halo-free warm handcrafted board body")
         expect(base.contains(".normalizedPochDiscAsset(diameter: size)"),
                "The shared material image must normalize the transparent source canvas")
 
@@ -326,15 +333,15 @@ struct R1MaterialContractTests {
                "The physical source asset must remain the sole well-ring geometry")
 
         for anchor in [
-            "case .king:     normalized = CGPoint(x: 0.5000, y: 0.1463)",
-            "case .queen:    normalized = CGPoint(x: 0.7311, y: 0.2358)",
-            "case .mariage:  normalized = CGPoint(x: 0.8426, y: 0.4639)",
-            "case .jack:     normalized = CGPoint(x: 0.7462, y: 0.7080)",
-            "case .ten:      normalized = CGPoint(x: 0.4990, y: 0.8135)",
-            "case .sequence: normalized = CGPoint(x: 0.2498, y: 0.7100)",
-            "case .poch:     normalized = CGPoint(x: 0.1564, y: 0.4649)",
-            "case .ace:      normalized = CGPoint(x: 0.2679, y: 0.2358)",
-            "case .center:   normalized = CGPoint(x: 0.5000, y: 0.5000)"
+            "case .king:     normalized = CGPoint(x: 0.4990, y: 0.1443)",
+            "case .queen:    normalized = CGPoint(x: 0.7401, y: 0.2378)",
+            "case .mariage:  normalized = CGPoint(x: 0.8547, y: 0.4779)",
+            "case .jack:     normalized = CGPoint(x: 0.7643, y: 0.7351)",
+            "case .ten:      normalized = CGPoint(x: 0.4940, y: 0.8567)",
+            "case .sequence: normalized = CGPoint(x: 0.2287, y: 0.7341)",
+            "case .poch:     normalized = CGPoint(x: 0.1393, y: 0.4789)",
+            "case .ace:      normalized = CGPoint(x: 0.2558, y: 0.2368)",
+            "case .center:   normalized = CGPoint(x: 0.4970, y: 0.4870)"
         ] {
             expect(ring.contains(anchor),
                    "every Track-A overlay must use the measured 1254-px asset center map")
@@ -420,15 +427,23 @@ struct R1MaterialContractTests {
                "R1 piles must not repeat one cloned rosette")
     }
 
-    private static func contactFeedbackIsImpactBoundAndBundled(_ source: String) throws {
+    private static func contactFeedbackIsImpactBoundAndBundled(
+        _ source: String,
+        audio: String
+    ) throws {
         expect(source.contains(".onChange(of: trigger)"),
                "Ceramic sound must be bound to the impact trigger")
         expect(source.contains("R1ContactDynamics.resolve(surface: surface,"),
                "Surface and group size must share one contact mapping")
         expect(source.contains("groupSize: groupSize"),
                "The bundled group size must reach audio and haptics")
-        expect(source.contains("now - lastContactTime >= 0.12"),
-               "Rapid subordinate contacts must remain throttled")
+        expect(audio.contains("struct EventKey: Hashable")
+            && audio.contains("register(eventKey)")
+            && audio.contains("private static let voiceCount = 6"),
+               "Accepted contacts need identity deduplication and overlapping voices")
+        expect(!audio.contains("lastContactTime")
+            && !audio.contains("systemUptime"),
+               "Distinct physical contacts must never be discarded by wall time")
 
         let feedback = try section(in: source,
                                    from: "struct R1ContactFeedback: ViewModifier",
@@ -487,7 +502,11 @@ struct R1MaterialContractTests {
                "The R1 shadow must not pop to a new paint state before contact")
     }
 
-    private static func ceramicAudioVariantsMeetTheRuntimeContract(_ source: String) throws {
+    private static func ceramicAudioVariantsMeetTheRuntimeContract(
+        _ source: String,
+        builder: String,
+        receipt: String
+    ) throws {
         let expression = try NSRegularExpression(
             pattern: #"r1-ceramic-(?:outer|center|stack)-0[1-3]"#
         )
@@ -500,8 +519,16 @@ struct R1MaterialContractTests {
                "R1 requires three variants for outer well, center well, and player stack")
 
         expect(source.contains("case .playerStack:")
-               && source.contains("variants = stackVariants"),
-               "Player-stack contacts need their own softer ceramic-on-ceramic family")
+               && source.contains("return (stackVariants"),
+               "Player-stack contacts need their own ceramic-on-ceramic family")
+        expect(builder.contains("real clay/ceramic poker chips")
+            && builder.contains("fartheststar")
+            && !builder.contains("coin(s) spin drop")
+            && !builder.contains("coin drop into coins"),
+               "Every R1 family must derive from real clay/ceramic chip Foley")
+        expect(receipt.contains(#""technicalVerdict": "GREEN""#)
+            && receipt.contains("PENDING_NEW_CERAMIC_FOLEY_TESTFLIGHT"),
+               "Objective audio must be green while the physical-iPhone gate stays explicit")
 
         for name in names {
             let url = root.appendingPathComponent("App/Audio/\(name).caf")

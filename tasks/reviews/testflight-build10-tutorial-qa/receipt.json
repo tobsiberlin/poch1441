@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "generated_at": "2026-07-22T06:45:29+0200",
+  "app": {
+    "name": "Poch 1441",
+    "bundle_id": "com.tobc.poch1441",
+    "version": "0.1.0",
+    "build": "10"
+  },
+  "delivery": {
+    "scope": "internal_testflight_only",
+    "test_flight_internal_testing_only": true,
+    "upload_state": "COMPLETE",
+    "processing_state": "VALID",
+    "internal_build_state": "IN_BETA_TESTING",
+    "external_build_state": "NOT_APPLICABLE",
+    "uses_non_exempt_encryption": false
+  },
+  "artifact": {
+    "path": "build/Poch1441InternalQA.ipa",
+    "bytes": 53432988,
+    "sha256": "0c8dded02344e3e3ba8e65423821aec53ab5a3bcc15345845d40593211f053fe",
+    "get_task_allow": false,
+    "beta_reports_active": true,
+    "developer_tools_support": "absent",
+    "debug_dylib": "absent",
+    "metal_source_paths": "absent",
+    "r1_contact_audio_assets": 9
+  },
+  "software_gate": {
+    "result": "GREEN_FOR_INTERNAL_TESTFLIGHT",
+    "tutorial_premiere_tests": "8/8 PASS",
+    "phase2_dynamic_type": "3/3 PASS",
+    "product_sizes": [
+      "390x844 PASS",
+      "402x874 PASS"
+    ],
+    "production_result": "BLOCKED"
+  },
+  "pending_gates": [
+    "physical_build_10_start",
+    "human_audio",
+    "on_device_haptics_and_settings_off",
+    "240fps_96khz_contact_sync_offset",
+    "complete_product_localization"
+  ],
+  "historical_red_gates_preserved": true
+}

@@ -1,0 +1,49 @@
+{
+  "sequences": [
+    {
+      "sequence": "standard",
+      "capturedFrames": 196,
+      "videoFrames": 196,
+      "videoDurationSeconds": 3.265,
+      "nominalFrameRate": 60.03079,
+      "medianCaptureIntervalMilliseconds": 16.663666698150337,
+      "p95CaptureIntervalMilliseconds": 17.60087499860674,
+      "maximumCaptureIntervalMilliseconds": 17.742125026416034,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    },
+    {
+      "sequence": "reducedMotion",
+      "capturedFrames": 82,
+      "videoFrames": 82,
+      "videoDurationSeconds": 1.3633333333333333,
+      "nominalFrameRate": 60.148514,
+      "medianCaptureIntervalMilliseconds": 16.65854168822989,
+      "p95CaptureIntervalMilliseconds": 17.65770831843838,
+      "maximumCaptureIntervalMilliseconds": 17.726499994751066,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    },
+    {
+      "sequence": "cancellation",
+      "capturedFrames": 97,
+      "videoFrames": 97,
+      "videoDurationSeconds": 1.6166666666666667,
+      "nominalFrameRate": 60,
+      "medianCaptureIntervalMilliseconds": 16.673812526278198,
+      "p95CaptureIntervalMilliseconds": 17.554291698615998,
+      "maximumCaptureIntervalMilliseconds": 23.77970836823806,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    }
+  ],
+  "result": "PASS",
+  "sourceContractSHA256": "2294f03d7fa1079b737ff6274aad36555d1a3acad018b8f0f0659a3251e8487c",
+  "viewport": "402x874",
+  "syntheticProgressUsed": false,
+  "productAudioIncluded": false,
+  "materialApprovalClaimed": false
+}

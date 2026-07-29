@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poch 1441 - Track B Snackbox-Auswahl</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --canvas: #0b1118;
+      --canvas-raised: #101924;
+      --surface: #151f2b;
+      --surface-deep: #091018;
+      --line: #334150;
+      --line-quiet: #25313e;
+      --ink: #f0f1ef;
+      --muted: #9ba7b4;
+      --quiet: #6f7d8b;
+      --metal: #b9c0c8;
+      --accent: #c9a45d;
+      --accent-deep: #7b6338;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--canvas); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      text-rendering: optimizeLegibility;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    img { display: block; max-width: 100%; }
+    h1, h2, h3, p, dl, dd { margin: 0; }
+
+    .shell {
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: clamp(20px, 3.2vw, 48px);
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, .55fr);
+      gap: clamp(24px, 5vw, 74px);
+      align-items: end;
+      padding-bottom: clamp(26px, 4vw, 52px);
+      border-bottom: 1px solid var(--line);
+    }
+    .kicker {
+      margin-bottom: 10px;
+      color: var(--metal);
+      font-size: 12px;
+      font-weight: 680;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 15ch;
+      font-size: clamp(38px, 5.4vw, 76px);
+      font-weight: 610;
+      letter-spacing: -.05em;
+      line-height: .96;
+    }
+    .intro {
+      max-width: 44ch;
+      padding-left: 20px;
+      border-left: 2px solid var(--accent);
+      color: var(--muted);
+    }
+    .intro strong { color: var(--ink); font-weight: 620; }
+
+    .gates {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .gate {
+      min-width: 0;
+      padding: 0 20px;
+      border-left: 1px solid var(--line-quiet);
+    }
+    .gate:first-child { padding-left: 0; border-left: 0; }
+    .gate:last-child { padding-right: 0; }
+    .gate dt {
+      color: var(--quiet);
+      font: 11px/1.4 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .gate dd { margin-top: 5px; color: var(--metal); }
+
+    .selection-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin: 0 calc(clamp(20px, 3.2vw, 48px) * -1);
+      padding: 14px clamp(20px, 3.2vw, 48px);
+      border-bottom: 1px solid var(--line);
+      background: var(--canvas);
+    }
+    .selection-copy { min-width: 0; }
+    .selection-label {
+      color: var(--quiet);
+      font: 11px/1.3 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    #selection-name {
+      display: block;
+      margin-top: 2px;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 620;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .reset {
+      min-height: 40px;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .reset:hover { border-color: var(--metal); }
+    .reset:active { transform: translateY(1px); }
+
+    .gallery-head {
+      display: grid;
+      grid-template-columns: minmax(0, .72fr) minmax(280px, 1.28fr);
+      gap: 24px;
+      align-items: end;
+      padding: clamp(38px, 6vw, 86px) 0 22px;
+    }
+    h2 {
+      font-size: clamp(25px, 3vw, 42px);
+      font-weight: 590;
+      letter-spacing: -.035em;
+      line-height: 1;
+    }
+    .gallery-head p { max-width: 68ch; color: var(--muted); }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(18px, 2.5vw, 34px);
+    }
+    .concept {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-deep);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / .035), 0 18px 50px rgb(2 7 13 / .24);
+    }
+    .concept:has(input:checked) {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent-deep), 0 22px 64px rgb(2 7 13 / .42);
+    }
+    .image-button {
+      position: relative;
+      width: 100%;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: #090e13;
+      cursor: zoom-in;
+    }
+    .image-button::after {
+      position: absolute;
+      inset: 0;
+      border: 1px solid transparent;
+      content: "";
+      pointer-events: none;
+    }
+    .image-button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+    .image-button img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      transition: transform 180ms ease-out, filter 180ms ease-out;
+    }
+    .image-button:hover img { transform: scale(1.012); filter: brightness(1.025); }
+
+    .concept-body { padding: clamp(18px, 2.5vw, 28px); }
+    .concept-title-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+    }
+    .number {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font: 11px/1.3 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .08em;
+    }
+    h3 {
+      font-size: clamp(19px, 2vw, 26px);
+      font-weight: 610;
+      letter-spacing: -.025em;
+      line-height: 1.06;
+    }
+    .choice {
+      display: inline-grid;
+      grid-template-columns: 18px auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--metal);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .choice:has(input:checked) { border-color: var(--accent); color: var(--ink); }
+    .choice input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+    .summary { margin-top: 15px; color: var(--muted); }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 22px;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line-quiet);
+    }
+    .fact dt {
+      color: var(--quiet);
+      font: 10px/1.35 "SFMono-Regular", ui-monospace, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .fact dd { margin-top: 3px; color: var(--metal); }
+    .fact-risk { grid-column: 1 / -1; }
+    .fact-risk dd { color: #c5b59b; }
+
+    .verdict {
+      display: grid;
+      grid-template-columns: minmax(0, .7fr) minmax(300px, 1.3fr);
+      gap: clamp(24px, 5vw, 74px);
+      margin-top: clamp(50px, 8vw, 110px);
+      padding: clamp(28px, 4vw, 54px) 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .verdict p { max-width: 66ch; color: var(--muted); }
+    .verdict strong { color: var(--ink); font-weight: 620; }
+
+    footer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      padding: 24px 0 10px;
+      color: var(--quiet);
+      font: 11px/1.5 "SFMono-Regular", ui-monospace, monospace;
+    }
+
+    dialog {
+      width: min(1320px, calc(100vw - 36px));
+      max-height: calc(100dvh - 36px);
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-deep);
+      color: var(--ink);
+      box-shadow: 0 28px 100px rgb(0 0 0 / .6);
+    }
+    dialog::backdrop { background: rgb(4 8 12 / .86); backdrop-filter: blur(8px); }
+    .dialog-image {
+      width: 100%;
+      max-height: calc(100dvh - 116px);
+      object-fit: contain;
+      background: #070b0f;
+    }
+    .dialog-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      min-height: 62px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+    }
+    #dialog-title { overflow: hidden; font-weight: 620; text-overflow: ellipsis; white-space: nowrap; }
+    .dialog-close {
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .masthead, .gallery-head, .verdict { grid-template-columns: 1fr; }
+      .intro { padding-left: 0; padding-top: 14px; border-left: 0; border-top: 2px solid var(--accent); }
+      .gates { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 0; }
+      .gate:nth-child(3) { padding-left: 0; border-left: 0; }
+      .gallery { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .gates { grid-template-columns: 1fr; gap: 0; }
+      .gate, .gate:first-child, .gate:nth-child(3) { padding: 12px 0; border-top: 1px solid var(--line-quiet); border-left: 0; }
+      .gate:first-child { border-top: 0; }
+      .selection-bar { grid-template-columns: minmax(0, 1fr); }
+      .reset { width: 100%; }
+      .concept-title-row { grid-template-columns: 1fr; }
+      .choice { justify-self: stretch; }
+      .facts { grid-template-columns: 1fr; }
+      .fact-risk { grid-column: auto; }
+      footer { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .image-button img { transition: none; }
+      .image-button:hover img { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="kicker">Track B - Snackbox-Auswahl</p>
+        <h1>Elf glaubwürdige Ausgangspunkte</h1>
+      </div>
+      <p class="intro"><strong>Nicht elf Farbvarianten.</strong> Elf unterschiedliche gebrauchte Haushaltsobjekte - inklusive einer echten Keksdose mit separat eingesetztem 8+1-Inlay.</p>
+    </header>
+
+    <dl class="gates" aria-label="Verbindliche Auswahlkriterien">
+      <div class="gate"><dt>Objekt</dt><dd>Alte Snackbox mit sichtbarer Schließlogik</dd></div>
+      <div class="gate"><dt>Topologie</dt><dd>Exakt acht Außenfächer plus große Mitte</dd></div>
+      <div class="gate"><dt>Bild</dt><dd>Komplett frei, ohne Hand oder Vordergrundobjekt</dd></div>
+      <div class="gate"><dt>Beschriftung</dt><dd>Blankes Klebeband, Text später als lokalisierbares Overlay</dd></div>
+    </dl>
+
+    <div class="selection-bar" aria-live="polite">
+      <div class="selection-copy">
+        <span class="selection-label">Deine Auswahl</span>
+        <span id="selection-name">Noch keine Variante ausgewählt</span>
+      </div>
+      <button class="reset" id="reset-selection" type="button">Auswahl zurücksetzen</button>
+    </div>
+
+    <section aria-labelledby="gallery-title">
+      <div class="gallery-head">
+        <h2 id="gallery-title">Form zuerst. Material danach.</h2>
+        <p>Ein Klick auf das Bild öffnet die unbeschnittene Großansicht. Die Auswahl wird lokal im Browser gespeichert und verändert keine App-Datei.</p>
+      </div>
+
+      <div class="gallery">
+        <article class="concept" data-name="Bernstein-Oval">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/01-amber-oval.png" data-title="01 - Bernstein-Oval" aria-label="Bernstein-Oval groß ansehen">
+            <img src="track-b-snackbox-selection-assets/01-amber-oval.png" alt="Ovale bernsteinfarbene Snackbox mit acht Außenfächern, großer Mitte, Münzen und offenem Deckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">01</span><h3>Bernstein-Oval</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Bernstein-Oval"> Auswählen</label>
+            </div>
+            <p class="summary">Die engste Fortsetzung der Referenz: einfacher Kunststoff, glaubwürdige Alterung, klare Ovallogik.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Oval, 3-1-3-1</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Schnappdeckel und Frontlasche</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Hohe Referenznähe</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Sehr gut für Landscape</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Bernstein kann zu nostalgisch wirken, wenn die App-Beleuchtung zu warm bleibt.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Rauchglas-Rondell">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/02-smoke-round.png" data-title="02 - Rauchglas-Rondell" aria-label="Rauchglas-Rondell groß ansehen">
+            <img src="track-b-snackbox-selection-assets/02-smoke-round.png" alt="Runde rauchklare Snackbox mit acht Außenfächern, großer Mitte, Münzen und abgenommenem Deckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">02</span><h3>Rauchglas-Rondell</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Rauchglas-Rondell"> Auswählen</label>
+            </div>
+            <p class="summary">Die vertraute Ringlesbarkeit bleibt erhalten, aber das Objekt wirkt gebraucht und verschließbar.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Rund, radial</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Reibdeckel und umlaufende Nut</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Sofort lesbare 8+1-Ordnung</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Geringstes Geometrierisiko</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Kann ohne deutlich sichtbare Deckelkante wieder wie eine Servierplatte gelesen werden.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Aluminium-Oktagon">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/03-aluminum-octagon.png" data-title="03 - Aluminium-Oktagon" aria-label="Aluminium-Oktagon groß ansehen">
+            <img src="track-b-snackbox-selection-assets/03-aluminum-octagon.png" alt="Niedrige oktagonale Snackdose aus mattem Aluminium mit acht Außenfächern, großer Mitte und Deckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">03</span><h3>Aluminium-Oktagon</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Aluminium-Oktagon"> Auswählen</label>
+            </div>
+            <p class="summary">Der sachlichste Materialwechsel: gestanztes Aluminium, kleine Dellen, klare Serienfertigung.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Oktagonal, radial</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Reibdeckel und kleiner Schnapper</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Robust und nicht dekorativ</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Sehr gute Frontlip-Masken</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Zu viele Kratzer oder zu tiefe Fächer kippen in Kantinenblech statt Snackbox.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Rauchklare Scharnierbox">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/04-smoke-hinged-square.png" data-title="04 - Rauchklare Scharnierbox" aria-label="Rauchklare Scharnierbox groß ansehen">
+            <img src="track-b-snackbox-selection-assets/04-smoke-hinged-square.png" alt="Quadratische rauchklare Snackbox mit abgerundeten Ecken, acht Außenfächern, großer Mitte und offenem Scharnierdeckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">04</span><h3>Rauchklare Scharnierbox</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Rauchklare Scharnierbox"> Auswählen</label>
+            </div>
+            <p class="summary">Die stärkste eckige Alternative: kompakt, unprätentiös und als echte Box eindeutig.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Gerundetes Quadrat</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Scharnier und Frontschnapper</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Beste Box-Lesbarkeit</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Gute Portrait- und Landscape-Nutzung</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Die 3-1-3-1-Ordnung muss klar bleiben, sonst wirkt sie wie eine Sortierbox.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Gesprenkeltes Melamin">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/05-speckled-melamine.png" data-title="05 - Gesprenkeltes Melamin" aria-label="Gesprenkeltes Melamin groß ansehen">
+            <img src="track-b-snackbox-selection-assets/05-speckled-melamine.png" alt="Gesprenkelte helle Melamin-Snackbox mit acht äußeren Schälchen, großer Mitte und abgenommenem Deckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">05</span><h3>Gesprenkeltes Melamin</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Gesprenkeltes Melamin"> Auswählen</label>
+            </div>
+            <p class="summary">Ruhiger und heller als die Referenz. Die eingesetzten Schälchen geben dem Objekt echte Haushaltslogik.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Breites Oval</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Lift-off-Deckel und Passsitze</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Sehr glaubwürdige Haptik</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Klare separate Frontlip</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Zu sauber oder zu hell wird daraus moderne Lifestyle-Serveware.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Graugrüne Emaille">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/06-green-enamel.png" data-title="06 - Graugrüne Emaille" aria-label="Graugrüne Emaille groß ansehen">
+            <img src="track-b-snackbox-selection-assets/06-green-enamel.png" alt="Graugrüne Emaille-Snackbox mit offenem Scharnierdeckel, acht Außenfächern und großer ovaler Mitte" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">06</span><h3>Graugrüne Emaille</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Graugrüne Emaille"> Auswählen</label>
+            </div>
+            <p class="summary">Ein robustes Alltagsobjekt mit gut lesbarer Tiefe, mattem Finish und klarer Vorderkante.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Gerundetes Rechteck</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Stahlscharnier und Frontverschluss</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Physische Tiefe und Gewicht</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Stabile Masken und Schatten</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Farbe und Beschläge dürfen nicht nach Militär- oder Campingkostüm aussehen.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Olive Kapselbox">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/07-olive-capsule.png" data-title="07 - Olive Kapselbox" aria-label="Olive Kapselbox groß ansehen">
+            <img src="track-b-snackbox-selection-assets/07-olive-capsule.png" alt="Längliche olivgraue Snackbox aus mattem Kunststoff mit acht Außenfächern, großer Mitte und Snap-on-Deckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">07</span><h3>Olive Kapselbox</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Olive Kapselbox"> Auswählen</label>
+            </div>
+            <p class="summary">Die flachste und funktionalste Landscape-Form. Unaufdringlich, gut stapelbar, gut projizierbar.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Stadionform, 3-1-3-1</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Snap-on-Deckel und Seitenlaschen</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Beste Breitenökonomie</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Stärkster Landscape-Kandidat</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Zu moderne Rippen oder zu gleichmäßige Mulden machen sie generisch.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Rattan-Picknickbox">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/08-rattan-picnic.png" data-title="08 - Rattan-Picknickbox" aria-label="Rattan-Picknickbox groß ansehen">
+            <img src="track-b-snackbox-selection-assets/08-rattan-picnic.png" alt="Alte rechteckige Rattan-Picknickbox mit cremefarbenem Kunststoffeinsatz, acht Außenfächern und großer Mitte" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">08</span><h3>Rattan-Picknickbox</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Rattan-Picknickbox"> Auswählen</label>
+            </div>
+            <p class="summary">Die deutlichste Reiseerzählung. Ein einfacher Flechtmantel schützt den praktischen Kunststoffeinsatz.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Gerundetes Rechteck</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Scharnierdeckel und Frontlasche</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Starke Gegenstandsbiografie</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Materiallayer gut trennbar</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Das Flechtwerk kann zu dekorativ werden und vom eigentlichen Spiel ablenken.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Dunkles Phenolharz">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/09-phenolic-octagon.png" data-title="09 - Dunkles Phenolharz" aria-label="Dunkles Phenolharz groß ansehen">
+            <img src="track-b-snackbox-selection-assets/09-phenolic-octagon.png" alt="Dunkelbraune oktagonale Snackbox aus Phenolharz mit acht Außenfächern, großer Mitte und abgenommenem Deckel" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">09</span><h3>Dunkles Phenolharz</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Dunkles Phenolharz"> Auswählen</label>
+            </div>
+            <p class="summary">Dunkel, ernst und kompakt. Das matte Formteil lässt Münzen und Klebeband klar hervortreten.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Weiches Oktagon</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Lift-off-Deckel und kleiner Schnapper</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Ruhigste Gesamtwirkung</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Sehr klare 8+1-Geometrie</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Bei zu viel Glanz wirkt das Material wie ein Schmuck- oder Pokeretui.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Pressglas mit Aluminiumdeckel">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/10-pressed-glass.png" data-title="10 - Pressglas mit Aluminiumdeckel" aria-label="Pressglas mit Aluminiumdeckel groß ansehen">
+            <img src="track-b-snackbox-selection-assets/10-pressed-glass.png" alt="Hell blaugraue Pressglas-Snackbox mit acht Außenfächern, großer Mitte und mattem Aluminiumdeckel" width="1451" height="1084">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">10</span><h3>Pressglas mit Aluminiumdeckel</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Pressglas mit Aluminiumdeckel"> Auswählen</label>
+            </div>
+            <p class="summary">Die schwerste Variante. Dickes Pressglas erzeugt echte Tiefe, Kantenlicht und eine andere Münzresonanz.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Rund, radial</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Lift-off-Aluminiumdeckel</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Stärkste optische Tiefe</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Sehr klare Occlusion-Layer</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Schwerer und weniger reisetauglich; Reflexionen benötigen die genaueste Lichtkontrolle.</dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="concept" data-name="Patinierte Keksdose">
+          <button class="image-button" type="button" data-image="track-b-snackbox-selection-assets/11-biscuit-tin.png" data-title="11 - Patinierte Keksdose" aria-label="Patinierte Keksdose groß ansehen">
+            <img src="track-b-snackbox-selection-assets/11-biscuit-tin.png" alt="Stark abgenutzte rechteckige Keksdose mit geöffnetem bedrucktem Deckel und separat eingesetzter 8+1-Münzschale" width="1448" height="1086">
+          </button>
+          <div class="concept-body">
+            <div class="concept-title-row">
+              <div><span class="number">11</span><h3>Patinierte Keksdose</h3></div>
+              <label class="choice"><input type="radio" name="concept" value="Patinierte Keksdose"> Auswählen</label>
+            </div>
+            <p class="summary">Die stärkste Gegenstandsbiografie: eine jahrzehntealte Reibdeckeldose, später mit einer passenden 8+1-Einlage zweckentfremdet.</p>
+            <dl class="facts">
+              <div class="fact"><dt>Form</dt><dd>Niedriges, weiches Rechteck</dd></div>
+              <div class="fact"><dt>Mechanik</dt><dd>Reibdeckel plus separater Einsatz</dd></div>
+              <div class="fact"><dt>Stärke</dt><dd>Alter und Zweckentfremdung sofort lesbar</dd></div>
+              <div class="fact"><dt>Umsetzung</dt><dd>Sehr klare Vorderlippen- und Münzlayer</dd></div>
+              <div class="fact fact-risk"><dt>Risiko</dt><dd>Deckeldekor und Gebrauchsspuren müssen leise bleiben; Text entsteht ausschließlich als lokalisierbares Overlay.</dd></div>
+            </dl>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="verdict" aria-labelledby="verdict-title">
+      <h2 id="verdict-title">Mein enger Prüfkreis</h2>
+      <p><strong>04 Rauchklare Scharnierbox</strong> bleibt die stärkste mobile Gesamtlösung. <strong>11 Patinierte Keksdose</strong> erzählt die glaubwürdigste Objektgeschichte, benötigt aber die strengste Deckel- und Lichtkontrolle. <strong>07 Olive Kapselbox</strong> nutzt Landscape am besten. Die produktive Geometrie, Frontlippen und Münzbewegungen bleiben in allen Fällen getrennte deterministische Layer.</p>
+    </section>
+
+    <footer>
+      <span>Track B Auswahltafel</span>
+      <span>19. Juli 2026</span>
+    </footer>
+  </main>
+
+  <dialog id="image-dialog" aria-labelledby="dialog-title">
+    <img class="dialog-image" id="dialog-image" src="" alt="">
+    <div class="dialog-bar">
+      <span id="dialog-title"></span>
+      <button class="dialog-close" id="dialog-close" type="button">Schließen</button>
+    </div>
+  </dialog>
+
+  <script>
+    const storageKey = "poch1441-track-b-snackbox-choice";
+    const selectionName = document.querySelector("#selection-name");
+    const radios = [...document.querySelectorAll('input[name="concept"]')];
+    const dialog = document.querySelector("#image-dialog");
+    const dialogImage = document.querySelector("#dialog-image");
+    const dialogTitle = document.querySelector("#dialog-title");
+
+    function setSelection(value) {
+      selectionName.textContent = value || "Noch keine Variante ausgewählt";
+      if (value) localStorage.setItem(storageKey, value);
+      else localStorage.removeItem(storageKey);
+    }
+
+    const stored = localStorage.getItem(storageKey);
+    const storedRadio = radios.find((radio) => radio.value === stored);
+    if (storedRadio) {
+      storedRadio.checked = true;
+      setSelection(storedRadio.value);
+    }
+
+    radios.forEach((radio) => {
+      radio.addEventListener("change", () => setSelection(radio.value));
+    });
+
+    document.querySelector("#reset-selection").addEventListener("click", () => {
+      radios.forEach((radio) => { radio.checked = false; });
+      setSelection("");
+    });
+
+    document.querySelectorAll(".image-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        dialogImage.src = button.dataset.image;
+        dialogImage.alt = button.getAttribute("aria-label");
+        dialogTitle.textContent = button.dataset.title;
+        dialog.showModal();
+      });
+    });
+
+    document.querySelector("#dialog-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  </script>
+</body>
+</html>

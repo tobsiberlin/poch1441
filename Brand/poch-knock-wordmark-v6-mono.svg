@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 220" shape-rendering="geometricPrecision">
+  <title>POCH 1441 knock wordmark v6.2 optical monochrome</title>
+  <desc>Transparent one-colour optical wordmark for engraving, embossing, printing and small headers.</desc>
+
+  <text x="58" y="168" fill="black"
+        font-family="Avenir Next, Avenir, Helvetica Neue, sans-serif"
+        font-size="144" font-weight="600">P</text>
+  <g transform="translate(175 22) scale(.18)">
+    <path fill="black" fill-rule="evenodd"
+          d="M852 512A340 326 0 1 0 172 512A340 326 0 1 0 852 512Z
+             M686 512A174 166 0 1 1 338 512A174 166 0 1 1 686 512Z
+             M760 220L824 280L770 302Z"/>
+    <path d="M512 472L552 512L512 552L472 512Z" fill="black"/>
+  </g>
+  <text x="330" y="168" fill="black"
+        font-family="Avenir Next, Avenir, Helvetica Neue, sans-serif"
+        font-size="144" font-weight="600" letter-spacing="1">CH</text>
+  <text x="580" y="164" fill="black"
+        font-family="Avenir Next, Avenir, Helvetica Neue, sans-serif"
+        font-size="72" font-weight="500" letter-spacing="11"
+        font-variant-numeric="tabular-nums" style="font-feature-settings:'tnum' 1">1441</text>
+</svg>

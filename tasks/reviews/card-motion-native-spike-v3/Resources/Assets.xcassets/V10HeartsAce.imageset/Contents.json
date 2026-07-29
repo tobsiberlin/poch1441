@@ -1,0 +1,19 @@
+{
+  "images" : [
+    {
+      "filename" : "v10-hearts-ace@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "v10-hearts-ace@3x.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+

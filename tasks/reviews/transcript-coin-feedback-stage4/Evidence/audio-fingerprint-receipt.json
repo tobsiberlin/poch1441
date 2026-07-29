@@ -1,0 +1,31 @@
+{
+  "asset": "App/Audio/cent-copper-polycarbonate-01.wav",
+  "clippedSampleCount": 0,
+  "dcOffset": 6.580352783203125e-06,
+  "durationSeconds": 0.18,
+  "earlyRMS0To30ms": 0.21303973059543557,
+  "format": {
+    "channels": 1,
+    "pcmBits": 16,
+    "sampleRateHertz": 96000
+  },
+  "humanSpeakerVerdict": "PENDING",
+  "minimumSpectralRMSEDifferenceDecibels": 27.660676751845152,
+  "onsetSecondsAt10PercentPeak": 2.0833333333333333e-05,
+  "peakAmplitude": 0.8599853515625,
+  "peakIndex": 104,
+  "provenance": "deterministic additive modal synthesis; seed 1441",
+  "rmsAmplitude": 0.099729974099378,
+  "schema": "poch.contact-audio-fingerprint.v1",
+  "sha256": "b4ed82c4bddbf201f604aacede596555775981678e434c7bcf76bdcd5525b3d5",
+  "spectralRMSEDifferenceDecibelsVsCeramic": {
+    "r1-ceramic-center-01.caf": 29.295477600790985,
+    "r1-ceramic-center-02.caf": 28.966485782853677,
+    "r1-ceramic-center-03.caf": 27.660676751845152,
+    "r1-ceramic-outer-01.caf": 31.032669947337016,
+    "r1-ceramic-outer-02.caf": 30.638167172684284,
+    "r1-ceramic-outer-03.caf": 32.24332235315043
+  },
+  "tailRMS120To180ms": 0.013199969650505057,
+  "technicalVerdict": "GREEN"
+}

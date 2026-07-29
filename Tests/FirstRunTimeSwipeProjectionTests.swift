@@ -71,10 +71,14 @@ struct FirstRunTimeSwipeProjectionTests {
     }
 
     private static func handleRemainsVisibleAtBothEndpoints() {
-        expect(FirstRunTimeSwipeProjection.handleCenterX(progress: 0, width: 390) == 34,
+        expect(FirstRunTimeSwipeProjection.handleCenterX(progress: 0, width: 390) == 24,
                "The handle must remain fully inside the historical edge")
-        expect(FirstRunTimeSwipeProjection.handleCenterX(progress: 1, width: 390) == 356,
+        expect(FirstRunTimeSwipeProjection.handleCenterX(progress: 1, width: 390) == 366,
                "The handle must remain fully inside the present-day edge")
+        expect(FirstRunTimeSwipeProjection.seamX(progress: 0, width: 390) == 0,
+               "The image seam must begin at the true historical edge")
+        expect(FirstRunTimeSwipeProjection.seamX(progress: 1, width: 390) == 390,
+               "The image seam must end at the true present-day edge")
         expect(FirstRunTimeSwipeProjection.handleSymbolName(progress: 0) == "chevron.right",
                "The left endpoint must advertise the available direction")
         expect(FirstRunTimeSwipeProjection.handleSymbolName(progress: 1) == "chevron.left",
