@@ -778,10 +778,10 @@ struct Phase3View: View {
         guard let winner = game.roundRecap.finalPlayer else { return "" }
         if winner == 0 {
             return String(localized: "phase3.final.you.body",
-                          defaultValue: "Du nimmst die Mitte und 1 Chip für jede Restkarte der anderen.")
+                          defaultValue: "Du nimmst die Mitte. Jeder Gegner zahlt dir 1 Chip für jede seiner Restkarten.")
         }
         let format = String(localized: "phase3.final.opponent.body",
-                            defaultValue: "%@ nimmt die Mitte. Du zahlst 1 Chip pro Restkarte.")
+                            defaultValue: "%@ nimmt die Mitte. Du zahlst 1 Chip für jede deiner Restkarten.")
         return String(format: format, game.name(of: winner))
     }
 
@@ -818,7 +818,7 @@ struct Phase3View: View {
             }
             if firstLead {
                 return String(localized: "phase3.start.detail",
-                              defaultValue: "Wähle eine Startkarte. Danach geht es in derselben Kartenfarbe aufwärts.")
+                              defaultValue: "Wähle eine Startkarte. Danach folgt jeweils die nächsthöhere Karte derselben Farbe.")
             }
             if leader == 0, assistHints {
                 return String(localized: "phase3.lead.hint",
@@ -1073,7 +1073,7 @@ struct Phase3View: View {
             )
             let openingRule = String(
                 localized: "phase3.guided.opening.choice.detail",
-                defaultValue: "Jede Handkarte darf eröffnen. Danach passt nur die nächsthöhere Karte derselben Farbe."
+                defaultValue: "Du darfst mit jeder Handkarte eröffnen. Danach darf nur die nächsthöhere Karte derselben Farbe gelegt werden."
             )
             return Phase3GuidedStatusCopy(
                 eyebrow: String(localized: "phase3.guided.opening.choice.eyebrow",
@@ -1097,21 +1097,21 @@ struct Phase3View: View {
                 let missing = guidedCardName(Card(suit: last.card.suit, rank: nextRank))
                 if seat == 0 {
                     ending = String(format: String(localized: "phase3.guided.break.missing.you",
-                                                   defaultValue: "%@ fehlt - die Reihe endet. Du hast zuletzt gelegt und eröffnest neu."),
+                                                   defaultValue: "%@ fehlt. Du hast zuletzt gelegt und eröffnest neu."),
                                     missing)
                 } else {
                     ending = String(format: String(localized: "phase3.guided.break.missing.opponent",
-                                                   defaultValue: "%@ fehlt - die Reihe endet. %@ eröffnet neu."),
+                                                   defaultValue: "%@ fehlt. Die Reihe endet und %@ eröffnet neu."),
                                     missing, actor)
                 }
             } else {
                 if seat == 0 {
                     ending = String(format: String(localized: "phase3.guided.break.ace.you",
-                                                   defaultValue: "Das %@ ist die höchste Karte - die Reihe endet. Du eröffnest neu."),
+                                                   defaultValue: "Das %@ ist die höchste Karte. Die Reihe endet und du eröffnest neu."),
                                     currentLabel)
                 } else {
                     ending = String(format: String(localized: "phase3.guided.break.ace.opponent",
-                                                   defaultValue: "Das %@ ist die höchste Karte - die Reihe endet. %@ eröffnet neu."),
+                                                   defaultValue: "Das %@ ist die höchste Karte. Die Reihe endet und %@ eröffnet neu."),
                                     currentLabel, actor)
                 }
             }
@@ -1138,22 +1138,22 @@ struct Phase3View: View {
         if last.isLead {
             if seat == 0 {
                 reason = String(format: String(localized: "phase3.guided.reason.lead.you",
-                                               defaultValue: "Du eröffnest mit %@. Jetzt folgt die nächsthöhere Karte derselben Kartenfarbe."),
+                                               defaultValue: "Du eröffnest mit %@. Jetzt folgt die nächsthöhere Karte derselben Farbe."),
                                 currentLabel)
             } else {
                 reason = String(format: String(localized: "phase3.guided.reason.lead.opponent",
-                                               defaultValue: "%@ eröffnet mit %@. Jetzt folgt die nächsthöhere Karte derselben Kartenfarbe."),
+                                               defaultValue: "%@ eröffnet mit %@. Jetzt folgt die nächsthöhere Karte derselben Farbe."),
                                 actor, currentLabel)
             }
         } else if let previous {
             let previousLabel = guidedCardName(previous.card)
             if seat == 0 {
                 reason = String(format: String(localized: "phase3.guided.reason.follow.you",
-                                               defaultValue: "Du legst %@ - diese Karte folgt direkt auf %@."),
+                                               defaultValue: "Du legst %@. Diese Karte folgt direkt auf %@."),
                                 currentLabel, previousLabel)
             } else {
                 reason = String(format: String(localized: "phase3.guided.reason.follow.opponent",
-                                               defaultValue: "%@ legt %@ - diese Karte folgt direkt auf %@."),
+                                               defaultValue: "%@ legt %@. Diese Karte folgt direkt auf %@."),
                                 actor, currentLabel, previousLabel)
             }
         } else {
@@ -1177,7 +1177,7 @@ struct Phase3View: View {
                 title: String(format: String(localized: "phase3.guided.follow.title",
                                              defaultValue: "Lege %@."), guidedCardObjectName(required)),
                 detail: String(format: String(localized: "phase3.guided.follow.detail",
-                                              defaultValue: "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Kartenfarbe passt."),
+                                              defaultValue: "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Farbe darf gelegt werden."),
                                currentLabel,
                                requiredLabel)
             )
@@ -1189,7 +1189,7 @@ struct Phase3View: View {
             let titleFormat = String(localized: "phase3.guided.next.opponent",
                                      defaultValue: "%@ legt %@")
             let detailFormat = String(localized: "phase3.guided.follow.detail",
-                                      defaultValue: "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Kartenfarbe passt.")
+                                      defaultValue: "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Farbe darf gelegt werden.")
             return Phase3GuidedStatusCopy(
                 eyebrow: playedEyebrow,
                 title: String(format: titleFormat, name, guidedCardName(nextCard)),
@@ -1440,9 +1440,9 @@ struct Phase3View: View {
 
                     Text(r.winner == 0
                          ? String(localized: "phase3.result.you.body",
-                                  defaultValue: "Du gewinnst die Chips aus der Mitte. Zusätzlich zahlt dir jeder Gegner für jede übrige Handkarte 1 Chip.")
+                                  defaultValue: "Du gewinnst die Chips aus der Mitte. Jeder Gegner zahlt dir 1 Chip für jede seiner Restkarten.")
                          : String(format: String(localized: "phase3.result.opponent.body",
-                                                 defaultValue: "%@ gewinnt die Chips aus der Mitte. Für jede Karte, die du noch hältst, zahlst du 1 Chip - höchstens deinen Vorrat."),
+                                                 defaultValue: "%@ gewinnt die Chips aus der Mitte. Du zahlst 1 Chip für jede deiner Restkarten, höchstens deinen Vorrat."),
                                   game.name(of: r.winner)))
                         .font(.system(size: 12.5, weight: .semibold))
                         .foregroundStyle(Tokens.jewelPlatin.opacity(0.76))

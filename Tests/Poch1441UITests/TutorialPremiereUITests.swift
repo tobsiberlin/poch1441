@@ -399,7 +399,7 @@ final class TutorialPremiereUITests: XCTestCase {
         XCTAssertTrue(body.waitForExistence(timeout: 4))
         XCTAssertTrue(action.waitForExistence(timeout: 4))
         XCTAssertEqual(title.label, "Zwei Zehner: Du darfst pochen.")
-        XCTAssertEqual(body.label, "Mit gleichen Karten darfst du pochen.")
+        XCTAssertEqual(body.label, "Mit gleichen Kartenwerten pochst du um den Pott.")
         XCTAssertEqual(action.label, "Einsatz wählen")
         XCTAssertFalse(title.frame.intersects(body.frame))
         XCTAssertTrue(window.frame.contains(title.frame))
@@ -556,13 +556,17 @@ final class TutorialPremiereUITests: XCTestCase {
         intro.tap()
 
         let boardTourNext = app.buttons["firstRun.boardTour.next"]
-        for step in 1...3 {
+        for step in 1...7 {
             XCTAssertTrue(boardTourNext.waitForExistence(timeout: 5),
                           "Kameraeinstellung \(step) muss bis zur Bestätigung stehen bleiben.")
+            let previousLabel = boardTourNext.label
             attachFilmFrame(in: app,
                             reducedMotion: reducedMotion,
                             moment: "board-tour-\(step)")
-            boardTourNext.tap()
+            boardTourNext.coordinate(withNormalizedOffset: CGVector(dx: 0.90, dy: 0.50)).tap()
+            XCTAssertTrue(waitUntil(timeout: 3) {
+                !boardTourNext.exists || boardTourNext.label != previousLabel
+            })
         }
 
         let openingToken = app.buttons["firstRun.openingToken"]

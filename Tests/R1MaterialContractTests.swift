@@ -59,8 +59,8 @@ struct R1MaterialContractTests {
                "The old runtime brightness duplicate must not return")
         expect(!components.contains(".brightness(Tokens.pochDiscWellFloorLift)"),
                "Velvet must be built once, not brightened at runtime")
-        expect(components.contains("PochDiscSuitEngravingOverlay(size: size)"),
-               "The satin outer frame needs the dark vector suit engravings")
+        expect(!components.contains("PochDiscSuitEngravingOverlay(size: size)"),
+               "The warm board must not add unrelated suit marks around its outer rim")
     }
 
     private static func r1RendererUsesTheReferencePalette(
@@ -95,8 +95,8 @@ struct R1MaterialContractTests {
                "R1 must not substitute arbitrary chevron, square, or diamond marks")
         expect(source.contains("static func resolve(compartment: TravelCompartment, index: Int)"),
                "R1 needs a deterministic material resolver tied to the physical well")
-        expect(source.contains("case .jack: palette = [.ochre]"),
-               "The reference ochre material must reach the jack well")
+        expect(source.contains("return .naturalWhite"),
+               "Equal-value R1 tokens must use one calm ivory colorway")
     }
 
     private static func r1AssetsShareTheCanonicalSilhouette(
@@ -317,8 +317,8 @@ struct R1MaterialContractTests {
                                through: "private struct TableWorldSpatialPresentation")
         expect(base.contains("PochDiscMaterialImage(size: diameter)"),
                "Track A board base must use the normalized shared material image")
-        expect(base.contains("Image(\"PochDiscCleanBase\")"),
-               "Track A must use the halo-free build-time body while retaining source detail")
+        expect(base.contains("Image(\"PochDiscWarmBoard\")"),
+               "Track A must use the halo-free warm handcrafted board body")
         expect(base.contains(".normalizedPochDiscAsset(diameter: size)"),
                "The shared material image must normalize the transparent source canvas")
 
@@ -333,15 +333,15 @@ struct R1MaterialContractTests {
                "The physical source asset must remain the sole well-ring geometry")
 
         for anchor in [
-            "case .king:     normalized = CGPoint(x: 0.5000, y: 0.1463)",
-            "case .queen:    normalized = CGPoint(x: 0.7311, y: 0.2358)",
-            "case .mariage:  normalized = CGPoint(x: 0.8426, y: 0.4639)",
-            "case .jack:     normalized = CGPoint(x: 0.7462, y: 0.7080)",
-            "case .ten:      normalized = CGPoint(x: 0.4990, y: 0.8135)",
-            "case .sequence: normalized = CGPoint(x: 0.2498, y: 0.7100)",
-            "case .poch:     normalized = CGPoint(x: 0.1564, y: 0.4649)",
-            "case .ace:      normalized = CGPoint(x: 0.2679, y: 0.2358)",
-            "case .center:   normalized = CGPoint(x: 0.5000, y: 0.5000)"
+            "case .king:     normalized = CGPoint(x: 0.4990, y: 0.1443)",
+            "case .queen:    normalized = CGPoint(x: 0.7401, y: 0.2378)",
+            "case .mariage:  normalized = CGPoint(x: 0.8547, y: 0.4779)",
+            "case .jack:     normalized = CGPoint(x: 0.7643, y: 0.7351)",
+            "case .ten:      normalized = CGPoint(x: 0.4940, y: 0.8567)",
+            "case .sequence: normalized = CGPoint(x: 0.2287, y: 0.7341)",
+            "case .poch:     normalized = CGPoint(x: 0.1393, y: 0.4789)",
+            "case .ace:      normalized = CGPoint(x: 0.2558, y: 0.2368)",
+            "case .center:   normalized = CGPoint(x: 0.4970, y: 0.4870)"
         ] {
             expect(ring.contains(anchor),
                    "every Track-A overlay must use the measured 1254-px asset center map")

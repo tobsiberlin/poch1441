@@ -146,7 +146,7 @@ struct FirstRunTimeSwipeOpening: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text(String(localized: "firstRun.timeSwipe.prelude.body",
-                                defaultValue: "Zieh die Zeit nach vorn - vom Wirtshaus bis an deinen Tisch."))
+                                defaultValue: "Zieh die Zeit nach vorn: vom Wirtshaus bis an deinen Tisch."))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color(hex: 0xF4F0E8).opacity(0.78))
                         .fixedSize(horizontal: false, vertical: true)
@@ -661,7 +661,7 @@ struct FirstRunTimeSwipeOpening: View {
                 title: String(localized: "firstRun.timeSwipe.origin.title",
                               defaultValue: "1441: Ein Tisch, drei Chancen."),
                 body: String(localized: "firstRun.timeSwipe.origin.body",
-                             defaultValue: "Die ältesten bekannten Spuren führen ins Jahr 1441. Schon damals verband Poch Trumpf, Einsatz und das Rennen um die letzte Karte.")
+                             defaultValue: "Die ältesten bekannten Spuren führen ins Jahr 1441. Heute verbindet Poch Trumpf, Einsatz und das Rennen um die letzte Karte.")
             )
         case .branch:
             return TimeSwipeCopy(
@@ -679,7 +679,7 @@ struct FirstRunTimeSwipeOpening: View {
                 title: String(localized: "firstRun.timeSwipe.today.title",
                               defaultValue: "Jetzt beginnt deine erste Runde."),
                 body: String(localized: "firstRun.timeSwipe.today.body",
-                             defaultValue: "Hol dir Chips mit passenden Trumpfkarten, fordere die anderen im Poch-Pott heraus und werde deine Karten zuerst los.")
+                             defaultValue: "Hol dir Chips mit passenden Trumpfkarten, poche um den Poch-Pott und spiele deine Hand zuerst leer.")
             )
         }
     }

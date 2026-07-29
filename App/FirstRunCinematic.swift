@@ -482,7 +482,7 @@ struct FirstRunCinematic: View {
                         .foregroundStyle(Tokens.jewelPlatin)
                         .accessibilityIdentifier("firstRun.intro.title")
                     Text(String(localized: "firstRun.cinematic.accessibility.body",
-                                defaultValue: "Hana spielt die erste Runde mit dir: Passende Trumpfkarten holen Bonusfelder. Mit mindestens zwei gleichen Karten bietest du um den Poch-Pott. Wer seine Hand zuerst leert, gewinnt die Mitte."))
+                                defaultValue: "Hana spielt die erste Runde mit dir. Passende Trumpfkarten bringen Chips. Mit Karten desselben Werts pochst du um den Poch-Pott. Wer zuerst keine Karten mehr hat, gewinnt die Mitte."))
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Tokens.jewelPlatin.opacity(0.80))
                         .multilineTextAlignment(.center)

@@ -75,9 +75,28 @@ enum Tokens {
     static let guidedMeldLearningHandCompact: CGFloat = 112
     static let guidedMeldLearningHandRegular: CGFloat = 146
     static let guidedMeldLearningGap: CGFloat = 7
+    // Filmischer Tischrundgang vor der ersten Interaktion. Diese Fläche ist
+    // bewusst eine dialogische Regieebene und verwendet nicht die goldenen
+    // Aktionskapseln des anschließenden Mitmach-Tutorials.
+    static let guidedTableTourPanelWidth: CGFloat = 370
+    static let guidedTableTourLandscapeWidth: CGFloat = 420
+    static let guidedTableTourPanelCorner: CGFloat = 26
+    static let guidedTableTourHorizontalMargin: CGFloat = 16
+    static let guidedTableTourNarratorSize: CGFloat = 44
+    static let guidedTableTourMomentHeight: CGFloat = 64
     /// Sichtbare Ruhezone zwischen Erklärung und Kartenhand im räumlichen
     /// Portrait-Layout. Der Screenshot-Vertrag fordert davon mindestens 12 pt.
     static let guidedMeldCoachHandClearance: CGFloat = 24
+    /// Der freie Austeilzustand besitzt eine eigene vertikale Bühne. Anders als
+    /// der kompakte geführte Coach darf seine Erklärung nicht über der Scheibe
+    /// schweben oder bis an die Aktion reichen.
+    static let regularDealOpponentRailHeight: CGFloat = 142
+    static let regularDealBoardMax: CGFloat = 258
+    static let regularDealCoachGap: CGFloat = 10
+    static let regularDealCoachActionGap: CGFloat = 12
+    static let regularDealHandHeight: CGFloat = 112
+    static let regularCoachContentSpacing: CGFloat = 6
+    static let regularCoachVerticalPadding: CGFloat = 10
     static let guidedOpeningTokenSize: CGFloat = 38
     static let guidedOpeningSourceGap: CGFloat = 66
     static let guidedOpeningSnapRadius: CGFloat = 58

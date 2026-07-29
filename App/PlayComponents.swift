@@ -614,23 +614,13 @@ enum R1Colorway: CaseIterable, Sendable {
     case slate
     case ochre
 
-    /// Rein materielle Referenzpalette. Die Zuordnung ist deterministisch und
-    /// codiert weder Besitzer noch Wert; sie bildet ausschließlich die
-    /// bestätigte physische Produktbestückung ab.
+    /// Alle Spielsteine besitzen denselben Wert und deshalb dieselbe ruhige
+    /// Elfenbeinfarbe. Materialvariation entsteht über Relief, Drehung und
+    /// Licht - nicht über Farben, die Wert oder Besitzer suggerieren würden.
     static func resolve(compartment: TravelCompartment, index: Int) -> Self {
-        let palette: [Self]
-        switch compartment {
-        case .king: palette = [.terracotta, .slate]
-        case .queen: palette = [.slate, .naturalWhite]
-        case .mariage: palette = [.sage]
-        case .jack: palette = [.ochre]
-        case .ten: palette = [.terracotta, .naturalWhite]
-        case .sequence: palette = [.slate, .naturalWhite]
-        case .poch: palette = [.slate, .naturalWhite]
-        case .ace: palette = [.slate, .terracotta]
-        case .center: palette = [.terracotta, .slate, .naturalWhite, .sage, .ochre]
-        }
-        return palette[index % palette.count]
+        _ = compartment
+        _ = index
+        return .naturalWhite
     }
 
     fileprivate var face: Color {
@@ -872,37 +862,42 @@ struct TableWorldBoardBase: View {
 }
 
 /// Gemeinsame, normalisierte Materialquelle für Disc-Basis und Vorderlippen.
-/// Das transparente Build-Time-Grading dämpft Chrom und Blau und ersetzt den
-/// gleichförmigen Web-Look der Mulden durch unregelmäßigen Samtflor.
+/// Warmes Walnussholz, dunkler Filz und eine feine Messingkante lassen das
+/// Pochbrett als handwerkliches Spielobjekt statt als technischen Metallring
+/// erscheinen. Semantik und Beschriftung bleiben bewusst native Overlays.
 struct PochDiscMaterialImage: View {
     let size: CGFloat
 
     var body: some View {
         ZStack {
-            Image("PochDiscCleanBase")
+            Image("PochDiscWarmBoard")
                 .resizable()
                 .interpolation(.high)
                 .scaledToFill()
                 .frame(width: size, height: size)
                 .normalizedPochDiscAsset(diameter: size)
-                .saturation(0.35)
-                .brightness(-0.30)
+                .saturation(0.72)
+                .brightness(-0.24)
                 .offset(y: size * Tokens.pochDiscSidewallExtensionRatio)
 
-            Image("PochDiscCleanBase")
+            Image("PochDiscWarmBoard")
                 .resizable()
                 .interpolation(.high)
                 .scaledToFill()
                 .frame(width: size, height: size)
                 .normalizedPochDiscAsset(diameter: size)
-
-            Image("PochDiscMaterialGrade")
-                .resizable()
-                .interpolation(.high)
-                .scaledToFill()
-                .frame(width: size, height: size)
-
-            PochDiscSuitEngravingOverlay(size: size)
+                .overlay {
+                    Circle()
+                        .fill(
+                            LinearGradient(colors: [
+                                Color.white.opacity(0.055),
+                                Color.clear,
+                                Color.black.opacity(0.08)
+                            ], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                        .padding(size * 0.055)
+                        .blendMode(.softLight)
+                }
         }
         .frame(width: size, height: size)
         .allowsHitTesting(false)

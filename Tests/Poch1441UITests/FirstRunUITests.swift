@@ -13,44 +13,74 @@ final class FirstRunUITests: XCTestCase {
         let title = app.staticTexts["firstRun.boardTour.title"]
         let body = app.staticTexts["firstRun.boardTour.body"]
         let next = app.buttons["firstRun.boardTour.next"]
-        let board = app.descendants(matching: .any)["firstRun.learningBoard"]
-        let panel = app.descendants(matching: .any)["firstRun.boardTour.panel"]
-        let trumpKing = app.descendants(matching: .any).matching(
-            NSPredicate(format: "label == %@", "Dein Trumpf-König")
-        ).firstMatch
+        let board = app.descendants(matching: .any)["firstRun.learningBoardVisibleBounds"]
         let expectedTitles = [
-            "Dein Trumpf-König räumt das Bonusfeld ab.",
-            "Mit gleichen Karten darfst du pochen.",
-            "Deine letzte Karte gewinnt die Mitte."
+            "Schau dir erst das Pochbrett an.",
+            "Fünf Trumpfkarten haben eigene Felder.",
+            "Hochzeit und Folge haben eigene Felder.",
+            "Eine Runde hat drei Phasen.",
+            "Passende Trumpfkarten bringen dir Chips.",
+            "Mit gleichen Kartenwerten pochst du um den Pott.",
+            "Wer zuerst leer ist, gewinnt die Mitte."
+        ]
+        let expectedActions = [
+            "Die Kartenfelder",
+            "Hochzeit und Folge",
+            "Die drei Phasen",
+            "Phase 1: Melden",
+            "Phase 2: Pochen",
+            "Phase 3: Ausspielen",
+            "Mit Hana loslegen"
         ]
         let window = app.windows.firstMatch
 
         for (step, expectedTitle) in expectedTitles.enumerated() {
             XCTAssertTrue(title.waitForExistence(timeout: 4))
+            XCTAssertTrue(waitUntil(timeout: 4) { title.label == expectedTitle },
+                          "Rundgang-Schritt \(step + 1) muss nach der Kamerafahrt stabil ankommen.")
             XCTAssertEqual(title.label, expectedTitle)
+            XCTAssertEqual(next.label, expectedActions[step])
             XCTAssertTrue(body.exists)
             XCTAssertTrue(next.isHittable)
             XCTAssertTrue(board.waitForExistence(timeout: 3))
-            XCTAssertTrue(panel.waitForExistence(timeout: 3))
-            XCTAssertFalse(board.frame.intersects(panel.frame),
-                           "Der Rundgang muss das vorgestellte Brett sichtbar lassen. Brett: \(board.frame), Karte: \(panel.frame)")
+            let explanationFrame = boardTourExplanationFrame(in: app)
+            XCTAssertFalse(board.frame.intersects(explanationFrame),
+                           "Der Rundgang muss das vorgestellte Brett sichtbar lassen. Brett: \(board.frame), Erklärung: \(explanationFrame)")
+            XCTAssertGreaterThanOrEqual(
+                explanationFrame.minY - board.frame.maxY,
+                12,
+                "Zwischen Brett und Erzählung müssen mindestens 12 pt sichtbare Ruhe bleiben. Brett: \(board.frame), Erklärung: \(explanationFrame)"
+            )
             XCTAssertTrue(window.frame.intersects(board.frame),
                           "Die geführte Kamera muss das reale Brett sichtbar halten.")
-            XCTAssertTrue(window.frame.contains(panel.frame),
+            XCTAssertTrue(window.frame.contains(explanationFrame),
                           "Der Erklärungskasten darf nicht aus dem SE-Fenster laufen.")
             XCTAssertFalse(title.frame.intersects(body.frame))
             XCTAssertFalse(body.frame.intersects(next.frame))
-            if step == 0 {
-                XCTAssertTrue(trumpKing.waitForExistence(timeout: 3),
-                              "Der erste Rundgang-Schritt muss den erklärten Trumpf-König wirklich zeigen.")
-                XCTAssertTrue(window.frame.contains(trumpKing.frame))
-                XCTAssertFalse(trumpKing.frame.intersects(panel.frame))
+            if step == 1 || step == 2 {
+                let fieldNames = step == 1
+                    ? ["König", "Dame", "Bube", "Zehn", "Ass"]
+                    : ["Hochzeit", "Folge"]
+                for fieldName in fieldNames {
+                    let label = app.staticTexts[fieldName]
+                    XCTAssertTrue(label.waitForExistence(timeout: 3),
+                                  "\(fieldName) muss direkt auf dem vorgestellten Brett benannt werden.")
+                    XCTAssertTrue(board.frame.contains(label.frame),
+                                  "\(fieldName) gehört als Beschriftung in den Brettframe: \(label.frame).")
+                }
+            } else if step > 2 {
+                let names = ["acts", "meld", "bidding", "playout"]
+                let visual = app.descendants(matching: .any)["firstRun.boardTour.visual.\(names[step - 3])"]
+                XCTAssertTrue(visual.waitForExistence(timeout: 3),
+                              "Rundgang-Schritt \(step + 1) braucht sein eigenes sichtbares Motiv.")
+                XCTAssertTrue(window.frame.contains(visual.frame))
+                XCTAssertFalse(board.frame.intersects(visual.frame))
             }
             let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             screenshot.name = "board-tour-\(expectedTitle)"
             screenshot.lifetime = .keepAlways
             add(screenshot)
-            next.tap()
+            tapBoardTourAction(next)
         }
 
         XCTAssertFalse(app.otherElements["firstRun.boardTour"].waitForExistence(timeout: 2))
@@ -68,24 +98,23 @@ final class FirstRunUITests: XCTestCase {
         app.launch()
 
         let window = app.windows.firstMatch
-        let board = app.descendants(matching: .any)["firstRun.learningBoard"]
-        let panel = app.descendants(matching: .any)["firstRun.boardTour.panel"]
+        let board = app.descendants(matching: .any)["firstRun.learningBoardVisibleBounds"]
         let next = app.buttons["firstRun.boardTour.next"]
 
-        for step in 1...3 {
+        for step in 1...7 {
             XCTAssertTrue(window.waitForExistence(timeout: 4))
             XCTAssertTrue(board.waitForExistence(timeout: 3))
-            XCTAssertTrue(panel.waitForExistence(timeout: 3))
             XCTAssertTrue(next.waitForExistence(timeout: 2))
+            let explanationFrame = boardTourExplanationFrame(in: app)
             XCTAssertTrue(window.frame.intersects(board.frame),
                           "Die geführte Kamera muss das Brett in Landscape sichtbar halten, Schritt \(step).")
-            XCTAssertTrue(window.frame.contains(panel.frame),
+            XCTAssertTrue(window.frame.contains(explanationFrame),
                           "Der Erklärungskasten muss in Landscape vollständig sichtbar bleiben, Schritt \(step).")
-            XCTAssertFalse(board.frame.intersects(panel.frame),
-                           "Landscape braucht eine echte Side-by-Side-Komposition, Schritt \(step). Brett: \(board.frame), Karte: \(panel.frame)")
+            XCTAssertFalse(board.frame.intersects(explanationFrame),
+                           "Landscape braucht eine echte Side-by-Side-Komposition, Schritt \(step). Brett: \(board.frame), Erklärung: \(explanationFrame)")
             XCTAssertTrue(next.isHittable)
             attachScreenshot(of: app, named: "board-tour-landscape-step-\(step)")
-            next.tap()
+            tapBoardTourAction(next)
         }
     }
 
@@ -104,24 +133,23 @@ final class FirstRunUITests: XCTestCase {
             throw XCTSkip("Dieser Gate wird gezielt auf einer kleinen iPhone-Klasse ausgeführt.")
         }
 
-        let panel = app.descendants(matching: .any)["firstRun.boardTour.panel"]
         let next = app.buttons["firstRun.boardTour.next"]
-        let board = app.descendants(matching: .any)["firstRun.learningBoard"]
+        let board = app.descendants(matching: .any)["firstRun.learningBoardVisibleBounds"]
 
-        for step in 1...3 {
-            XCTAssertTrue(panel.waitForExistence(timeout: 4))
+        for step in 1...7 {
             XCTAssertTrue(next.waitForExistence(timeout: 2))
             XCTAssertTrue(board.waitForExistence(timeout: 2))
-            XCTAssertTrue(window.frame.contains(panel.frame),
+            let explanationFrame = boardTourExplanationFrame(in: app)
+            XCTAssertTrue(window.frame.contains(explanationFrame),
                           "Die XXL-Erklärung in Schritt \(step) muss im SE-Fenster bleiben.")
             XCTAssertTrue(window.frame.contains(next.frame),
                           "Die XXL-Aktion in Schritt \(step) muss vollständig sichtbar bleiben.")
             XCTAssertTrue(next.isHittable,
                           "Die XXL-Aktion in Schritt \(step) muss ohne Scroll-Rätsel bedienbar sein.")
-            XCTAssertFalse(board.frame.intersects(panel.frame),
-                           "Auch XXL darf Erklärung und vorgestelltes Brett nicht überlagern. Brett: \(board.frame), Karte: \(panel.frame)")
+            XCTAssertFalse(board.frame.intersects(explanationFrame),
+                           "Auch XXL darf Erklärung und vorgestelltes Brett nicht überlagern. Brett: \(board.frame), Erklärung: \(explanationFrame)")
             attachScreenshot(of: app, named: "board-tour-xxxl-step-\(step)")
-            next.tap()
+            tapBoardTourAction(next)
         }
     }
 
@@ -278,6 +306,49 @@ final class FirstRunUITests: XCTestCase {
             }
             attachScreenshot(of: app, named: checkpoint.name)
         }
+    }
+
+    @MainActor
+    func testMeldCoachActionsAreActuallyTappableOnSmallPhone() {
+        let app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launchArguments = localizedArguments([
+            "-tutorialSeed",
+            "-tutorialMeldStep=4",
+            "-reduceMotionQA",
+            "-players=4"
+        ])
+        app.launch()
+        dismissGuidedPhaseCurtainIfPresent(in: app)
+
+        let action = app.buttons["firstRun.coachAction"]
+        let expectedActions = [
+            "Tischkarte aufdecken",
+            "Karo-König zeigen",
+            "Gewinn einsammeln",
+            "Jetzt pochen"
+        ]
+
+        for expectedAction in expectedActions {
+            XCTAssertTrue(action.waitForExistence(timeout: 12),
+                          "\(expectedAction) muss als echter Button erscheinen.")
+            XCTAssertTrue(waitUntil(timeout: 4) { action.label == expectedAction },
+                          "Erwartet wurde \(expectedAction), sichtbar war \(action.label).")
+            assertCoachContentFitsWithoutScroll(in: app, context: expectedAction)
+            XCTAssertTrue(action.isEnabled,
+                          "\(expectedAction) darf nicht deaktiviert sein.")
+            attachScreenshot(of: app, named: "meld-coach-\(expectedAction)")
+            let previousLabel = action.label
+            action.tap()
+            XCTAssertTrue(waitUntil(timeout: 12) {
+                !action.exists || action.label != previousLabel
+            }, "Ein Tap auf \(expectedAction) muss den Tutorialzustand verändern.")
+        }
+
+        let phaseCurtain = app.buttons["tutorial.phaseCurtain.continue"]
+        XCTAssertTrue(phaseCurtain.waitForExistence(timeout: 8),
+                      "Nach Jetzt pochen muss der bestätigbare Übergang zu Phase 2 erscheinen.")
+        XCTAssertTrue(phaseCurtain.isHittable)
     }
 
     @MainActor
@@ -768,10 +839,14 @@ final class FirstRunUITests: XCTestCase {
     @MainActor
     private func dismissGuidedPhaseCurtainIfPresent(in app: XCUIApplication) {
         let boardTour = app.buttons["firstRun.boardTour.next"]
-        for _ in 0..<4 where boardTour.waitForExistence(timeout: 1) {
+        for _ in 0..<9 where boardTour.waitForExistence(timeout: 1) {
             XCTAssertTrue(boardTour.isHittable,
                           "Jede Brettstation muss bewusst bestätigt werden können.")
-            boardTour.tap()
+            let previousLabel = boardTour.label
+            tapBoardTourAction(boardTour)
+            XCTAssertTrue(waitUntil(timeout: 3) {
+                !boardTour.exists || boardTour.label != previousLabel
+            }, "Die Tischführung muss nach jeder Bestätigung sichtbar weiterschalten.")
         }
         let continueButton = app.buttons["tutorial.phaseCurtain.continue"]
         if continueButton.waitForExistence(timeout: 2) {
@@ -1073,6 +1148,45 @@ final class FirstRunUITests: XCTestCase {
                 )
             }
         }
+    }
+
+    @MainActor
+    private func boardTourExplanationFrame(in app: XCUIApplication) -> CGRect {
+        let identifiers = [
+            "firstRun.boardTour.narrator",
+            "firstRun.boardTour.title",
+            "firstRun.boardTour.body",
+            "firstRun.boardTour.next"
+        ]
+        let frames = identifiers.compactMap { identifier -> CGRect? in
+            let element = app.descendants(matching: .any)[identifier]
+            XCTAssertTrue(element.waitForExistence(timeout: 3),
+                          "\(identifier) muss zur sichtbaren Tischführung gehören.")
+            return element.exists ? element.frame : nil
+        }
+        guard var union = frames.first else { return .null }
+        for frame in frames.dropFirst() {
+            union = union.union(frame)
+        }
+        return union
+    }
+
+    @MainActor
+    private func tapBoardTourAction(_ button: XCUIElement) {
+        XCTAssertTrue(button.isHittable,
+                      "Die aktuelle Tischführung braucht eine bedienbare Weiter-Aktion.")
+        button.coordinate(withNormalizedOffset: CGVector(dx: 0.90, dy: 0.50)).tap()
+    }
+
+    @MainActor
+    private func waitUntil(timeout: TimeInterval,
+                           condition: @escaping () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if condition() { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.10))
+        }
+        return condition()
     }
 
     @MainActor
