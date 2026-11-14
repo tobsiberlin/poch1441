@@ -2,6 +2,13 @@
 
 Änderungen am Neubau von POCH 1441. Die Historie des alten Projekts steht in `legacy/CHANGELOG.md`.
 
+## [M0 Entwurf] - 2026-11-14
+
+### Hinzugefügt
+- `docs/RULES.md`: Regelvertrag für PochCore als Entwurf. Klassik-Regeln mit stabilen IDs (`K-…`), Modern-Layer als eigener Abschnitt (`M-…`), jeder Grenzfall mit Beispiel.
+- Abweichungen zwischen `legacy/PochKit` und Konzept, jeweils mit Beleg `Datei:Zeile`.
+- Fragenliste mit 18 offenen Punkten (F-01 bis F-18) und 6 aus Pagat übernommenen Regeln zur Bestätigung. Nichts davon ist entschieden.
+
 ## [Neustart] - 2026-11-14
 
 ### Hinzugefügt
