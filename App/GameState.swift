@@ -427,6 +427,7 @@ final class GameState {
         revealedPlays = 0
         landedPlays = 0
         guidedPlayoutPresentation = false
+        endSequenceGeneration += 1
         betTransfer = 0
         lastBetActor = nil
         lastBetAmount = 0
@@ -815,6 +816,7 @@ final class GameState {
     /// Rundenende-Inszenierung (§6c c): Eiszeit-Vakuum -> Straf-Strom -> Banner.
     enum EndPhase: Comparable { case none, finalCard, frozen, punishing, done }
     private(set) var endPhase: EndPhase = .none
+    private var endSequenceGeneration = 0
 
     /// Anzeige-Konto am Rundenende: im Freeze noch VOR den Strafzahlungen, ab dem
     /// Straf-Strom rollen die Zähler auf den Endstand.
@@ -912,6 +914,10 @@ final class GameState {
 
     func configureGuidedPlayoutPresentation(_ enabled: Bool) {
         guidedPlayoutPresentation = enabled
+        // SwiftUI can re-appear the phase view synchronously when Reduced
+        // Motion replaces the final flight. Once the end sequence has started,
+        // presentation reconfiguration must not cancel its hold and settlement.
+        guard endPhase == .none else { return }
         cascadeTask?.cancel()
         if !enabled {
             runCascadeIfNeeded()
@@ -949,6 +955,10 @@ final class GameState {
             sequence: sequence,
             generation: generation
         ))
+        // The engine can finish on the same card whose spatial presentation is
+        // still in flight. Re-check only after contact; otherwise the guided
+        // round remains stranded before points and result actions appear.
+        finishGuidedPlayoutIfNeeded()
         return true
     }
 
@@ -1082,25 +1092,37 @@ final class GameState {
     /// Straf-Strom mit gedeckelter 90-ms-Tick-Kadenz -> Ergebnis.
     private func runEndSequence() async {
         guard endPhase == .none else { return }
+        let generation = endSequenceGeneration
         endPhase = .finalCard
         hapticTick += 1
-        try? await Task.sleep(for: .seconds(Tokens.p3FinalCardHold))
-        guard !Task.isCancelled else { return }
+        guard await waitForEndSequence(Tokens.p3FinalCardHold,
+                                       generation: generation) else { return }
         endPhase = .frozen
         hapticTick += 1
-        try? await Task.sleep(for: .seconds(Tokens.p3Vakuum))
-        guard !Task.isCancelled else { return }
+        guard await waitForEndSequence(Tokens.p3Vakuum,
+                                       generation: generation) else { return }
         endPhase = .punishing
         let resultValue = (roundResult?.centerPool ?? 0) + (roundResult?.payments.reduce(0, +) ?? 0)
         let ticks = min(resultValue, Tokens.p3PunishTickCap)
         for _ in 0..<ticks {
             hapticTick += 1
-            try? await Task.sleep(for: .seconds(Tokens.hapticCadence))
-            if Task.isCancelled { return }
+            guard await waitForEndSequence(Tokens.hapticCadence,
+                                           generation: generation) else { return }
         }
-        try? await Task.sleep(for: .seconds(0.45))
-        guard !Task.isCancelled else { return }
+        guard await waitForEndSequence(0.45,
+                                       generation: generation) else { return }
         endPhase = .done
+    }
+
+    /// End-of-round timing is a product state transition, not disposable view
+    /// work. A detached clock wait survives incidental SwiftUI task cancellation;
+    /// the round generation still invalidates it on restart or a genuine new round.
+    private func waitForEndSequence(_ seconds: Double,
+                                    generation: Int) async -> Bool {
+        await Task.detached(priority: .userInitiated) {
+            try? await Task.sleep(for: .seconds(seconds))
+        }.value
+        return generation == endSequenceGeneration
     }
 
     #if DEBUG || INTERNAL_QA

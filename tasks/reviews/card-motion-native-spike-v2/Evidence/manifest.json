@@ -1,0 +1,430 @@
+{
+  "frames" : [
+    {
+      "file" : "390x844-deal-progress-000.png",
+      "height" : 844,
+      "progress" : 0,
+      "segment" : "deal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-deal-progress-025.png",
+      "height" : 844,
+      "progress" : 0.25,
+      "segment" : "deal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-deal-progress-050.png",
+      "height" : 844,
+      "progress" : 0.5,
+      "segment" : "deal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-deal-progress-075.png",
+      "height" : 844,
+      "progress" : 0.75,
+      "segment" : "deal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-deal-progress-100.png",
+      "height" : 844,
+      "progress" : 1,
+      "segment" : "deal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-reveal-progress-000.png",
+      "height" : 844,
+      "progress" : 0,
+      "segment" : "reveal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-reveal-progress-025.png",
+      "height" : 844,
+      "progress" : 0.25,
+      "segment" : "reveal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-reveal-progress-050.png",
+      "height" : 844,
+      "progress" : 0.5,
+      "segment" : "reveal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-reveal-progress-075.png",
+      "height" : 844,
+      "progress" : 0.75,
+      "segment" : "reveal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-reveal-progress-100.png",
+      "height" : 844,
+      "progress" : 1,
+      "segment" : "reveal",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-play-progress-000.png",
+      "height" : 844,
+      "progress" : 0,
+      "segment" : "play",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-play-progress-025.png",
+      "height" : 844,
+      "progress" : 0.25,
+      "segment" : "play",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-play-progress-050.png",
+      "height" : 844,
+      "progress" : 0.5,
+      "segment" : "play",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-play-progress-075.png",
+      "height" : 844,
+      "progress" : 0.75,
+      "segment" : "play",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-play-progress-100.png",
+      "height" : 844,
+      "progress" : 1,
+      "segment" : "play",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-return-progress-000.png",
+      "height" : 844,
+      "progress" : 0,
+      "segment" : "return",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-return-progress-025.png",
+      "height" : 844,
+      "progress" : 0.25,
+      "segment" : "return",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-return-progress-050.png",
+      "height" : 844,
+      "progress" : 0.5,
+      "segment" : "return",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-return-progress-075.png",
+      "height" : 844,
+      "progress" : 0.75,
+      "segment" : "return",
+      "width" : 390
+    },
+    {
+      "file" : "390x844-return-progress-100.png",
+      "height" : 844,
+      "progress" : 1,
+      "segment" : "return",
+      "width" : 390
+    },
+    {
+      "file" : "667x375-deal-progress-000.png",
+      "height" : 375,
+      "progress" : 0,
+      "segment" : "deal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-deal-progress-025.png",
+      "height" : 375,
+      "progress" : 0.25,
+      "segment" : "deal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-deal-progress-050.png",
+      "height" : 375,
+      "progress" : 0.5,
+      "segment" : "deal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-deal-progress-075.png",
+      "height" : 375,
+      "progress" : 0.75,
+      "segment" : "deal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-deal-progress-100.png",
+      "height" : 375,
+      "progress" : 1,
+      "segment" : "deal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-reveal-progress-000.png",
+      "height" : 375,
+      "progress" : 0,
+      "segment" : "reveal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-reveal-progress-025.png",
+      "height" : 375,
+      "progress" : 0.25,
+      "segment" : "reveal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-reveal-progress-050.png",
+      "height" : 375,
+      "progress" : 0.5,
+      "segment" : "reveal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-reveal-progress-075.png",
+      "height" : 375,
+      "progress" : 0.75,
+      "segment" : "reveal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-reveal-progress-100.png",
+      "height" : 375,
+      "progress" : 1,
+      "segment" : "reveal",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-play-progress-000.png",
+      "height" : 375,
+      "progress" : 0,
+      "segment" : "play",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-play-progress-025.png",
+      "height" : 375,
+      "progress" : 0.25,
+      "segment" : "play",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-play-progress-050.png",
+      "height" : 375,
+      "progress" : 0.5,
+      "segment" : "play",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-play-progress-075.png",
+      "height" : 375,
+      "progress" : 0.75,
+      "segment" : "play",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-play-progress-100.png",
+      "height" : 375,
+      "progress" : 1,
+      "segment" : "play",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-return-progress-000.png",
+      "height" : 375,
+      "progress" : 0,
+      "segment" : "return",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-return-progress-025.png",
+      "height" : 375,
+      "progress" : 0.25,
+      "segment" : "return",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-return-progress-050.png",
+      "height" : 375,
+      "progress" : 0.5,
+      "segment" : "return",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-return-progress-075.png",
+      "height" : 375,
+      "progress" : 0.75,
+      "segment" : "return",
+      "width" : 667
+    },
+    {
+      "file" : "667x375-return-progress-100.png",
+      "height" : 375,
+      "progress" : 1,
+      "segment" : "return",
+      "width" : 667
+    },
+    {
+      "file" : "402x874-deal-progress-000.png",
+      "height" : 874,
+      "progress" : 0,
+      "segment" : "deal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-deal-progress-025.png",
+      "height" : 874,
+      "progress" : 0.25,
+      "segment" : "deal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-deal-progress-050.png",
+      "height" : 874,
+      "progress" : 0.5,
+      "segment" : "deal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-deal-progress-075.png",
+      "height" : 874,
+      "progress" : 0.75,
+      "segment" : "deal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-deal-progress-100.png",
+      "height" : 874,
+      "progress" : 1,
+      "segment" : "deal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-reveal-progress-000.png",
+      "height" : 874,
+      "progress" : 0,
+      "segment" : "reveal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-reveal-progress-025.png",
+      "height" : 874,
+      "progress" : 0.25,
+      "segment" : "reveal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-reveal-progress-050.png",
+      "height" : 874,
+      "progress" : 0.5,
+      "segment" : "reveal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-reveal-progress-075.png",
+      "height" : 874,
+      "progress" : 0.75,
+      "segment" : "reveal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-reveal-progress-100.png",
+      "height" : 874,
+      "progress" : 1,
+      "segment" : "reveal",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-play-progress-000.png",
+      "height" : 874,
+      "progress" : 0,
+      "segment" : "play",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-play-progress-025.png",
+      "height" : 874,
+      "progress" : 0.25,
+      "segment" : "play",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-play-progress-050.png",
+      "height" : 874,
+      "progress" : 0.5,
+      "segment" : "play",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-play-progress-075.png",
+      "height" : 874,
+      "progress" : 0.75,
+      "segment" : "play",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-play-progress-100.png",
+      "height" : 874,
+      "progress" : 1,
+      "segment" : "play",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-return-progress-000.png",
+      "height" : 874,
+      "progress" : 0,
+      "segment" : "return",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-return-progress-025.png",
+      "height" : 874,
+      "progress" : 0.25,
+      "segment" : "return",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-return-progress-050.png",
+      "height" : 874,
+      "progress" : 0.5,
+      "segment" : "return",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-return-progress-075.png",
+      "height" : 874,
+      "progress" : 0.75,
+      "segment" : "return",
+      "width" : 402
+    },
+    {
+      "file" : "402x874-return-progress-100.png",
+      "height" : 874,
+      "progress" : 1,
+      "segment" : "return",
+      "width" : 402
+    }
+  ],
+  "generatedAt" : "2026-07-19T21:56:52Z",
+  "sourceAssets" : [
+    "App\/CardBack.swift + App\/CardMaterialContract.swift (W2)",
+    "App\/Assets.xcassets\/CardBackDamage\/card_back_damage_04.imageset",
+    "App\/Assets.xcassets\/Cards\/card_hearts_ace.imageset (public V10 face)"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "channels" : [
+    "flattened light-neutral aged-copper albedo",
+    "directional height\/normal approximation for relief and rim",
+    "coin-local roughness and oxidation islands",
+    "world-locked edge and specular response",
+    "separate height-aware ground shadow",
+    "front-lip occlusion recomposition"
+  ],
+  "contactFrameCount" : 2,
+  "cropSizePixels" : 76,
+  "inheritedChecks" : 106,
+  "inheritedGateSummarySHA256" : "8ee7ce5321d7a42556c6bc64ba5ba5da46e2df2d3deab788c6385d4fcf649737",
+  "inheritedTranscriptCount" : 12,
+  "inheritedTranscriptsSHA256" : "76e883093a396548b07060d29d3f2149857240c1026cd1fefe35450de52d98be",
+  "projectedCoinDiameterPixels" : 19.8,
+  "selectedSampleIndices" : [
+    0,
+    4,
+    8,
+    12,
+    16,
+    18,
+    19,
+    20,
+    21,
+    28
+  ],
+  "selectedSeed" : 1441,
+  "selectedTimes" : [
+    0,
+    0.016666666666666666,
+    0.03333333333333333,
+    0.05,
+    0.06666666666666667,
+    0.075,
+    0.07916666666666666,
+    0.08333333333333333,
+    0.0875,
+    0.11666666666666667
+  ],
+  "supersampleScale" : 6,
+  "uncutProofFinalTime" : 1.6125,
+  "uncutProofFrameCount" : 98,
+  "uncutProofFrameRate" : 60,
+  "uncutProofGenerated" : true,
+  "verdict" : "TECHNICAL_GREEN_HUMAN_PENDING",
+  "worldLightProfile" : {
+    "ambientStrength" : 0.22,
+    "contactShadowOffset" : {
+      "x" : 2.4,
+      "y" : 3.2,
+      "z" : 0
+    },
+    "id" : "track-b-lamp-left-v1",
+    "keyDirection" : {
+      "x" : -0.72,
+      "y" : -0.58,
+      "z" : 0.38
+    },
+    "screenAzimuthRadians" : 2.46
+  }
+}

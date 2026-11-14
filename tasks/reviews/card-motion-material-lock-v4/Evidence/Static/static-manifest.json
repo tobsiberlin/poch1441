@@ -1,0 +1,9 @@
+{
+  "generatedAt" : "2026-07-20T13:08:28Z",
+  "materialHypothesis" : "Irregular directional fibres, sparse bent print dropout and narrow edge compression will read as matte printed card stock at 54.85 px without discrete oval patches.",
+  "motionAdvanced" : false,
+  "sourceFrame" : "402x874-static-source-v4.png",
+  "stableRestFrame" : "402x874-static-rest-v4.png",
+  "targetCardShortEdgePixels" : 54.85065110795071,
+  "viewport" : "402x874"
+}

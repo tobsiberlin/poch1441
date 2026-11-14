@@ -1,0 +1,17 @@
+{
+  "schema": "poch.stage4.human-visual-verdict.v1",
+  "recordedAt": "2026-07-20T17:33:38+02:00",
+  "verdict": "GREEN",
+  "asset": "queen-drop-final-uncut.mp4",
+  "durationSeconds": 31.17833333333333,
+  "review": {
+    "uncutPlaybackCompleted": true,
+    "exactlyOneCoin": true,
+    "coinScaleReadsAsCent": true,
+    "v3MaterialReliefVisible": true,
+    "orientationChangeVisible": true,
+    "queenFrontLipOcclusionCoherent": true,
+    "stableCertifiedRest": true
+  },
+  "scopeWarning": "Certified Queen-well drop beginning roughly 52 mm above the well; not a complete source-stack throw."
+}

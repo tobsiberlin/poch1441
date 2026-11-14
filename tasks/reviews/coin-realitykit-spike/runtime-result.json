@@ -1,0 +1,69 @@
+{
+  "cases" : [
+    {
+      "contactCount" : 2,
+      "failures" : [
+        "Kontaktpenetration 1.148 mm > 0.150 mm"
+      ],
+      "lipContact" : false,
+      "maximumOrientationDeltaDegrees" : 121.98536682128906,
+      "maximumRelativeEnergyGrowth" : 0,
+      "maximumReportedPenetrationMeters" : 0.0011480312095955014,
+      "name" : "central-face-0deg",
+      "passed" : false,
+      "remainedContained" : true,
+      "sustainedRestSeconds" : 0.5166518744081259
+    },
+    {
+      "contactCount" : 2,
+      "failures" : [
+        "Kontaktpenetration 1.616 mm > 0.150 mm"
+      ],
+      "lipContact" : false,
+      "maximumOrientationDeltaDegrees" : 123.69860076904297,
+      "maximumRelativeEnergyGrowth" : 0,
+      "maximumReportedPenetrationMeters" : 0.0016155713237822056,
+      "name" : "central-face-minus3deg",
+      "passed" : false,
+      "remainedContained" : true,
+      "sustainedRestSeconds" : 0.5000028312206268
+    },
+    {
+      "contactCount" : 2,
+      "failures" : [
+        "Kontaktpenetration 1.244 mm > 0.150 mm"
+      ],
+      "lipContact" : false,
+      "maximumOrientationDeltaDegrees" : 178.9698028564453,
+      "maximumRelativeEnergyGrowth" : 0,
+      "maximumReportedPenetrationMeters" : 0.0012444235617294908,
+      "name" : "central-face-plus3deg",
+      "passed" : false,
+      "remainedContained" : true,
+      "sustainedRestSeconds" : 0.516660749912262
+    },
+    {
+      "contactCount" : 8,
+      "failures" : [
+        "Kontaktpenetration 0.980 mm > 0.150 mm"
+      ],
+      "lipContact" : true,
+      "maximumOrientationDeltaDegrees" : 120.25890350341797,
+      "maximumRelativeEnergyGrowth" : 0,
+      "maximumReportedPenetrationMeters" : 0.0009800868574529886,
+      "name" : "edge-lip-78deg",
+      "passed" : false,
+      "remainedContained" : true,
+      "sustainedRestSeconds" : 0.316680246964097
+    }
+  ],
+  "commands" : [
+    "xcodegen generate --spec project.yml",
+    "xcodebuild -project CoinRealityKitSpike.xcodeproj -scheme CoinRealityKitSpike -sdk iphonesimulator -destination 'platform=iOS Simulator,id=<UDID>' -derivedDataPath .derived build",
+    "xcrun simctl install <UDID> .derived\/Build\/Products\/Debug-iphonesimulator\/CoinRealityKitSpike.app",
+    "xcrun simctl launch <UDID> com.tobc.reviews.coin-realitykit-spike"
+  ],
+  "frameP95Milliseconds" : 16.703875735402107,
+  "sdkRuntime" : "26.2",
+  "verdict" : "RED"
+}

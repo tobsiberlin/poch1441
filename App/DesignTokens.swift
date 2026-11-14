@@ -52,6 +52,14 @@ enum Tokens {
     // Status-Icons. Die Werte bleiben klein genug für drei Sitze auf 375 pt.
     static let firstRunOpponentPortraitSize: CGFloat = 58
     static let phase1OpponentPortraitSize: CGFloat = 44
+    static let phase1OpponentRailHeight: CGFloat = 182
+    static let phase1OpponentSeatHeight: CGFloat = 166
+    // `DealTableauLayout.opponentPose` already lifts the fan by about 39 pt.
+    // A second negative offset moved the complete hand into the app chrome.
+    static let phase1OpponentCardsOffsetY: CGFloat = 0
+    static let phase1OpponentPortraitOffsetY: CGFloat = 28
+    static let phase1OpponentLabelOffsetY: CGFloat = 68
+    static let phase1OpponentPayoutOffsetY: CGFloat = 74
     static let phase3OpponentPortraitSize: CGFloat = 68
     static let phase3OpponentSpacing: CGFloat = 14
 
@@ -67,6 +75,28 @@ enum Tokens {
     static let guidedMeldLearningHandCompact: CGFloat = 112
     static let guidedMeldLearningHandRegular: CGFloat = 146
     static let guidedMeldLearningGap: CGFloat = 7
+    // Filmischer Tischrundgang vor der ersten Interaktion. Diese Fläche ist
+    // bewusst eine dialogische Regieebene und verwendet nicht die goldenen
+    // Aktionskapseln des anschließenden Mitmach-Tutorials.
+    static let guidedTableTourPanelWidth: CGFloat = 370
+    static let guidedTableTourLandscapeWidth: CGFloat = 420
+    static let guidedTableTourPanelCorner: CGFloat = 26
+    static let guidedTableTourHorizontalMargin: CGFloat = 16
+    static let guidedTableTourNarratorSize: CGFloat = 44
+    static let guidedTableTourMomentHeight: CGFloat = 64
+    /// Sichtbare Ruhezone zwischen Erklärung und Kartenhand im räumlichen
+    /// Portrait-Layout. Der Screenshot-Vertrag fordert davon mindestens 12 pt.
+    static let guidedMeldCoachHandClearance: CGFloat = 24
+    /// Der freie Austeilzustand besitzt eine eigene vertikale Bühne. Anders als
+    /// der kompakte geführte Coach darf seine Erklärung nicht über der Scheibe
+    /// schweben oder bis an die Aktion reichen.
+    static let regularDealOpponentRailHeight: CGFloat = 142
+    static let regularDealBoardMax: CGFloat = 258
+    static let regularDealCoachGap: CGFloat = 10
+    static let regularDealCoachActionGap: CGFloat = 12
+    static let regularDealHandHeight: CGFloat = 112
+    static let regularCoachContentSpacing: CGFloat = 6
+    static let regularCoachVerticalPadding: CGFloat = 10
     static let guidedOpeningTokenSize: CGFloat = 38
     static let guidedOpeningSourceGap: CGFloat = 66
     static let guidedOpeningSnapRadius: CGFloat = 58
@@ -262,34 +292,29 @@ extension Color {
     }
 }
 
-/// Production POCH 1441 wordmark. The vector asset is an outlined master with
-/// no font dependency, so the same geometry survives App-Icon, print and the
-/// later milled/debossed physical board. The independent Three Acts symbol
-/// keeps the three phases visible without turning the O into a pictogram.
+/// Ruhige Produktwortmarke, solange das physische Markenzeichen noch nicht
+/// finalisiert ist. Sie hält Logo-Experimente aus dem Spiel heraus und bleibt
+/// in jeder Größe lesbar: Name zuerst, Herkunft als warmer Sekundärakzent.
 struct PochBrandWordmark: View {
     var height: CGFloat = 24
     var color: Color? = nil
 
-    @ViewBuilder
     var body: some View {
-        if let color {
-            Image("PochBrandWordmark")
-                .renderingMode(.template)
-                .resizable()
-                .interpolation(.high)
-                .scaledToFit()
-                .foregroundStyle(color)
-                .frame(width: height * (1180.0 / 220.0), height: height)
-                .accessibilityLabel(Text(verbatim: "Poch 1441"))
-        } else {
-            Image("PochBrandWordmarkFullColor")
-                .renderingMode(.original)
-                .resizable()
-                .interpolation(.high)
-                .scaledToFit()
-                .frame(width: height * (1180.0 / 220.0), height: height)
-                .accessibilityLabel(Text(verbatim: "Poch 1441"))
+        HStack(alignment: .firstTextBaseline, spacing: height * 0.32) {
+            Text(verbatim: "POCH")
+                .font(.system(size: height * 0.92, weight: .black, design: .default))
+                .tracking(height * 0.006)
+                .foregroundStyle(color ?? Tokens.jewelPlatin)
+
+            Text(verbatim: "1441")
+                .font(.system(size: height * 0.84, weight: .medium, design: .default))
+                .tracking(height * 0.035)
+                .foregroundStyle(color ?? Tokens.jewelGold)
         }
+        .fixedSize(horizontal: true, vertical: true)
+        .frame(height: height)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "Poch 1441"))
     }
 }
 

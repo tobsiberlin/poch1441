@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 Three Acts core app icon</title>
+  <desc>Flat Three Acts core with a quiet board orbit.</desc>
+  <rect width="1024" height="1024" fill="#101821"/>
+  <circle cx="512" cy="512" r="348" fill="none" stroke="#30404C" stroke-width="18"/>
+  <g fill="none" stroke-width="92" stroke-linecap="round">
+    <path d="M338.34 332.17A250 250 0 0 1 685.66 332.17" stroke="#C8A35A"/>
+    <path d="M754.57 451.52A250 250 0 0 1 580.91 752.32" stroke="#8D74AA"/>
+    <path d="M443.09 752.32A250 250 0 0 1 269.43 451.52" stroke="#6F9B8B"/>
+  </g>
+  <circle cx="512" cy="512" r="112" fill="#101821" stroke="#F4F0E8" stroke-width="38"/>
+  <path d="M512 450L574 512L512 574L450 512Z" fill="#C96E55"/>
+</svg>

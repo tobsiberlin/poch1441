@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "executedAt": "2026-07-20T16:40:37+02:00",
+  "finishedAt": "2026-07-20T16:41:09+02:00",
+  "device": {
+    "name": "iPhone 17 Pro",
+    "identifier": "D1923D48-6E8D-4157-B703-8B05CC334D08",
+    "platform": "iOS Simulator",
+    "osVersion": "26.2",
+    "architecture": "arm64"
+  },
+  "total": 3,
+  "passed": 3,
+  "failed": 0,
+  "skipped": 0,
+  "tests": [
+    {
+      "name": "testStandardTranscriptReachesEightContactsWithAtMostTwoMovingCards",
+      "status": "PASS",
+      "duration": "9s"
+    },
+    {
+      "name": "testReducedMotionTranscriptReachesEightContactsWithoutSpatialFlight",
+      "status": "PASS",
+      "duration": "6s"
+    },
+    {
+      "name": "testSkipCancelsVisibleTranscriptWithoutLateContactWrite",
+      "status": "PASS",
+      "duration": "9s"
+    }
+  ],
+  "diagnosticsCollection": "never",
+  "compilerWarningsFromProjectOrTests": 0
+}
+

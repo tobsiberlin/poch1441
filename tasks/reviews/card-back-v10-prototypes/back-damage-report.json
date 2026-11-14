@@ -1,0 +1,97 @@
+{
+  "canvas": [
+    1000,
+    1400
+  ],
+  "source_alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+  "variant_count": 10,
+  "variants": [
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "stress_line",
+        "grip_polish"
+      ],
+      "sha256": "1b1f5326e9dfb68539cf8723892ad7785da7eec008fbd42cd5a5840e955c7265",
+      "variant": 1
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "repair_film"
+      ],
+      "sha256": "a68dc6c91886577799ffa5b6d0a6f704a4bcd1411706e747a4e9674f29b1d031",
+      "variant": 2
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "print_wear",
+        "edge_compression"
+      ],
+      "sha256": "d5baabb6f29b1505c32bfd67ff5a88a429998e85d148c405484ba9cc761f5295",
+      "variant": 3
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "stress_line"
+      ],
+      "sha256": "c1fc6ffe7eb7d601bb252d6b8f900bf85a267ea51f14edda05c341e9c9112758",
+      "variant": 4
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "grip_polish",
+        "print_wear"
+      ],
+      "sha256": "3d7cc16145decaf518d16a3ca16b3d0e28d1e0b87af3514f7c2ffff773ae66ed",
+      "variant": 5
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "repair_film",
+        "edge_compression"
+      ],
+      "sha256": "26d12d1f456d8fe3384c16fba4bfefe6fbb26ffd51a525f76fa099882f28c8dd",
+      "variant": 6
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "stress_line",
+        "print_wear"
+      ],
+      "sha256": "21055b80bb8fb5dd10a6480ccafb8e86892c92a412867877d8d2b06111cfa57d",
+      "variant": 7
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "edge_compression"
+      ],
+      "sha256": "7bd5c70e5e7f4ca4752dbe3bdefa0a16a5528fcca05849245b2e55115a25102d",
+      "variant": 8
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "grip_polish",
+        "repair_film"
+      ],
+      "sha256": "fc27261ecfd1d6011aa63706787d4f7a887f5cc92f1730e0a8257efe6abedfcf",
+      "variant": 9
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_types": [
+        "print_wear",
+        "stress_line"
+      ],
+      "sha256": "c20d6b42c396b43f9902ff3bdbc5c555f01912c8c8d9f8abba7bc25a85db80cd",
+      "variant": 10
+    }
+  ]
+}

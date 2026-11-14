@@ -1,0 +1,80 @@
+{
+  "schema": "poch.stage4.testflight-internal-build.v2",
+  "recordedAt": "2026-07-20T20:56:28+02:00",
+  "verdict": "DISTRIBUTED_INTERNAL_DEVICE_LAUNCH_RETEST_REQUIRED",
+  "appStoreConnect": {
+    "appId": "6789242958",
+    "bundleIdentifier": "com.tobc.poch1441",
+    "version": "0.1.0",
+    "build": "8",
+    "processing": "FINISHED",
+    "distribution": "INTERNAL_TESTERS"
+  },
+  "build": {
+    "scheme": "Poch1441InternalQA",
+    "configuration": "InternalQA",
+    "swiftCompilationConditions": [
+      "INTERNAL_QA"
+    ],
+    "configurationPreset": "release",
+    "swiftOptimizationLevel": "-O",
+    "enableTestability": false,
+    "enableDebugDylib": false,
+    "linkedDeveloperToolsSupport": false,
+    "debugDylibInArchive": false,
+    "metalDebugInformation": "NO",
+    "metalCompileDebugFlags": "ABSENT",
+    "testFlightInternalTestingOnly": true,
+    "ipaSha256": "aa6bd56c7366276c1cad967ee7c069481c0384613de59241bf99bbee88b6c3d2"
+  },
+  "supersededDeliveries": [
+    {
+      "build": "6",
+      "processing": "FINISHED",
+      "distribution": "INTERNAL_TESTERS",
+      "appStoreConnectNotice": "ITMS-90730_FOUND_METAL_SHADER_SOURCE_CODE",
+      "noticeBlocking": false,
+      "rootCause": "InternalQA inherited MTL_ENABLE_DEBUG_INFO=INCLUDE_SOURCE from the debug preset",
+      "resolution": "Metal debug information disabled in builds 7 and 8",
+      "evidence": "testflight-build6-itms-90730.png",
+      "disposition": "SUPERSEDED_DO_NOT_TEST"
+    },
+    {
+      "build": "7",
+      "processing": "FINISHED",
+      "distribution": "INTERNAL_TESTERS",
+      "physicalDeviceLaunch": "USER_REPORTED_IMMEDIATE_TERMINATION",
+      "deviceCrashLogAvailable": false,
+      "artifactDefect": "InternalQA used the debug preset and linked DeveloperToolsSupport",
+      "resolution": "Build 8 uses the release preset with only INTERNAL_QA and rejects debug delivery artifacts before upload",
+      "evidence": "testflight-build7-startcrash.json",
+      "disposition": "BLOCKED_SUPERSEDED_DO_NOT_TEST"
+    }
+  ],
+  "verification": {
+    "internalQASimulatorBuild": "PASS",
+    "defaultLaunchSmoke": "9/9 PASS",
+    "settingsEntryFlow": "PASS",
+    "certifiedDropToRestFlow": "PASS",
+    "internalQAUITests": "3/3 PASS",
+    "normalReleaseSimulatorBuild": "PASS",
+    "metalDebugInformationDisabled": "PASS",
+    "metalCompileSourceDebugFlagsAbsent": "PASS",
+    "developerToolsSupportAbsent": "PASS",
+    "debugDylibAbsent": "PASS",
+    "releaseOptimization": "PASS",
+    "warningsAsErrors": "PASS",
+    "archive": "PASS",
+    "export": "PASS",
+    "upload": "PASS",
+    "processing": "PASS",
+    "internalDistribution": "PASS",
+    "physicalDeviceLaunchRetest": "PENDING"
+  },
+  "hardwareGates": {
+    "humanSpeaker": "PENDING",
+    "physical240fps96kHzSync": "PENDING",
+    "physicalHaptics": "PENDING"
+  },
+  "productionIntegration": "BLOCKED_UNTIL_ALL_HARDWARE_GATES_GREEN"
+}

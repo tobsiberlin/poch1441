@@ -1,47 +1,61 @@
 import Foundation
 
 /// Pure, deterministic mix state for the direct-manipulation time bridge.
-/// The former synthetic transition layer stays silent; the two real rooms
-/// create the seam through their reversible equal-power crossfade.
+/// Two genuinely different rooms follow the finger through a reversible
+/// equal-power crossfade. A quiet, broadband time texture exists only around
+/// the center so the seam reads as a place in time, never as a third scene.
 struct FirstRunTimeSwipeAudioMix: Equatable, Sendable {
     let originRoomVolume: Float
     let originMotifVolume: Float
     let presentRoomVolume: Float
     let presentMotifVolume: Float
+    let signatureContactVolume: Float
     let timeNoiseVolume: Float
     let timeNoiseRate: Float
     let originRoomPan: Float
     let originMotifPan: Float
     let presentRoomPan: Float
     let presentMotifPan: Float
+    let signatureContactPan: Float
 
     static func state(progress: Double, reduceMotion: Bool = false) -> Self {
         let clamped = min(max(progress, 0), 1)
         let angle = clamped * .pi / 2
         let origin = clamped == 1 ? Float.zero : Float(cos(angle))
         let present = clamped == 0 ? Float.zero : Float(sin(angle))
+        let seamPosition = Float(sin(clamped * .pi))
+        let seam = seamPosition * seamPosition
+        let seamLevel: Float = reduceMotion ? 0.045 : 0.065
+        let finger = Float(clamped)
 
         return Self(
-            // The source masters differ by 0.92 dB. These endpoints place both
-            // rooms at approximately -27 dBFS RMS before device volume.
-            originRoomVolume: origin * 0.50,
-            originMotifVolume: origin * 0.18,
-            presentRoomVolume: present * 0.45,
-            presentMotifVolume: present * 0.16,
-            // The previous stationary hiss and pitched 760 Hz seam were audible
-            // as an effect rather than a place changing under the finger. The
-            // natural rooms now carry the transformation without a radio layer.
-            timeNoiseVolume: 0,
+            // Every layer receives the era gain itself. At the endpoints the
+            // opposite world is digital silence; at the seam both worlds retain
+            // equal-power audibility without a loudness hole.
+            // The selected rooms carry the era identity. Authored motifs remain
+            // quiet tactile punctuation instead of competing music beds.
+            // The supplied historical master is roughly 14 dB hotter than the
+            // contemporary recording, so its runtime gain is compensated here.
+            originRoomVolume: origin * 0.09,
+            originMotifVolume: origin * 0.03,
+            presentRoomVolume: present * 0.46,
+            presentMotifVolume: present * 0.14,
+            // The same physical knuckle contact and the same event grid survive
+            // the complete gesture. Only their acoustic surface and position morph.
+            signatureContactVolume: 0.18,
+            // The authored texture is broadband and unpitched. Its squared
+            // envelope creates one audible, reversible acoustic seam around
+            // the center while remaining completely absent at both endpoints.
+            timeNoiseVolume: seam * seamLevel,
             timeNoiseRate: 1,
-            // Stereo follows the chronology requested by the product: 1441 on
-            // the left, the present on the right, and both rooms meeting at the
-            // midpoint. This is deliberately semantic rather than a literal
-            // pan beneath the image wipe, whose revealed side changes while the
-            // finger moves.
-            originRoomPan: -0.28,
-            originMotifPan: -0.14,
-            presentRoomPan: 0.28,
-            presentMotifPan: 0.14
+            // The rooms approach the finger-controlled seam without crossing
+            // chronology: 1441 remains left, today right, and the invariant
+            // signature contact travels continuously through the center.
+            originRoomPan: -0.58 + finger * 0.46,
+            originMotifPan: -0.34 + finger * 0.24,
+            presentRoomPan: 0.12 + finger * 0.46,
+            presentMotifPan: 0.10 + finger * 0.24,
+            signatureContactPan: -0.22 + finger * 0.44
         )
     }
 }

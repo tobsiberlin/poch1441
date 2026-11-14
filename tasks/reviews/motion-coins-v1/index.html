@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Poch 1441 - Münzbewegung V1</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="title-lockup">
+        <span class="eyebrow">Motion study · V1</span>
+        <h1>Münzen mit Gewicht</h1>
+      </div>
+      <div class="seed-badge" aria-label="Deterministische Simulation">
+        <span class="seed-dot" aria-hidden="true"></span>
+        <span id="seedLabel">Seed 144101</span>
+      </div>
+    </header>
+
+    <nav class="scene-switcher" aria-label="Bewegungsszenario" role="tablist">
+      <button class="scene-tab is-active" type="button" role="tab" aria-selected="true"
+              data-scene="outer">
+        <span class="tab-index">01</span>
+        <span class="tab-label"><strong>Einwurf</strong><small>Außenmulde</small></span>
+      </button>
+      <button class="scene-tab" type="button" role="tab" aria-selected="false"
+              data-scene="center">
+        <span class="tab-index">02</span>
+        <span class="tab-label"><strong>Auszahlung</strong><small>Poch-Mitte</small></span>
+      </button>
+      <button class="scene-tab" type="button" role="tab" aria-selected="false"
+              data-scene="snackbox">
+        <span class="tab-index">03</span>
+        <span class="tab-label"><strong>Track B</strong><small>Snackbox</small></span>
+      </button>
+    </nav>
+
+    <section class="stage-card" aria-label="Interaktiver Münzbewegungs-Prototyp">
+      <canvas id="coinCanvas" aria-label="Deterministische Münzsimulation"></canvas>
+
+      <div class="stage-heading" aria-live="polite">
+        <span id="sceneKicker">TRACK A · EINWURF</span>
+        <strong id="sceneTitle">Einsatz in die Außenmulde</strong>
+      </div>
+
+      <div class="state-pill" id="statePill" data-state="ready">
+        <span class="state-indicator" aria-hidden="true"></span>
+        <span id="stateLabel">Bereit</span>
+      </div>
+
+      <dl class="telemetry" aria-label="Simulationswerte">
+        <div>
+          <dt>Settle</dt>
+          <dd id="settleValue">-</dd>
+        </div>
+        <div>
+          <dt>Kontakte</dt>
+          <dd id="collisionValue">0</dd>
+        </div>
+        <div>
+          <dt>Stabil</dt>
+          <dd id="stableValue">0 / 8</dd>
+        </div>
+        <div>
+          <dt>Render</dt>
+          <dd id="fpsValue">60 fps</dd>
+        </div>
+      </dl>
+    </section>
+
+    <footer class="control-deck">
+      <div class="transport" aria-label="Wiedergabesteuerung">
+        <button class="control-button control-button--primary" id="playButton" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6.4 4.7v10.6L15 10 6.4 4.7Z"/></svg>
+          <span>Play</span>
+        </button>
+        <button class="control-button" id="pauseButton" type="button" disabled>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.6 4.5h3v11h-3v-11Zm5.8 0h3v11h-3v-11Z"/></svg>
+          <span>Pause</span>
+        </button>
+        <button class="control-button" id="replayButton" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.4 6.7V3.5L2.8 5.1l1.6 1.6Zm.2-1.4A7 7 0 1 1 3 12.8l1.8-.5a5.1 5.1 0 1 0 1.1-5.5L4.6 5.3Z"/></svg>
+          <span>Replay</span>
+        </button>
+      </div>
+
+      <fieldset class="motion-picker">
+        <legend>Bewegung</legend>
+        <label>
+          <input type="radio" name="motion" value="normal" checked>
+          <span>Normal</span>
+        </label>
+        <label>
+          <input type="radio" name="motion" value="reduced">
+          <span>Reduziert</span>
+        </label>
+      </fieldset>
+
+      <p class="simulation-note"><span aria-hidden="true">120 Hz</span> feste Physik · Canvas 2D</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

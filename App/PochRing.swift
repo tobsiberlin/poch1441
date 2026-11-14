@@ -70,22 +70,22 @@ enum PochRing {
     ]
 }
 
-/// Calibrated overlay geometry for the canonical 2026 Poch Disc. The source
-/// centers were measured on the 1254-px asset after the shared 1.26 canvas
-/// normalization; overlays, flights and the asset-rim occlusion use one map.
+/// Calibrated overlay geometry for the warm 2026 Poch board. The source
+/// centers were measured on the 1254-px asset after the shared canvas
+/// normalization; overlays, flights and highlights use this single map.
 enum PochDiscGeometry {
     static func wellCenter(for pool: Pool, in size: CGFloat) -> CGPoint {
         let normalized: CGPoint
         switch pool {
-        case .king:     normalized = CGPoint(x: 0.5000, y: 0.1463)
-        case .queen:    normalized = CGPoint(x: 0.7311, y: 0.2358)
-        case .mariage:  normalized = CGPoint(x: 0.8426, y: 0.4639)
-        case .jack:     normalized = CGPoint(x: 0.7462, y: 0.7080)
-        case .ten:      normalized = CGPoint(x: 0.4990, y: 0.8135)
-        case .sequence: normalized = CGPoint(x: 0.2498, y: 0.7100)
-        case .poch:     normalized = CGPoint(x: 0.1564, y: 0.4649)
-        case .ace:      normalized = CGPoint(x: 0.2679, y: 0.2358)
-        case .center:   normalized = CGPoint(x: 0.5000, y: 0.5000)
+        case .king:     normalized = CGPoint(x: 0.4990, y: 0.1443)
+        case .queen:    normalized = CGPoint(x: 0.7401, y: 0.2378)
+        case .mariage:  normalized = CGPoint(x: 0.8547, y: 0.4779)
+        case .jack:     normalized = CGPoint(x: 0.7643, y: 0.7351)
+        case .ten:      normalized = CGPoint(x: 0.4940, y: 0.8567)
+        case .sequence: normalized = CGPoint(x: 0.2287, y: 0.7341)
+        case .poch:     normalized = CGPoint(x: 0.1393, y: 0.4789)
+        case .ace:      normalized = CGPoint(x: 0.2558, y: 0.2368)
+        case .center:   normalized = CGPoint(x: 0.4970, y: 0.4870)
         }
         return CGPoint(x: normalized.x * size, y: normalized.y * size)
     }

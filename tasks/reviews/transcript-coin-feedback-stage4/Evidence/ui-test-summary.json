@@ -1,0 +1,22 @@
+{
+  "schema": "poch.stage4.ui-test-summary.v1",
+  "recordedAt": "2026-07-20T17:33:38+02:00",
+  "result": "Passed",
+  "totalTestCount": 3,
+  "passedTests": 3,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "device": {
+    "name": "Poch1441-QA-16Pro",
+    "model": "iPhone 16 Pro",
+    "platform": "iOS Simulator",
+    "osVersion": "26.2",
+    "deviceID": "DDF5A7CC-86E3-4FD8-A188-62514D857C3C"
+  },
+  "xcresult": "/tmp/poch1441-stage4-data-build/Logs/Test/Test-Poch1441-2026.07.20_17-29-36-+0200.xcresult",
+  "cases": [
+    "standard Queen-well drop reaches rest with exactly one coin",
+    "Reduced Motion reaches the same rest synchronously",
+    "default Track-B Phase 2 keeps the DEBUG transcript hook absent"
+  ]
+}

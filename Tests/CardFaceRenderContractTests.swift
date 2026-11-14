@@ -53,6 +53,10 @@ struct CardFaceRenderContractTests {
                "Clean runtime border strokes must not cover the baked handling rim")
         expect(source.contains(".padding(-accentLineWidth)"),
                "Semantic state rings must remain outside the materialized card surface")
+        expect(source.contains(".saturation(card.suit.isRed ? 2.32 : 1.42)") &&
+               source.contains(".contrast(1.18)") &&
+               source.contains(".brightness(0.06)"),
+               "The dark table must restore vivid red, deep black and luminous paper after baked patina")
 
         guard let bodyStart = source.range(of: "    var body: some View {")?.lowerBound,
               let helperStart = source.range(of: "    private func svgCard", range: bodyStart..<source.endIndex)?.lowerBound else {

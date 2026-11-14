@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 Set Table app icon</title>
+  <desc>Asymmetric flat table composition with Three Acts board and one card back.</desc>
+  <rect width="1024" height="1024" fill="#101821"/>
+  <circle cx="408" cy="600" r="412" fill="#0A1118" stroke="#344450" stroke-width="18"/>
+  <g fill="none" stroke-width="82" stroke-linecap="round">
+    <path d="M228.17 426.34A250 250 0 0 1 587.83 426.34" stroke="#C8A35A"/>
+    <path d="M648.32 531.09A250 250 0 0 1 468.48 842.57" stroke="#8D74AA"/>
+    <path d="M347.52 842.57A250 250 0 0 1 167.68 531.09" stroke="#6F9B8B"/>
+  </g>
+  <circle cx="408" cy="600" r="108" fill="#101821" stroke="#F4F0E8" stroke-width="34"/>
+  <path d="M408 540L468 600L408 660L348 600Z" fill="#C96E55"/>
+  <g transform="rotate(7 793 290)">
+    <rect x="690" y="124" width="206" height="332" rx="30" fill="#19242E" stroke="#F4F0E8" stroke-width="14"/>
+    <rect x="714" y="148" width="158" height="284" rx="15" fill="none" stroke="#41515D" stroke-width="8"/>
+    <path d="M793 238L845 290L793 342L741 290Z" fill="none" stroke="#F4F0E8" stroke-width="15"/>
+    <path d="M793 263L820 290L793 317L766 290Z" fill="#C96E55"/>
+  </g>
+</svg>

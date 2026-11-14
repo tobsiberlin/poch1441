@@ -1,0 +1,11 @@
+{
+  "result": "Passed",
+  "totalTestCount": 7,
+  "passedTests": 7,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "productContractSHA256": "8f50b68ff3141ad45f7d9eb751913c9c40af99678c15570a52821413561f6f16",
+  "testSourceSHA256": "160639cfa486464c90adf20952c66df2bcea9377349b15f5f7980e9bf6b0934e",
+  "diagnosticsCollection": "never",
+  "perTestTimeoutSeconds": 30
+}

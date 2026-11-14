@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1380 288">
+  <title>POCH 1441 board glyph wordmark v4</title>
+  <desc>Flat board glyph with a neutral POCH wordmark and evenly spaced provenance numerals.</desc>
+  <rect width="1380" height="288" fill="#101821"/>
+  <g transform="translate(28 28) scale(.225)">
+    <circle cx="512" cy="512" r="386" fill="#0A1118" stroke="#F4F0E8" stroke-width="24"/>
+    <g fill="#101821" stroke="#F4F0E8" stroke-width="24">
+      <circle cx="512" cy="266" r="58"/><circle cx="686" cy="338" r="58"/>
+      <circle cx="758" cy="512" r="58"/><circle cx="686" cy="686" r="58"/>
+      <circle cx="512" cy="758" r="58"/><circle cx="338" cy="686" r="58"/>
+      <circle cx="266" cy="512" r="58"/><circle cx="338" cy="338" r="58"/>
+      <circle cx="512" cy="512" r="108" stroke-width="28"/>
+    </g>
+    <circle cx="512" cy="266" r="24" fill="#C8A35A"/>
+    <circle cx="758" cy="512" r="24" fill="#8D74AA"/>
+    <circle cx="338" cy="686" r="24" fill="#6F9B8B"/>
+    <path d="M512 464L560 512L512 560L464 512Z" fill="#C96E55"/>
+  </g>
+  <g fill="#F4F0E8">
+    <path fill-rule="evenodd" d="M260 52H340C389 52 416 79 416 124C416 170 389 194 342 194H306V236H260ZM306 94V154H337C358 154 369 144 369 124C369 104 358 94 337 94Z"/>
+    <path fill-rule="evenodd" d="M524 52C467 52 434 90 434 144C434 199 469 236 524 236C580 236 614 199 614 144C614 90 581 52 524 52ZM524 96C554 96 568 115 568 144C568 174 554 192 524 192C495 192 480 174 480 144C480 115 495 96 524 96Z"/>
+    <path d="M795 86C775 63 751 52 717 52C666 52 634 89 634 144C634 200 668 236 717 236C752 236 777 224 796 199L761 173C750 187 738 193 720 193C694 193 681 175 681 144C681 113 694 95 720 95C738 95 750 101 761 115Z"/>
+    <path d="M814 52H861V119H929V52H976V236H929V164H861V236H814Z"/>
+  </g>
+  <g fill="#C8A35A">
+    <g transform="translate(1000 0)"><path d="M24 116L43 96H62V216H26V132H8V116Z"/></g>
+    <g transform="translate(1090 0)"><path fill-rule="evenodd" d="M42 96H76V166H84V200H76V216H42V200H4V170ZM42 139L19 166H42Z"/></g>
+    <g transform="translate(1180 0)"><path fill-rule="evenodd" d="M42 96H76V166H84V200H76V216H42V200H4V170ZM42 139L19 166H42Z"/></g>
+    <g transform="translate(1270 0)"><path d="M24 116L43 96H62V216H26V132H8V116Z"/></g>
+  </g>
+</svg>

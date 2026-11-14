@@ -1,0 +1,162 @@
+{
+  "canvas": [
+    1000,
+    1400
+  ],
+  "distribution": {
+    "edge_compression": 2,
+    "quiet": 1,
+    "repair_film": 3,
+    "stress_line": 4
+  },
+  "material_contract": {
+    "alpha_preserved": true,
+    "repair_film_opacity_range": [
+      0.13,
+      0.15
+    ],
+    "repair_film_reflection_edges": 1,
+    "repair_film_width_range": [
+      50,
+      66
+    ],
+    "stress_line_branches": [
+      1,
+      2
+    ],
+    "stress_line_luminance_reduction_percent": 40,
+    "stress_line_segment_breaks": [
+      2,
+      4
+    ],
+    "version": "V10.2"
+  },
+  "phone_variant_order": [
+    8,
+    1,
+    5,
+    2,
+    6,
+    3,
+    9
+  ],
+  "source_alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+  "variant_count": 10,
+  "variants": [
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        349,
+        258,
+        623,
+        342
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "80bbe4fd63dbe61fe5abe15cc0b019c00e03ba4cc915ebc193ec64d2c22697e5",
+      "variant": 1
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        225,
+        235,
+        501,
+        319
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "5e41bae6d169b38d89ef34019378c081bbe804332d99a7af843ae6a84a7bf0ba",
+      "variant": 2
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        409,
+        212,
+        681,
+        296
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "dddba15d5201f480733258cc860c78526b48316d12b6e5807af88b872f1c09ce",
+      "variant": 3
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        542,
+        223,
+        768,
+        307
+      ],
+      "primary_damage": "stress_line",
+      "sha256": "2baae1ee9a4e87bf2f49924652954e0749843502cb34315e23b2415b5336ebe2",
+      "variant": 4
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        384,
+        328,
+        714,
+        458
+      ],
+      "primary_damage": "repair_film",
+      "sha256": "aac5b540c749b2954ab83f9aabe7ad6b156e49cacb7c94a411443e440ddc6b0f",
+      "variant": 5
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        284,
+        264,
+        638,
+        370
+      ],
+      "primary_damage": "repair_film",
+      "sha256": "cb42cbdcb10fa573d555c12ac100fb2e3a6a4f6f5cfc25bdabe703cdf5c81129",
+      "variant": 6
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        328,
+        250,
+        642,
+        378
+      ],
+      "primary_damage": "repair_film",
+      "sha256": "8240090fe06048d7f375c2fb882b09a1953370d94bac1258c339f74ecfc2c848",
+      "variant": 7
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        140,
+        1195,
+        780,
+        1400
+      ],
+      "primary_damage": "edge_compression",
+      "sha256": "880daeaaed9d8671767d2721c9bc961c0e7376442f3c064d429dace1ffc979f4",
+      "variant": 8
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": [
+        820,
+        448,
+        1000,
+        1148
+      ],
+      "primary_damage": "edge_compression",
+      "sha256": "caec8b28cda60b08bdfcde14546632c7f7e3599b66c8beaa17567102860440b6",
+      "variant": 9
+    },
+    {
+      "alpha_sha256": "199bc9797d579fe33716febfbfa7ac9f3e1d0bbf201a9a19a8eae22dfab1c9e2",
+      "damage_bbox": null,
+      "primary_damage": "quiet",
+      "sha256": "61e8418fe9ff38af3cbc8a3aba51be6476ddc1edb7ec79a70f1a2ac24c34d535",
+      "variant": 10
+    }
+  ]
+}

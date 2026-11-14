@@ -146,7 +146,7 @@ struct FirstRunTimeSwipeOpening: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text(String(localized: "firstRun.timeSwipe.prelude.body",
-                                defaultValue: "Zieh die Zeit nach vorn - vom Wirtshaus bis an deinen Tisch."))
+                                defaultValue: "Zieh die Zeit nach vorn: vom Wirtshaus bis an deinen Tisch."))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color(hex: 0xF4F0E8).opacity(0.78))
                         .fixedSize(horizontal: false, vertical: true)
@@ -283,17 +283,21 @@ struct FirstRunTimeSwipeOpening: View {
 
     private func timeSeam(size: CGSize,
                           progress: Double) -> some View {
-        let x = FirstRunTimeSwipeProjection.handleCenterX(
+        let handleX = FirstRunTimeSwipeProjection.handleCenterX(
             progress: progress,
             width: Double(size.width)
         )
         let handleSymbol = FirstRunTimeSwipeProjection
             .handleSymbolName(progress: progress)
         return ZStack {
+            // The visible seam and its handle share one axis. At the two
+            // endpoints the image reveal still reaches the true edge, while
+            // the control remains fully visible inside the safe inset.
             Capsule()
                 .fill(Color(hex: 0xD8B466).opacity(0.64))
                 .frame(width: 2, height: size.height * 0.66)
-                .rotationEffect(.degrees(7))
+                .shadow(color: Color(hex: 0xD8B466).opacity(0.16), radius: 8)
+                .position(x: CGFloat(handleX), y: size.height * 0.42)
 
             Image(systemName: handleSymbol)
                 .font(.system(size: 12, weight: .bold))
@@ -305,8 +309,8 @@ struct FirstRunTimeSwipeOpening: View {
                         .overlay(Circle().strokeBorder(Color(hex: 0xD8B466).opacity(0.55)))
                 )
                 .shadow(color: .black.opacity(0.36), radius: 12, y: 6)
+                .position(x: CGFloat(handleX), y: size.height * 0.42)
         }
-        .position(x: CGFloat(x), y: size.height * 0.42)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
@@ -657,7 +661,7 @@ struct FirstRunTimeSwipeOpening: View {
                 title: String(localized: "firstRun.timeSwipe.origin.title",
                               defaultValue: "1441: Ein Tisch, drei Chancen."),
                 body: String(localized: "firstRun.timeSwipe.origin.body",
-                             defaultValue: "Die ältesten bekannten Spuren führen ins Jahr 1441. Schon damals verband Poch Trumpf, Einsatz und das Rennen um die letzte Karte.")
+                             defaultValue: "Die ältesten bekannten Spuren führen ins Jahr 1441. Heute verbindet Poch Trumpf, Einsatz und das Rennen um die letzte Karte.")
             )
         case .branch:
             return TimeSwipeCopy(
@@ -675,7 +679,7 @@ struct FirstRunTimeSwipeOpening: View {
                 title: String(localized: "firstRun.timeSwipe.today.title",
                               defaultValue: "Jetzt beginnt deine erste Runde."),
                 body: String(localized: "firstRun.timeSwipe.today.body",
-                             defaultValue: "Hol dir Chips mit passenden Trumpfkarten, fordere die anderen im Poch-Pott heraus und werde deine Karten zuerst los.")
+                             defaultValue: "Hol dir Chips mit passenden Trumpfkarten, poche um den Poch-Pott und spiele deine Hand zuerst leer.")
             )
         }
     }

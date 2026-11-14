@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>POCH 1441 · Melden Reinvention V2</title>
+  <style>
+    :root { color-scheme: dark; --paper:#f5f3ed; --muted:#8f96a3; --gold:#d8ae53; --cyan:#76dff5; }
+    * { box-sizing:border-box; }
+    html,body { min-height:100%; margin:0; background:#07090c; color:var(--paper); font-family:"Avenir Next",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    body { overflow-x:hidden; }
+    .shell { min-height:100vh; display:grid; grid-template-rows:68px 1fr; background:radial-gradient(circle at 50% 45%,#131821 0,#090c11 36%,#06070a 72%); }
+    header { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:0 28px; border-bottom:1px solid rgba(255,255,255,.08); background:rgba(5,7,10,.86); }
+    .brand { font-size:17px; font-weight:700; letter-spacing:-.02em; }
+    .brand span { color:var(--gold); font-weight:500; }
+    .proof { color:#8e96a5; font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; }
+    main { display:grid; grid-template-columns:minmax(240px,1fr) minmax(320px,390px) minmax(240px,1fr); align-items:center; gap:38px; padding:28px 38px 96px; }
+    .brief,.lens { max-width:330px; }
+    .brief { justify-self:end; }
+    .lens { justify-self:start; }
+    .eyebrow { color:var(--cyan); font-size:10px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; }
+    h1 { margin:14px 0 12px; font-size:clamp(34px,3.2vw,56px); line-height:.94; letter-spacing:-.055em; }
+    .axis { margin:0; color:#b6bcc6; font-size:16px; line-height:1.55; }
+    .count { margin-top:28px; color:rgba(255,255,255,.1); font-size:80px; font-weight:800; line-height:1; }
+    .phone { position:relative; width:min(390px,calc(100vw - 28px)); aspect-ratio:390/844; overflow:hidden; border:1px solid rgba(255,255,255,.16); border-radius:48px; background:#050608; box-shadow:0 36px 100px rgba(0,0,0,.65),0 0 0 7px rgba(255,255,255,.025); }
+    #stage { position:absolute; inset:0; }
+    #stage img { display:block; width:100%; height:100%; object-fit:cover; }
+    .scene-action { position:absolute; z-index:3; left:40%; right:5%; bottom:4.4%; height:5.2%; border:0; border-radius:16px; background:transparent; cursor:pointer; }
+    .scene-action:focus-visible { outline:3px solid var(--cyan); outline-offset:3px; }
+    .scene-flash { position:absolute; z-index:2; inset:0; pointer-events:none; opacity:0; background:radial-gradient(circle at 50% 46%,rgba(227,185,92,.28),transparent 36%); transition:opacity 180ms ease-out; }
+    #stage[data-confirmed] .scene-flash { opacity:1; }
+    .status { margin-top:16px; min-height:42px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.1); border-radius:999px; color:#9ca4b0; background:rgba(255,255,255,.035); font-size:12px; }
+    .status[data-live] { color:#0b0d10; border-color:#ffe0a0; background:var(--gold); }
+    dl { margin:18px 0 0; display:grid; gap:16px; }
+    dt { color:#f2f0eb; font-size:10px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
+    dd { margin:5px 0 0; color:#aab1bc; font-size:13px; line-height:1.5; }
+    .cost { color:#dc9a9a; }
+    .keys { margin-top:22px; color:#78808c; font-size:11px; }
+    @media (max-width:980px) {
+      main { grid-template-columns:1fr; justify-items:center; gap:22px; padding:24px 14px 110px; }
+      .brief,.lens { justify-self:center; width:min(390px,calc(100vw - 28px)); max-width:none; }
+      .count { display:none; }
+      .lens { padding-bottom:20px; }
+    }
+    @media (prefers-reduced-motion:reduce) { .scene-flash { transition:none; } }
+
+    .proto-picker {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2147483647;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(10, 10, 10, 0.82);
+      -webkit-backdrop-filter: blur(12px) saturate(1.4);
+      backdrop-filter: blur(12px) saturate(1.4);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+        0 8px 24px rgba(0, 0, 0, 0.24),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .proto-picker-highlight {
+      position: absolute;
+      top: 4px;
+      left: 0;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      will-change: transform;
+    }
+
+    .proto-picker[data-ready] .proto-picker-highlight {
+      transition:
+        transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+        width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+    }
+
+    .proto-picker-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.55);
+      font: inherit;
+      cursor: pointer;
+      transition: color 150ms ease-out;
+    }
+
+    .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+    .proto-picker-item:active { transform: scale(0.97); }
+    .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+    .proto-picker-item[data-active] { color: #fff; }
+    .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+    .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+    .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">POCH <span>1441</span></div>
+      <div class="proof">Melden · fünf neue Designs · Produktionscode unberührt</div>
+    </header>
+    <main>
+      <aside class="brief">
+        <div class="eyebrow">Richtung <span id="position">1 von 5</span></div>
+        <h1 id="title">Trumpf-Sternbild</h1>
+        <p class="axis" id="axis"></p>
+        <div class="count" id="count">01</div>
+      </aside>
+      <section>
+        <div class="phone" aria-label="Poch-1441-Melden-Mockup im iPhone-Format">
+          <div id="stage"></div>
+        </div>
+        <div class="status" id="status" aria-live="polite">Gültiger Spielzustand · bereit</div>
+      </section>
+      <aside class="lens">
+        <div class="eyebrow">Entscheidungslinse</div>
+        <dl>
+          <div><dt>Was neu ist</dt><dd id="new"></dd></div>
+          <div><dt>Was echt bleibt</dt><dd id="real"></dd></div>
+          <div><dt>Wann es gewinnt</dt><dd id="wins"></dd></div>
+          <div><dt>Kosten</dt><dd class="cost" id="cost"></dd></div>
+        </dl>
+        <div class="keys">1-5 · ← → · R zum Zurücksetzen</div>
+      </aside>
+    </main>
+  </div>
+
+  <nav class="proto-picker" aria-label="Prototype variants">
+    <span class="proto-picker-highlight" aria-hidden="true"></span>
+    <button class="proto-picker-item" data-active aria-current="true">Sternbild</button>
+    <button class="proto-picker-item">Explosionsring</button>
+    <button class="proto-picker-item">Beweistisch</button>
+    <button class="proto-picker-item">Handbühne</button>
+    <button class="proto-picker-item">Doppellinse</button>
+    <span class="proto-picker-divider" aria-hidden="true"></span>
+    <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+  </nav>
+
+  <script>
+    const variants = [
+      {name:'Trumpf-Sternbild',file:'01-constellation.png',axis:'Die gültige Karo-Folge verbindet Hand und Ring als räumliche Regelkarte.',new:'Goldene Kontaktlinien machen das Muster körperlich, ohne den Poch-Ring zu ersetzen.',real:'Originalring, echte Patina-Karten 7♦ 8♦ 9♦, reale Gegner und Folge-Pott.',wins:'Wenn Regelverständnis und ikonische Eigenheit gleichzeitig tragen sollen.',cost:'Zusätzliche Projektions- und VoiceOver-Logik für die Kontaktlinien.',action:'Folge melden',done:'Folge gemeldet · 4 Münzen lösen sich.'},
+      {name:'Explosionsring',file:'02-exploded-ring.png',axis:'Hand, Regel und Auszahlung werden als drei getrennte Tiefenebenen lesbar.',new:'Der Meldemoment erhält eine physische Z-Achse statt einer weiteren Infokarte.',real:'Derselbe Ringzustand, dieselbe Karo-Folge und echte Spielmünzen.',wins:'Wenn Material, Tiefe und Ursache-Wirkung den Premiumcharakter führen sollen.',cost:'Native Tiefenanimation und Reduced-Motion-Ersatz sind anspruchsvoll.',action:'Auszahlen',done:'Auszahlung bestätigt · Ebenen schließen sich.'},
+      {name:'Beweistisch',file:'03-evidence-table.png',axis:'Jede Auszahlung bleibt als nachvollziehbare Beweiskette sichtbar.',new:'Ring, drei Kartenbelege und Hand werden asymmetrisch wie ein Präzisionsinstrument geordnet.',real:'Gültige Karten, Trumpfzustand, Ringbelegung und Auszahlung bleiben unverändert.',wins:'Wenn Klarheit, Auditierbarkeit und Tutorialstärke Vorrang haben.',cost:'Weniger mystisch und weniger klassisch brettspielhaft.',action:'Belege melden',done:'Drei Belege bestätigt · Auszahlung +4.'},
+      {name:'Handbühne',file:'04-hand-theatre.png',axis:'Die echte Kartenkombination übernimmt die Bühne, während der Ring im Hintergrund reagiert.',new:'Licht, Maßstab und Tiefenstaffelung machen die Hand zum High-Impact-Moment.',real:'Originalkarten, Originalring, Gegner und Folge-Pott.',wins:'Wenn Melden emotional und sofort verständlich werden soll.',cost:'Für häufiges Expertenspiel muss die Inszenierung stark verkürzt werden.',action:'Folge melden',done:'Folge gemeldet · Bühne gibt den Tisch frei.'},
+      {name:'Doppellinse',file:'05-dual-lens.png',axis:'Ursache in der Hand und Wirkung im Ring bleiben gleichzeitig sichtbar.',new:'Zwei Materialwelten teilen den Screen entlang einer verschiebbaren optischen Naht.',real:'Echte Handkarten, Originalring und Auszahlung +4.',wins:'Wenn Lernen ohne Popup und ohne Blickwechsel funktionieren soll.',cost:'Die Zweiteilung beansprucht permanent Kompositionsraum.',action:'Folge melden',done:'Folge gemeldet · beide Linsen stimmen überein.'}
+    ];
+
+    const stage = document.getElementById('stage');
+    const picker = document.querySelector('.proto-picker');
+    const highlight = picker.querySelector('.proto-picker-highlight');
+    const items = [...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+    const replay = picker.querySelector('.proto-picker-replay');
+    let current = 0;
+
+    function moveHighlight() {
+      const el = items[current];
+      highlight.style.width = el.offsetWidth + 'px';
+      highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+    }
+
+    function renderVariant() {
+      const variant = variants[current];
+      stage.innerHTML = `<img src="mockups/${variant.file}" alt="${variant.name} als neues Melden-Design mit echten Poch-1441-Komponenten"><div class="scene-flash"></div><button class="scene-action" aria-label="${variant.action}"></button>`;
+      document.getElementById('position').textContent = `${current + 1} von 5`;
+      document.getElementById('title').textContent = variant.name;
+      document.getElementById('axis').textContent = variant.axis;
+      document.getElementById('count').textContent = String(current + 1).padStart(2,'0');
+      document.getElementById('new').textContent = variant.new;
+      document.getElementById('real').textContent = variant.real;
+      document.getElementById('wins').textContent = variant.wins;
+      document.getElementById('cost').textContent = variant.cost;
+      const status = document.getElementById('status');
+      status.textContent = `Gültiger Spielzustand · ${variant.action}`;
+      status.removeAttribute('data-live');
+      stage.querySelector('.scene-action').addEventListener('click', () => {
+        stage.toggleAttribute('data-confirmed', true);
+        status.textContent = variant.done;
+        status.setAttribute('data-live','');
+      });
+      document.title = `POCH 1441 · ${variant.name}`;
+    }
+
+    function mount(i) {
+      stage.innerHTML = '';
+      requestAnimationFrame(renderVariant);
+    }
+
+    function setActive(i) {
+      if (i < 0 || i >= variants.length) return;
+      current = i;
+      items.forEach((el, j) => {
+        el.toggleAttribute('data-active', j === i);
+        if (j === i) el.setAttribute('aria-current', 'true');
+        else el.removeAttribute('aria-current');
+      });
+      moveHighlight();
+      const url = new URL(location);
+      url.searchParams.set('v', i + 1);
+      try { history.replaceState(null, '', url); } catch (error) {}
+      mount(i);
+    }
+
+    items.forEach((el, i) => el.addEventListener('click', () => setActive(i)));
+    replay?.addEventListener('click', () => mount(current));
+    window.addEventListener('resize', moveHighlight);
+
+    document.addEventListener('keydown', (e) => {
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= variants.length) setActive(num - 1);
+      else if (e.key === 'ArrowRight') setActive((current + 1) % variants.length);
+      else if (e.key === 'ArrowLeft') setActive((current - 1 + variants.length) % variants.length);
+      else if (e.key === 'r' || e.key === 'R') mount(current);
+    });
+
+    setActive(Math.max(0,Math.min(4,(parseInt(new URLSearchParams(location.search).get('v'),10)||1)-1)));
+    requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute('data-ready', '')));
+  </script>
+</body>
+</html>

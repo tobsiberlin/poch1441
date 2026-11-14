@@ -1,0 +1,12 @@
+{
+  "schema": "poch.stage4.resolved-red-visual.v1",
+  "recordedAt": "2026-07-20T17:33:38+02:00",
+  "verdict": "RED_RESOLVED_IN_LATER_CANDIDATE",
+  "assets": [
+    "resolved-red-flat-coin-uncut.mp4",
+    "resolved-red-flat-coin-contact-sheet.png"
+  ],
+  "finding": "The first runtime candidate read as a flat orange disc with insufficient relief and weak tray-lip occlusion.",
+  "resolution": "The final candidate uses the byte-bound V3 material atlas and recomposes the real Queen front lip.",
+  "historicGateNote": "This does not relabel the separate historic Coin Transcript V1 visual RED gate."
+}

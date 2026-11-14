@@ -1,0 +1,76 @@
+{
+  "status": "APPROVED",
+  "approved": true,
+  "reproducible": true,
+  "scope": "tasks/reviews/motion-cards-v3/**",
+  "assets": {
+    "cardBack": "W2",
+    "cardFronts": "V10"
+  },
+  "viewports": [
+    {
+      "size": "390x844",
+      "checksPassed": 26,
+      "checksFailed": 0,
+      "flightDurationsMs": [580, 580, 580, 580, 580, 573, 573],
+      "maximumExtractionAlignmentErrorPx": 0.019,
+      "shadowProjection": [
+        { "phase": "deal", "sampledFrames": 37, "maximumErrorPx": 0.001, "maximumLiftSeparationPx": 46.710 },
+        { "phase": "play", "sampledFrames": 23, "maximumErrorPx": 0.000, "maximumLiftSeparationPx": 20.572 },
+        { "phase": "return", "sampledFrames": 23, "maximumErrorPx": 0.000, "maximumLiftSeparationPx": 29.354 }
+      ],
+      "revealLayering": { "card": 60, "shadow": 50 },
+      "returnLayering": { "card": 60, "shadow": 50 },
+      "returnedCardZStack": [20, 21, 22, 23, 24],
+      "reducedNeighborJumpPx": 0,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    },
+    {
+      "size": "667x375",
+      "checksPassed": 26,
+      "checksFailed": 0,
+      "flightDurationsMs": [580, 580, 546, 501, 458, 420, 420],
+      "maximumExtractionAlignmentErrorPx": 0.012,
+      "shadowProjection": [
+        { "phase": "deal", "sampledFrames": 39, "maximumErrorPx": 0.003, "maximumLiftSeparationPx": 46.620 },
+        { "phase": "play", "sampledFrames": 16, "maximumErrorPx": 0.002, "maximumLiftSeparationPx": 25.210 },
+        { "phase": "return", "sampledFrames": 16, "maximumErrorPx": 0.002, "maximumLiftSeparationPx": 26.032 }
+      ],
+      "revealLayering": { "card": 60, "shadow": 50 },
+      "returnLayering": { "card": 60, "shadow": 50 },
+      "returnedCardZStack": [20, 21, 22, 23, 24],
+      "reducedNeighborJumpPx": 0,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    }
+  ],
+  "evidence": [
+    {
+      "viewport": "390x844",
+      "screens": "evidence/390x844/frame-00.png...frame-15.png",
+      "contactSheet": "evidence/contact-sheet-390x844.png",
+      "contactSheetSize": "780x1688",
+      "contactSheetSha256": "73fb90d128415dc99503c0344f7d8c19c6c385cf5d36825478aa969c0a057b0e"
+    },
+    {
+      "viewport": "667x375",
+      "screens": "evidence/667x375/frame-00.png...frame-15.png",
+      "contactSheet": "evidence/contact-sheet-667x375.png",
+      "contactSheetSize": "1336x751",
+      "contactSheetSha256": "e8c031ec4b32afc6c7582614cc282742659d73650a6594c5f78e21a611ddcf02"
+    }
+  ],
+  "visualReview": {
+    "dealCadence": "Calm and readable; at most two cards are in transit.",
+    "spatialArcs": "Weighted symmetric travel with separate lifted card and linear table projection.",
+    "fanOcclusion": "Reveal and return remain above the full fan until controlled slot insertion.",
+    "repeatedUse": "No 72 ms conveyor cascade; 360 ms cadence preserves legibility without excessive delay.",
+    "reducedMotion": "Live retarget remains interruptible; neighbors stay fixed and spatial changes occur at opacity zero.",
+    "remainingBlockers": []
+  },
+  "command": "PLAYWRIGHT_CORE_PATH=<path> CHROMIUM_EXECUTABLE_PATH=<path> node tasks/reviews/motion-cards-v3/qa.mjs",
+  "decision": "APPROVED - automated contracts and both visual contact sheets passed review."
+}

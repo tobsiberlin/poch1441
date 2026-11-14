@@ -1,0 +1,21 @@
+{
+  "status": "RESOLVED_TEST_HARNESS_RED",
+  "executedAt": "2026-07-20T16:26:23+02:00",
+  "total": 3,
+  "passed": 1,
+  "failed": 2,
+  "failedTests": [
+    "testStandardTranscriptReachesEightContactsWithAtMostTwoMovingCards",
+    "testReducedMotionTranscriptReachesEightContactsWithoutSpatialFlight"
+  ],
+  "failure": "The accessibility predicate required the transient exact string deal 8/ and missed the counter as it progressed beyond eight.",
+  "productEvidenceAtFailure": {
+    "standardFinalObservedValue": "deal 23/31",
+    "reducedMotionFinalObservedValue": "deal 26/31",
+    "skipTest": "PASS"
+  },
+  "resolution": "The wait now parses the live landed count numerically and accepts values greater than or equal to eight while sampling the moving-card count.",
+  "productCodeChangedForResolution": false,
+  "supersededBy": "ui-test-summary.json"
+}
+

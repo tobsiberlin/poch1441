@@ -1,0 +1,15 @@
+{
+  "humanWallclockGate": "GREEN",
+  "productGate": "GREEN",
+  "productionIntegrationAllowed": true,
+  "greenHumanChecks": [
+    "QuickTime playback is upright for Standard, Reduced Motion, and Cancellation",
+    "motion cadence and physical continuity remain visually coherent",
+    "committed cancellation cards visibly complete travel, contact, settle, and rest",
+    "future cancellation cards remain in deck with no return path or fade-out"
+  ],
+  "schemaVersion": 1,
+  "technicalGate": "GREEN",
+  "reviewedAt": "2026-07-20T15:41:08+02:00",
+  "reviewer": "Lead"
+}

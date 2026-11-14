@@ -1,8 +1,9 @@
 # Table Foley Sources
 
-The three card contacts are deterministic crops of real card-dealing Foley by
-Freesound user `el_boss`. Each source is licensed under CC0 1.0 Universal.
-The build script verifies the downloaded preview fingerprint before processing.
+The three card contacts are deterministic crops of three separate, real
+card-dealing performances by Freesound user `el_boss`. Each source is licensed
+under CC0 1.0 Universal. The build script verifies every downloaded preview
+fingerprint before processing; there is no synthesized or pitch-shifted clone.
 
 | Asset | Source | Preview SHA-256 |
 | --- | --- | --- |
@@ -11,6 +12,19 @@ The build script verifies the downloaded preview fingerprint before processing.
 | `card-deal-03.caf` | [Playing Card Deal Variation 3](https://freesound.org/people/el_boss/sounds/571575/) | `024eea9ea74466dd14f1110923d0d6b0535d8de269409296a2537a0a7b2f0949` |
 
 License: [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)
+
+## Authored contact differences
+
+| Asset | Crop | Paper/table band | Peak ceiling | Physical role |
+| --- | ---: | ---: | ---: | --- |
+| `card-deal-01.caf` | 300 ms | 240-9,800 Hz | 0.56 | light paper flick |
+| `card-deal-02.caf` | 360 ms | 135-6,400 Hz | 0.64 | medium card landing |
+| `card-deal-03.caf` | 440 ms | 85-4,600 Hz | 0.70 | fuller card/table contact |
+
+Before any CAF is written, the generator rejects a set whose durations are too
+similar, RMS dynamics are too flat, zero-crossing tone is too uniform, or any
+pair is highly correlated. This preserves organic take-to-take variation while
+the runtime chooses among the three real performances deterministically.
 
 Rebuild with:
 

@@ -1,0 +1,130 @@
+{
+  "candidates": [
+    {
+      "clean_rotation_rms": 0.93406,
+      "damage": "feine Stresslinie",
+      "damage_alpha_coverage": 0.00171,
+      "damage_variant": 1,
+      "direction": "Kleines Tapisserie-/Rosettenrepeat",
+      "name": "Tapisserie-Rosette",
+      "number": 1,
+      "phone_pattern_contrast": 18.339,
+      "png_sha256": "5d8692aaf4ed7be5def57d48978d2229cf755614a3b83ddca4a5d809c314c424",
+      "scores": {
+        "authenticity": 9.0,
+        "phone": 8.5,
+        "printability": 9.1
+      },
+      "slug": "tapestry-rosette",
+      "svg_sha256": "91aed522e6434e81b67430e9604b804562badf6736f44619d49f8a58d5ff488c",
+      "verdict": "Eigenst\u00e4ndig und stofflich; in der Hand ruhig, ohne Tapetenhaftigkeit."
+    },
+    {
+      "clean_rotation_rms": 0.90789,
+      "damage": "matter Reparaturfilm",
+      "damage_alpha_coverage": 0.01322,
+      "damage_variant": 5,
+      "direction": "Guillochiertes Bandgewebe",
+      "favorite": true,
+      "name": "Guilloche-Bandgewebe",
+      "number": 2,
+      "phone_pattern_contrast": 11.096,
+      "png_sha256": "85aed0275a095f42bcb509486e9163a07888fc1a63356cdd9d2b061addedfdcb",
+      "scores": {
+        "authenticity": 9.6,
+        "phone": 9.2,
+        "printability": 9.4
+      },
+      "slug": "guilloche-weave",
+      "svg_sha256": "908af0e854c0d14201fb035dcbc2b52d6af6448471001c8e44b48334adf735b2",
+      "verdict": "Beste Balance: historisch glaubw\u00fcrdig, unverwechselbar und mobil klar."
+    },
+    {
+      "clean_rotation_rms": 0.92192,
+      "damage": "untere Kantenkompression",
+      "damage_alpha_coverage": 0.0300857,
+      "damage_variant": 8,
+      "direction": "Feine botanische Gravur ohne Kitsch",
+      "name": "Botanische Gravur",
+      "number": 3,
+      "phone_pattern_contrast": 17.273,
+      "png_sha256": "f8c171180d22c9dbdee92a3ca2d86a55be0a1fbfd3e5991b26bfde719f39721a",
+      "scores": {
+        "authenticity": 9.3,
+        "phone": 7.8,
+        "printability": 8.6
+      },
+      "slug": "botanical-engraving",
+      "svg_sha256": "812d171e30ff6f3c2162d71ff46defde5f5496f886a87b3af05528e65c52f57b",
+      "verdict": "Sehr authentisch und charaktervoll; verliert im kleinsten F\u00e4cher etwas Linie."
+    },
+    {
+      "clean_rotation_rms": 1.06559,
+      "damage": "verzweigte Stresslinie",
+      "damage_alpha_coverage": 0.0018907,
+      "damage_variant": 3,
+      "direction": "Kompakte Karo-Webung",
+      "name": "Karo-Webung",
+      "number": 4,
+      "phone_pattern_contrast": 13.553,
+      "png_sha256": "61c312dee888c065e466a740da49afb9b7084fc98f5a275354ee1358745e01d6",
+      "scores": {
+        "authenticity": 8.8,
+        "phone": 9.3,
+        "printability": 9.5
+      },
+      "slug": "diamond-weave",
+      "svg_sha256": "e5a8e03e88b0a007a7436f489c3187ff718dba3833e345f827f7cd5e8f898b39",
+      "verdict": "Am klarsten im Phone-F\u00e4cher; das Poch-Karo bleibt reine Webstruktur."
+    },
+    {
+      "clean_rotation_rms": 0.91676,
+      "damage": "matter Reparaturfilm",
+      "damage_alpha_coverage": 0.0126286,
+      "damage_variant": 6,
+      "direction": "Ruhiges Mikro-Stern-/Punktgitter",
+      "name": "Mikro-Sterngitter",
+      "number": 5,
+      "phone_pattern_contrast": 6.533,
+      "png_sha256": "9062e2843195be2b89b60eb7e8fb5ae861cff0ecff91b587e64395a2d236a2f2",
+      "scores": {
+        "authenticity": 8.6,
+        "phone": 8.8,
+        "printability": 9.6
+      },
+      "slug": "micro-star-grid",
+      "svg_sha256": "5b287b6c31ca8bb441ef01adcd6499834a135d6dc98136c6d4589840a8063894",
+      "verdict": "Leise und robust druckbar; bewusst weniger erz\u00e4hlerisch als 1, 2 und 3."
+    },
+    {
+      "clean_rotation_rms": 1.03437,
+      "damage": "rechte Kantenkompression",
+      "damage_alpha_coverage": 0.03234,
+      "damage_variant": 9,
+      "direction": "Zweifarbiger historischer Linolschnitt",
+      "name": "Zweifarbiger Linolschnitt",
+      "number": 6,
+      "phone_pattern_contrast": 35.805,
+      "png_sha256": "ca8470ddad687d5c078431c09275e81352f576bd414b35169ccaf6e00bb59844",
+      "scores": {
+        "authenticity": 9.1,
+        "phone": 8.9,
+        "printability": 8.7
+      },
+      "slug": "two-tone-linocut",
+      "svg_sha256": "6cf652151e15814729034538c81507fc7bffad42e3d57fb6da5ad84c8f8087d1",
+      "verdict": "Kr\u00e4ftigster eigener Charakter; etwas rustikaler als der Favorit."
+    }
+  ],
+  "canvas": [
+    1000,
+    1400
+  ],
+  "favorite": 2,
+  "favorite_name": "Guilloche-Bandgewebe",
+  "palette": {
+    "charcoal": "#292C2D",
+    "indigo": "#34495B",
+    "paper": "#D4C5A7"
+  }
+}

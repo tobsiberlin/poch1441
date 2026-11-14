@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" shape-rendering="geometricPrecision">
+  <title>POCH 1441 knock glyph v6 monochrome</title>
+  <desc>One-colour master for engraving, embossing, printing and small-scale reproduction.</desc>
+  <defs>
+    <mask id="ring-mask">
+      <rect width="1024" height="1024" fill="black"/>
+      <ellipse cx="512" cy="512" rx="340" ry="326" fill="white"/>
+      <ellipse cx="512" cy="512" rx="174" ry="166" fill="black"/>
+      <path d="M760 220L824 280L770 302Z" fill="black"/>
+      <rect x="256" y="375" width="66" height="28" rx="14" fill="black" transform="rotate(-60 289 389)"/>
+      <rect x="350" y="711" width="66" height="28" rx="14" fill="black" transform="rotate(30 383 725)"/>
+      <rect x="702" y="621" width="66" height="28" rx="14" fill="black" transform="rotate(-60 735 635)"/>
+    </mask>
+  </defs>
+
+  <rect width="1024" height="1024" fill="black" mask="url(#ring-mask)"/>
+  <path d="M512 482L542 512L512 542L482 512Z" fill="black"/>
+</svg>

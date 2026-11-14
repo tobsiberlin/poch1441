@@ -1,0 +1,79 @@
+{
+  "sequences": [
+    {
+      "sequence": "standard",
+      "capturedFrames": 196,
+      "videoFrames": 196,
+      "videoDurationSeconds": 3.2683333333333335,
+      "nominalFrameRate": 60,
+      "medianCaptureIntervalMilliseconds": 16.662249981891364,
+      "p95CaptureIntervalMilliseconds": 17.497708380687982,
+      "maximumCaptureIntervalMilliseconds": 17.704291676636785,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    },
+    {
+      "sequence": "reducedMotion",
+      "capturedFrames": 82,
+      "videoFrames": 82,
+      "videoDurationSeconds": 1.3633333333333333,
+      "nominalFrameRate": 60.148514,
+      "medianCaptureIntervalMilliseconds": 16.65674999821931,
+      "p95CaptureIntervalMilliseconds": 17.459041613619775,
+      "maximumCaptureIntervalMilliseconds": 17.7149583469145,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0
+    },
+    {
+      "sequence": "cancellation",
+      "capturedFrames": 121,
+      "videoFrames": 121,
+      "videoDurationSeconds": 2.015,
+      "nominalFrameRate": 60.05004,
+      "medianCaptureIntervalMilliseconds": 16.664375027175993,
+      "p95CaptureIntervalMilliseconds": 17.38145831041038,
+      "maximumCaptureIntervalMilliseconds": 17.744041688274592,
+      "maximumActiveCards": 2,
+      "maximumActiveCardsAtPeel": 2,
+      "invisibleWaitSeconds": 0,
+      "cancellation": {
+        "committedCardIndices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "futureCardIndices": [
+          5,
+          6,
+          7
+        ],
+        "drainCompleteSeconds": 1.710632874808307,
+        "postCancelPhaseTraces": {
+          "3": [
+            "travel",
+            "contact",
+            "settle",
+            "rest"
+          ],
+          "4": [
+            "travel",
+            "contact",
+            "settle",
+            "rest"
+          ]
+        },
+        "postCancelPeelCount": 0
+      }
+    }
+  ],
+  "result": "PASS",
+  "sourceContractSHA256": "2294f03d7fa1079b737ff6274aad36555d1a3acad018b8f0f0659a3251e8487c",
+  "viewport": "402x874",
+  "syntheticProgressUsed": false,
+  "productAudioIncluded": false,
+  "materialApprovalClaimed": false
+}

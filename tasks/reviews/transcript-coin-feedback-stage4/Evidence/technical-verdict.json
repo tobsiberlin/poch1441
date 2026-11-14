@@ -1,0 +1,25 @@
+{
+  "schema": "poch.stage4.technical-verdict.v1",
+  "recordedAt": "2026-07-20T17:33:38+02:00",
+  "verdict": "GREEN",
+  "scope": "isolated DEBUG Queen-well drop only",
+  "checks": {
+    "appBuild": "GREEN",
+    "coinTranscript": "GREEN",
+    "sharedTimelineRegression": "GREEN",
+    "coinTransferLifecycle": "GREEN",
+    "contactCueExactOnce": "GREEN",
+    "integrationContract": "GREEN",
+    "phase2RegressionContract": "GREEN",
+    "pochKitRuleCore": "63/63 PASS",
+    "uiFlows": "3/3 PASS",
+    "audioFingerprintTechnical": "GREEN",
+    "audioFingerprintHumanSpeaker": "PENDING",
+    "physical240fps96kHzSync": "PENDING_NO_DEVICE",
+    "physicalHapticCharacter": "PENDING_NO_DEVICE"
+  },
+  "warnings": [
+    "Expected AppIntents metadata skip because the target has no AppIntents dependency"
+  ],
+  "productionIntegration": "BLOCKED"
+}

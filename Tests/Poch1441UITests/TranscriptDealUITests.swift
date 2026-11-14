@@ -18,6 +18,7 @@ final class TranscriptDealUITests: XCTestCase {
         XCTAssertTrue(status.exists, "Der Standardpfad muss acht echte Kontaktmarker erreichen.")
         XCTAssertLessThan(elapsed, 5, "Acht sichtbare Kontakte dürfen keine versteckte Langzeitpause enthalten.")
         assertAtMostTwoMovingCards(in: app, samples: 24)
+        assertOpponentRailSeparatedFromBoard(in: app)
         attachScreenshot(of: app, named: "transcript-deal-stage3-standard-eight-contact")
     }
 
@@ -86,6 +87,27 @@ final class TranscriptDealUITests: XCTestCase {
     private func dealStatus(in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any)
             .matching(identifier: "phase1.presentation").firstMatch
+    }
+
+    @MainActor
+    private func assertOpponentRailSeparatedFromBoard(in app: XCUIApplication) {
+        let board = app.images.matching(identifier: "table.world.phase1.board").firstMatch
+        XCTAssertTrue(board.waitForExistence(timeout: 4), "Das Poch-Brett muss sichtbar sein.")
+
+        let seats = (1...3).map {
+            app.descendants(matching: .any)["phase1.deal.seat.\($0)"]
+        }
+        for (index, seat) in seats.enumerated() {
+            XCTAssertTrue(seat.waitForExistence(timeout: 4), "Mitspielerplatz \(index + 1) fehlt.")
+            XCTAssertFalse(seat.frame.intersects(board.frame),
+                           "Karten und Gesicht von Platz \(index + 1) dürfen nicht am Brett kleben: \(seat.frame), \(board.frame)")
+        }
+        for left in seats.indices {
+            for right in seats.indices where right > left {
+                XCTAssertFalse(seats[left].frame.intersects(seats[right].frame),
+                               "Mitspielerplätze brauchen getrennte Zielzonen.")
+            }
+        }
     }
 
     @MainActor

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 compact board glyph v5</title>
+  <desc>Solid warm Poch disc with eight recessed outer wells, one central well and three equal game pieces.</desc>
+  <rect width="1024" height="1024" fill="#101821"/>
+  <circle cx="512" cy="512" r="390" fill="#31414D" stroke="#F4F0E8" stroke-width="16"/>
+  <g fill="#0A1118">
+    <circle cx="512" cy="262" r="64"/>
+    <circle cx="689" cy="335" r="64"/>
+    <circle cx="762" cy="512" r="64"/>
+    <circle cx="689" cy="689" r="64"/>
+    <circle cx="512" cy="762" r="64"/>
+    <circle cx="335" cy="689" r="64"/>
+    <circle cx="262" cy="512" r="64"/>
+    <circle cx="335" cy="335" r="64"/>
+    <circle cx="512" cy="512" r="114"/>
+  </g>
+  <circle cx="512" cy="262" r="38" fill="#C8A35A"/>
+  <circle cx="762" cy="512" r="38" fill="#8D74AA"/>
+  <circle cx="335" cy="689" r="38" fill="#6F9B8B"/>
+  <path d="M512 476L548 512L512 548L476 512Z" fill="#C96E55"/>
+</svg>

@@ -19,7 +19,7 @@ enum FirstRunTimeChapter: Int, CaseIterable, Equatable, Sendable {
 /// without launching the app.
 enum FirstRunTimeSwipeProjection {
     static let branchProgress = 0.55
-    static let handleSafeInset = 34.0
+    static let handleSafeInset = 24.0
 
     static func clamped(_ progress: Double) -> Double {
         min(max(progress, 0), 1)
@@ -63,6 +63,11 @@ enum FirstRunTimeSwipeProjection {
         guard width > 0 else { return 0 }
         let inset = min(handleSafeInset, width / 2)
         return min(max(width * clamped(progress), inset), width - inset)
+    }
+
+    static func seamX(progress: Double, width: Double) -> Double {
+        guard width > 0 else { return 0 }
+        return width * clamped(progress)
     }
 
     static func handleSymbolName(progress: Double) -> String {

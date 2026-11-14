@@ -276,7 +276,7 @@
     "firstRun.timeSwipe.prelude.body" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Zieh die Zeit nach vorn - vom Wirtshaus bis an deinen Tisch." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Zieh die Zeit nach vorn: vom Wirtshaus bis an deinen Tisch." } },
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Draw Poch from the tavern to today’s table. Then play it yourself." } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Lleva Poch de la taberna a la mesa de hoy. Después juegas tú." } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fais passer Poch de l’auberge à la table d’aujourd’hui. Puis joue toi-même." } },
@@ -324,7 +324,7 @@
     "firstRun.timeSwipe.origin.body" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die ältesten bekannten Spuren führen ins Jahr 1441. Schon damals verband Poch Trumpf, Einsatz und das Rennen um die letzte Karte." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die ältesten bekannten Spuren führen ins Jahr 1441. Heute verbindet Poch Trumpf, Einsatz und das Rennen um die letzte Karte." } },
         "en" : { "stringUnit" : { "state" : "translated", "value" : "The first traces lead to 1441: cards, stakes, and three very different games in one round." } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Las primeras huellas llevan a 1441: cartas, apuestas y tres juegos muy distintos en una ronda." } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "Les premières traces remontent à 1441 : cartes, mises et trois jeux très différents en une manche." } },
@@ -384,7 +384,7 @@
     "firstRun.timeSwipe.today.body" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hol dir Chips mit passenden Trumpfkarten, fordere die anderen im Poch-Pott heraus und werde deine Karten zuerst los." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hol dir Chips mit passenden Trumpfkarten, poche um den Poch-Pott und spiele deine Hand zuerst leer." } },
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Trump brings quick wins. Then you risk chips in the Poch pot. Finally, be the first to empty your hand." } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "El triunfo da ganancias rápidas. Luego arriesgas fichas en el bote Poch. Al final, vacía tu mano antes que nadie." } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "L’atout offre des gains rapides. Puis tu risques des jetons dans le pot du Poch. Enfin, vide ta main le premier." } },
@@ -427,6 +427,222 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Gioca senza suggerimenti" } },
         "nl" : { "stringUnit" : { "state" : "translated", "value" : "Zonder aanwijzingen spelen" } },
         "pl" : { "stringUnit" : { "state" : "translated", "value" : "Graj bez podpowiedzi" } }
+      }
+    },
+    "firstRun.tableTour.table.eyebrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "HANA · DAS BRETT" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "HANA · THE BOARD" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "HANA · EL TABLERO" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "HANA · LE PLATEAU" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "HANA · IL TAVOLIERE" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "HANA · HET BORD" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "HANA · PLANSZA" } }
+      }
+    },
+    "firstRun.tableTour.table.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Schau dir erst das Pochbrett an." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Before the cards fall, get to know the table." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes de repartir, conoce la mesa." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Avant de distribuer, découvre la table." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Prima di distribuire, scopri il tavolo." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Leer de tafel kennen voordat de kaarten vallen." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Zanim rozdamy karty, poznaj stół." } }
+      }
+    },
+    "firstRun.tableTour.table.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Außen liegen sieben Kartenfelder und der Poch-Pott. Die Chips in der Mitte gewinnt, wer zuerst keine Karten mehr hat." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Seven bonus wells and the Poch pot wait around the edge. The large centre rewards the first player to empty their hand." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "En el borde esperan siete casillas de bonificación y el bote Poch. El gran centro premia a quien vacíe primero su mano." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sept cases bonus et le pot du Poch entourent le plateau. Le grand centre récompense la première personne qui vide sa main." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sul bordo aspettano sette caselle bonus e il piatto Poch. Il grande centro premia chi svuota per primo la mano." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Aan de rand wachten zeven bonusvakken en de Poch-pot. Het grote midden beloont wie als eerste de hand leegspeelt." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Na obrzeżu czeka siedem pól bonusowych i pula Poch. Duży środek trafia do osoby, która pierwsza opróżni rękę." } }
+      }
+    },
+    "firstRun.tableTour.table.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Kartenfelder" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Show me the wells" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Muéstrame las casillas" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Montre-moi les cases" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Mostrami le caselle" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Laat de vakken zien" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pokaż mi pola" } }
+      }
+    },
+    "firstRun.tableTour.wells.eyebrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "FÜNF TRUMPFKARTEN" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "THE CARD WELLS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "LAS CASILLAS DE CARTA" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "LES CASES DE CARTE" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "LE CASELLE DELLE CARTE" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "DE KAARTVAKKEN" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "POLA KART" } }
+      }
+    },
+    "firstRun.tableTour.wells.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Fünf Trumpfkarten haben eigene Felder." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Five card ranks have a place of their own." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cinco valores tienen su propio lugar." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Cinq valeurs ont leur propre place." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Cinque valori hanno un posto tutto loro." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Vijf kaartwaarden hebben een eigen plek." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Pięć wartości kart ma własne miejsce." } }
+      }
+    },
+    "firstRun.tableTour.wells.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "König, Dame, Bube, Zehn und Ass liegen außen am Brett. Zeigst du später eine davon in Trumpf, nimmst du die Chips aus ihrem Feld." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Follow the light across king, queen, jack, ten and ace. Later, each matching trump card wins exactly the chips in its well." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sigue la luz por rey, reina, jota, diez y as. Después, cada triunfo que coincida gana justo las fichas de su casilla." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Suis la lumière sur roi, dame, valet, dix et as. Plus tard, chaque atout correspondant gagne exactement les jetons de sa case." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Segui la luce su re, regina, fante, dieci e asso. Poi ogni briscola corrispondente vince esattamente le fiches della sua casella." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Volg het licht langs heer, vrouw, boer, tien en aas. Later wint elke passende troefkaart precies de fiches uit haar vak." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Podążaj za światłem przez króla, damę, waleta, dziesiątkę i asa. Później każda pasująca karta atutowa wygrywa żetony ze swojego pola." } }
+      }
+    },
+    "firstRun.tableTour.wells.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hochzeit und Folge" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "And the special wells?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Y las casillas especiales?" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Et les cases spéciales ?" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "E le caselle speciali?" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "En de bijzondere vakken?" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "A pola specjalne?" } }
+      }
+    },
+    "firstRun.tableTour.combinations.eyebrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "ZWEI KOMBINATIONEN" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "TWO SPECIAL WELLS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "DOS CASILLAS ESPECIALES" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "DEUX CASES SPÉCIALES" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "DUE CASELLE SPECIALI" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "TWEE BIJZONDERE VAKKEN" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "DWA POLA SPECJALNE" } }
+      }
+    },
+    "firstRun.tableTour.combinations.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hochzeit und Folge haben eigene Felder." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Some wells listen for more than one card." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Algunas casillas esperan más de una carta." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Certaines cases attendent plusieurs cartes." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Alcune caselle aspettano più carte." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Sommige vakken luisteren naar meerdere kaarten." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Niektóre pola czekają na kilka kart." } }
+      }
+    },
+    "firstRun.tableTour.combinations.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "König und Dame in Trumpf sind eine Hochzeit. Sieben, Acht und Neun in Trumpf sind eine Folge. Diese Karten behältst du auf der Hand." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "King and queen of the trump suit form the marriage. Seven, eight and nine in trump form the sequence. Whoever holds a combination takes its well." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Rey y reina del triunfo forman el matrimonio. Siete, ocho y nueve de triunfo forman la escalera. Quien tenga la combinación gana su casilla." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Le roi et la dame d’atout forment le mariage. Sept, huit et neuf d’atout forment la suite. Qui détient la combinaison gagne sa case." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Re e regina di briscola formano il matrimonio. Sette, otto e nove di briscola formano la scala. Chi ha la combinazione prende la sua casella." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Heer en vrouw van de troefkleur vormen het huwelijk. Zeven, acht en negen in troef vormen de reeks. Wie de combinatie heeft, wint het bijbehorende vak." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Król i dama w kolorze atutowym tworzą małżeństwo. Siódemka, ósemka i dziewiątka atutowa tworzą sekwens. Posiadacz układu zdobywa jego pole." } }
+      }
+    },
+    "firstRun.tableTour.combinations.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die drei Phasen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "How does this become a round?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cómo se convierte esto en una ronda?" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comment tout cela devient-il une manche ?" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Come diventa una mano?" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Hoe wordt dit een ronde?" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Jak powstaje z tego runda?" } }
+      }
+    },
+    "firstRun.tableTour.acts.eyebrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "EINE RUNDE · DREI PHASEN" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "ONE ROUND · THREE ACTS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "UNA RONDA · TRES ACTOS" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "UNE MANCHE · TROIS ACTES" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "UNA MANO · TRE ATTI" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "ÉÉN RONDE · DRIE AKTEN" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "JEDNA RUNDA · TRZY AKTY" } }
+      }
+    },
+    "firstRun.tableTour.acts.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Eine Runde hat drei Phasen." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The board tells three little stories." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El tablero cuenta tres pequeñas historias." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Le plateau raconte trois petites histoires." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il tavoliere racconta tre piccole storie." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Het bord vertelt drie kleine verhalen." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Plansza opowiada trzy małe historie." } }
+      }
+    },
+    "firstRun.tableTour.acts.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Beim Melden bringen Trumpfkarten Chips. Beim Pochen geht es um den Poch-Pott. Beim Ausspielen gewinnt, wer zuerst keine Karten mehr hat." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "First the bonus wells pay out. Then you bluff for the Poch pot. Finally everyone empties their hand. You do not need to act yet - this is only the overview." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Primero se reparten las casillas de bonificación. Después se farolea por el Poch. Al final vaciáis las manos. Aún no tienes que actuar: solo es el resumen." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "D’abord, les cases bonus sont attribuées. Puis on bluffe pour le Poch. Enfin, chacun vide sa main. Tu n’as encore rien à faire : ce n’est qu’un aperçu." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Prima si assegnano le caselle bonus. Poi si bluffa per il Poch. Infine si svuotano le mani. Non devi ancora fare nulla: è solo una panoramica." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Eerst worden de bonusvakken verdeeld. Daarna bluf je om de Poch-pot. Tot slot speelt iedereen de hand leeg. Je hoeft nog niets te doen: dit is alleen het overzicht." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Najpierw wypłacane są pola bonusowe. Potem blefujecie o pulę Poch. Na końcu opróżniacie ręce. Jeszcze nic nie musisz robić: to tylko przegląd." } }
+      }
+    },
+    "firstRun.tableTour.acts.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Phase 1: Melden" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Why does someone get chips?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Por qué recibe alguien fichas?" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pourquoi quelqu’un reçoit-il des jetons ?" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Perché qualcuno riceve fiches?" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Waarom krijgt iemand fiches?" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Dlaczego ktoś dostaje żetony?" } }
+      }
+    },
+    "firstRun.tableTour.meld.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Phase 2: Pochen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Then comes the Poch" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Después viene el Poch" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ensuite vient le Poch" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Poi viene il Poch" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Daarna komt de Poch" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Potem przychodzi Poch" } }
+      }
+    },
+    "firstRun.tableTour.bidding.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Phase 3: Ausspielen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "How does the round end?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cómo termina la ronda?" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comment se termine la manche ?" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Come finisce la mano?" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Hoe eindigt de ronde?" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Jak kończy się runda?" } }
       }
     },
     "firstRun.act.bidding" : {
@@ -576,43 +792,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit mindestens zwei Karten desselben Werts darfst du um den Poch-Pott bieten. Bieten mehrere bis zum Ende mit, gewinnt die stärkste Gruppe gleicher Karten."
+            "value" : "Zum Pochen brauchst du mindestens zwei Karten desselben Werts. Passen alle anderen, nimmst du den Poch-Pott. Bleiben mehrere dabei, gewinnt die stärkste Kartenkombination."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pair, triple, or four of a kind: you stake chips. If several players stay in, four of a kind beats a triple, and a triple beats a pair."
+            "value" : "A pair, three of a kind or four of a kind lets you stake. If everyone folds, the Poch is yours. If several stay, the strongest group wins."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pareja, trío o cuatro iguales: apuestas fichas. Si siguen varios jugadores, cuatro iguales ganan al trío y el trío a la pareja."
+            "value" : "Con pareja, trío o póquer puedes apostar. Si todos pasan, el Poch es tuyo. Si siguen varios, gana el grupo más fuerte."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paire, brelan ou carré : tu mises des jetons. Si plusieurs joueurs restent, le carré bat le brelan et le brelan bat la paire."
+            "value" : "Avec une paire, un brelan ou un carré, tu peux miser. Si tous passent, le Poch est à toi. Si plusieurs restent, le groupe le plus fort gagne."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coppia, tris o poker: punti le fiche. Se restano più giocatori, il poker batte il tris e il tris batte la coppia."
+            "value" : "Con coppia, tris o poker puoi puntare. Se tutti passano, il Poch è tuo. Se restano più giocatori, vince il gruppo più forte."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paar, drieling of vierling: je zet fiches in. Blijven er meerdere spelers over, dan verslaat een vierling een drieling en een drieling een paar."
+            "value" : "Met een paar, drie- of vierling mag je inzetten. Past iedereen, dan is de Poch van jou. Blijven er meer over, dan wint de sterkste groep."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para, trójka lub kareta: stawiasz żetony. Jeśli zostanie kilku graczy, kareta bije trójkę, a trójka parę."
+            "value" : "Z parą, trójką lub czwórką możesz stawiać. Jeśli wszyscy spasują, Poch jest twój. Gdy zostaje kilku graczy, wygrywa najsilniejsza grupa."
           }
         }
       }
@@ -623,43 +839,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCH-POTT"
+            "value" : "II · POCHEN"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCH"
+            "value" : "II · THE POCH"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCH"
+            "value" : "II · EL POCH"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCH"
+            "value" : "II · LE POCH"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCH"
+            "value" : "II · IL POCH"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCHEN"
+            "value" : "II · POCHEN"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POCH"
+            "value" : "II · POCH"
           }
         }
       }
@@ -670,43 +886,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gleiche Karten bringen dich ins Bieten."
+            "value" : "Mit gleichen Kartenwerten pochst du um den Pott."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Matching ranks let you poch."
+            "value" : "Matching cards get you into the Poch."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los valores iguales te permiten hacer poch."
+            "value" : "Las cartas iguales te meten en el Poch."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Des valeurs identiques te permettent de pocher."
+            "value" : "Des cartes identiques t’ouvrent le Poch."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "I valori uguali ti permettono di fare poch."
+            "value" : "Le carte uguali ti aprono il Poch."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Met gelijke waarden mag je pochen."
+            "value" : "Gelijke kaarten brengen je in de Poch."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jednakowe wartości pozwalają zagrać w Poch."
+            "value" : "Takie same karty otwierają ci Poch."
           }
         }
       }
@@ -717,43 +933,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Passt eine deiner Trumpfkarten zu einem beschrifteten Bonusfeld, bekommst du dessen Chips sofort. Gleich zeigst du selbst eine passende Karte."
+            "value" : "Die offene Tischkarte bestimmt Trumpf. Zeigst du eine passende Trumpfkarte oder Kombination, nimmst du die Chips aus den passenden Feldern. Die gezeigten Karten bleiben in deiner Hand."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The table card sets the trump suit. The trump ace, king, queen, jack, and ten win their field; King+Queen and 7-8-9 win additional fields."
+            "value" : "The open table card sets trump. Whoever holds the matching special card shows it and takes exactly the chips from its named well. The card stays in hand."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La carta de la mesa marca el palo de triunfo. El as, rey, reina, jota y diez de triunfo ganan su casilla; Rey+Reina y 7-8-9 ganan casillas adicionales."
+            "value" : "La carta abierta marca el triunfo. Quien tenga la carta especial correspondiente la muestra y recibe exactamente las fichas de la casilla indicada. La carta se queda en la mano."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La carte de table détermine la couleur d’atout. L’as, le roi, la dame, le valet et le dix d’atout remportent leur case ; Roi+Dame et 7-8-9 remportent des cases supplémentaires."
+            "value" : "La carte ouverte désigne l’atout. La personne qui possède la carte spéciale correspondante la montre et reçoit exactement les jetons de la case nommée. La carte reste en main."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La carta sul tavolo stabilisce il seme di briscola. Asso, re, regina, fante e dieci di briscola vincono la loro casella; Re+Regina e 7-8-9 vincono caselle aggiuntive."
+            "value" : "La carta scoperta stabilisce la briscola. Chi possiede la carta speciale corrispondente la mostra e riceve esattamente le fiche della casella indicata. La carta resta in mano."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De tafelkaart bepaalt de troefkleur. Troefaas, -koning, -vrouw, -boer en -tien winnen hun veld; Koning+Vrouw en 7-8-9 winnen extra velden."
+            "value" : "De open tafelkaart bepaalt troef. Wie de passende speciale kaart heeft, toont die en krijgt precies de fiches uit het genoemde vak. De kaart blijft in de hand."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karta na stole wyznacza kolor atutowy. Atutowy as, król, dama, walet i dziesiątka wygrywają swoje pole; Król+Dama i 7-8-9 wygrywają dodatkowe pola."
+            "value" : "Odkryta karta wyznacza atut. Osoba z pasującą kartą specjalną pokazuje ją i dostaje dokładnie żetony z nazwanego pola. Karta zostaje w ręce."
           }
         }
       }
@@ -764,43 +980,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BONUSFELDER"
+            "value" : "I · MELDEN"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SHOW TRUMP"
+            "value" : "I · MELDING"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MOSTRAR TRIUNFO"
+            "value" : "I · ANUNCIAR"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MONTRER L’ATOUT"
+            "value" : "I · ANNONCER"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MOSTRA LA BRISCOLA"
+            "value" : "I · DICHIARARE"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TROEF TONEN"
+            "value" : "I · MELDEN"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POKAŻ ATUT"
+            "value" : "I · MELDOWANIE"
           }
         }
       }
@@ -811,43 +1027,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trumpf holt sofort Chips."
+            "value" : "Passende Trumpfkarten bringen dir Chips."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Certain trump cards win fields."
+            "value" : "The matching trump card determines the payout."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ciertas cartas de triunfo ganan casillas."
+            "value" : "La carta de triunfo correcta decide el pago."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Certaines cartes d’atout remportent des cases."
+            "value" : "La bonne carte d’atout détermine le gain."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alcune carte di briscola vincono le caselle."
+            "value" : "La carta di briscola giusta decide il premio."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bepaalde troefkaarten winnen velden."
+            "value" : "De passende troefkaart bepaalt de uitbetaling."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Określone karty atutowe wygrywają pola."
+            "value" : "Pasująca karta atutowa wyznacza wypłatę."
           }
         }
       }
@@ -858,7 +1074,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nur du siehst deine Karten offen. Bei Hana, Noah und Jonas bleiben die Werte verdeckt."
+            "value" : "Nur deine Karten liegen offen. Hana, Noah und Jonas halten ihre Karten verdeckt."
           }
         },
         "en" : {
@@ -999,43 +1215,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihr baut eine Reihe in derselben Kartenfarbe. Auf die Kreuz-Sieben passt nur die Kreuz-Acht, dann die Kreuz-Neun. Wer die Reihe beendet, eröffnet die nächste."
+            "value" : "Ihr legt Karten derselben Farbe in aufsteigender Folge. Wer zuerst keine Karten mehr hat, gewinnt die Chips in der Mitte. Alle anderen zahlen 1 Chip für jede Restkarte."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You lead with one card. Then the next higher card in the same suit must follow. The first player to run out of cards wins the centre."
+            "value" : "Play one suit upward: 7♣, 8♣, 9♣. The first player to lay the last card wins the centre - plus chips for every card the others still hold."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abres con una carta. Después debe seguir la carta inmediatamente superior del mismo palo. Quien se quede primero sin cartas gana el centro."
+            "value" : "Jugad un palo en orden ascendente: 7♣, 8♣, 9♣. Quien juegue primero su última carta gana el centro y fichas por cada carta restante de los demás."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu ouvres avec une carte. La carte immédiatement supérieure de la même couleur doit ensuite suivre. Le premier à ne plus avoir de cartes gagne le centre."
+            "value" : "Jouez une couleur dans l’ordre : 7♣, 8♣, 9♣. Le premier à poser sa dernière carte gagne le centre, plus des jetons pour chaque carte restante des autres."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apri con una carta. Poi deve seguire la carta immediatamente superiore dello stesso seme. Chi finisce per primo le carte vince il centro."
+            "value" : "Giocate un seme in ordine crescente: 7♣, 8♣, 9♣. Chi posa per primo l’ultima carta vince il centro e fiche per ogni carta rimasta agli altri."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je opent met één kaart. Daarna moet de eerstvolgende hogere kaart van dezelfde kleur volgen. Wie als eerste geen kaarten meer heeft, wint het midden."
+            "value" : "Speel één kleur oplopend uit: 7♣, 8♣, 9♣. Wie als eerste de laatste kaart legt, wint het midden plus fiches voor elke kaart die de anderen overhouden."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Otwierasz jedną kartą. Potem musi nastąpić kolejna wyższa karta w tym samym kolorze. Kto pierwszy pozbędzie się kart, wygrywa środek."
+            "value" : "Grajcie jeden kolor rosnąco: 7♣, 8♣, 9♣. Kto pierwszy zagra ostatnią kartę, wygrywa środek oraz żetony za każdą kartę pozostałą u rywali."
           }
         }
       }
@@ -1046,43 +1262,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MITTE"
+            "value" : "III · AUSSPIELEN"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PLAY OUT"
+            "value" : "III · PLAYING OUT"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JUGAR LAS CARTAS"
+            "value" : "III · JUGAR LAS CARTAS"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JOUER SA MAIN"
+            "value" : "III · JOUER SA MAIN"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GIOCA LA MANO"
+            "value" : "III · GIOCARE LE CARTE"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "UITSPELEN"
+            "value" : "III · UITSPELEN"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ROZGRYWKA"
+            "value" : "III · WYKŁADANIE"
           }
         }
       }
@@ -1093,43 +1309,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wer zuerst keine Karten mehr hat, gewinnt die Mitte."
+            "value" : "Wer zuerst leer ist, gewinnt die Mitte."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Be the first to shed your cards."
+            "value" : "Get rid of your cards first."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sé el primero en quedarte sin cartas."
+            "value" : "Deshazte primero de tus cartas."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sois le premier à te débarrasser de tes cartes."
+            "value" : "Débarrasse-toi de tes cartes en premier."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sii il primo a liberarti delle carte."
+            "value" : "Liberati per primo delle tue carte."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Raak als eerste je kaarten kwijt."
+            "value" : "Speel als eerste al je kaarten weg."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jako pierwszy pozbądź się kart."
+            "value" : "Pozbądź się kart jako pierwszy."
           }
         }
       }
@@ -1140,7 +1356,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "sieht den Treffer"
+            "value" : "freut sich über die Chips"
           }
         },
         "en" : {
@@ -1234,7 +1450,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "steigt aus"
+            "value" : "passt"
           }
         },
         "en" : {
@@ -1281,7 +1497,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "liest den Einsatz"
+            "value" : "prüft deinen Einsatz"
           }
         },
         "en" : {
@@ -1328,7 +1544,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "hat die Lücke gesehen"
+            "value" : "erkennt die Lücke"
           }
         },
         "en" : {
@@ -1513,7 +1729,7 @@
     "firstRun.cinematic.accessibility.body" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hana spielt die erste Runde mit dir: Passende Trumpfkarten holen Bonusfelder. Mit mindestens zwei gleichen Karten bietest du um den Poch-Pott. Wer seine Hand zuerst leert, gewinnt die Mitte." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hana spielt die erste Runde mit dir. Passende Trumpfkarten bringen Chips. Mit Karten desselben Werts pochst du um den Poch-Pott. Wer zuerst keine Karten mehr hat, gewinnt die Mitte." } },
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Hana plays the first round with you. Certain trump cards win fields, a pair, triple, or four of a kind lets you poch, and the first player to run out of cards wins the centre." } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Hana juega la primera ronda contigo. Ciertas cartas de triunfo ganan casillas, una pareja, un trío o cuatro iguales permiten hacer poch y quien se quede primero sin cartas gana el centro." } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "Hana joue la première manche avec toi. Certaines cartes d’atout remportent des cases, une paire, un brelan ou un carré permet de pocher et le premier à ne plus avoir de cartes gagne le centre." } },
@@ -1858,7 +2074,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bestimmte Trumpfkarten gewinnen sofort Chips. Danach bietest du mit mindestens zwei gleichen Karten um den Poch-Pott. Wer zuerst ohne Karten ist, gewinnt die Mitte."
+            "value" : "Bestimmte Trumpfkarten bringen dir Chips. Danach pochst du mit Karten desselben Werts um den Poch-Pott. Wer zuerst keine Karten mehr hat, gewinnt die Chips in der Mitte."
           }
         },
         "en" : {
@@ -3172,6 +3388,1452 @@
         }
       }
     },
+    "phase2.accessibility.poch" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch %d"
+          }
+        }
+      }
+    },
+    "phase2.accessibility.stake" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einsatz %d"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stake %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apuesta %d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puntata %d"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inzet %d"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stawka %d"
+          }
+        }
+      }
+    },
+    "phase2.action.call" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitgehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Call"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Igualar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vedi"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meegaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprawdź"
+          }
+        }
+      }
+    },
+    "phase2.action.call.cost" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für %d mitgehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Call for %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Igualar por %d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivre pour %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vedi per %d"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voor %d meegaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprawdź za %d"
+          }
+        }
+      }
+    },
+    "phase2.action.call.cost.one" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Für 1 Chip mitgehen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Call for 1 chip" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Igualar por 1 ficha" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Suivre pour 1 jeton" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Vedi per 1 fiche" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Voor 1 fiche meegaan" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Sprawdź za 1 żeton" } }
+      }
+    },
+    "phase2.action.call.cost.many" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Für %d Chips mitgehen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Call for %d chips" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Igualar por %d fichas" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Suivre pour %d jetons" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Vedi per %d fiches" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Voor %d fiches meegaan" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Sprawdź za %d żetonów" } }
+      }
+    },
+    "phase2.action.open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit %d Chips pochen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch with %d chips"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pochen con %d fichas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pocher avec %d jetons"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch con %d gettoni"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch met %d fiches"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch za %d żetonów"
+          }
+        }
+      }
+    },
+    "phase2.action.open.one" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit 1 Chip pochen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Poch with 1 chip" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pochen con 1 ficha" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pocher avec 1 jeton" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Poch con 1 gettone" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Poch met 1 fiche" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Poch za 1 żeton" } }
+      }
+    },
+    "phase2.action.pass" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fold"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passa"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasuj"
+          }
+        }
+      }
+    },
+    "phase2.action.raise" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf %d erhöhen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raise to %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subir a %d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relancer à %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rilancia a %d"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verhogen naar %d"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podbij do %d"
+          }
+        }
+      }
+    },
+    "phase2.hint.noPair" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du hast kein Paar. Tippe Passen - so behältst du deine Chips."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have no pair. Tap Fold to keep your chips."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tienes pareja. Toca Pasar para conservar tus fichas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu n’as pas de paire. Touche Passer pour garder tes jetons."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non hai una coppia. Tocca Passa per conservare i gettoni."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je hebt geen paar. Tik op Passen om je fiches te houden."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie masz pary. Stuknij Pasuj, aby zachować żetony."
+          }
+        }
+      }
+    },
+    "phase2.hint.open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poche um %d Chips. Wer mitgeht, bleibt im Rennen um den Poch-Pott."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch for %d chips. Anyone who calls stays in contention for the Poch pot."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz Poch con %d fichas. Quien iguale sigue compitiendo por el bote Poch."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poche avec %d jetons. Ceux qui suivent restent en lice pour le pot de Poch."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai Poch con %d gettoni. Chi vede resta in corsa per il piatto Poch."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poch met %d fiches. Wie meegaat, blijft in de race om de Poch-pot."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zagraj Poch za %d żetonów. Kto sprawdzi, pozostaje w grze o pulę Poch."
+          }
+        }
+      }
+    },
+    "phase2.hint.opponentTurn" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ entscheidet jetzt: mitgehen, erhöhen oder passen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ decides now: stay in or fold."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ decide ahora: seguir o pasar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ décide maintenant : suivre ou passer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ decide ora: restare o passare."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ beslist nu: meegaan of passen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ teraz decyduje: gra dalej albo pasuje."
+          }
+        }
+      }
+    },
+    "phase2.hint.resolved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Poch-Pott ist entschieden. Als Nächstes spielt ihr eure Karten in Reihen aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Poch pot is settled. Next, play your cards in ascending runs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El bote Poch está decidido. Ahora jugáis las cartas en secuencias ascendentes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le pot de Poch est attribué. Ensuite, jouez vos cartes en suites ascendantes."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il piatto Poch è assegnato. Ora giocate le carte in sequenze crescenti."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De Poch-pot is verdeeld. Nu speel je de kaarten in oplopende reeksen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pula Poch jest rozstrzygnięta. Teraz zagrywacie karty w rosnących sekwencjach."
+          }
+        }
+      }
+    },
+    "phase2.hand.combo" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - deine stärkste Gruppe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - your strongest group"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - tu grupo más fuerte"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - ton groupe le plus fort"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - il tuo gruppo più forte"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - je sterkste groep"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ - twój najsilniejszy układ"
+          }
+        }
+      }
+    },
+    "phase2.metric.fromYou" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "VON DIR" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "FROM YOU" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "TU APUESTA" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "TA MISE" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "DA TE" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "VAN JOU" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "OD CIEBIE" } }
+      }
+    },
+    "phase2.metric.inPoch" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "IM POTT" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "IN THE POCH" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "EN EL POCH" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "DANS LE POCH" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "NEL POCH" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "IN DE POCH" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "W POCHU" } }
+      }
+    },
+    "phase2.metric.yourBid" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "DEIN GEBOT" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "YOUR BID" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "TU OFERTA" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "TON ENCHÈRE" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "LA TUA PUNTATA" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "JOUW BOD" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "TWOJA STAWKA" } }
+      }
+    },
+    "phase2.metric.limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIMIT"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIMIT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LÍMITE"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIMITE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIMITE"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIMIET"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIMIT"
+          }
+        }
+      }
+    },
+    "phase2.metric.open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "offen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "open"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abierto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ouvert"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aperto"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "open"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "otwarte"
+          }
+        }
+      }
+    },
+    "phase2.metric.poch" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POCH"
+          }
+        }
+      }
+    },
+    "phase2.metric.pot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POTT"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BOTE"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POT"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIATTO"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POT"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PULA"
+          }
+        }
+      }
+    },
+    "phase2.metric.you" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DU"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOU"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TÚ"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOI"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TU"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JIJ"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TY"
+          }
+        }
+      }
+    },
+    "phase2.reaction.called" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "geht mit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "calls"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iguala"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "suit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vede"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gaat mee"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sprawdza"
+          }
+        }
+      }
+    },
+    "phase2.reaction.opened" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pocht %d!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "poches %d!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace Poch con %d!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "poche %d !"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fa Poch con %d!"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pocht %d!"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gra Poch za %d!"
+          }
+        }
+      }
+    },
+    "phase2.reaction.passed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "folds"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passe"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passa"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "past"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pasuje"
+          }
+        }
+      }
+    },
+    "phase2.reaction.raised" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "erhöht auf %d"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "raises to %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sube a %d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "relance à %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rilancia a %d"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "verhoogt naar %d"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "podbija do %d"
+          }
+        }
+      }
+    },
+    "phase2.reaction.thinking" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "überlegt …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "thinking…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "piensa…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "réfléchit…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "riflette…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "denkt na…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zastanawia się…"
+          }
+        }
+      }
+    },
+    "phase2.showdown.accessibility" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@ schlägt %3$@: %4$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@ beats %3$@: %4$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@ vence a %3$@: %4$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ : %2$@ bat %3$@ : %4$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@ batte %3$@: %4$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@ verslaat %3$@: %4$@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@ pokonuje %3$@: %4$@"
+          }
+        }
+      }
+    },
+    "phase2.stakeDial.set" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SETZE"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SET"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APUESTA"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MISE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PUNTA"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZET IN"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POSTAW"
+          }
+        }
+      }
+    },
+    "phase2.status.noPair" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KEIN PAAR"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NO PAIR"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SIN PAREJA"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AUCUNE PAIRE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NESSUNA COPPIA"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GEEN PAAR"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BRAK PARY"
+          }
+        }
+      }
+    },
+    "phase2.status.pass" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PASSEN"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FOLD"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PASAR"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PASSER"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PASSA"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PASSEN"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PASUJ"
+          }
+        }
+      }
+    },
+    "phase2.status.yourTurn" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DU BIST DRAN"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOUR TURN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TU TURNO"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À TOI"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOCCA A TE"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JIJ BENT"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TWÓJ RUCH"
+          }
+        }
+      }
+    },
+    "phase2.wall.highest" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Höchster Einsatz: %d Chips"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest stake: %d chips"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apuesta máxima: %d fichas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise maximale : %d jetons"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puntata massima: %d gettoni"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoogste inzet: %d fiches"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najwyższa stawka: %d żetonów"
+          }
+        }
+      }
+    },
+    "phase2.wall.opponent" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximal %1$d Chips - mehr kann %2$@ nicht mitgehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum %1$d chips - %2$@ cannot call more"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máximo %1$d fichas - %2$@ no puede igualar más"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum %1$d jetons - %2$@ ne peut pas suivre davantage"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Massimo %1$d gettoni - %2$@ non può vedere oltre"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximaal %1$d fiches - %2$@ kan niet hoger meegaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maksymalnie %1$d żetonów - %2$@ nie może sprawdzić więcej"
+          }
+        }
+      }
+    },
+    "phase2.wall.you" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximal %d Chips - dein Vorrat setzt die Grenze"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum %d chips - your stack sets the limit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máximo %d fichas - tu reserva marca el límite"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum %d jetons - ta réserve fixe la limite"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Massimo %d gettoni - la tua riserva fissa il limite"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximaal %d fiches - jouw voorraad bepaalt de limiet"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maksymalnie %d żetonów - ogranicza cię twój stos"
+          }
+        }
+      }
+    },
     "phase2.board.accessibility" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3531,7 +5193,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ nimmt die Mitte. Du zahlst 1 Chip pro Restkarte."
+            "value" : "%@ nimmt die Mitte. Du zahlst 1 Chip für jede deiner Restkarten."
           }
         },
         "en" : {
@@ -3625,7 +5287,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du nimmst die Mitte und 1 Chip für jede Restkarte der anderen."
+            "value" : "Du nimmst die Mitte. Jeder Gegner zahlt dir 1 Chip für jede seiner Restkarten."
           }
         },
         "en" : {
@@ -3672,7 +5334,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das %@ ist die höchste Karte - die Reihe endet. %@ eröffnet neu."
+            "value" : "Das %@ ist die höchste Karte. Die Reihe endet und %@ eröffnet neu."
           }
         },
         "en" : {
@@ -3719,7 +5381,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das %@ ist die höchste Karte - die Reihe endet. Du eröffnest neu."
+            "value" : "Das %@ ist die höchste Karte. Die Reihe endet und du eröffnest neu."
           }
         },
         "en" : {
@@ -3813,7 +5475,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ fehlt - die Reihe endet. %@ eröffnet neu."
+            "value" : "%@ fehlt. Die Reihe endet und %@ eröffnet neu."
           }
         },
         "en" : {
@@ -3860,7 +5522,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ fehlt - die Reihe endet. Du hast zuletzt gelegt und eröffnest neu."
+            "value" : "%@ fehlt. Du hast zuletzt gelegt und eröffnest neu."
           }
         },
         "en" : {
@@ -3948,13 +5610,335 @@
         }
       }
     },
+    "phase3.guided.opening.choice.detail" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du darfst mit jeder Handkarte eröffnen. Danach darf nur die nächsthöhere Karte derselben Farbe gelegt werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any card in your hand can open a run. After that, only the next higher card of the same suit fits."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cualquier carta de tu mano puede abrir una serie. Después solo encaja la carta inmediatamente superior del mismo palo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N’importe quelle carte de ta main peut ouvrir une suite. Ensuite, seule la carte immédiatement supérieure de la même couleur convient."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualsiasi carta della tua mano può aprire una sequenza. Poi può seguire solo la carta immediatamente superiore dello stesso seme."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke kaart in je hand kan een reeks openen. Daarna past alleen de eerstvolgende hogere kaart van dezelfde kleur."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Każda karta z twojej ręki może rozpocząć sekwencję. Potem pasuje tylko kolejna wyższa karta w tym samym kolorze."
+          }
+        }
+      }
+    },
+    "phase3.guided.opening.choice.eyebrow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DEINE ERSTE ENTSCHEIDUNG"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOUR FIRST CHOICE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TU PRIMERA DECISIÓN"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TON PREMIER CHOIX"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LA TUA PRIMA SCELTA"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JOUW EERSTE KEUZE"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TWÓJ PIERWSZY WYBÓR"
+          }
+        }
+      }
+    },
+    "phase3.guided.opening.choice.title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle deine Startkarte."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose your opening card."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige tu carta inicial."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis ta carte de départ."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli la carta iniziale."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies je startkaart."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz kartę startową."
+          }
+        }
+      }
+    },
+    "phase3.guided.advance.hint" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf die markierte Person, um den nächsten Zug zu sehen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the next move above the highlighted player."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca la siguiente jugada sobre el jugador resaltado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touche le prochain coup au-dessus du joueur en surbrillance."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca la prossima mossa sopra il giocatore evidenziato."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tik op de volgende zet boven de gemarkeerde speler."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stuknij następny ruch nad wyróżnionym graczem."
+          }
+        }
+      }
+    },
+    "phase3.guided.opponent.turn.detail" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf die markierte Person. Dort siehst du, welche Karte als Nächstes kommt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each move appears beside the player who makes it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada jugada aparece junto al jugador que la hace."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque coup apparaît près du joueur qui le joue."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ogni mossa appare accanto al giocatore che la fa."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke zet verschijnt bij de speler die hem doet."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Każdy ruch pojawia się przy graczu, który go wykonuje."
+          }
+        }
+      }
+    },
+    "phase3.guided.opponent.turn.title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die anderen sind am Zug."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The others are playing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juegan los demás."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les autres jouent."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca agli altri."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De anderen zijn aan zet."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teraz grają pozostali."
+          }
+        }
+      }
+    },
+    "phase3.result.confirm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runde abschließen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm result"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar resultado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmer le résultat"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma il risultato"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultaat bevestigen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potwierdź wynik"
+          }
+        }
+      }
+    },
     "phase3.guided.first.detail" : {
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Damit beginnt eine Herz-Reihe. Als Nächstes passt nur die Herz-Dame."
+            "value" : "Damit beginnt eine Herz-Reihe. Danach darf nur die Herz-Dame gelegt werden."
           }
         },
         "en" : {
@@ -4095,7 +6079,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Kartenfarbe passt."
+            "value" : "Auf %@ folgt %@. Nur die nächsthöhere Karte derselben Farbe darf gelegt werden."
           }
         },
         "en" : {
@@ -4612,7 +6596,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ legt %@ - diese Karte folgt direkt auf %@."
+            "value" : "%@ legt %@. Diese Karte folgt direkt auf %@."
           }
         },
         "en" : {
@@ -4659,7 +6643,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du legst %@ - diese Karte folgt direkt auf %@."
+            "value" : "Du legst %@. Diese Karte folgt direkt auf %@."
           }
         },
         "en" : {
@@ -4706,7 +6690,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ eröffnet mit %@. Jetzt folgt die nächsthöhere Karte derselben Kartenfarbe."
+            "value" : "%@ eröffnet mit %@. Jetzt folgt die nächsthöhere Karte derselben Farbe."
           }
         },
         "en" : {
@@ -4753,7 +6737,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du eröffnest mit %@. Jetzt folgt die nächsthöhere Karte derselben Kartenfarbe."
+            "value" : "Du eröffnest mit %@. Jetzt folgt die nächsthöhere Karte derselben Farbe."
           }
         },
         "en" : {
@@ -5552,7 +7536,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle eine Startkarte. Danach geht es in derselben Kartenfarbe aufwärts."
+            "value" : "Wähle eine Startkarte. Danach folgt jeweils die nächsthöhere Karte derselben Farbe."
           }
         },
         "en" : {
@@ -6657,7 +8641,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alle passen - der Poch-Pott wächst weiter"
+            "value" : "Alle passen. Der Poch-Pott wächst weiter"
           }
         },
         "en" : {
@@ -6704,7 +8688,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mindestens zwei gleiche Karten bringen dich ins Bieten. Drei gleiche schlagen zwei, vier gleiche schlagen drei."
+            "value" : "Mit mindestens zwei Karten desselben Werts darfst du pochen. Ein Drilling schlägt jedes Paar; ein Vierling jeden Drilling."
           }
         },
         "en" : {
@@ -6892,7 +8876,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit %d Chips eröffnest du den Poch. Die anderen müssen antworten."
+            "value" : "Du eröffnest mit %d Chips. Jetzt müssen die anderen mitgehen, erhöhen oder passen."
           }
         },
         "en" : {
@@ -6982,7 +8966,7 @@
     },
     "tutorial.bidding.commit.body.one" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Du setzt 1 Chip. Jetzt können die anderen mitgehen, erhöhen oder passen." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Du eröffnest mit 1 Chip. Jetzt müssen die anderen mitgehen, erhöhen oder passen." } },
         "en" : { "stringUnit" : { "state" : "translated", "value" : "You stake 1 chip. Now the others can call, raise, or fold." } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Apuestas 1 ficha. Ahora los demás pueden igualar, subir o pasar." } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "Tu mises 1 jeton. Les autres peuvent maintenant suivre, relancer ou passer." } },
@@ -6993,7 +8977,7 @@
     },
     "tutorial.bidding.commit.body.many" : {
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Du setzt %d Chips. Jetzt können die anderen mitgehen, erhöhen oder passen." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Du eröffnest mit %d Chips. Jetzt müssen die anderen mitgehen, erhöhen oder passen." } },
         "en" : { "stringUnit" : { "state" : "translated", "value" : "You stake %d chips. Now the others can call, raise, or fold." } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Apuestas %d fichas. Ahora los demás pueden igualar, subir o pasar." } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "Tu mises %d jetons. Les autres peuvent maintenant suivre, relancer ou passer." } },
@@ -7149,7 +9133,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zum Pochen brauchst du mindestens zwei gleiche Karten. Diesmal passt du und setzt nichts."
+            "value" : "Zum Pochen brauchst du mindestens zwei Karten desselben Werts. Diesmal passt du und setzt nichts."
           }
         },
         "en" : {
@@ -7243,7 +9227,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ kann mitgehen, erhöhen oder passen."
+            "value" : "%@ entscheidet jetzt: mitgehen, erhöhen oder passen."
           }
         },
         "en" : {
@@ -7384,7 +9368,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mitgehen: +%d Chip zum Einsatz. Wenn du passt, steigst du aus; dein bisheriger Einsatz bleibt im Poch-Pott."
+            "value" : "Mitgehen kostet %d weitere Chips. Passt du, bist du raus. Dein bisheriger Einsatz bleibt im Poch-Pott."
           }
         },
         "en" : {
@@ -7423,6 +9407,28 @@
             "value" : "Sprawdzenie: dodaj %d żeton do stawki. Jeśli spasujesz, dotychczasowa stawka zostaje w Poch."
           }
         }
+      }
+    },
+    "tutorial.bidding.reply.body.one" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mitgehen kostet 1 weiteren Chip. Passt du, bist du raus. Dein bisheriger Einsatz bleibt im Poch-Pott." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pay 1 more chip to stay in. If you fold, you are out; your previous stake stays in the Poch pot." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Paga 1 ficha más para seguir. Si pasas, quedas fuera; tu apuesta anterior permanece en el bote de Poch." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ajoute 1 jeton pour rester dans le jeu. Si tu passes, tu sors; ta mise reste dans le pot de Poch." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Aggiungi 1 fiche per restare in gioco. Se passi, sei fuori; la tua puntata resta nel piatto Poch." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Betaal nog 1 fiche om mee te blijven doen. Als je past, lig je eruit; je eerdere inzet blijft in de Poch-pot." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Dołóż 1 żeton, aby zostać w grze. Jeśli spasujesz, odpadasz; wcześniejsza stawka zostaje w puli Poch." } }
+      }
+    },
+    "tutorial.bidding.reply.body.many" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mitgehen kostet %d weitere Chips. Passt du, bist du raus. Dein bisheriger Einsatz bleibt im Poch-Pott." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pay %d more chips to stay in. If you fold, you are out; your previous stake stays in the Poch pot." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Paga %d fichas más para seguir. Si pasas, quedas fuera; tu apuesta anterior permanece en el bote de Poch." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ajoute %d jetons pour rester dans le jeu. Si tu passes, tu sors; ta mise reste dans le pot de Poch." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Aggiungi %d fiches per restare in gioco. Se passi, sei fuori; la tua puntata resta nel piatto Poch." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Betaal nog %d fiches om mee te blijven doen. Als je past, lig je eruit; je eerdere inzet blijft in de Poch-pot." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Dołóż %d żetony, aby zostać w grze. Jeśli spasujesz, odpadasz; wcześniejsza stawka zostaje w puli Poch." } }
       }
     },
     "tutorial.bidding.reply.title" : {
@@ -7630,7 +9636,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 Chip ist vorsichtig. Mit 2 Chips wächst der Poch-Pott - und dein Risiko."
+            "value" : "Mit 1 Chip bleibst du vorsichtig. Mit 2 Chips wachsen der Poch-Pott und dein Risiko."
           }
         },
         "en" : {
@@ -7912,7 +9918,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jetzt muss Hana mitgehen, erhöhen oder aussteigen."
+            "value" : "Jetzt muss Hana mitgehen, erhöhen oder passen."
           }
         },
         "en" : {
@@ -7959,7 +9965,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dein Chip liegt im Poch-Pott."
+            "value" : "Dein Einsatz liegt im Poch-Pott."
           }
         },
         "en" : {
@@ -8006,7 +10012,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alle anderen passen. Der letzte Spieler im Gebot nimmt den Poch-Pott - ohne Aufdecken."
+            "value" : "Alle anderen passen. Der letzte Spieler im Gebot nimmt den Poch-Pott, ohne die Karten aufzudecken."
           }
         },
         "en" : {
@@ -8147,7 +10153,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das %@-Bonusfeld bleibt gefüllt und wird in der nächsten Runde wertvoller. Ab jetzt spielst du ohne eingeblendete Hinweise."
+            "value" : "Das %@-Bonusfeld bleibt gefüllt. In der nächsten Runde kommen neue Chips dazu. Hana wartet schon auf die Revanche."
           }
         },
         "en" : {
@@ -8193,7 +10199,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die nächste Runde läuft ohne eingeblendete Hinweise. Hana bleibt am Tisch."
+            "value" : "Ab jetzt spielst du frei. Hana bleibt am Tisch - und will den Poch-Pott zurück."
           }
         },
         "en" : {
@@ -9614,7 +11620,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wer zuerst keine Karten mehr hat, nimmt die Mitte. Dazu zahlt jeder Gegner 1 Chip pro Restkarte."
+            "value" : "Wer zuerst keine Karten mehr hat, nimmt die Mitte. Alle anderen zahlen 1 Chip für jede Restkarte."
           }
         },
         "en" : {
@@ -9708,7 +11714,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihre Farbe entscheidet, welche Karten jetzt Bonusfelder gewinnen. Die Tischkarte selbst gehört niemandem."
+            "value" : "Decke sie auf. Ihre Farbe wird Trumpf für diese Runde. Die Karte selbst gehört niemandem."
           }
         },
         "en" : {
@@ -9755,7 +11761,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Karte bestimmt Trumpf."
+            "value" : "Die Tischkarte bestimmt Trumpf."
           }
         },
         "en" : {
@@ -9794,6 +11800,28 @@
             "value" : "Odkryj kartę na stole"
           }
         }
+      }
+    },
+    "tutorial.guide.trump.revealed.body" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Passende %@-Karten und Kombinationen bringen jetzt Chips aus ihren Feldern." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Certain %@ cards now immediately win the chips in their bonus fields." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Algunas cartas de %@ ganan ahora de inmediato las fichas de sus campos de bonificación." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Certaines cartes de %@ remportent maintenant immédiatement les jetons de leurs cases bonus." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Alcune carte di %@ vincono subito le fiches dei rispettivi campi bonus." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Bepaalde %@-kaarten winnen nu meteen de fiches uit hun bonusvelden." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Wybrane karty %@ od razu zdobywają żetony ze swoich pól premiowych." } }
+      }
+    },
+    "tutorial.guide.trump.revealed.title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ ist Trumpf." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ is trump." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ es triunfo." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "%@ est l’atout." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "%@ è briscola." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "%@ is troef." } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "%@ jest atutem." } }
       }
     },
     "tutorial.handoff.action.bidding" : {
@@ -9943,7 +11971,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit mindestens zwei gleichen Karten darfst du bieten. Passen alle anderen, gehört der Poch-Pott dir. Bleiben mehrere im Gebot, gewinnt die stärkste Gruppe gleicher Karten."
+            "value" : "Mit mindestens zwei Karten desselben Werts darfst du pochen. Passen alle anderen, nimmst du den Poch-Pott. Bleiben mehrere dabei, gewinnt die stärkste Kartenkombination."
           }
         },
         "en" : {
@@ -10178,7 +12206,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihr baut eine Reihe in derselben Kartenfarbe: Sieben, Acht, Neun und weiter. Wer zuerst seine letzte Karte legt, gewinnt die Mitte."
+            "value" : "Ihr legt Karten derselben Farbe in aufsteigender Folge. Wer zuerst seine letzte Karte legt, gewinnt die Chips in der Mitte."
           }
         },
         "en" : {
@@ -10319,7 +12347,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit Hana spielen"
+            "value" : "Mit Hana loslegen"
           }
         },
         "en" : {
@@ -10601,7 +12629,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit gleichen Karten bieten"
+            "value" : "Mit gleichen Werten pochen"
           }
         },
         "en" : {
@@ -11024,7 +13052,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tisch füllen"
+            "value" : "Chips auslegen"
           }
         },
         "en" : {
@@ -11306,7 +13334,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trumpf aufdecken"
+            "value" : "Tischkarte aufdecken"
           }
         },
         "en" : {
@@ -11447,7 +13475,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ füllt die Felder."
+            "value" : "%@ legt Chips in die Bonusfelder."
           }
         },
         "en" : {
@@ -11494,7 +13522,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alle füllen die Felder. Passende Trumpfkarten holen gleich Chips aus den Bonusfeldern; um den Poch-Pott spielt ihr danach."
+            "value" : "Jeder legt reihum je einen Chip in jedes Feld. Dein Chip in der Mitte liegt schon."
           }
         },
         "en" : {
@@ -11588,7 +13616,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alle setzen mit dir ein"
+            "value" : "Jetzt legt jeder Chips aus"
           }
         },
         "en" : {
@@ -11629,49 +13657,60 @@
         }
       }
     },
+    "tutorial.meld.boardTour.king" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein Trumpf-König" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your trump king" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu rey de triunfo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ton roi d’atout" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il tuo re di briscola" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Jouw troefkoning" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Twój król atutowy" } }
+      }
+    },
     "tutorial.meld.claim.body" : {
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "König und Dame sind Trumpf. Der König gewinnt sein Bonusfeld; gemeinsam gewinnen beide zusätzlich die Hochzeit."
+            "value" : "König und Dame in Trumpf bilden eine Hochzeit. Du nimmst die Chips aus König, Dame und Hochzeit. Danach sind Noah und Jonas dran."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The king and queen of the same trump suit form the Marriage. That also wins you this field."
+            "value" : "You receive King, Queen and Marriage. Noah and Jonas then meld their trump cards."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El rey y la reina del mismo palo de triunfo forman el Matrimonio. Así también ganas esta casilla."
+            "value" : "Recibes Rey, Dama y Matrimonio. Después Noah y Jonas muestran sus triunfos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le roi et la dame de la même couleur d’atout forment le Mariage. Tu remportes ainsi aussi cette case."
+            "value" : "Tu reçois Roi, Dame et Mariage. Noah et Jonas annoncent ensuite leurs atouts."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il re e la regina dello stesso seme di briscola formano il Matrimonio. Così vinci anche questa casella."
+            "value" : "Ricevi Re, Regina e Matrimonio. Poi Noah e Jonas dichiarano le loro briscole."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De koning en vrouw van dezelfde troefkleur vormen het Huwelijk. Daarmee win je ook dit veld."
+            "value" : "Je krijgt Koning, Vrouw en Huwelijk. Daarna melden Noah en Jonas hun troefkaarten."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Król i dama w tym samym kolorze atutowym tworzą Małżeństwo. Dzięki temu wygrywasz również to pole."
+            "value" : "Otrzymujesz Króla, Damę i Małżeństwo. Potem Noah i Jonas meldują swoje atuty."
           }
         }
       }
@@ -11682,43 +13721,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "König und Dame - das ist die Hochzeit."
+            "value" : "Deine Hochzeit bringt Chips aus drei Feldern."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "King and queen: two prizes"
+            "value" : "Your Marriage pays three times"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rey y reina: dos premios"
+            "value" : "Tu Matrimonio paga tres veces"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Roi et dame : deux gains"
+            "value" : "Ton Mariage paie trois fois"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Re e regina: due premi"
+            "value" : "Il tuo Matrimonio paga tre volte"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koning en vrouw: twee prijzen"
+            "value" : "Je Huwelijk betaalt drie keer"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Król i dama: dwie wygrane"
+            "value" : "Twoje Małżeństwo płaci trzy razy"
           }
         }
       }
@@ -11729,43 +13768,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Er trägt die Trumpffarbe Karo. Zeig ihn: Die Chips aus dem König-Bonusfeld gehen an dich, und die Karte bleibt in deiner Hand."
+            "value" : "Karo ist Trumpf. Dein König passt zum König-Feld. Zeig ihn und nimm die Chips daraus. Die Karte bleibt in deiner Hand."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your king is the same suit as the table card. Show it: you take the chips, while the card stays in your hand."
+            "value" : "Diamonds are trump. Show the king: you take the chips from its bonus field. The card stays in your hand."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu rey es del mismo palo que la carta de la mesa. Muéstralo: recoges las fichas y la carta se queda en tu mano."
+            "value" : "Diamantes es triunfo. Muestra el rey: recoges las fichas de su casilla de premio. La carta se queda en tu mano."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ton roi est de la même couleur que la carte de table. Montre-le : tu prends les jetons, mais la carte reste dans ta main."
+            "value" : "Carreau est l’atout. Montre le roi : tu prends les jetons de sa case bonus. La carte reste dans ta main."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il tuo re è dello stesso seme della carta sul tavolo. Mostralo: prendi le fiche, mentre la carta resta nella tua mano."
+            "value" : "Quadri è briscola. Mostra il re: prendi le fiche dalla sua casella bonus. La carta resta nella tua mano."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je koning is van dezelfde kleur als de tafelkaart. Toon hem: je pakt de fiches, terwijl de kaart in je hand blijft."
+            "value" : "Ruiten is troef. Toon de koning: je pakt de fiches uit zijn bonusvak. De kaart blijft in je hand."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Twój król ma ten sam kolor co karta na stole. Pokaż go: zabierasz żetony, a karta zostaje w twojej ręce."
+            "value" : "Karo jest atutem. Pokaż króla: zabierasz żetony z jego pola bonusowego. Karta zostaje w twojej ręce."
           }
         }
       }
@@ -11776,43 +13815,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dein Karo-König gewinnt das König-Bonusfeld."
+            "value" : "Dein Karo-König bringt dir Chips."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your trump king wins the King field."
+            "value" : "Your diamond king wins."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu rey de triunfo gana la casilla Rey."
+            "value" : "Tu rey de diamantes gana."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ton roi d’atout remporte la case Roi."
+            "value" : "Ton roi de carreau gagne."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il tuo re di briscola vince la casella Re."
+            "value" : "Il tuo re di quadri vince."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je troefkoning wint het Koningsveld."
+            "value" : "Je ruitenkoning wint."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Twój atutowy król wygrywa pole Król."
+            "value" : "Twój król karo wygrywa."
           }
         }
       }
@@ -11823,7 +13862,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lege deinen Chip hinein. Wer zuerst keine Karten mehr hat, gewinnt die Mitte."
+            "value" : "Die Mitte bleibt bis zum Ausspielen liegen. Wer zuerst keine Karten mehr hat, gewinnt alle Chips darin."
           }
         },
         "en" : {
@@ -11870,7 +13909,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Füll die Mitte fürs Finale."
+            "value" : "Lege den Chip in die Mitte."
           }
         },
         "en" : {
@@ -11917,7 +13956,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nur du siehst deine Karten offen - zusammen sind sie deine Hand. Bei den anderen bleiben die Werte verdeckt."
+            "value" : "Nur deine Karten liegen offen. Zusammen bilden sie deine Hand. Die Karten der anderen bleiben verdeckt."
           }
         },
         "en" : {
@@ -11964,7 +14003,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Karten kommen."
+            "value" : "Die Karten werden verteilt."
           }
         },
         "en" : {
@@ -12011,7 +14050,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sie gehört niemandem. Deckst du sie auf, wird ihre Kartenfarbe zum Trumpf dieser Runde."
+            "value" : "Sie gehört niemandem. Wenn du sie aufdeckst, bestimmt ihre Farbe den Trumpf dieser Runde."
           }
         },
         "en" : {
@@ -12058,7 +14097,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine Karte bleibt auf dem Tisch."
+            "value" : "Eine Karte bleibt verdeckt in der Mitte."
           }
         },
         "en" : {
@@ -12105,43 +14144,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Chips aus König und Hochzeit gehen an dich. Chips in nicht gewonnenen Bonusfeldern bleiben liegen; in der nächsten Runde kommen weitere dazu."
+            "value" : "Du nimmst die Chips aus König, Dame und Hochzeit. Noah nimmt die Chips aus der Zehn, Jonas die aus dem Ass."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You take the chips from the King and Marriage fields. Unclaimed fields stay filled and keep growing."
+            "value" : "You: King, Queen, Marriage. Noah: Ten. Jonas: Ace. Each player takes only their own bonus chips."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recoges las fichas de las casillas Rey y Matrimonio. Las casillas no ganadas siguen llenas y creciendo."
+            "value" : "Tú: Rey, Dama, Matrimonio. Noah: Diez. Jonas: As. Cada persona toma solo sus fichas bonus."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu prends les jetons des cases Roi et Mariage. Les cases non remportées restent remplies et continuent de grossir."
+            "value" : "Toi : Roi, Dame, Mariage. Noah : Dix. Jonas : As. Chacun prend seulement ses jetons bonus."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prendi le fiche dalle caselle Re e Matrimonio. Le caselle non vinte restano piene e continuano a crescere."
+            "value" : "Tu: Re, Regina, Matrimonio. Noah: Dieci. Jonas: Asso. Ognuno prende solo le proprie fiche bonus."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je pakt de fiches uit de velden Koning en Huwelijk. Niet-gewonnen velden blijven gevuld en groeien verder."
+            "value" : "Jij: Koning, Vrouw, Huwelijk. Noah: Tien. Jonas: Aas. Iedereen pakt alleen eigen bonusfiches."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zabierasz żetony z pól Król i Małżeństwo. Niezdobyte pola pozostają pełne i dalej rosną."
+            "value" : "Ty: Król, Dama, Małżeństwo. Noah: Dziesiątka. Jonas: As. Każdy bierze tylko własne żetony bonusowe."
           }
         }
       }
@@ -12152,43 +14191,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zwei Bonusfelder gehören dir."
+            "value" : "Jeder nimmt Chips aus den passenden Feldern."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your first chips"
+            "value" : "Each meld pays its owner"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus primeras fichas"
+            "value" : "Cada anuncio paga a su dueño"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tes premiers jetons"
+            "value" : "Chaque annonce paie son auteur"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le tue prime fiche"
+            "value" : "Ogni dichiarazione paga chi la fa"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je eerste fiches"
+            "value" : "Elke melding betaalt de eigenaar"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Twoje pierwsze żetony"
+            "value" : "Każdy meldunek płaci właścicielowi"
           }
         }
       }
@@ -12199,7 +14238,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leg deinen Chip hinein. Wer zuerst keine Karten mehr vor sich hat, gewinnt alle Chips in der Mitte."
+            "value" : "Die Mitte bleibt bis zum Ausspielen liegen. Wer zuerst keine Karten mehr hat, gewinnt alle Chips darin."
           }
         },
         "en" : {
@@ -12246,7 +14285,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dein Ziel fürs Finale: die Mitte."
+            "value" : "Lege deinen Chip in die Mitte."
           }
         },
         "en" : {
@@ -12384,7 +14423,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ gewinnt die Chips aus der Mitte. Für jede Karte, die du noch hältst, zahlst du 1 Chip - höchstens deinen Vorrat."
+            "value" : "%@ gewinnt die Chips aus der Mitte. Du zahlst 1 Chip für jede deiner Restkarten, höchstens deinen Vorrat."
           }
         },
         "en" : {
@@ -12476,7 +14515,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du gewinnst die Chips aus der Mitte. Zusätzlich zahlt dir jeder Gegner für jede übrige Handkarte 1 Chip."
+            "value" : "Du gewinnst die Chips aus der Mitte. Jeder Gegner zahlt dir 1 Chip für jede seiner Restkarten."
           }
         },
         "en" : {

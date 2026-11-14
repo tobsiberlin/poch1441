@@ -1,0 +1,142 @@
+{
+  "result": "PASS",
+  "status": "TECHNICAL_GREEN_HUMAN_PENDING",
+  "productContractSHA256": "8f50b68ff3141ad45f7d9eb751913c9c40af99678c15570a52821413561f6f16",
+  "xctest": {
+    "result": "Passed",
+    "totalTestCount": 7,
+    "passedTests": 7,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "productContractSHA256": "8f50b68ff3141ad45f7d9eb751913c9c40af99678c15570a52821413561f6f16",
+    "testSourceSHA256": "160639cfa486464c90adf20952c66df2bcea9377349b15f5f7980e9bf6b0934e",
+    "diagnosticsCollection": "never",
+    "perTestTimeoutSeconds": 30
+  },
+  "planStableID": "card.deal.track-b.transcript-player.v1",
+  "instantiatedPlanCount": 1,
+  "viewport": "402x874",
+  "standardWallclock": {
+    "capturedFrames": 61,
+    "medianIntervalMilliseconds": 16.66520835715346,
+    "p95IntervalMilliseconds": 16.766041633673012,
+    "maximumIntervalMilliseconds": 17.290333285927773,
+    "callbackNames": [
+      "onContact",
+      "onRest"
+    ],
+    "settleFramesCountedMoving": 11
+  },
+  "rateSegments": [
+    {
+      "requestedFramesPerSecond": 60,
+      "samples": 48,
+      "medianIntervalMilliseconds": 16.659874992910773,
+      "p95IntervalMilliseconds": 17.666208324953914,
+      "maximumIntervalMilliseconds": 17.721750016789883
+    },
+    {
+      "requestedFramesPerSecond": 80,
+      "samples": 64,
+      "medianIntervalMilliseconds": 12.498895783210173,
+      "p95IntervalMilliseconds": 13.254583347588778,
+      "maximumIntervalMilliseconds": 13.393666711635888
+    },
+    {
+      "requestedFramesPerSecond": 120,
+      "samples": 96,
+      "medianIntervalMilliseconds": 8.331708319019526,
+      "p95IntervalMilliseconds": 8.988291665446013,
+      "maximumIntervalMilliseconds": 9.195875027216971
+    }
+  ],
+  "cancellation": {
+    "beforeReleaseCallbackCount": 1,
+    "beforeReleaseContactCount": 0,
+    "beforeReleaseRestCount": 0,
+    "committedCallbackNames": [
+      "onContact",
+      "onRest"
+    ],
+    "committedCancelIgnored": true,
+    "committedFinalPhase": "resting",
+    "committedFinalPosition": {
+      "x": 0.9,
+      "y": 0.86
+    }
+  },
+  "reducedMotion": {
+    "callbackNames": [
+      "onContact",
+      "onRest"
+    ],
+    "finalPhase": "resting",
+    "finalPosition": {
+      "x": 0.9,
+      "y": 0.86
+    },
+    "releaseLatencySeconds": 1.5416298992931843e-06
+  },
+  "video": {
+    "audioTrackCount": 0,
+    "durationSeconds": 1.0166666666666666,
+    "frameCount": 61,
+    "height": 874,
+    "nominalFrameRate": 60,
+    "path": "/Users/tobsi/poch1441/tasks/reviews/transcript-motion-player-v1/Evidence/402x874-standard-wallclock-uncut-60fps.mp4",
+    "videoTrackCount": 1,
+    "width": 402
+  },
+  "decodedPixelOrientation": {
+    "comparison": "18 decoded H.264 frames versus frame-matched pre-encode contact-sheet cells",
+    "decodedOrientation": "upright",
+    "maximumUprightMeanAbsoluteError": 5.0,
+    "minimumWinningMargin": 2.0,
+    "result": "PASS",
+    "sampledFrameIndices": [
+      0,
+      4,
+      7,
+      11,
+      14,
+      18,
+      21,
+      25,
+      28,
+      32,
+      35,
+      39,
+      42,
+      46,
+      49,
+      53,
+      56,
+      60
+    ],
+    "schemaVersion": 1,
+    "scores": {
+      "horizontalFlip": {
+        "maximumAbsoluteError": 3.6622300148010254,
+        "meanAbsoluteError": 3.3813677496380277,
+        "p95AbsoluteError": 3.6588949084281923
+      },
+      "rotate180": {
+        "maximumAbsoluteError": 6.742498874664307,
+        "meanAbsoluteError": 6.483548800150554,
+        "p95AbsoluteError": 6.72185595035553
+      },
+      "upright": {
+        "maximumAbsoluteError": 1.3486946821212769,
+        "meanAbsoluteError": 1.3027659588389926,
+        "p95AbsoluteError": 1.3413050413131713
+      },
+      "verticalFlip": {
+        "maximumAbsoluteError": 7.012540340423584,
+        "meanAbsoluteError": 6.649075614081489,
+        "p95AbsoluteError": 6.991897416114807
+      }
+    },
+    "winningMargin": 2.078601790799035
+  },
+  "visualVerdict": "PENDING"
+}

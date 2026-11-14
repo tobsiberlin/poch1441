@@ -1,0 +1,23 @@
+{
+  "baseTimingReceipt": {
+    "file": "verification.json",
+    "sha256": "aefa9d1da22b5d08b2f07c8a2228aac8f6c72b6b11c7be3cc335ef9907686cf8"
+  },
+  "decodedOrientationReceipt": {
+    "file": "orientation-verification.json",
+    "sha256": "8acee9a64ef3b5486fc938f3bcd9a673bba6dc3d73c9d6558f2b852628a79f0b"
+  },
+  "frozenV3Files": {
+    "Scripts/VideoInspector.swift": "a86915e6ad6e207af688c98b34a78756fa844cbb5c58bb9a2dd80a1d572ca4bf",
+    "Scripts/make_encoded_review_strips.py": "15dead7b50ea94d4c9b25833c14bb9c4e138ab7aef5d81db4855b64b3c903ee0",
+    "Scripts/verify_evidence.py": "ef11bdb73f3212f1f14a7ab6549515bf6e62e567a4950cbb252453d9f52dd15b",
+    "Sources/DealRhythmContract.swift": "2294f03d7fa1079b737ff6274aad36555d1a3acad018b8f0f0659a3251e8487c",
+    "Sources/RhythmHarnessModel.swift": "37760e68efee123be56c6f9ae8e3a6ed06ed4ca2b16087c856082367544aacfe",
+    "Sources/RhythmHarnessStage.swift": "48bc7fc8646b24b3ae847dbd660994ad2f0347950729d447843fe34b1916db85",
+    "Sources/W2CardBody.swift": "b5c745e86aae6c3cab7ebb7cd43589885067db60612dc95b4ea38b7e6ad53aac"
+  },
+  "humanReviewStatus": "HUMAN_PENDING",
+  "productionIntegrationAllowed": false,
+  "result": "PASS",
+  "schemaVersion": 1
+}

@@ -1,0 +1,18 @@
+{
+  "artifactSHA256": {
+    "orientationContactCropStrip": "c16886ca615728d8532206f23c8a48e6f115cb9c5049155b6c27f8bd9721cd6f",
+    "orientationContactStrip": "4e6292ef7d4bb5c7904b332abb2639e41b2761b1db5fdbdec368edb8aa830397",
+    "technicalReceipt": "f3ab172b6e8d527f006ab28cf21dac7e2cf7038529581cc11ee66287321dac79",
+    "uncutProof": "87d7e206901a3ca7dd7fe4c0ba754468201ba118ed7795c96bb06d6b6dc11cb7"
+  },
+  "decision": "GREEN",
+  "gate": "ISOLATED_MATERIAL_ONLY",
+  "notes": [
+    "Temporal rim, specular, relief, roughness and oxidation remain coherent at the real 19.8 px projection.",
+    "The embossed numeral is not reliably legible and is not used as the identity gate.",
+    "This receipt does not authorize production integration, audio, haptics or full payout motion."
+  ],
+  "reviewedAt": "2026-07-20T14:53:07+02:00",
+  "reviewer": "Lead",
+  "sourceTechnicalVerdict": "TECHNICAL_GREEN_HUMAN_PENDING"
+}

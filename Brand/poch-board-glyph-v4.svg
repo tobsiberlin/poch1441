@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 board glyph v4</title>
+  <desc>Flat Poch board with eight wells, one central well and three restrained deposits.</desc>
+  <rect width="1024" height="1024" fill="#101821"/>
+  <circle cx="512" cy="512" r="386" fill="#0A1118" stroke="#F4F0E8" stroke-width="20"/>
+  <g fill="#101821" stroke="#F4F0E8" stroke-width="20">
+    <circle cx="512" cy="266" r="58"/>
+    <circle cx="686" cy="338" r="58"/>
+    <circle cx="758" cy="512" r="58"/>
+    <circle cx="686" cy="686" r="58"/>
+    <circle cx="512" cy="758" r="58"/>
+    <circle cx="338" cy="686" r="58"/>
+    <circle cx="266" cy="512" r="58"/>
+    <circle cx="338" cy="338" r="58"/>
+    <circle cx="512" cy="512" r="108" stroke-width="24"/>
+  </g>
+  <circle cx="512" cy="266" r="24" fill="#C8A35A"/>
+  <circle cx="758" cy="512" r="24" fill="#8D74AA"/>
+  <circle cx="338" cy="686" r="24" fill="#6F9B8B"/>
+  <path d="M512 464L560 512L512 560L464 512Z" fill="#C96E55"/>
+</svg>

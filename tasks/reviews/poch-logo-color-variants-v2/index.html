@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>POCH 1441 - Farb- und Muldenvergleich</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #101821;
+      --ink-2: #151e28;
+      --ink-3: #1b2631;
+      --ivory: #f4f0e8;
+      --muted: #aeb5bc;
+      --line: rgba(244, 240, 232, .12);
+      --brass: #c8a35a;
+      --copper: #b96a55;
+      --plum: #8e75ad;
+      --sage: #6f9a8c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 70% -20%, rgba(111, 154, 140, .11), transparent 34rem),
+        var(--ink);
+      color: var(--ivory);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    }
+
+    main {
+      width: min(1440px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 54px 0 80px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+      gap: 48px;
+      align-items: end;
+      padding-bottom: 34px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(42px, 6vw, 86px);
+      line-height: .96;
+      letter-spacing: -.055em;
+    }
+
+    header p {
+      max-width: 48ch;
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .wordmark-strip {
+      margin-top: 34px;
+      min-height: 170px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .022);
+    }
+
+    .wordmark-strip img { width: min(780px, 82%); }
+
+    .section-title {
+      margin: 62px 0 24px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 42px);
+      letter-spacing: -.035em;
+    }
+
+    .section-title p {
+      max-width: 56ch;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .variants {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    article {
+      position: relative;
+      overflow: hidden;
+      min-height: 500px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--ink-2);
+    }
+
+    article.recommended { border-color: rgba(200, 163, 90, .48); }
+
+    .variant-copy {
+      position: absolute;
+      inset: 26px 28px auto;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .variant-copy h3 {
+      margin: 0 0 7px;
+      font-size: 25px;
+      letter-spacing: -.025em;
+    }
+
+    .variant-copy p {
+      max-width: 46ch;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.42;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border: 1px solid currentColor;
+      border-radius: 8px;
+      color: var(--brass);
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .mark-stage {
+      position: absolute;
+      inset: 110px 28px 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 50% 44%, rgba(244, 240, 232, .055), transparent 46%),
+        #111923;
+    }
+
+    .mark {
+      --well-distance: 122px;
+      position: relative;
+      width: min(54%, 280px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .mark img {
+      position: relative;
+      z-index: 2;
+      width: 69%;
+      filter: drop-shadow(0 16px 24px rgba(0, 0, 0, .22));
+    }
+
+    .wells {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      animation: settle 900ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    .well {
+      --angle: 0deg;
+      --distance: 46%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px;
+      transform: rotate(var(--angle)) translateY(calc(-1 * var(--well-distance))) rotate(calc(-1 * var(--angle)));
+      border: 1px solid rgba(244, 240, 232, .24);
+      border-radius: 50%;
+      background: #24303b;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, .38);
+    }
+
+    .well:nth-child(1) { --angle: 0deg; }
+    .well:nth-child(2) { --angle: 45deg; }
+    .well:nth-child(3) { --angle: 90deg; }
+    .well:nth-child(4) { --angle: 135deg; }
+    .well:nth-child(5) { --angle: 180deg; }
+    .well:nth-child(6) { --angle: 225deg; }
+    .well:nth-child(7) { --angle: 270deg; }
+    .well:nth-child(8) { --angle: 315deg; }
+
+    .whisper .well { background: color-mix(in srgb, var(--brass) 26%, #24303b); }
+    .phases .well:nth-child(-n+3) { background: var(--brass); }
+    .phases .well:nth-child(n+4):nth-child(-n+5) { background: var(--plum); }
+    .phases .well:nth-child(n+6) { background: var(--sage); }
+    .full .well:nth-child(4n+1) { background: var(--brass); }
+    .full .well:nth-child(4n+2) { background: var(--copper); }
+    .full .well:nth-child(4n+3) { background: var(--plum); }
+    .full .well:nth-child(4n) { background: var(--sage); }
+
+    .applications {
+      display: grid;
+      grid-template-columns: .76fr 1.24fr;
+      gap: 18px;
+    }
+
+    .application {
+      min-height: 620px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #131c25;
+    }
+
+    .card-back {
+      position: relative;
+      width: min(68%, 350px);
+      aspect-ratio: .69;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 2px solid color-mix(in srgb, var(--brass) 60%, transparent);
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, transparent 47%, rgba(200, 163, 90, .13) 47% 53%, transparent 53%),
+        linear-gradient(45deg, transparent 47%, rgba(185, 106, 85, .12) 47% 53%, transparent 53%),
+        #152230;
+      box-shadow: 0 32px 70px rgba(0, 0, 0, .32);
+    }
+
+    .card-back::before {
+      content: "";
+      position: absolute;
+      inset: 22px;
+      border: 1px solid rgba(244, 240, 232, .16);
+      border-radius: 14px;
+    }
+
+    .card-back .mark { --well-distance: 88px; width: 58%; }
+
+    .board {
+      --well-distance: min(25vw, 245px);
+      position: relative;
+      width: min(74%, 580px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(244, 240, 232, .24);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 45% 36%, rgba(244, 240, 232, .08), transparent 25%),
+        #16212b;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, .36), inset 0 0 0 12px rgba(0, 0, 0, .15);
+    }
+
+    .board .mark { width: 46%; }
+    .board .well { width: 46px; height: 46px; margin: -23px; }
+
+    footer {
+      margin-top: 42px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    @keyframes settle {
+      from { opacity: 0; transform: scale(.94); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 820px) {
+      main { width: min(100% - 24px, 680px); padding-top: 30px; }
+      header, .variants, .applications { grid-template-columns: 1fr; }
+      header { gap: 18px; }
+      .section-title { align-items: flex-start; flex-direction: column; }
+      article { min-height: 440px; }
+      .variant-copy { grid-template-columns: 1fr; }
+      .tag { justify-self: start; }
+      .mark-stage { top: 140px; }
+      .mark { --well-distance: 104px; }
+      .card-back .mark { --well-distance: 78px; }
+      .application { min-height: 500px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wells { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Wie viel Farbe verträgt POCH?</h1>
+      <p>Das Kernlogo bleibt ruhig. Die Mulden dürfen die drei Spielphasen sichtbar machen, solange sie nicht wie Roulette oder ein Ladeindikator wirken.</p>
+    </header>
+
+    <div class="wordmark-strip">
+      <img src="assets/poch-1441-wordmark-color-master.svg" alt="Farbige Wortmarke POCH 1441">
+    </div>
+
+    <div class="section-title">
+      <h2>Vier Intensitäten</h2>
+      <p>Von der reinen Kernmarke bis zur mutigen Tischsignatur. Variante 03 ist meine Empfehlung für Kartenrücken, Brett und Intro.</p>
+    </div>
+
+    <section class="variants" aria-label="Logo-Farbvarianten">
+      <article>
+        <div class="variant-copy"><div><h3>01 Kern</h3><p>Nur Elfenbein, Messing und der kupferne Einsatzkern. Beste Hauptlogo-Fassung.</p></div><span class="tag">Logo</span></div>
+        <div class="mark-stage"><div class="mark"><img src="assets/poch-knock-symbol-color-master.svg" alt="Kernlogo ohne Mulden"></div></div>
+      </article>
+
+      <article>
+        <div class="variant-copy"><div><h3>02 Leiser Ring</h3><p>Acht Mulden werden nur als warme Materialpunkte angedeutet. Sehr sicher, aber weniger erzählerisch.</p></div><span class="tag">Subtil</span></div>
+        <div class="mark-stage"><div class="mark whisper"><div class="wells" aria-hidden="true"><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i></div><img src="assets/poch-knock-symbol-color-master.svg" alt="Logo mit acht dezenten Mulden"></div></div>
+      </article>
+
+      <article class="recommended">
+        <div class="variant-copy"><div><h3>03 Drei Phasen</h3><p>Messing für Trumpf, Pflaume fürs Pochen, Salbei fürs Ausspielen. Farbe erklärt das Spiel.</p></div><span class="tag">Empfehlung</span></div>
+        <div class="mark-stage"><div class="mark phases"><div class="wells" aria-hidden="true"><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i></div><img src="assets/poch-knock-symbol-color-master.svg" alt="Logo mit nach Spielphasen gefärbten Mulden"></div></div>
+      </article>
+
+      <article>
+        <div class="variant-copy"><div><h3>04 Voller Tisch</h3><p>Vier Farbtöne wechseln rundum. Lebendig, aber als Hauptlogo schon nah an Spielzeug oder Roulette.</p></div><span class="tag">Mutig</span></div>
+        <div class="mark-stage"><div class="mark full"><div class="wells" aria-hidden="true"><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i></div><img src="assets/poch-knock-symbol-color-master.svg" alt="Logo mit vier wechselnden Muldenfarben"></div></div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <h2>Dort wird die Idee stark</h2>
+      <p>Die farbigen Mulden sind eine Produktsprache. Sie gehören auf Karten und Brett, nicht zwingend in jede Wortmarke.</p>
+    </div>
+
+    <section class="applications" aria-label="Anwendungen auf Kartenrücken und Brett">
+      <div class="application">
+        <div class="card-back">
+          <div class="mark phases"><div class="wells" aria-hidden="true"><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i></div><img src="assets/poch-knock-symbol-color-master.svg" alt="POCH Symbol auf einem Kartenrücken"></div>
+        </div>
+      </div>
+      <div class="application">
+        <div class="board phases">
+          <div class="wells" aria-hidden="true"><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i><i class="well"></i></div>
+          <div class="mark"><img src="assets/poch-knock-symbol-color-master.svg" alt="POCH Symbol in einem modernen Spielbrett"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>Empfehlung: 01 als Logo, 03 als lebendige Produktanwendung. So bleibt POCH zeitlos und bekommt trotzdem Farbe, Geschichte und Spiellust.</footer>
+  </main>
+</body>
+</html>

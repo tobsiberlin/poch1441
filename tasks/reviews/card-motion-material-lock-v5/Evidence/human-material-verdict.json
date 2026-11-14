@@ -1,0 +1,14 @@
+{
+  "decision": "GREEN",
+  "gate": "CARD_MATERIAL_PRODUCT_LOCK",
+  "greenSubgates": [
+    "FROZEN_V4_SOURCE_LOCK",
+    "STATIC_REAL_SCALE_MATERIAL_INHERITED",
+    "DECODED_PIXEL_ORIENTATION",
+    "FRAME_AND_METADATA_CORRESPONDENCE",
+    "QUICKTIME_HUMAN_PLAYBACK"
+  ],
+  "reviewedAt": "2026-07-20T15:41:08+02:00",
+  "reason": "The native verifier identifies the decoded video as upright identity. Lead review of the complete uncut MP4 in QuickTime confirms upright source, flight, contact and rest with coherent material, shadow and card surface.",
+  "reviewer": "Lead"
+}

@@ -43,3 +43,12 @@ Swift/SpriteKit/SwiftUI-Spiel mit deterministischem PochKit-Kern. Historischer P
 - Jeder neue sichtbare String braucht DE, EN, FR, IT, ES, NL, PL.
 - Build/Tests/Simulator passend zur Änderung ausführen.
 - Keine Commits oder Pushes ohne explizite Nutzeranweisung.
+
+<!-- polyki-guidance:v2 -->
+## PolyKI-Review
+
+- „Mach Poly Review“ bedeutet: den eindeutig gemeinten Gegenstand ohne weitere Rückfrage über den globalen `polyki`-Skill und das MCP `polyki` von ChatGPT, Claude, Perplexity, Gemini und Grok unabhängig prüfen und erst nach fünf Antworten per ChatGPT synthetisieren lassen.
+- Bei substanziellen Architektur-, Security-, Rechts-, Payment-, Datenmodell-, Produkt- oder Richtungsentscheidungen sowie Vorhaben mit mehr als fünf betroffenen Dateien PolyKI automatisch als Alternative zu einem einzelnen Gemini- oder GPT-Review verwenden. Kleine Bugfixes und Routinearbeit benötigen kein PolyKI.
+- Ausschließlich die kanonischen Werkzeuge `polyki_ask`, `polyki_consult`, `polyki_review`, `polyki_get_result`, `polyki_materialize_artifacts`, `polyki_list_consultations` und `polyki_synthesize` verwenden.
+- Für Design-/Visionreviews aktuelle Zielbilder ausdrücklich über `polyki_review` übergeben. Dateien nur aufgabenbezogen und ausdrücklich freigegeben übertragen; niemals Geheimnisse, Zugangsdaten, `.env`-, Auth- oder Session-Dateien.
+- Provider-Login, 2FA, CAPTCHA, Limits und Schutzmaßnahmen niemals umgehen. Ein Teilquorum nie als vollständiges 5/5-Dossier ausgeben.

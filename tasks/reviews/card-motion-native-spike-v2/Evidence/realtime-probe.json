@@ -1,0 +1,10 @@
+{
+  "consecutivePairsOver33_3Milliseconds" : 0,
+  "durationSeconds" : 5.76101495831972,
+  "maximumFrameMilliseconds" : 16.666666691889986,
+  "p95FrameMilliseconds" : 16.666666691889986,
+  "percentAtOrUnder16_67Milliseconds" : 100,
+  "sampleCount" : 344,
+  "simulator" : true,
+  "verdict" : "GREEN"
+}

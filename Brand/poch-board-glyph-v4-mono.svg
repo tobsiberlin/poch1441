@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>POCH 1441 board glyph v4 monochrome</title>
+  <desc>One-color engraving master of the Poch board glyph.</desc>
+  <g fill="none" stroke="#000000" stroke-width="20">
+    <circle cx="512" cy="512" r="386"/>
+    <circle cx="512" cy="266" r="58"/>
+    <circle cx="686" cy="338" r="58"/>
+    <circle cx="758" cy="512" r="58"/>
+    <circle cx="686" cy="686" r="58"/>
+    <circle cx="512" cy="758" r="58"/>
+    <circle cx="338" cy="686" r="58"/>
+    <circle cx="266" cy="512" r="58"/>
+    <circle cx="338" cy="338" r="58"/>
+    <circle cx="512" cy="512" r="108" stroke-width="24"/>
+  </g>
+  <g fill="#000000">
+    <circle cx="512" cy="266" r="24"/>
+    <circle cx="758" cy="512" r="24"/>
+    <circle cx="338" cy="686" r="24"/>
+    <path d="M512 464L560 512L512 560L464 512Z"/>
+  </g>
+</svg>

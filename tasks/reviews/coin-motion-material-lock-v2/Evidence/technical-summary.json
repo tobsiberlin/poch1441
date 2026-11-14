@@ -1,0 +1,50 @@
+{
+  "failures" : [
+
+  ],
+  "inherited" : {
+    "checks" : 106,
+    "commitPoint" : "release",
+    "gateSummarySHA256" : "8ee7ce5321d7a42556c6bc64ba5ba5da46e2df2d3deab788c6385d4fcf649737",
+    "protectedHistoryLength" : 8,
+    "selectionPoolCount" : 12,
+    "source" : "..\/coin-motion-transcript-gate-v1",
+    "transcriptCount" : 12,
+    "transcriptsSHA256" : "76e883093a396548b07060d29d3f2149857240c1026cd1fefe35450de52d98be"
+  },
+  "material" : {
+    "albedo" : "aged real 1 euro cent copper",
+    "alphaCropPixels" : [
+      133,
+      91,
+      310,
+      309
+    ],
+    "edge" : "1.67 mm worn copper edge",
+    "frontLipOcclusionPass" : true,
+    "groundShadowPass" : true,
+    "mode" : "crop-gate",
+    "physicalCoinDiameterMeters" : 0.019,
+    "projectedCoinDiameterPixels" : 19.8,
+    "relief" : "source relief + directional convolution response",
+    "response" : "roughness-biased directional Track-B light",
+    "supersampleScale" : 6,
+    "targetViewport" : "402x874",
+    "worldLightProfile" : {
+      "ambientStrength" : 0.22,
+      "id" : "track-b-lamp-left-v1",
+      "keyDirectionScreen" : {
+        "x" : -0.72,
+        "y" : -0.58,
+        "z" : 0.38
+      },
+      "shadowBlurPixels" : 2.2,
+      "shadowOffsetPixels" : {
+        "x" : 2.4,
+        "y" : 3.2,
+        "z" : 0
+      }
+    }
+  },
+  "verdict" : "TECHNICAL_GREEN_HUMAN_PENDING"
+}

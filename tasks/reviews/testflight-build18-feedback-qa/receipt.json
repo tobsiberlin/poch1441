@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "generated_at": "2026-07-29T02:12:04+0200",
+  "app": {
+    "name": "Poch 1441",
+    "bundle_id": "com.tobc.poch1441",
+    "version": "0.1.0",
+    "build": "18"
+  },
+  "source": {
+    "branch": "agent/publish-poch-tutorial-hardware-qa",
+    "commit": "4b7b0077acae60b13545e2cd2107ff60a0f31f52"
+  },
+  "delivery": {
+    "scope": "internal_testflight_only",
+    "test_flight_internal_testing_only": true,
+    "upload_state": "COMPLETE",
+    "processing_state": "VALID",
+    "internal_build_state": "IN_BETA_TESTING",
+    "external_build_state": "NOT_APPLICABLE",
+    "uses_non_exempt_encryption": false,
+    "delivery_uuid": "98d22e61-812c-428e-be33-893215de1ff1"
+  },
+  "artifact": {
+    "path": "build/Poch1441InternalQA.ipa",
+    "bytes": 62221808,
+    "sha256": "4d5068edc556a73a99f945db37f9167af65ab85cca6113177528ba8df01f00f6",
+    "dsym_bytes": 4919078,
+    "dsym_sha256": "d81372ac055804f46e55a65baeba7a4f93c26ffaa79b19cfdb9a1e768271471a",
+    "get_task_allow": false,
+    "beta_reports_active": true,
+    "developer_tools_support": "absent",
+    "debug_dylib": "absent",
+    "metal_source_paths": "absent"
+  },
+  "software_gate": {
+    "result": "GREEN_FOR_INTERNAL_TESTFLIGHT",
+    "standard_and_reduced_motion_full_flow": "PASS",
+    "empty_hand_result_hold": "PASS",
+    "compact_portrait_landscape_and_ax_xxxl": "PASS",
+    "production_result": "BLOCKED"
+  },
+  "pending_gates": [
+    "physical_build_18_full_flow",
+    "human_audio",
+    "on_device_haptics_and_settings_off",
+    "real_device_audio_visual_sync"
+  ],
+  "historical_red_gates_preserved": true
+}

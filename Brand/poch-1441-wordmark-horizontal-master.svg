@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 220">
+  <title>POCH 1441 horizontal wordmark</title>
+  <desc>Outlined monochrome wordmark with the closed Knock Groove O. No font dependency.</desc>
+  <defs>
+    <mask id="wordmark-knock-groove" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+      <rect width="200" height="200" fill="#ffffff"/>
+      <path d="M151-4L183 17L151 52L134 42Z" fill="#000000"/>
+    </mask>
+  </defs>
+  <g fill="#000000">
+    <!-- P -->
+    <path fill-rule="evenodd" d="M32 32H102C139 32 158 52 158 87C158 122 138 141 102 141H74V182H32ZM74 67V107H98C111 107 117 100 117 87C117 74 111 67 98 67Z"/>
+
+    <!-- O: closed ring; the groove stops before the inner counter -->
+    <g transform="translate(176 18) scale(.82)">
+      <path fill-rule="evenodd" mask="url(#wordmark-knock-groove)" d="M58 12C29 12 12 31 12 60V140C12 169 31 188 60 188H140C169 188 188 169 188 140V60C188 31 169 12 140 12ZM76 58C64 58 58 66 58 78V122C58 134 66 142 78 142H122C134 142 142 134 142 122V78C142 66 134 58 122 58Z"/>
+      <path d="M100 86L114 100L100 114L86 100Z"/>
+    </g>
+
+    <!-- C -->
+    <path d="M490 66C471 43 448 32 414 32C365 32 338 65 338 107C338 150 367 182 414 182C448 182 473 170 491 146L459 123C448 136 436 143 418 143C395 143 381 129 381 107C381 85 395 71 418 71C436 71 448 78 459 91Z"/>
+
+    <!-- H -->
+    <path d="M510 32H552V86H616V32H658V182H616V125H552V182H510Z"/>
+
+    <!-- 1441: optically even tracking, quieter than POCH -->
+    <g transform="translate(700 0) scale(.82 1)">
+      <path d="M0 84L25 62H53V174H18V96H0Z"/>
+      <g transform="translate(67 0)">
+        <path d="M43 62H77V126H93V156H77V174H43V156H0V128ZM43 99L19 126H43Z" fill-rule="evenodd"/>
+      </g>
+      <g transform="translate(174 0)">
+        <path d="M43 62H77V126H93V156H77V174H43V156H0V128ZM43 99L19 126H43Z" fill-rule="evenodd"/>
+      </g>
+      <g transform="translate(281 0)">
+        <path d="M0 84L25 62H53V174H18V96H0Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

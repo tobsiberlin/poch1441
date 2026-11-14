@@ -1,0 +1,9 @@
+{
+  "durationSeconds" : 2.62711025000317,
+  "effectiveFramesPerSecond" : 23.98072178353534,
+  "file" : "realtime-contact-sheet-402x874.png",
+  "frameCount" : 64,
+  "maximumLatenessMilliseconds" : 2.6456666528247297,
+  "missedDeadlineCount" : 0,
+  "requestedFramesPerSecond" : 24
+}
