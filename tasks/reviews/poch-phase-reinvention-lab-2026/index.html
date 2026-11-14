@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>POCH 1441 - Phasenlabor 2026</title>
+  <style>
+    :root {
+      --ink: #07080c;
+      --lift: #11141c;
+      --paper: #f0ece4;
+      --muted: #858b99;
+      --gold: #d2ab5c;
+      --rose: #d64c69;
+      --emerald: #38ba93;
+      --amethyst: #9f6ae8;
+      --cyan: #53d9ff;
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #090a0e; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--paper);
+      background:
+        radial-gradient(circle at 10% -10%, rgba(83, 217, 255, 0.11), transparent 34rem),
+        radial-gradient(circle at 90% 0%, rgba(214, 76, 105, 0.1), transparent 32rem),
+        #090a0e;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .lab-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+      align-items: center;
+      gap: 20px;
+      min-height: 76px;
+      padding: 12px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(9,10,14,.82);
+      -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      backdrop-filter: blur(18px) saturate(1.3);
+    }
+
+    .lab-brand { display: flex; align-items: baseline; gap: 8px; letter-spacing: -.03em; }
+    .lab-brand strong { font-size: 18px; letter-spacing: -.04em; }
+    .lab-brand span { color: var(--gold); font-size: 15px; }
+    .lab-kicker { justify-self: end; color: var(--muted); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
+
+    .chapter-tabs {
+      display: flex;
+      gap: 3px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .chapter-tab {
+      min-height: 38px;
+      padding: 0 15px;
+      border: 0;
+      border-radius: 10px;
+      color: #8f94a0;
+      background: transparent;
+      cursor: pointer;
+      transition: color 150ms ease-out, background-color 150ms ease-out, transform 120ms ease-out;
+    }
+    .chapter-tab:active { transform: scale(.97); }
+    .chapter-tab[aria-selected="true"] { color: #0b0c10; background: var(--paper); }
+
+    .lab-main {
+      display: grid;
+      grid-template-columns: minmax(230px, 310px) minmax(390px, 1fr) minmax(230px, 310px);
+      align-items: start;
+      gap: clamp(22px, 4vw, 64px);
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: 34px 28px 120px;
+    }
+
+    .concept-panel {
+      position: sticky;
+      top: 112px;
+      padding-top: 18px;
+    }
+    .eyebrow { color: var(--cyan); font-size: 10px; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
+    .concept-panel h1 { margin: 12px 0 8px; font-size: clamp(30px, 3vw, 48px); line-height: .95; letter-spacing: -.055em; }
+    .concept-axis { margin: 0; color: #aeb3be; font-size: 15px; line-height: 1.5; }
+    .concept-number { margin-top: 32px; color: rgba(255,255,255,.13); font-size: 78px; font-weight: 800; line-height: .8; letter-spacing: -.08em; }
+
+    .phone-wrap { display: grid; place-items: start center; }
+    .phone {
+      position: relative;
+      width: min(390px, calc(100vw - 28px));
+      aspect-ratio: 390 / 844;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 48px;
+      background: #090b10;
+      box-shadow: 0 42px 110px rgba(0,0,0,.58), 0 0 0 8px rgba(255,255,255,.025);
+      container-type: inline-size;
+    }
+    #stage, #stage > .game { width: 100%; height: 100%; }
+    #stage { background: #090b10; }
+
+    .decision-panel { color: #aeb3be; font-size: 13px; line-height: 1.55; }
+    .decision-panel dl { margin: 18px 0 0; }
+    .decision-panel dt { margin-top: 18px; color: #fff; font-size: 10px; font-weight: 750; letter-spacing: .15em; text-transform: uppercase; }
+    .decision-panel dd { margin: 5px 0 0; }
+    .tradeoff { color: #e2a0ad; }
+    .gesture-note {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 24px;
+      padding: 8px 10px;
+      border: 1px solid rgba(83,217,255,.22);
+      border-radius: 999px;
+      color: #a9eaff;
+      background: rgba(83,217,255,.06);
+      font-size: 11px;
+    }
+
+    .game {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: 24px 18px 18px;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,.06), transparent 32%),
+        linear-gradient(180deg, #11141c, #07080c 72%);
+      color: #f1f2f5;
+    }
+    .game::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .22;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+    .game-top { display: flex; align-items: center; justify-content: space-between; min-height: 42px; }
+    .wordmark { display: flex; gap: 5px; align-items: baseline; font-size: 17px; font-weight: 850; letter-spacing: -.035em; }
+    .wordmark span { color: var(--gold); font-weight: 500; }
+    .act-tag { color: var(--muted); font-size: 9px; font-weight: 780; letter-spacing: .16em; text-transform: uppercase; }
+    .round-chip { padding: 6px 9px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #c8cbd2; font-size: 10px; }
+    .game-title { margin: 10px 0 2px; font-size: 27px; line-height: 1; letter-spacing: -.045em; }
+    .game-subtitle { margin: 0; color: #8f95a2; font-size: 11px; line-height: 1.45; }
+
+    .glass {
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.025));
+      box-shadow: 0 20px 50px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.1);
+      -webkit-backdrop-filter: blur(16px) saturate(1.25);
+      backdrop-filter: blur(16px) saturate(1.25);
+    }
+    .action {
+      min-height: 48px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      color: #f4f4f6;
+      background: rgba(255,255,255,.075);
+      cursor: pointer;
+      transition: transform 130ms ease-out, background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out, opacity 160ms ease-out;
+    }
+    .action:active { transform: scale(.97); }
+    .action.primary { color: #0a0b0e; background: var(--gold); border-color: #f0cb80; font-weight: 800; }
+    .action.amethyst { background: #5e3b83; border-color: #a77bda; }
+    .action.emerald { color: #06110e; background: #55c4a4; border-color: #91e5cb; font-weight: 800; }
+    .action[disabled] { opacity: .38; cursor: not-allowed; }
+
+    .card {
+      position: relative;
+      display: grid;
+      align-content: space-between;
+      width: 52px;
+      height: 78px;
+      padding: 7px;
+      border: 1px solid #d6d0c7;
+      border-radius: 9px;
+      color: #111318;
+      background: linear-gradient(145deg, #fffdf6, #d8d4cc);
+      box-shadow: 0 10px 18px rgba(0,0,0,.34);
+      font-family: ui-serif, Georgia, serif;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: .85;
+      transform-origin: bottom center;
+    }
+    button.card { cursor: pointer; transition: transform 160ms var(--ease-out), box-shadow 160ms ease-out, opacity 160ms ease-out; }
+    button.card:active { transform: translateY(2px) scale(.97); }
+    .card.red { color: #b32c42; }
+    .card .suit { justify-self: end; font-size: 22px; }
+    .card.selected { box-shadow: 0 0 0 2px var(--gold), 0 12px 28px rgba(210,171,92,.32); transform: translateY(-8px); }
+    .card.played { opacity: .18; transform: translateY(-16px) scale(.92); pointer-events: none; }
+    .hand { display: flex; justify-content: center; align-items: end; min-height: 92px; }
+    .hand .card { margin-left: -15px; }
+    .hand .card:first-child { margin-left: 0; }
+    .hand .card:nth-child(odd) { transform: rotate(-3deg); }
+    .hand .card:nth-child(even) { transform: rotate(3deg); }
+    .hand .card.selected { transform: translateY(-8px) rotate(0deg); }
+
+    .opponents { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
+    .opponent { display: grid; justify-items: center; flex: 1; color: #9ba0ac; font-size: 9px; }
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 5px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 50%;
+      color: #f3e9d5;
+      background: radial-gradient(circle at 38% 30%, #6c6578, #201d2a 68%);
+      box-shadow: 0 6px 16px rgba(0,0,0,.3);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .token { width: 25px; height: 25px; border: 2px solid rgba(255,255,255,.35); border-radius: 50%; background: radial-gradient(circle at 34% 28%, #f0d48f, #a77528 67%); box-shadow: 0 6px 12px rgba(0,0,0,.36); }
+    .token.purple { background: radial-gradient(circle at 34% 28%, #c49cf5, #5c327f 67%); }
+    .token.green { background: radial-gradient(circle at 34% 28%, #8edfc4, #24755e 67%); }
+
+    /* Splash directions */
+    .splash { padding: 0; }
+    .splash .game-top { position: absolute; inset: 28px 20px auto; z-index: 8; }
+    .splash-copy { position: absolute; z-index: 7; left: 24px; right: 24px; bottom: 34px; }
+    .splash-copy h2 { margin: 0 0 7px; max-width: 320px; font-size: 36px; line-height: .92; letter-spacing: -.055em; }
+    .splash-copy p { margin: 0 0 14px; max-width: 300px; color: #c5c7ce; font-size: 12px; line-height: 1.4; }
+    .splash-copy .action { width: 100%; }
+    .splash-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .splash-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.18), transparent 34%, rgba(5,6,9,.93) 88%); }
+
+    .scratch-board { position: absolute; inset: 0; touch-action: none; }
+    .scratch-board canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+    .scratch-progress { position: absolute; z-index: 8; top: 80px; left: 22px; color: #e9d8b7; font: 700 9px/1 ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; }
+
+    .knock-world { position: absolute; inset: 0; background: #0b0a0b url('assets/02-four-knocks.webp') center/cover; }
+    .knock-world::after { content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 54%, transparent, rgba(0,0,0,.78) 74%); }
+    .knock-grid { position: absolute; z-index: 5; inset: 120px 22px 210px; display: grid; grid-template: 1fr 1fr / 1fr 1fr; gap: 12px; }
+    .knock {
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(6,7,10,.36);
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      transition: transform 160ms var(--ease-out), background-color 180ms ease-out, border-color 180ms ease-out;
+    }
+    .knock:active { transform: scale(.94); }
+    .knock.done { color: #09100e; background: #74d8b6; border-color: #adf3da; }
+    .knock-count { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; }
+
+    .trailer-world { position: absolute; inset: 0; background: url('assets/03-playable-trailer-veto.webp') center/cover; }
+    .trailer-world::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.08) 45%,rgba(0,0,0,.9)); }
+    .swipe-card { position: absolute; z-index: 6; left: calc(50% - 56px); bottom: 192px; width: 112px; height: 164px; touch-action: none; transition: transform 220ms var(--ease-out), opacity 180ms ease-out; }
+    .swipe-card .card { width: 112px; height: 164px; padding: 12px; border-radius: 15px; font-size: 28px; }
+    .swipe-card.launched { transform: translate3d(280px,-180px,0) rotate(26deg); opacity: 0; }
+    .trailer-outcome { position: absolute; z-index: 5; inset: 136px 22px 250px; display: grid; place-items: center; opacity: 0; transform: scale(.96); transition: opacity 200ms ease-out, transform 220ms var(--ease-out); }
+    .trailer-outcome.revealed { opacity: 1; transform: scale(1); }
+    .trailer-orbit { width: 230px; height: 230px; border: 1px solid #dd4968; border-radius: 50%; box-shadow: inset 0 0 55px rgba(214,76,105,.22), 0 0 34px rgba(214,76,105,.18); }
+
+    .portraits-world { position: absolute; inset: 0; background: url('assets/04-living-portraits.webp') center/cover; }
+    .portraits-world::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,5,8,.1),rgba(8,9,14,.92) 74%); }
+    .portrait-row { position: absolute; z-index: 7; left: 17px; right: 17px; bottom: 205px; display: flex; gap: 8px; }
+    .living-portrait { flex: 1; min-height: 138px; padding: 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 22px; color: #ddd; background: rgba(9,9,13,.55); cursor: pointer; transition: transform 180ms var(--ease-out), background-color 180ms ease-out, border-color 180ms ease-out; }
+    .living-portrait:active { transform: scale(.97); }
+    .living-portrait .avatar { width: 58px; height: 58px; margin: 0 auto 8px; filter: grayscale(1); transition: filter 220ms ease-out, transform 220ms var(--ease-out); }
+    .living-portrait.awake { background: rgba(17,45,41,.7); border-color: rgba(87,221,181,.5); }
+    .living-portrait.awake .avatar { filter: grayscale(0); transform: translateY(-3px); }
+
+    .jump-world { position: absolute; inset: 0; background: url('assets/05-graphic-time-jump.webp') center/cover; transition: filter 240ms ease-out; }
+    .jump-world[data-era="1441"] { filter: sepia(.65) saturate(.7) brightness(.58); }
+    .jump-world[data-era="1900"] { filter: sepia(.22) saturate(.8) brightness(.72); }
+    .jump-world[data-era="2026"] { filter: contrast(1.05) saturate(1.08); }
+    .jump-world[data-era="next"] { filter: hue-rotate(155deg) saturate(1.45) contrast(1.15); }
+    .era-control { position:absolute; z-index:8; left:24px; right:24px; bottom:196px; padding:16px; border-radius:20px; }
+    .era-control output { display:block; margin-bottom:10px; color:#fff; font-size:30px; font-weight:850; letter-spacing:-.04em; }
+    .era-control input { width:100%; accent-color:var(--rose); }
+    .era-labels { display:flex; justify-content:space-between; color:#aeb2bc; font-size:9px; }
+
+    /* Phase 1 */
+    .phase1 { --phase: var(--gold); }
+    .phase1 .game-title { color:#f5e7c6; }
+    .constellation { position: relative; height: 348px; margin-top: 18px; }
+    .constellation::before { content:""; position:absolute; inset:20px 8px 34px; background:conic-gradient(from 12deg at 50% 50%, transparent 0 9%, rgba(210,171,92,.22) 10% 11%, transparent 12% 27%, rgba(210,171,92,.18) 28% 29%, transparent 30%); border:1px solid rgba(210,171,92,.14); border-radius:50%; box-shadow:inset 0 0 60px rgba(210,171,92,.05); }
+    .star-node { position:absolute; display:grid; place-items:center; width:64px; height:64px; border:1px solid rgba(210,171,92,.35); border-radius:50%; color:#e9d4a7; background:#121116; cursor:pointer; transition:transform 160ms var(--ease-out), background-color 180ms ease-out, box-shadow 180ms ease-out; }
+    .star-node:active { transform:scale(.96); }
+    .star-node.selected { color:#10100f; background:var(--gold); box-shadow:0 0 30px rgba(210,171,92,.35); }
+    .star-node:nth-child(1){left:12px;top:108px}.star-node:nth-child(2){left:90px;top:22px}.star-node:nth-child(3){right:90px;top:22px}.star-node:nth-child(4){right:12px;top:108px}.star-node:nth-child(5){left:90px;bottom:22px}.star-node:nth-child(6){right:90px;bottom:22px}.star-node:nth-child(7){left:calc(50% - 38px);top:132px;width:76px;height:76px}
+    .meld-footer { position:absolute; left:18px; right:18px; bottom:18px; display:grid; grid-template-columns:1fr 1.35fr; gap:8px; }
+
+    .layers-stage { position:relative; height:430px; margin-top:10px; perspective:700px; }
+    .layer-disc { position:absolute; left:50%; width:260px; height:160px; margin-left:-130px; border:1px solid rgba(255,255,255,.22); border-radius:50%; transform:rotateX(62deg); box-shadow:0 22px 34px rgba(0,0,0,.38); transition:transform 240ms var(--ease-in-out), opacity 200ms ease-out; }
+    .layer-disc:nth-child(1){top:28px;background:rgba(89,217,255,.12)}
+    .layer-disc:nth-child(2){top:96px;background:rgba(159,106,232,.16)}
+    .layer-disc:nth-child(3){top:164px;background:rgba(210,171,92,.18)}
+    .layers-stage[data-lift="2"] .layer-disc:nth-child(1){transform:translateY(-18px) rotateX(62deg)}
+    .layers-stage[data-lift="3"] .layer-disc:nth-child(1){transform:translateY(-34px) rotateX(62deg)}
+    .layers-stage[data-lift="3"] .layer-disc:nth-child(2){transform:translateY(-16px) rotateX(62deg)}
+    .layer-label { position:absolute; inset:auto 18px 12px; padding:13px; border-radius:16px; color:#cad0dd; font-size:11px; }
+    .layer-slider { position:absolute; right:-25px; top:160px; width:170px; transform:rotate(-90deg); accent-color:var(--cyan); }
+
+    .evidence-desk { margin-top:16px; padding:14px; border:1px solid rgba(255,255,255,.12); border-radius:24px; background:linear-gradient(145deg,#24211d,#0d0e12); }
+    .evidence-trump { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px dashed rgba(255,255,255,.16); }
+    .evidence-slots { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .evidence-slot { min-height:104px; padding:11px; border:1px dashed rgba(255,255,255,.18); border-radius:14px; color:#9fa4af; background:rgba(0,0,0,.16); cursor:pointer; transition:background-color 180ms ease-out,border-color 180ms ease-out,transform 150ms ease-out; }
+    .evidence-slot:active{transform:scale(.98)}.evidence-slot.marked{color:#13100a;background:#d7b66f;border-color:#ffe4aa}.evidence-slot strong{display:block;margin-bottom:5px;color:inherit;font-size:13px}
+    .receipt { margin-top:10px; padding:10px 12px; border-radius:10px; color:#1a1712; background:#ddd5c6; font:700 10px/1.4 ui-monospace,monospace; }
+
+    .hand-theatre { position:relative; height:455px; margin-top:10px; overflow:hidden; border-radius:28px; background:radial-gradient(ellipse at 50% 15%,rgba(210,171,92,.28),transparent 35%),linear-gradient(180deg,#1d1510,#09090c); }
+    .curtain { position:absolute; top:0; bottom:0; width:72px; background:linear-gradient(90deg,#4b1421,#1c0c12); box-shadow:inset -8px 0 18px rgba(0,0,0,.32); }
+    .curtain.left{left:0}.curtain.right{right:0;transform:scaleX(-1)}
+    .theatre-hero { position:absolute; inset:86px 60px auto; text-align:center; }
+    .theatre-hero .card { margin:auto; width:82px; height:120px; font-size:25px; }
+    .theatre-picks { position:absolute; left:20px; right:20px; bottom:24px; display:flex; gap:8px; }
+    .theatre-picks .action { flex:1; font-size:11px; }
+
+    .lens-stage { position:relative; height:455px; margin-top:10px; border:1px solid rgba(255,255,255,.12); border-radius:30px; overflow:hidden; background:#0a0c12; }
+    .lens-pane { position:absolute; inset:0; padding:22px; }
+    .lens-pane.payout { clip-path:inset(0 0 0 50%); background:radial-gradient(circle at 70% 35%,rgba(210,171,92,.25),transparent 34%); }
+    .lens-divider { position:absolute; z-index:4; top:0; bottom:0; left:50%; width:2px; background:#fff; box-shadow:0 0 18px rgba(255,255,255,.7); }
+    .lens-knob { position:absolute; z-index:5; left:calc(50% - 23px); top:205px; display:grid; place-items:center; width:46px; height:46px; border:1px solid #fff; border-radius:50%; color:#0b0c10; background:#fff; cursor:ew-resize; }
+    .lens-control { position:absolute; z-index:6; left:24px; right:24px; bottom:18px; accent-color:var(--gold); }
+
+    /* Phase 2 */
+    .phase2 { --phase:var(--amethyst); background:radial-gradient(circle at 50% 30%,rgba(159,106,232,.14),transparent 35%),linear-gradient(180deg,#11101a,#07080c 75%); }
+    .phase2::before, .phase3::before {
+      position:absolute;
+      z-index:3;
+      left:18px;
+      right:18px;
+      bottom:18px;
+      min-height:50px;
+      padding:10px 14px 10px 56px;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:17px;
+      color:#afb4bf;
+      background:
+        linear-gradient(135deg, transparent 0 30px, rgba(255,255,255,.05) 31px),
+        rgba(8,9,13,.88);
+      box-shadow:0 16px 30px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05);
+      font-size:9px;
+      font-weight:750;
+      line-height:28px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      pointer-events:none;
+    }
+    .phase2::before { content:"DEINE HAND  ·  10♣ 10♦  ·  18 CHIPS"; border-color:rgba(159,106,232,.18); }
+    .phase3::before { content:"DEINE HAND  ·  4 KARTEN  ·  TRUMPF ♥"; border-color:rgba(56,186,147,.18); }
+    .phase2::after, .phase3::after {
+      z-index:2;
+      opacity:.32;
+    }
+    .pressure-line { margin-top:28px; }
+    .pressure-faces { display:flex; justify-content:space-between; align-items:center; }
+    .pressure-faces .avatar { width:72px;height:72px;font-size:18px; }
+    .pressure-meter { position:relative; height:12px; margin:28px 12px; border-radius:999px; background:rgba(255,255,255,.08); }
+    .pressure-meter span { position:absolute; inset:0; transform-origin:left; transform:scaleX(.38); border-radius:inherit; background:linear-gradient(90deg,var(--amethyst),var(--rose)); transition:transform 220ms var(--ease-out); }
+    .pressure-copy { padding:18px; border-radius:22px; }
+    .bid-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:12px; }
+
+    .duel-stage { position:relative; height:476px; margin-top:12px; overflow:hidden; border-radius:28px; background:linear-gradient(180deg,#151019,#07080c); }
+    .duel-face { position:absolute; top:30px; display:grid; justify-items:center; gap:8px; }
+    .duel-face.left{left:22px}.duel-face.right{right:22px}.duel-face .avatar{width:86px;height:86px;font-size:22px}.duel-face.active .avatar{box-shadow:0 0 0 2px var(--amethyst),0 0 28px rgba(159,106,232,.32)}
+    .duel-pot { position:absolute; left:calc(50% - 62px); top:200px; display:grid; place-items:center; width:124px;height:124px;border:1px solid rgba(159,106,232,.5);border-radius:50%;background:radial-gradient(circle,rgba(159,106,232,.22),rgba(0,0,0,.2));font-size:34px;font-weight:850; }
+    .duel-stage .bid-actions { position:absolute; left:18px; right:18px; bottom:18px; }
+
+    .sealed-stage { margin-top:28px; text-align:center; }
+    .sealed-pot { position:relative; display:grid; place-items:center; width:230px;height:230px;margin:0 auto 24px;border:1px solid rgba(255,255,255,.2);border-radius:50%;background:radial-gradient(circle,rgba(159,106,232,.26),rgba(8,8,12,.86) 66%);box-shadow:inset 0 0 50px rgba(159,106,232,.15),0 24px 50px rgba(0,0,0,.4); }
+    .sealed-pot::after { content:"";position:absolute;inset:30px;border:1px dashed rgba(255,255,255,.2);border-radius:50%; }
+    .hold-button { position:relative; overflow:hidden; width:100%; min-height:58px; border:1px solid #aa7bdd;border-radius:18px;color:#fff;background:#38244f;cursor:pointer;touch-action:none; }
+    .hold-fill { position:absolute;inset:0;background:#8f5ec6;transform:scaleX(0);transform-origin:left;transition:transform 180ms ease-out; }
+    .hold-button.holding .hold-fill { transform:scaleX(1);transition:transform 900ms linear; }
+    .hold-button span:last-child { position:relative;z-index:1;font-weight:800; }
+
+    .orbit-stage { position:relative; height:490px; margin-top:8px; }
+    .orbit-ring { position:absolute; left:50%;top:42px;width:276px;height:276px;margin-left:-138px;border:1px solid rgba(83,217,255,.32);border-radius:50%;box-shadow:inset 0 0 50px rgba(83,217,255,.08); }
+    .orbit-center { position:absolute;left:calc(50% - 62px);top:118px;display:grid;place-items:center;width:124px;height:124px;border-radius:50%;background:#171225;border:1px solid #73509d;font-size:32px;font-weight:850; }
+    .orbit-seat { position:absolute;display:grid;place-items:center;width:54px;height:54px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:#101219;font-size:10px; }
+    .orbit-seat.s1{left:12px;top:145px}.orbit-seat.s2{right:12px;top:145px}.orbit-seat.s3{left:calc(50% - 27px);top:10px}
+    .orbit-controls { position:absolute;left:18px;right:18px;bottom:18px;padding:16px;border-radius:20px; }
+    .orbit-controls input{width:100%;accent-color:var(--cyan)}
+
+    .stack-stage { position:relative; height:490px; margin-top:6px; perspective:700px; }
+    .glass-bid { position:absolute;left:50%;width:250px;height:118px;margin-left:-125px;border:1px solid rgba(255,255,255,.22);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(159,106,232,.05));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transform:rotateX(58deg);cursor:pointer;transition:transform 220ms var(--ease-out),border-color 180ms ease-out,opacity 180ms ease-out; }
+    .glass-bid:nth-child(1){top:38px}.glass-bid:nth-child(2){top:118px}.glass-bid:nth-child(3){top:198px}.glass-bid.active{border-color:var(--cyan);transform:translateY(-13px) rotateX(58deg);box-shadow:0 0 30px rgba(83,217,255,.16)}
+    .glass-bid span { display:block; color:rgba(255,255,255,.72); font-size:10px; font-weight:800; letter-spacing:.13em; transform:rotateX(-22deg); }
+    .stack-readout { position:absolute;left:18px;right:18px;bottom:18px;padding:16px;border-radius:20px; }
+
+    /* Phase 3 */
+    .phase3 { --phase:var(--emerald); background:radial-gradient(circle at 50% 35%,rgba(56,186,147,.12),transparent 38%),linear-gradient(180deg,#0e1717,#06090b 76%); }
+    .runway { position:relative;height:500px;margin-top:8px;perspective:800px;overflow:hidden; }
+    .runway::before{content:"";position:absolute;left:70px;right:70px;top:15px;bottom:65px;border:1px solid rgba(56,186,147,.25);background:linear-gradient(180deg,rgba(56,186,147,.02),rgba(56,186,147,.12));transform:rotateX(52deg);transform-origin:bottom;clip-path:polygon(35% 0,65% 0,100% 100%,0 100%);}
+    .run-card { position:absolute;left:calc(50% - 32px);width:64px;height:94px;transition:transform 220ms var(--ease-out),opacity 180ms ease-out; }
+    .run-card:nth-child(2){top:54px;transform:scale(.68)}.run-card:nth-child(3){top:128px;transform:scale(.78)}.run-card:nth-child(4){top:216px;transform:scale(.9)}.run-card:nth-child(5){top:314px}
+    .runway .action { position:absolute;left:22px;right:22px;bottom:12px; }
+
+    .timeline-stage { margin-top:20px; }
+    .timeline-track { position:relative;display:flex;align-items:center;gap:12px;min-height:250px;padding:20px 4px;overflow-x:auto;scroll-snap-type:x mandatory; }
+    .timeline-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(56,186,147,.35)}
+    .timeline-event { position:relative;z-index:1;flex:0 0 86px;display:grid;justify-items:center;gap:8px;scroll-snap-align:center; }
+    .timeline-event .card{width:62px;height:92px}.timeline-event.done{opacity:.35}.timeline-event.current .card{box-shadow:0 0 0 2px var(--emerald),0 0 24px rgba(56,186,147,.25);transform:translateY(-8px)}
+    .timeline-panel { margin-top:12px;padding:16px;border-radius:20px; }
+
+    .collapse-stage { position:relative;height:490px;margin-top:8px; }
+    .collapse-ring { position:absolute;left:calc(50% - 124px);top:34px;display:grid;place-items:center;width:248px;height:248px;border:18px solid #2c3438;border-radius:50%;box-shadow:inset 0 0 40px rgba(0,0,0,.6),0 25px 35px rgba(0,0,0,.35);transition:transform 240ms var(--ease-in-out),opacity 200ms ease-out; }
+    .collapse-ring::after { content:"REGELKÖRPER\A MELDEN · POCHEN"; white-space:pre; color:#7f8f8b; font-size:9px; font-weight:780; line-height:1.65; letter-spacing:.15em; text-align:center; }
+    .collapse-stage.open .collapse-ring{transform:scale(.72);opacity:.34}
+    .collapse-lane{position:absolute;top:154px;width:120px;height:1px;background:var(--emerald);transform:scaleX(0);transition:transform 240ms var(--ease-out);}
+    .collapse-lane.left{left:8px;transform-origin:right}.collapse-lane.right{right:8px;transform-origin:left}.collapse-stage.open .collapse-lane{transform:scaleX(1)}
+    .collapse-hand{position:absolute;left:18px;right:18px;bottom:80px;display:flex;justify-content:center;opacity:0;transform:translateY(12px);transition:opacity 200ms ease-out,transform 220ms var(--ease-out)}
+    .collapse-stage.open .collapse-hand{opacity:1;transform:translateY(0)}
+    .collapse-stage>.action{position:absolute;left:18px;right:18px;bottom:14px}
+
+    .spotlight-stage { position:relative;height:500px;margin-top:8px;overflow:hidden; }
+    .spotlight-cone { position:absolute;left:calc(50% - 145px);top:-40px;width:290px;height:430px;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(56,186,147,.07) 70%,transparent);clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);filter:blur(1px); }
+    .spotlight-card { position:absolute;left:calc(50% - 48px);top:185px; }
+    .spotlight-card .card{width:96px;height:144px;font-size:28px;box-shadow:0 26px 50px rgba(0,0,0,.55),0 0 34px rgba(56,186,147,.18)}
+    .spotlight-status { position:absolute;left:22px;right:22px;bottom:18px;padding:16px;border-radius:20px;text-align:center; }
+
+    .relay-stage { position:relative;height:500px;margin-top:6px; }
+    .relay-path { position:absolute;inset:30px 22px 100px;border:1px dashed rgba(56,186,147,.34);border-radius:46% 54% 44% 56%/54% 44% 56% 46%; }
+    .relay-seat { position:absolute;display:grid;place-items:center;width:68px;height:68px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:#101819;color:#c9d6d2;font-size:10px;transition:transform 200ms var(--ease-out),box-shadow 180ms ease-out; }
+    .relay-seat.active{transform:scale(1.08);box-shadow:0 0 0 2px var(--emerald),0 0 25px rgba(56,186,147,.25)}
+    .relay-seat.s1{left:18px;top:80px}.relay-seat.s2{right:18px;top:80px}.relay-seat.s3{right:55px;top:270px}.relay-seat.s4{left:55px;top:270px}
+    .relay-card { position:absolute;left:calc(50% - 27px);top:175px;transition:transform 240ms var(--ease-in-out); }
+    .relay-stage[data-seat="1"] .relay-card{transform:translate(-92px,-72px)}.relay-stage[data-seat="2"] .relay-card{transform:translate(92px,-72px)}.relay-stage[data-seat="3"] .relay-card{transform:translate(72px,110px)}.relay-stage[data-seat="4"] .relay-card{transform:translate(-72px,110px)}
+    .relay-stage>.action{position:absolute;left:18px;right:18px;bottom:14px}
+
+    /* Image-led cinematic scenes. The bitmap carries the world; HTML only carries
+       crisp state, selection and accessible interaction. */
+    .cinematic { padding:0; background:#050609; }
+    .cinematic::before { display:none; }
+    .cinematic::after { display:none; }
+    .scene-art { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center; }
+    .scene-chrome { display:none; }
+    .scene-chrome .wordmark { text-shadow:0 2px 12px #000; }
+    .scene-phase { padding:6px 9px;border:1px solid rgba(255,255,255,.18);border-radius:999px;color:rgba(255,255,255,.82);background:rgba(4,5,8,.52);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:8px;font-weight:800;letter-spacing:.13em;text-transform:uppercase; }
+    .scene-caption { display:none; }
+    .scene-caption-head { display:flex;align-items:start;justify-content:space-between;gap:12px; }
+    .scene-caption h2 { margin:2px 0 4px;font-size:19px;line-height:1.02;letter-spacing:-.04em; }
+    .scene-caption p { margin:0;color:#bcc0c9;font-size:10px;line-height:1.4; }
+    .scene-state { flex:0 0 auto;padding:5px 7px;border:1px solid rgba(83,217,255,.22);border-radius:999px;color:#9ceaff;background:rgba(83,217,255,.08);font-size:7px;font-weight:800;letter-spacing:.12em;text-transform:uppercase; }
+    .scene-controls { display:flex;align-items:center;gap:7px;margin-top:11px; }
+    .scene-controls .action { flex:1;min-height:42px;border-radius:14px;font-size:11px; }
+    .scene-controls input[type="range"] { width:100%;accent-color:var(--cyan); }
+    .scene-metrics { display:flex;gap:6px;margin-top:10px; }
+    .scene-metric { flex:1;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#d9dbe1;background:rgba(255,255,255,.04);font-size:8px;text-align:center; }
+    .scene-metric strong { display:block;margin-top:2px;color:#fff;font-size:13px; }
+    .scene-hitlayer { display:none; }
+    .scene-hitlayer button { pointer-events:auto; }
+    .scene-knocks { display:grid;grid-template:1fr 1fr/1fr 1fr;gap:18px;height:100%;padding:34px 24px; }
+    .cinematic .knock { place-self:center;display:grid;place-items:center;width:54px;height:54px;border-radius:50%;font-size:12px;background:rgba(6,8,11,.42);box-shadow:0 0 0 8px rgba(255,255,255,.025),0 12px 28px rgba(0,0,0,.4); }
+    .cinematic .knock.done { background:#61d1ac;box-shadow:0 0 0 8px rgba(97,209,172,.08),0 0 28px rgba(97,209,172,.28); }
+    .portrait-hotspots { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start;height:100%;padding-top:66px; }
+    .cinematic .living-portrait { min-height:52px;padding:8px;border-radius:16px;font-size:9px;background:rgba(8,10,13,.46); }
+    .cinematic .living-portrait.awake { background:rgba(28,91,74,.74);box-shadow:0 0 24px rgba(56,186,147,.22); }
+    .scene-mini-options { display:flex;gap:6px;margin-top:10px; }
+    .scene-mini-options button { flex:1;min-height:36px;border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#d9dbe1;background:rgba(255,255,255,.06);font-size:9px;cursor:pointer;transition:transform 130ms ease-out,background-color 160ms ease-out,border-color 160ms ease-out,color 160ms ease-out; }
+    .scene-mini-options button:active { transform:scale(.97); }
+    .scene-mini-options button.selected,.scene-mini-options button.marked,.scene-mini-options button.active { color:#090b0d;background:var(--gold);border-color:#ffe2a3; }
+    .cinematic.phase-two .scene-state { color:#d8b9ff;border-color:rgba(159,106,232,.3);background:rgba(159,106,232,.12); }
+    .cinematic.phase-three .scene-state { color:#a8f3d9;border-color:rgba(56,186,147,.3);background:rgba(56,186,147,.12); }
+    .cinematic .pressure-meter { margin:9px 0 0;height:5px; }
+    .cinematic .sealed-pot,.cinematic .orbit-ring,.cinematic .collapse-ring { display:none; }
+    .cinematic .hold-button { min-height:42px;border-radius:14px; }
+    .cinematic .scratch-board { z-index:2; }
+    .cinematic .scratch-board .scene-art { z-index:0; }
+    .cinematic .scratch-board canvas { z-index:2; }
+    .cinematic .scratch-progress { top:72px; }
+    .cinematic .era-labels { margin-top:3px; }
+    .cinematic .relay-seat { position:static;width:auto;height:auto;padding:5px 7px;border-radius:999px;font-size:8px; }
+    .cinematic .relay-card { display:none; }
+
+    @media (hover:hover) and (pointer:fine) {
+      .chapter-tab:hover { color:#fff; background:rgba(255,255,255,.08); }
+      .action:hover:not([disabled]) { border-color:rgba(255,255,255,.3); }
+      button.card:hover { transform:translateY(-5px); box-shadow:0 14px 25px rgba(0,0,0,.42); }
+      .star-node:hover { transform:translateY(-3px); }
+    }
+
+    @media (max-width: 1060px) {
+      .lab-header { grid-template-columns:1fr auto; }
+      .chapter-tabs { grid-column:1 / -1; grid-row:2; justify-self:center; }
+      .lab-kicker { display:none; }
+      .lab-main { grid-template-columns:minmax(200px,260px) minmax(360px,1fr); }
+      .decision-panel { grid-column:1; }
+      .phone-wrap { grid-column:2; grid-row:1 / span 2; }
+    }
+
+    @media (max-width: 740px) {
+      .lab-header { position:relative; display:flex; flex-wrap:wrap; justify-content:center; padding:10px 10px 12px; }
+      .lab-brand { width:100%; justify-content:center; }
+      .chapter-tabs { width:100%; overflow-x:auto; justify-content:flex-start; }
+      .chapter-tab { flex:1 0 auto; padding:0 12px; }
+      .lab-main { display:flex; flex-direction:column; align-items:center; gap:18px; padding:18px 8px 118px; }
+      .concept-panel, .decision-panel { position:static; width:min(390px,calc(100vw - 28px)); padding:0 4px; }
+      .concept-panel h1 { font-size:32px; }
+      .concept-number { display:none; }
+      .phone-wrap { order:2; }
+      .decision-panel { order:3; }
+      .concept-panel { order:1; }
+      .phone { border-radius:38px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior:auto !important; }
+      .swipe-card, .trailer-outcome, .living-portrait .avatar, .layer-disc, .pressure-meter span,
+      .glass-bid, .run-card, .collapse-ring, .collapse-lane, .collapse-hand, .relay-card, .relay-seat,
+      .living-portrait, .knock, .scene-mini-options button,
+      .action, button.card, .chapter-tab, .star-node { transition-duration:1ms !important; }
+      .hold-button.holding .hold-fill { transition-duration:1ms !important; }
+    }
+
+    /* Prototype picker - intentionally identical to the global harness spec. */
+    .proto-picker {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2147483647;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(10, 10, 10, 0.82);
+      -webkit-backdrop-filter: blur(12px) saturate(1.4);
+      backdrop-filter: blur(12px) saturate(1.4);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+        0 8px 24px rgba(0, 0, 0, 0.24),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .proto-picker-highlight {
+      position: absolute;
+      top: 4px;
+      left: 0;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      will-change: transform;
+    }
+
+    .proto-picker[data-ready] .proto-picker-highlight {
+      transition:
+        transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+        width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+    }
+
+    .proto-picker-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.55);
+      font: inherit;
+      cursor: pointer;
+      transition: color 150ms ease-out;
+    }
+
+    .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+    .proto-picker-item:active { transform: scale(0.97); }
+    .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+    .proto-picker-item[data-active] { color: #fff; }
+    .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+    .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+    .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+  </style>
+</head>
+<body>
+  <header class="lab-header">
+    <div class="lab-brand"><strong>POCH</strong><span>1441</span></div>
+    <nav class="chapter-tabs" aria-label="Kapitel">
+      <button class="chapter-tab" aria-selected="true" data-chapter="0">Cold Open</button>
+      <button class="chapter-tab" aria-selected="false" data-chapter="1">1 Melden</button>
+      <button class="chapter-tab" aria-selected="false" data-chapter="2">2 Pochen</button>
+      <button class="chapter-tab" aria-selected="false" data-chapter="3">3 Ausspielen</button>
+    </nav>
+    <div class="lab-kicker">20 spielbare Richtungen · Produktionscode unberührt</div>
+  </header>
+
+  <main class="lab-main">
+    <aside class="concept-panel" aria-live="polite">
+      <div class="eyebrow" id="chapterLabel">Cold Open · Richtung 1 von 5</div>
+      <h1 id="conceptName">Zeit unter der Oberfläche</h1>
+      <p class="concept-axis" id="conceptAxis">Geste statt Film: Geschichte wird unter dem Finger freigelegt.</p>
+      <div class="concept-number" id="conceptNumber" aria-hidden="true">01</div>
+    </aside>
+
+    <div class="phone-wrap">
+      <div class="phone" aria-label="Interaktive iPhone-Vorschau im Format 390 mal 844">
+        <div id="stage"></div>
+      </div>
+    </div>
+
+    <aside class="decision-panel" aria-live="polite">
+      <div class="eyebrow">Entscheidungslinse</div>
+      <dl>
+        <dt>Hero</dt><dd id="conceptHero"></dd>
+        <dt>Primäre Interaktion</dt><dd id="conceptInteraction"></dd>
+        <dt>Material und Licht</dt><dd id="conceptMaterial"></dd>
+        <dt>Kosten</dt><dd class="tradeoff" id="conceptTradeoff"></dd>
+      </dl>
+      <div class="gesture-note"><span aria-hidden="true">⌨</span><span>1-5 · ← → · R zum Zurücksetzen</span></div>
+    </aside>
+  </main>
+
+  <nav class="proto-picker" aria-label="Prototype variants">
+    <span class="proto-picker-highlight" aria-hidden="true"></span>
+    <button class="proto-picker-item" data-active aria-current="true">Zeitspalte</button>
+    <button class="proto-picker-item">4 Schläge</button>
+    <button class="proto-picker-item">Trailer</button>
+    <button class="proto-picker-item">Porträts</button>
+    <button class="proto-picker-item">Zeitsprung</button>
+    <span class="proto-picker-divider" aria-hidden="true"></span>
+    <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+  </nav>
+
+  <script>
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const card = (rank, suit, classes = '', attrs = '') => `<button class="card ${'♥♦'.includes(suit) ? 'red' : ''} ${classes}" ${attrs} aria-label="${rank} ${suit}"><span>${rank}${suit}</span><span class="suit">${suit}</span></button>`;
+    const staticCard = (rank, suit, classes = '') => `<div class="card ${'♥♦'.includes(suit) ? 'red' : ''} ${classes}" aria-hidden="true"><span>${rank}${suit}</span><span class="suit">${suit}</span></div>`;
+    const gameTop = (act, round = 'Runde 4 · 36') => `<div class="game-top"><div class="wordmark">POCH <span>1441</span></div><div class="act-tag">${act}</div><div class="round-chip">${round}</div></div>`;
+    const opponents = () => `<div class="opponents"><div class="opponent"><span class="avatar">N</span>Noah · wach</div><div class="opponent"><span class="avatar">H</span>Hana · prüft</div><div class="opponent"><span class="avatar">J</span>Jonas · ruhig</div></div>`;
+    const buttons = (primary = 'Bestätigen') => `<div class="meld-footer"><button class="action">Passen</button><button class="action primary">${primary}</button></div>`;
+
+    const renders = {
+      splashScratch: () => `<section class="game splash">${gameTop('Cold Open','1441 → heute')}<div class="scratch-board"><img class="splash-art" src="assets/01-time-under-surface.webp" alt="Historischer Raum geht in einen heutigen Spieleabend über"><canvas aria-label="Rubbele mit dem Finger die Geschichte frei"></canvas></div><div class="scratch-progress" aria-live="polite">Oberfläche 0 % geöffnet</div><div class="splash-shade"></div><div class="splash-copy"><h2>Die Zeit liegt direkt unter deinem Finger.</h2><p>Reibe über die dunkle Patina. Ohne Bewegung erscheint ein klarer Aufdecken-Knopf.</p><button class="action primary" data-scratch-reveal>${reducedMotion ? 'Geschichte aufdecken' : 'Ganz freilegen'}</button></div></section>`,
+      splashKnocks: () => `<section class="game splash">${gameTop('Cold Open','4 Schläge')}<div class="knock-world"></div><div class="knock-grid">${[1,2,3,4].map(i=>`<button class="knock" data-knock="${i}" aria-label="Schlag ${i}"><strong>${i}</strong><div class="knock-count">${['Holz','Metall','Glas','Tisch'][i-1]}</div></button>`).join('')}</div><div class="splash-copy"><h2>Vier Schläge. Vier Materialzeitalter.</h2><p id="knockCopy">Klopfe die vier Kontaktpunkte. Jeder Schlag zieht das Spiel näher an die Gegenwart.</p><button class="action" data-reset>Rhythmus zurücksetzen</button></div><div class="splash-shade"></div></section>`,
+      splashTrailer: () => `<section class="game splash">${gameTop('Cold Open','Dein erster Zug')}<div class="trailer-world"></div><div class="trailer-outcome"><div class="trailer-orbit"></div></div><div class="swipe-card" data-swipe-card>${staticCard('7','♥')}</div><div class="splash-copy"><h2>Kein Trailer. Ein echter Zug.</h2><p id="trailerCopy">Wirf die Sieben nach rechts. Das Ergebnis öffnet direkt den ersten Tisch.</p><button class="action primary" data-flick>Karte ausspielen</button></div><div class="splash-shade"></div></section>`,
+      splashPortraits: () => `<section class="game splash">${gameTop('Cold Open','Eine Runde lebt')}<div class="portraits-world"></div><div class="portrait-row">${['Hana','Noah','Jonas'].map((n,i)=>`<button class="living-portrait" data-portrait="${i}"><span class="avatar">${n[0]}</span><strong>${n}</strong><br><small>${['prüft deine Hand','hält den Blick','wartet auf den Schlag'][i]}</small></button>`).join('')}</div><div class="splash-copy"><h2>Menschen zuerst. Regeln danach.</h2><p id="portraitCopy">Berühre ein Porträt. Haltung und Reaktion ersetzen den üblichen Tutorial-Text.</p><button class="action" data-reset>Alle wieder einfrieren</button></div><div class="splash-shade"></div></section>`,
+      splashJump: () => `<section class="game splash">${gameTop('Cold Open','1441 ↔ morgen')}<div class="jump-world" data-era="1900"></div><div class="era-control glass"><output id="eraOutput">1900</output><input data-era-slider type="range" min="0" max="3" step="1" value="1" aria-label="Epoche wählen"><div class="era-labels"><span>1441</span><span>1900</span><span>2026</span><span>danach</span></div></div><div class="splash-copy"><h2>Ein Zeichen überlebt jede Oberfläche.</h2><p>Ziehe durch vier Epochen. Der Ring bleibt Regel, Material und Licht werden Gegenwart.</p></div><div class="splash-shade"></div></section>`,
+
+      meldConstellation: () => `<section class="game phase1">${gameTop('Akt I · Melden')}<h2 class="game-title">Baue dein Trumpf-Sternbild.</h2><p class="game-subtitle">Karo ist Trumpf · Drei passende Karten ergeben die Folge.</p><div class="constellation">${['A','K','Q','J','10','SEQ','POCH'].map((n,i)=>`<button class="star-node" data-star="${i}">${n}</button>`).join('')}</div><div class="hand">${card('7','♦','', 'data-meld-card')}${card('8','♦','', 'data-meld-card')}${card('9','♦','', 'data-meld-card')}${card('K','♣')}</div>${buttons('Folge melden')}</section>`,
+      meldLayers: () => `<section class="game phase1">${gameTop('Akt I · Melden','Trumpf · ♦')}<h2 class="game-title">Heb die Regel in Ebenen.</h2><p class="game-subtitle">Hand, Kombination und Auszahlung liegen als getrennte Architekturschichten.</p><div class="layers-stage" data-lift="1"><div class="layer-disc"></div><div class="layer-disc"></div><div class="layer-disc"></div><input class="layer-slider" data-layer-slider type="range" min="1" max="3" value="1" aria-label="Ebenen anheben"><div class="layer-label glass"><strong id="layerTitle">Ebene 1 · Hand</strong><br><span id="layerCopy">7♦, 8♦ und 9♦ sind verbunden.</span></div></div>${buttons('Ebene auszahlen')}</section>`,
+      meldEvidence: () => `<section class="game phase1">${gameTop('Akt I · Melden','Prüfung 02')}<h2 class="game-title">Melden als Beweis.</h2><p class="game-subtitle">Keine Vollscheibe: Trumpfkarte links, Regelbelege rechts.</p><div class="evidence-desk"><div class="evidence-trump"><div><div class="eyebrow">Offener Trumpf</div><strong>Karo · alle Belege aktiv</strong></div>${staticCard('J','♦')}</div><div class="evidence-slots"><button class="evidence-slot" data-evidence><strong>König</strong>K♦ in deiner Hand · +3</button><button class="evidence-slot" data-evidence><strong>Hochzeit</strong>K♦ + Q♦ · +5</button><button class="evidence-slot" data-evidence><strong>Folge</strong>7♦ 8♦ 9♦ · +4</button><button class="evidence-slot" data-evidence><strong>Ass</strong>Nicht vorhanden</button></div><div class="receipt" id="receipt">0 BELEGE MARKIERT · 0 CHIPS</div></div>${opponents()}${buttons('Markierte Belege melden')}</section>`,
+      meldTheatre: () => `<section class="game phase1">${gameTop('Akt I · Melden','Bühne offen')}<h2 class="game-title">Die Hand spielt die Hauptrolle.</h2><p class="game-subtitle">Nur die gewählte Kombination tritt ins Licht. Alles andere zieht sich zurück.</p><div class="hand-theatre"><div class="curtain left"></div><div class="curtain right"></div><div class="theatre-hero"><div id="theatreCard">${staticCard('K','♦')}</div><h3 id="theatreTitle">König · 3 Chips</h3><p class="game-subtitle" id="theatreCopy">Einzelmeldung, sofort lesbar.</p></div><div class="theatre-picks"><button class="action" data-theatre="king">König</button><button class="action" data-theatre="marriage">Hochzeit</button><button class="action" data-theatre="sequence">Folge</button></div></div></section>`,
+      meldLens: () => `<section class="game phase1">${gameTop('Akt I · Melden','Linse 50 %')}<h2 class="game-title">Sieh Hand und Wirkung zugleich.</h2><p class="game-subtitle">Die Linse trennt Besitz von Auszahlung, ohne den Blick zu wechseln.</p><div class="lens-stage" data-lens><div class="lens-pane"><div class="eyebrow">Deine Hand</div><div class="hand" style="margin-top:120px">${staticCard('7','♦')}${staticCard('8','♦')}${staticCard('9','♦')}</div></div><div class="lens-pane payout"><div class="eyebrow">Brett reagiert</div><div style="display:flex;justify-content:center;gap:8px;margin-top:140px"><span class="token"></span><span class="token"></span><span class="token"></span><span class="token"></span></div></div><div class="lens-divider"></div><div class="lens-knob" aria-hidden="true">↔</div><input class="lens-control" data-lens-slider type="range" min="12" max="88" value="50" aria-label="Linse zwischen Hand und Auszahlung verschieben"></div>${buttons('Folge melden')}</section>`,
+
+      pochPressure: () => `<section class="game phase2">${gameTop('Akt II · Pochen','Pott · 6')}<h2 class="game-title">Der Einsatz wird zur Drucklinie.</h2><p class="game-subtitle">Ein Blick genügt: wer drückt, wer hält, wer kippt.</p><div class="pressure-line"><div class="pressure-faces"><div><span class="avatar">DU</span><small>10-Paar</small></div><strong style="font-size:22px">gegen</strong><div><span class="avatar">N</span><small>Noah · ruhig</small></div></div><div class="pressure-meter"><span></span></div><div class="pressure-copy glass"><div class="eyebrow">Druck 38 %</div><h3 id="pressureTitle">Noah liest deinen Einsatz.</h3><p class="game-subtitle" id="pressureCopy">Ein Chip hält die Information offen.</p></div><div class="bid-actions"><button class="action" data-fold>Passen</button><button class="action amethyst" data-raise>Pochen +1</button></div></div>${opponents()}</section>`,
+      pochDuel: () => `<section class="game phase2">${gameTop('Akt II · Pochen','Duell · 1 gegen 1')}<h2 class="game-title">Shot. Reverse Shot.</h2><p class="game-subtitle">Das Brett verschwindet. Übrig bleiben Blick, Pott und Entscheidung.</p><div class="duel-stage"><div class="duel-face left active"><span class="avatar">DU</span><strong>10-Paar</strong></div><div class="duel-face right"><span class="avatar">H</span><strong>Hana</strong></div><div class="duel-pot" id="duelPot">6</div><div class="bid-actions"><button class="action" data-fold>Passen</button><button class="action amethyst" data-duel-call>Mitgehen · 2</button></div></div></section>`,
+      pochSealed: () => `<section class="game phase2">${gameTop('Akt II · Pochen','Versiegelt')}<h2 class="game-title">Ein Poch ist ein Versprechen.</h2><p class="game-subtitle">Bewusst halten, dann versiegeln. Loslassen bricht ohne Verlust ab.</p><div class="sealed-stage"><div class="sealed-pot"><div><div class="eyebrow">Poch-Pott</div><strong style="font-size:46px">8</strong><br><small>2 Chips riskieren</small></div></div><button class="hold-button" data-hold><span class="hold-fill"></span><span>Halten zum Pochen</span></button><p class="game-subtitle" id="holdStatus" style="margin-top:12px">Noch nicht gebunden.</p></div></section>`,
+      pochOrbit: () => `<section class="game phase2">${gameTop('Akt II · Pochen','Orbit 02')}<h2 class="game-title">Einsätze kreisen um Haltung.</h2><p class="game-subtitle">Der Orbit zeigt Distanz zur Entscheidung statt alter Mulden.</p><div class="orbit-stage"><div class="orbit-ring"></div><div class="orbit-seat s1">Noah<br>passt</div><div class="orbit-seat s2">Hana<br>+2</div><div class="orbit-seat s3">Du<br><span id="orbitBid">1</span></div><div class="orbit-center" id="orbitPot">7</div><div class="orbit-controls glass"><label for="orbitRange"><span class="eyebrow">Deine Umlaufbahn</span></label><input id="orbitRange" data-orbit type="range" min="0" max="3" value="1"><div class="era-labels"><span>passen</span><span>1</span><span>2</span><span>3</span></div></div></div></section>`,
+      pochStack: () => `<section class="game phase2">${gameTop('Akt II · Pochen','3 Zusagen')}<h2 class="game-title">Das Risiko wird ein Glasstapel.</h2><p class="game-subtitle">Jede Lage gehört sichtbar einer Person. Tippe eine Lage, um ihre Konsequenz zu lesen.</p><div class="stack-stage"><button class="glass-bid" data-glass-bid="Du" aria-label="Deine Einsatzlage"></button><button class="glass-bid" data-glass-bid="Hana" aria-label="Hanas Einsatzlage"></button><button class="glass-bid" data-glass-bid="Jonas" aria-label="Jonas Einsatzlage"></button><div class="stack-readout glass"><div class="eyebrow">Transparente Zusage</div><h3 id="stackTitle">Wähle eine Lage.</h3><p class="game-subtitle" id="stackCopy">Der Pott ist die Summe nachvollziehbarer Entscheidungen.</p></div></div></section>`,
+
+      playRunway: () => `<section class="game phase3">${gameTop('Akt III · Ausspielen','Kreuz bedienen')}<h2 class="game-title">Jede Karte hat eine Landebahn.</h2><p class="game-subtitle">Die erlaubte Fortsetzung liegt räumlich vor dir, nicht in einer Textbox.</p><div class="runway"><div></div>${['7','8','9','10'].map((n,i)=>`<div class="run-card">${staticCard(n,'♣')}</div>`).join('')}<button class="action emerald" data-runway>10♣ auf die Bahn</button></div></section>`,
+      playTimeline: () => `<section class="game phase3">${gameTop('Akt III · Ausspielen','Reihe · Kreuz')}<h2 class="game-title">Die Runde wird eine lesbare Taktlinie.</h2><p class="game-subtitle">Vergangenheit links, erlaubte Karte im Fokus, mögliche Zukunft rechts.</p><div class="timeline-stage"><div class="timeline-track">${['7','8','9','10','J','Q'].map((n,i)=>`<div class="timeline-event ${i<2?'done':i===2?'current':''}" data-event="${i}">${staticCard(n,'♣')}<small>${i<2?'gelegt':i===2?'jetzt':'wartet'}</small></div>`).join('')}</div><div class="timeline-panel glass"><strong id="timelineTitle">9♣ ist als Nächstes erlaubt.</strong><div class="bid-actions"><button class="action" data-timeline-back>Zurücklesen</button><button class="action emerald" data-timeline-next>9♣ legen</button></div></div></div></section>`,
+      playCollapse: () => `<section class="game phase3">${gameTop('Akt III · Ausspielen','Brett → Wege')}<h2 class="game-title">Das Brett zerfällt in Spiellinien.</h2><p class="game-subtitle">Der alte Regelkörper bleibt Herkunft, aber nicht mehr Bühne.</p><div class="collapse-stage"><div class="collapse-ring"></div><div class="collapse-lane left"></div><div class="collapse-lane right"></div><div class="collapse-hand">${staticCard('9','♣')}${staticCard('10','♣')}${staticCard('K','♦')}</div><button class="action emerald" data-collapse>Brett in Wege öffnen</button></div></section>`,
+      playSpotlight: () => `<section class="game phase3">${gameTop('Akt III · Ausspielen','Eine klare Aktion')}<h2 class="game-title">Nur die spielbare Karte bleibt im Licht.</h2><p class="game-subtitle">Maximale Fokusführung für kleine Displays und den ersten freien Zug.</p><div class="spotlight-stage"><div class="spotlight-cone"></div><div class="spotlight-card">${card('10','♣','', 'data-spotlight-card')}</div><div class="spotlight-status glass"><strong id="spotlightTitle">10♣ setzt die Kreuz-Reihe fort.</strong><p class="game-subtitle">Doppeltippen oder Karte wählen.</p></div></div></section>`,
+      playRelay: () => `<section class="game phase3">${gameTop('Akt III · Ausspielen','Anspielrecht sichtbar')}<h2 class="game-title">Eine Karte als sozialer Staffelstab.</h2><p class="game-subtitle">Der Weg des Anspielrechts ist wichtiger als eine statische Tischmitte.</p><div class="relay-stage" data-seat="1"><div class="relay-path"></div>${['Du','Noah','Hana','Jonas'].map((n,i)=>`<div class="relay-seat s${i+1} ${i===0?'active':''}" data-relay-seat="${i+1}">${n}</div>`).join('')}<div class="relay-card">${staticCard('9','♣')}</div><button class="action emerald" data-relay>Staffel weitergeben</button></div></section>`
+    };
+
+    const cinematicShell = ({asset, phase, title, copy, controls = '', hit = '', className = ''}) => `
+      <section class="game cinematic ${className}">
+        <img class="scene-art" src="assets/${asset}.webp" alt="${title} als detaillierte laufende Spielszene">
+        <div class="scene-chrome">
+          <div class="wordmark">POCH <span>1441</span></div>
+          <div class="scene-phase">${phase}</div>
+        </div>
+        ${hit}
+        <div class="scene-caption">
+          <div class="scene-caption-head">
+            <div><div class="eyebrow">Spielbare Szenenstudie</div><h2>${title}</h2></div>
+            <div class="scene-state">bereit</div>
+          </div>
+          <p>${copy}</p>
+          ${controls}
+        </div>
+      </section>`;
+
+    const sceneAction = (label, state, done = 'Gesetzt ✓', tone = '') => `<button class="action ${tone}" data-scene-action data-state="${state}" data-done="${done}">${label}</button>`;
+    const sceneOptions = options => `<div class="scene-mini-options">${options.map(([label,state])=>`<button data-scene-option data-state="${state}">${label}</button>`).join('')}</div>`;
+    const sceneRange = (min,max,value,state) => `<div class="scene-controls"><input type="range" min="${min}" max="${max}" value="${value}" data-scene-range aria-label="${state}"></div><div class="era-labels"><span>ruhig</span><span>präzise</span><span>maximal</span></div>`;
+
+    Object.assign(renders, {
+      splashScratch: () => cinematicShell({asset:'scene-c1-v1',phase:'Cold Open · 1',title:'Native Zeitbrücke',copy:'Der reale First-Run-Build führt von 1441 direkt an den heutigen Spieltisch.'}),
+      splashKnocks: () => cinematicShell({asset:'scene-c1-v2',phase:'Cold Open · 2',title:'Vier Schläge durch die Zeit',copy:'Jeder Kontakt antwortet in einem anderen Material - bis der moderne Tisch vollständig wach ist.',hit:`<div class="scene-hitlayer scene-knocks">${[1,2,3,4].map(i=>`<button class="knock" data-knock="${i}" aria-label="Materialschlag ${i}">${i}</button>`).join('')}</div>`,controls:`<div class="scene-controls"><button class="action" data-reset>Rhythmus zurücksetzen</button></div><p id="knockCopy" aria-live="polite"></p>`}),
+      splashTrailer: () => cinematicShell({asset:'scene-c1-v3',phase:'Cold Open · 3',title:'Der erste Zug gehört dir',copy:'Die Partie beginnt nicht mit Erklärung, sondern mit einer echten Karte und drei sichtbaren Reaktionen.',controls:`<div class="scene-controls">${sceneAction('Karte in die Lichtbahn werfen','Erster Zug verstanden - der Tisch ist offen.','Ausgespielt ✓','primary')}</div>`}),
+      splashPortraits: () => cinematicShell({asset:'scene-c1-v4',phase:'Cold Open · 4',title:'Menschen zuerst',copy:'Berühre die Gegenüber. Blick, Haltung und Nähe erzählen die Regeln, bevor Text nötig wird.',hit:`<div class="scene-hitlayer portrait-hotspots">${['Hana','Noah','Jonas'].map((n,i)=>`<button class="living-portrait" data-portrait="${i}">${n}</button>`).join('')}</div>`,controls:`<div class="scene-controls"><button class="action" data-reset>Reaktionen zurücksetzen</button></div><p id="portraitCopy" aria-live="polite"></p>`}),
+      splashJump: () => cinematicShell({asset:'scene-c1-v5',phase:'Cold Open · 5',title:'Der Kartenbogen durch die Zeit',copy:'Eine berührbare Karte hält die Form, während Papier, Metall, Glas und Licht ihre Epoche wechseln.',controls:`${sceneRange(0,3,1,'Epoche durchfahren')}<output class="scene-state" data-scene-output>1900</output>`}),
+
+      meldConstellation: () => cinematicShell({asset:'scene-c2-v1',phase:'Akt I · Melden · 1',title:'Trumpf-Sternbild',copy:'Drei Karten in deiner Hand verbinden sich sichtbar mit ihren physischen Gewinnorten.',className:'phase-one',controls:`${sceneOptions([['7♣','Erster Trumpf verbunden.'],['8♣','Zwei Trumpfkarten verbunden.'],['9♣','Folge vollständig.']])}<div class="scene-controls">${sceneAction('Folge melden','Vier schwere Spielsteine lösen sich und kommen zu dir.','Folge gemeldet ✓','primary')}</div>`}),
+      meldLayers: () => cinematicShell({asset:'scene-c2-v2',phase:'Akt I · Melden · 2',title:'Architektur-Lagen',copy:'Hand, Kombination und Auszahlung werden als drei reale Ebenen auseinandergezogen.',className:'phase-one',controls:`${sceneRange(1,3,1,'Regellagen anheben')}<output class="scene-state" data-scene-output>Ebene 1 · Hand</output>`}),
+      meldEvidence: () => cinematicShell({asset:'scene-c2-v3',phase:'Akt I · Melden · 3',title:'Melden als Beweis',copy:'Offener Trumpf, passende Karten und reagierende Metallsiegel liegen gemeinsam auf dem Tisch.',className:'phase-one',controls:`${sceneOptions([['König','König belegt · +3'],['Hochzeit','Hochzeit belegt · +5'],['Folge','Folge belegt · +4']])}<div class="scene-controls">${sceneAction('Belege auszahlen','Alle markierten Regelbelege werden physisch ausgezahlt.','Ausgezahlt ✓','primary')}</div>`}),
+      meldTheatre: () => cinematicShell({asset:'scene-c2-v4',phase:'Akt I · Melden · 4',title:'Handbühne',copy:'Die gewählte Kombination tritt aus dem Kartenfächer ins warme Licht; die Gegner reagieren im Schatten.',className:'phase-one',controls:`${sceneOptions([['König','König tritt ins Licht.'],['Hochzeit','König und Dame treten gemeinsam ins Licht.'],['Folge','Drei Karten bilden einen sichtbaren Rhythmus.']])}`}),
+      meldLens: () => cinematicShell({asset:'scene-c2-v5',phase:'Akt I · Melden · 5',title:'Doppellinse',copy:'Links bleibt die Ursache in deiner Hand, rechts wird die Auszahlung am selben Ort sichtbar.',className:'phase-one',controls:`${sceneRange(12,88,50,'Optische Trennlinie bewegen')}<output class="scene-state" data-scene-output>50 % Hand · 50 % Wirkung</output>`}),
+
+      pochPressure: () => cinematicShell({asset:'scene-c3-v1',phase:'Akt II · Pochen · 1',title:'Drucklinie',copy:'Dein Paar bleibt sichtbar, während jeder Einsatz die physische Distanz zum Gegenüber verkürzt.',className:'phase-two',controls:`<div class="pressure-meter"><span></span></div><div class="scene-controls">${sceneAction('Passen','Du löst den Druck und bleibst beim Ausspielen dabei.','Gepasst ✓')}${sceneAction('Pochen +1','Die Drucklinie schiebt sich zu Noah.','Druck erhöht','amethyst')}</div>`}),
+      pochDuel: () => cinematicShell({asset:'scene-c3-v2',phase:'Akt II · Pochen · 2',title:'Blickduell',copy:'Ein Gegenüber, dein Paar, ein tiefer Pott - alle übrige Information tritt zurück.',className:'phase-two',controls:`${sceneOptions([['Passen','Hana gewinnt Raum.'],['Mitgehen','Deine zwei Spielsteine rasten ein.'],['Erhöhen','Hana muss sofort neu lesen.']])}`}),
+      pochSealed: () => cinematicShell({asset:'scene-c3-v3',phase:'Akt II · Pochen · 3',title:'Versiegelter Pott',copy:'Der Einsatz wird erst gebunden, wenn dein Daumen den schweren Spielstein vollständig einrasten lässt.',className:'phase-two',controls:`<div class="scene-controls"><button class="hold-button" data-hold><span class="hold-fill"></span><span>Halten zum Versiegeln</span></button></div><p id="holdStatus" aria-live="polite">Noch nicht gebunden.</p>`}),
+      pochOrbit: () => cinematicShell({asset:'scene-c3-v4',phase:'Akt II · Pochen · 4',title:'Sozialer Einsatz-Orbit',copy:'Abstand zum Pott zeigt Haltung; dein Finger schiebt zwei Spielsteine auf einer realen Bahn nach innen.',className:'phase-two',controls:`${sceneRange(0,3,1,'Eigene Einsatzdistanz')}<output class="scene-state" data-scene-output>1 Spielstein · prüfend</output>`}),
+      pochStack: () => cinematicShell({asset:'scene-c3-v5',phase:'Akt II · Pochen · 5',title:'Transparente Zusagen',copy:'Jede Entscheidung bleibt als eigene Glasschicht mitsamt Händen, Steinen und Reflexion nachvollziehbar.',className:'phase-two',controls:`${sceneOptions([['Du','Deine Lage · 2 Spielsteine'],['Hana','Hanas Lage · mitgegangen'],['Jonas','Jonas Lage · erhöht']])}`}),
+
+      playRunway: () => cinematicShell({asset:'scene-c4-v1',phase:'Akt III · Ausspielen · 1',title:'Kartenbahn',copy:'Die erlaubte Fortsetzung ist ein realer Weg; die nächste Karte befindet sich bereits im Flug.',className:'phase-three',controls:`<div class="scene-controls">${sceneAction('9♣ landen lassen','Kartenkante trifft Kontaktbett - Noah ist als Nächstes dran.','9♣ gelandet ✓','emerald')}</div>`}),
+      playTimeline: () => cinematicShell({asset:'scene-c4-v2',phase:'Akt III · Ausspielen · 2',title:'Taktile Taktlinie',copy:'Vergangene Karten, aktueller Kontakt und nächste Lücke erzählen die Reihe ohne Popup.',className:'phase-three',controls:`${sceneOptions([['Zurück','Vergangene Kontakte werden lesbar.'],['Jetzt','9♣ ist genau jetzt erlaubt.'],['Voraus','Die nächste freie Lücke wartet auf 10♣.']])}`}),
+      playCollapse: () => cinematicShell({asset:'scene-c4-v3',phase:'Akt III · Ausspielen · 3',title:'Brettzerfall',copy:'Der alte Regelkörper zerlegt sich sichtbar in vier Kartenwege zwischen den Menschen.',className:'phase-three',controls:`<div class="scene-controls">${sceneAction('Mechanik in Wege öffnen','Vier Schienen verriegeln - das Ausspielen übernimmt die Bühne.','Wege geöffnet ✓','emerald')}</div>`}),
+      playSpotlight: () => cinematicShell({asset:'scene-c4-v4',phase:'Akt III · Ausspielen · 4',title:'Ein-Karten-Spotlight',copy:'Alles Unwichtige bleibt dunkel; nur die legal spielbare Karte, ihr Ziel und die wartenden Blicke tragen Licht.',className:'phase-three',controls:`<div class="scene-controls">${sceneAction('10♣ ausspielen','Die Lichtachse springt zum nächsten Menschen.','10♣ liegt ✓','emerald')}</div>`}),
+      playRelay: () => cinematicShell({asset:'scene-c4-v5',phase:'Akt III · Ausspielen · 5',title:'Sozialer Staffellauf',copy:'Anspielrecht wird zum sichtbaren Kontakt: eine Hand gibt frei, die nächste übernimmt.',className:'phase-three',controls:`${sceneOptions([['Du','Du gibst die Karte frei.'],['Noah','Noah nimmt den Staffelkontakt.'],['Hana','Hana liest die offene Reihe.'],['Jonas','Jonas bereitet die Fortsetzung vor.']])}`})
+    });
+
+    const chapters = [
+      { label:'Cold Open', variants:[
+        {name:'Zeitspalte', title:'Zeit unter der Oberfläche', axis:'Geste statt Film: Geschichte wird unter dem Finger freigelegt.', hero:'Eine dunkle, taktile Patina über einer historischen-gegenwärtigen Szene.', interaction:'Freirubbeln per Pointer oder Touch; vollständiges Aufdecken als barrierearme Alternative.', material:'Ruß, Holz und Fingerkontakt brechen in präzises heutiges Licht.', tradeoff:'Stärkste Eigenheit, aber Canvas-Maske, Bildproduktion und Audio-Scrubbing kosten am meisten.', render:renders.splashScratch},
+        {name:'4 Schläge', title:'Vier Schläge durch die Zeit', axis:'Rhythmus statt Wischen: vier Kontakte bauen die Gegenwart auf.', hero:'Vier haptische Kontaktpunkte als Mini-Partitur.', interaction:'Vier Schläge in beliebiger Reihenfolge; jeder beantwortet sich sichtbar.', material:'Holz → Metall → Glas → heutiger Tisch.', tradeoff:'Sehr merkfähig, verlangt jedoch exzellentes Haptik- und Audio-Timing.', render:renders.splashKnocks},
+        {name:'Trailer', title:'Spielbarer Trailer', axis:'Regelkompetenz statt Zuschauen: der erste echte Zug öffnet das Spiel.', hero:'Eine einzelne spielbare Karte vor angespanntem Gegenüber.', interaction:'Karte werfen oder über den großen Ersatzbutton ausspielen.', material:'Neo-Noir-Tisch, warme Haut, roter Kartenimpuls.', tradeoff:'Sofort spielerisch, kann aber ohne saubere Seed-Regie wie ein Tutorial wirken.', render:renders.splashTrailer},
+        {name:'Porträts', title:'Lebende Porträts', axis:'Soziale Präsenz statt Brettkunde.', hero:'Drei zunächst eingefrorene Mitspieler reagieren auf Kontakt.', interaction:'Person berühren, Blick und Haltung aktivieren.', material:'Dunkle Porträtmalerei kippt in lebendige, farbige Tiefe.', tradeoff:'Emotional stark, braucht hochwertige wiederkehrende Figurenanimation.', render:renders.splashPortraits},
+        {name:'Zeitsprung', title:'Grafischer Zeitsprung', axis:'Direktes Scrubbing statt linearem Intro.', hero:'Eine endlose Kartenform als visuelles Zeitdiagramm.', interaction:'Epoche stufenlos wählen; Ring und Licht antworten sofort.', material:'Papier, Kohle, Zinn und emissives Cyan in einer gemeinsamen Geometrie.', tradeoff:'Elegant und skalierbar, weniger menschlich als die anderen Einstiege.', render:renders.splashJump}
+      ]},
+      { label:'Akt I · Melden', variants:[
+        {name:'Sternbild', title:'Trumpf-Sternbild', axis:'Räumliche Mustererkennung statt statischer Mulden.', hero:'Sieben Regelsterne, die sich durch Kartenwahl verbinden.', interaction:'Karten oder Knoten markieren, Folge als Konstellation bestätigen.', material:'Goldene Inlays über tintenschwarzem Himmel.', tradeoff:'Regeln werden ikonisch, aber die Geometrie braucht VoiceOver-Ersatz.', render:renders.meldConstellation},
+        {name:'Lagen', title:'Architektur-Lagen', axis:'Explodierte Regelarchitektur statt vollständigem Brett.', hero:'Drei schwebende Ebenen für Hand, Kombination und Auszahlung.', interaction:'Ebenen anheben und semantisch einzeln lesen.', material:'Rauchglas, Platinränder, cyanfarbene Schnittlinien.', tradeoff:'Räumlich spektakulär, technisch anspruchsvoll und bei Reduce Motion stark zu vereinfachen.', render:renders.meldLayers},
+        {name:'Beweistisch', title:'Melden als Beweistisch', axis:'Prüfen und markieren statt Brett absuchen.', hero:'Offener Trumpf links, belegbare Regeln als klare Akten rechts.', interaction:'Gültige Belege markieren und gesammelt auszahlen.', material:'Dunkler Analysentisch, Papierbelege, Messingstempel.', tradeoff:'Extrem klar und zugänglich, weniger mystisch und weniger brettspielhaft.', render:renders.meldEvidence},
+        {name:'Bühne', title:'Handbühne', axis:'Dramaturgischer Fokus statt paralleler Information.', hero:'Eine Kombination tritt zwischen Vorhängen ins Licht.', interaction:'Zwischen König, Hochzeit und Folge inszeniert wählen.', material:'Dunkler Samt, warmer Spot, Kartenweiß als Hauptlicht.', tradeoff:'Große emotionale Klarheit, aber langsam bei erfahrenem häufigem Spiel.', render:renders.meldTheatre},
+        {name:'Linse', title:'Doppellinse', axis:'Ursache und Wirkung gleichzeitig statt nacheinander.', hero:'Verschiebbare Trennlinie zwischen Hand und Brettreaktion.', interaction:'Linse ziehen, um Besitz und Auszahlung gegeneinander zu lesen.', material:'Schwarzglas, weiße Optikkante, warme Tokenreflexe.', tradeoff:'Lehrreich und neuartig, kann im schnellen Spiel unnötige Bedienung erzeugen.', render:renders.meldLens}
+      ]},
+      { label:'Akt II · Pochen', variants:[
+        {name:'Drucklinie', title:'Drucklinie', axis:'Psychologische Spannung statt Brettgeometrie.', hero:'Zwei Gesichter und eine einzige eskalierende Drucklinie.', interaction:'Passen oder den Druck sichtbar um einen Schritt erhöhen.', material:'Amethyst zu Pink, ansonsten fast monochrom.', tradeoff:'Der soziale Kern ist sofort da, die physischen Poch-Wurzeln treten zurück.', render:renders.pochPressure},
+        {name:'Duell', title:'Shot / Reverse Shot', axis:'Filmische Gegenüberstellung statt Rundtisch.', hero:'Zwei große Spieleranker mit Pott als drittem Akteur.', interaction:'Mitgehen verändert Pott und aktiven Blick.', material:'Getöntes Glas, Hauttöne, konzentriertes Violett.', tradeoff:'Dramatisch und lesbar, muss bei mehr als zwei aktiven Spielern sauber schneiden.', render:renders.pochDuel},
+        {name:'Versiegelt', title:'Versiegelter Pott', axis:'Bewusstes Halten statt flüchtigem Button-Tap.', hero:'Ein versiegelter Pott als physisches Versprechen.', interaction:'Zum Pochen halten, Loslassen bricht sofort ab.', material:'Dunkles Glas, violette Versiegelung, präziser Kontaktring.', tradeoff:'Bedeutungsvoll bei seltenen Einsätzen, für Routinepartien potenziell zu langsam.', render:renders.pochSealed},
+        {name:'Orbit', title:'Einsatz-Orbit', axis:'Soziale Distanz statt Zahlenmatrix.', hero:'Spielerpositionen kreisen um einen konzentrierten Pott.', interaction:'Eigene Umlaufbahn von Passen bis drei Chips verschieben.', material:'Cyanes Glasgitter und amethystfarbener Kern.', tradeoff:'Zustände sind räumlich einprägsam, benötigen klare nicht-visuelle Labels.', render:renders.pochOrbit},
+        {name:'Glasstapel', title:'Transparenter Glasstapel', axis:'Nachvollziehbare Entscheidungslagen statt Summenzahl.', hero:'Jeder Einsatz bleibt als eigene durchsichtige Schicht erhalten.', interaction:'Eine Lage wählen und Besitzer, Risiko, Folge lesen.', material:'Gestapeltes Rauchglas mit cyanfarbenen Kanten.', tradeoff:'Auditierbar und premium, bei vielen Erhöhungen visuell schnell dicht.', render:renders.pochStack}
+      ]},
+      { label:'Akt III · Ausspielen', variants:[
+        {name:'Kartenbahn', title:'Kartenbahn', axis:'Gerichtete Bewegung statt Brettmitte.', hero:'Eine perspektivische Bahn macht die erlaubte Fortsetzung körperlich.', interaction:'Nächste Karte direkt auf die Bahn legen.', material:'Smaragdlicht auf dunklem Präzisionsmetall.', tradeoff:'Game Feel ist stark, lange Reihen brauchen Kamera- und Performance-Disziplin.', render:renders.playRunway},
+        {name:'Taktlinie', title:'Taktlinie', axis:'Zeitliche Lesbarkeit statt räumlichem Stapel.', hero:'Vergangenheit, Jetzt und mögliche Fortsetzung auf einer Linie.', interaction:'Vor- und zurücklesen, dann aktuelle Karte bestätigen.', material:'Matte Karten, feine smaragdgrüne Zeitachse.', tradeoff:'Regelzustand ist glasklar, wirkt analytischer als ein geselliger Tisch.', render:renders.playTimeline},
+        {name:'Zerfall', title:'Brettzerfall', axis:'Phasentransformation statt neu dekoriertem Brett.', hero:'Der alte Ring schrumpft und wird zu Spielerwegen.', interaction:'Transformation bewusst auslösen und sofort in der Hand weiterspielen.', material:'Dunkles Metall zerlegt sich in grüne Lichtlinien.', tradeoff:'Stärkster Aktwechsel, verlangt eine präzise native Morph-Architektur.', render:renders.playCollapse},
+        {name:'Spotlight', title:'Ein-Karten-Spotlight', axis:'Radikale Fokusführung statt vollständigem Zustand.', hero:'Die einzig spielbare Karte im Lichtkegel.', interaction:'Karte wählen; restliche Information bleibt sekundär erreichbar.', material:'Schwarzer Raum, neutrales Kartenweiß, smaragdgrüner Rand.', tradeoff:'Auf kleinen Displays souverän, für Experten möglicherweise zu wenig Übersicht.', render:renders.playSpotlight},
+        {name:'Staffel', title:'Sozialer Staffellauf', axis:'Anspielrecht als Objekt statt Statuszeile.', hero:'Eine Karte wandert sichtbar zwischen vier Personen.', interaction:'Staffel weitergeben und aktiven Sitz räumlich verfolgen.', material:'Feine grüne Route, matte Portraitinseln, reale Karte.', tradeoff:'Sozial verständlich, braucht für schnelle Ketten eine sehr knappe Bewegung.', render:renders.playRelay}
+      ]}
+    ];
+
+    const nativeMetadata = [
+      [
+        {name:'Zeitbrücke',title:'Der echte First Run',axis:'Historie führt unmittelbar in den bestehenden Spieltisch.',hero:'Native Zeitachse und reale First-Run-Komposition.',interaction:'Im Build wird horizontal durch die Zeit gestrichen.',material:'Historischer Raum, Goldlinie und heutige Produktoberfläche.',tradeoff:'Markant, muss aber schnell genug zum Spiel führen.'},
+        {name:'Gegenbewegung',title:'Zeit unter dem Finger',axis:'Der Übergang reagiert direkt auf die reale Wischrichtung.',hero:'Zweite native Position derselben First-Run-Geste.',interaction:'Der Finger kontrolliert Richtung und Fortschritt.',material:'Unveränderter First-Run-Build.',tradeoff:'Taktil stark; der Affordance muss sofort lesbar sein.'},
+        {name:'Münzwelle',title:'Das erste echte Spielsignal',axis:'Der Einstieg endet in einer nachweisbaren Ringreaktion.',hero:'Native Münzwelle am tatsächlichen Poch-Ring.',interaction:'Eine Spielaktion löst die vorhandene Auszahlung aus.',material:'Originalring, Originalmünzen und reale Beleuchtung.',tradeoff:'Zeigt sofort das Game, benötigt aber einen festen Seed.'},
+        {name:'Hana',title:'Ein Gegenüber tritt an',axis:'Soziale Bindung entsteht innerhalb der echten Partie.',hero:'Native Hana-Einführung über dem laufenden Pochen-Zustand.',interaction:'Runde beginnen oder gezielt eine Phase üben.',material:'Originalporträt, Poch-Ring und reale Kartenhand.',tradeoff:'Menschlich und klar; das Modal verdeckt bewusst Tischfläche.'},
+        {name:'Lernstart',title:'Direkt in unsere erste Runde',axis:'Das Tutorial öffnet auf dem echten Tisch.',hero:'Native Lernoberfläche über einem gültigen Melden-Zustand.',interaction:'Geführte Runde starten oder Spielteil wählen.',material:'Bestehende App-Hülle und reale Kartenhand.',tradeoff:'Maximal ehrlich, weniger filmisch.'}
+      ],
+      [
+        {name:'Ringzustand',title:'Melden - vollständiger Tisch',axis:'Baseline mit Ring, Potts, Trumpf und eigener Hand.',hero:'Realer Phase-1-Zustand aus dem nativen Build.',interaction:'Karten und Ring bleiben produktiv verbunden.',material:'Poch-Ring, Patina-Karten und TravelCent-Münzen.',tradeoff:'Authentisch und vollständig, aber informationsdicht.'},
+        {name:'Trumpf zeigen',title:'Trumpf als konkrete Handlung',axis:'Eine Handkarte wird mit ihrem echten Ringfeld verbunden.',hero:'Karo-König, Ziellinie und Auszahlungspott.',interaction:'Die gültige Karte wird im Build gezeigt.',material:'Originalkarte, Goldfokus und realer Ring.',tradeoff:'Extrem verständlich, aber bewusst geführt.'},
+        {name:'Auszahlung',title:'Meldung wird physisch bezahlt',axis:'Regelverständnis entsteht durch reale Münzbewegung.',hero:'Native Meldungs-Auszahlung mit Hand und Ring.',interaction:'Bestätigung löst den vorhandenen Coin-Flight aus.',material:'Produktive Münz- und Kartenmaterialien.',tradeoff:'Starkes Game Feel; Timing muss exakt bleiben.'},
+        {name:'Freigabe',title:'Vom Beleg zurück zur Partie',axis:'Der Fokus löst sich nach der Meldung wieder.',hero:'Native Release-Phase des geführten Ablaufs.',interaction:'Die nächste reale Aktion wird freigegeben.',material:'Unveränderte App-Assets.',tradeoff:'Sauberer Flow, im Standbild zurückhaltender.'},
+        {name:'Münzflug',title:'Der tatsächliche Kontaktmoment',axis:'Material und Bewegung tragen einen kurzen Peak.',hero:'Native Auszahlung im Flug statt erfundener Effektgrafik.',interaction:'Das Motion-System zeigt den Besitzwechsel.',material:'TravelCent-Münzen über dem realen Ring.',tradeoff:'Premium, aber nur als kurzer Akzent.'}
+      ],
+      [
+        {name:'Echter Zug',title:'Pochen - vollständige Entscheidung',axis:'Baseline mit Range, Ring, Gegnern, Hand und Aktionen.',hero:'Produktiver Phase-2-Zustand im Phone-Layout.',interaction:'Passen oder Pochen 1 innerhalb des gültigen Seeds.',material:'Amethystfokus auf dem bestehenden Ring.',tradeoff:'Vollständig, die Spannung verteilt sich auf viele Elemente.'},
+        {name:'Materialnähe',title:'Ring und Entscheidung aus der Nähe',axis:'Der tatsächliche Material-Build trägt die Bühne.',hero:'Native Materialfassung mit Pott, Range und Hand.',interaction:'Die originale Poch-Aktion bleibt Mittelpunkt.',material:'Metall, dunkles Inlay, Münzen und Patina-Karten.',tradeoff:'Markeneigen, braucht auf kleinen Screens strenge Hierarchie.'},
+        {name:'Coaching',title:'Der erste Poch wird geführt',axis:'Regie erklärt genau die mögliche Entscheidung.',hero:'Native Tutorialfassung des Pochen-Zugs.',interaction:'Gültiger Einsatz statt abstrakter Bluff-Metapher.',material:'Originale Phase-2-Oberfläche.',tradeoff:'Sehr klar; Experten dürfen die Führung nicht erneut sehen.'},
+        {name:'Brettfokus',title:'Der Ring bleibt Regelgedächtnis',axis:'Zentrierte Komposition priorisiert Pott und Felder.',hero:'Realer zentrierter Phase-2-Build.',interaction:'Einsatz verändert Potts und Statuswerte.',material:'Produktiver Ring mit Originalmünzen.',tradeoff:'Ikonisch, soziale Spannung bleibt in den Porträts.'},
+        {name:'Ergebnis',title:'Der Poch ist entschieden',axis:'Auszahlung und Übergang bleiben im echten Zustand sichtbar.',hero:'Native Settled-Phase mit Gewinner und Pott.',interaction:'Weiter zum Ausspielen aus demselben Matchzustand.',material:'Bestehende Ergebnis- und Münzdarstellung.',tradeoff:'Klarer Abschluss; der Peak braucht vorherigen Aufbau.'}
+      ],
+      [
+        {name:'Startkarte',title:'Ausspielen beginnt in der echten Hand',axis:'Die erste gültige Karte wird im produktiven Layout gewählt.',hero:'Native Phase 3 mit Mitte, Gegnern und Hand.',interaction:'Eine reale Handkarte startet die Reihe.',material:'Originalkarten vor dem bestehenden Tisch.',tradeoff:'Sofort klar; der Ring tritt bewusst zurück.'},
+        {name:'Spielfluss',title:'Der nächste legale Zug',axis:'Die Kartenfolge erscheint als tatsächlicher Spielzustand.',hero:'Native korrigierte Tutorialfassung des Ausspielens.',interaction:'Nur gültige Karten treiben die Reihe weiter.',material:'Patina-Karten und produktive Mitte.',tradeoff:'Ehrlich; Dramaturgie entsteht aus Kartenflug und Reaktion.'},
+        {name:'Ergebnis halten',title:'Der gewonnene Moment bleibt lesbar',axis:'Das Ergebnis wird nicht sofort weggeräumt.',hero:'Native Hold-Phase mit sichtbarer Ursache und Folge.',interaction:'Der Übergang folgt erst nach dem Lesen.',material:'Bestehende Ergebnisoberfläche.',tradeoff:'Nachvollziehbar; zu langes Halten bremst Serienpartien.'},
+        {name:'Abschluss',title:'Die geführte Runde schließt sich',axis:'Der echte Dreiphasen-Bogen wird bestätigt.',hero:'Native Completion-Oberfläche derselben Runde.',interaction:'Weiter zur nächsten echten Partie.',material:'Bestehende warme Ergebnishülle.',tradeoff:'Produktnah, weniger spektakulär als ein separates Finale.'},
+        {name:'Ruhemodus',title:'Nach dem Peak zurück in Ruhe',axis:'Der Abschluss bleibt Teil derselben Produktidentität.',hero:'Native Standardfassung ohne erfundene Bühnenwelt.',interaction:'Neustart oder Rückkehr innerhalb der App.',material:'Produktive Tokens und Originaltypografie.',tradeoff:'Konsistent; der Schluss lebt stärker von Typografie.'}
+      ]
+    ];
+
+    nativeMetadata.forEach((group, chapterIndex) => {
+      group.forEach((metadata, variantIndex) => Object.assign(chapters[chapterIndex].variants[variantIndex], metadata));
+    });
+
+    const stage = document.getElementById('stage');
+    const picker = document.querySelector('.proto-picker');
+    const highlight = picker.querySelector('.proto-picker-highlight');
+    const items = [...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+    const replay = picker.querySelector('.proto-picker-replay');
+    const chapterTabs = [...document.querySelectorAll('.chapter-tab')];
+    let current = 0;
+    let chapter = Math.max(0, Math.min(3, (parseInt(new URLSearchParams(location.search).get('c'), 10) || 1) - 1));
+
+    function moveHighlight() {
+      const el = items[current];
+      highlight.style.width = el.offsetWidth + 'px';
+      highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+    }
+
+    function mount(i) {
+      stage.innerHTML = '';
+      requestAnimationFrame(() => {
+        try {
+          stage.innerHTML = chapters[chapter].variants[i].render();
+          wireStage();
+        } catch (error) {
+          stage.innerHTML = `<section class="game"><div class="eyebrow">Renderfehler</div><h2 class="game-title">Diese Richtung konnte nicht geladen werden.</h2><p class="game-subtitle">${String(error?.stack || error)}</p></section>`;
+          console.error(error);
+        }
+      });
+    }
+
+    function updateDetails() {
+      const concept = chapters[chapter].variants[current];
+      document.getElementById('chapterLabel').textContent = `${chapters[chapter].label} · Richtung ${current + 1} von 5`;
+      document.getElementById('conceptName').textContent = concept.title;
+      document.getElementById('conceptAxis').textContent = concept.axis;
+      document.getElementById('conceptNumber').textContent = String(chapter * 5 + current + 1).padStart(2, '0');
+      document.getElementById('conceptHero').textContent = concept.hero;
+      document.getElementById('conceptInteraction').textContent = concept.interaction;
+      document.getElementById('conceptMaterial').textContent = concept.material;
+      document.getElementById('conceptTradeoff').textContent = concept.tradeoff;
+      document.title = `POCH 1441 · ${concept.title}`;
+    }
+
+    function setActive(i) {
+      if (i < 0 || i >= chapters[chapter].variants.length) return;
+      current = i;
+      items.forEach((el, j) => {
+        el.textContent = chapters[chapter].variants[j].name;
+        el.toggleAttribute('data-active', j === i);
+        if (j === i) el.setAttribute('aria-current', 'true');
+        else el.removeAttribute('aria-current');
+      });
+      moveHighlight();
+      const url = new URL(location);
+      url.searchParams.set('c', chapter + 1);
+      url.searchParams.set('v', i + 1);
+      try {
+        history.replaceState(null, '', url);
+      } catch (error) {
+        // Local file previews may reject URL mutation; selection must still render.
+      }
+      updateDetails();
+      mount(i);
+    }
+
+    function setChapter(i) {
+      if (i < 0 || i >= chapters.length) return;
+      chapter = i;
+      chapterTabs.forEach((el, j) => el.setAttribute('aria-selected', j === i ? 'true' : 'false'));
+      setActive(current);
+    }
+
+    function wireScratch() {
+      const board = stage.querySelector('.scratch-board');
+      const canvas = board?.querySelector('canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const drawCover = () => {
+        const rect = board.getBoundingClientRect();
+        canvas.width = Math.round(rect.width * devicePixelRatio);
+        canvas.height = Math.round(rect.height * devicePixelRatio);
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        const gradient = ctx.createLinearGradient(0,0,rect.width,rect.height);
+        gradient.addColorStop(0,'#17110e'); gradient.addColorStop(.48,'#0c0b0c'); gradient.addColorStop(1,'#142026');
+        ctx.fillStyle = gradient; ctx.fillRect(0,0,rect.width,rect.height);
+        ctx.strokeStyle = 'rgba(210,171,92,.28)'; ctx.lineWidth = 1;
+        for (let y=110;y<rect.height-160;y+=42){ctx.beginPath();ctx.moveTo(24,y);ctx.lineTo(rect.width-24,y+12);ctx.stroke();}
+        ctx.fillStyle='rgba(239,224,194,.82)';ctx.font='800 54px Georgia';ctx.textAlign='center';ctx.fillText('1441',rect.width/2,rect.height*.45);
+        ctx.font='700 11px ui-monospace';ctx.letterSpacing='2px';ctx.fillText('REIBE DIE ZEIT FREI',rect.width/2,rect.height*.49);
+        ctx.globalCompositeOperation='destination-out';
+        ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=112;
+        ctx.beginPath();ctx.moveTo(72,152);ctx.bezierCurveTo(118,288,264,390,320,610);ctx.stroke();
+        ctx.globalCompositeOperation='source-over';
+      };
+      drawCover();
+      let scratching=false, strokes=24;
+      const scratch = e => {
+        if(!scratching) return;
+        const r=canvas.getBoundingClientRect(); const x=e.clientX-r.left; const y=e.clientY-r.top;
+        ctx.globalCompositeOperation='destination-out';
+        const g=ctx.createRadialGradient(x,y,5,x,y,36);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,38,0,Math.PI*2);ctx.fill();
+        strokes=Math.min(100,strokes+2); const label=stage.querySelector('.scratch-progress'); if(label) label.textContent=`Oberfläche ${strokes} % geöffnet`;
+      };
+      canvas.addEventListener('pointerdown',e=>{scratching=true;canvas.setPointerCapture(e.pointerId);scratch(e)});
+      canvas.addEventListener('pointermove',scratch);
+      canvas.addEventListener('pointerup',()=>scratching=false);
+      stage.querySelector('[data-scratch-reveal]')?.addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);stage.querySelector('.scratch-progress').textContent='Oberfläche vollständig geöffnet';});
+    }
+
+    function wireSwipe() {
+      const el=stage.querySelector('[data-swipe-card]'); if(!el) return;
+      let start=0,dragging=false;
+      const finish=()=>{if(!dragging)return;dragging=false;const x=parseFloat(el.dataset.x||0);el.style.transform='';if(x>60) reveal();else el.style.transform='translate3d(0,0,0) rotate(0)'};
+      const reveal=()=>{el.classList.add('launched');stage.querySelector('.trailer-outcome')?.classList.add('revealed');const copy=stage.querySelector('#trailerCopy');if(copy)copy.textContent='Zug verstanden. Der erste Tisch ist offen.'};
+      el.addEventListener('pointerdown',e=>{dragging=true;start=e.clientX;el.setPointerCapture(e.pointerId)});
+      el.addEventListener('pointermove',e=>{if(!dragging)return;const x=Math.max(-20,e.clientX-start);el.dataset.x=x;el.style.transform=`translate3d(${x}px,${-Math.abs(x)*.28}px,0) rotate(${x*.08}deg)`});
+      el.addEventListener('pointerup',finish); stage.querySelector('[data-flick]')?.addEventListener('click',reveal);
+    }
+
+    function wireHold() {
+      const el=stage.querySelector('[data-hold]'); if(!el) return;
+      let timer;
+      const cancel=()=>{clearTimeout(timer);el.classList.remove('holding')};
+      const start=()=>{el.classList.add('holding');timer=setTimeout(()=>{el.classList.remove('holding');el.querySelector('span:last-child').textContent='Poch versiegelt ✓';el.disabled=true;stage.querySelector('#holdStatus').textContent='2 Chips gebunden · Gegner entscheiden.'},reducedMotion?20:900)};
+      el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);start()}); el.addEventListener('pointerup',cancel); el.addEventListener('pointercancel',cancel); el.addEventListener('pointerleave',cancel);
+    }
+
+    function wireStage() {
+      wireScratch(); wireSwipe(); wireHold();
+      stage.querySelectorAll('[data-reset]').forEach(el=>el.addEventListener('click',()=>mount(current)));
+      stage.querySelectorAll('[data-knock]').forEach(el=>el.addEventListener('click',()=>{el.classList.toggle('done');const n=stage.querySelectorAll('.knock.done').length;stage.querySelector('#knockCopy').textContent=n===4?'Der vierte Schlag öffnet den heutigen Tisch.':`${n} von 4 Materialschlägen gesetzt.`}));
+      stage.querySelectorAll('[data-portrait]').forEach(el=>el.addEventListener('click',()=>{el.classList.toggle('awake');const n=stage.querySelectorAll('.living-portrait.awake').length;stage.querySelector('#portraitCopy').textContent=n?`${n} Mitspieler ${n===1?'antwortet':'antworten'} auf deinen Kontakt.`:'Berühre ein Porträt. Haltung und Reaktion ersetzen den üblichen Tutorial-Text.'}));
+      stage.querySelector('[data-era-slider]')?.addEventListener('input',e=>{const eras=['1441','1900','2026','next'];const labels=['1441','1900','2026','Danach'];stage.querySelector('.jump-world').dataset.era=eras[e.target.value];stage.querySelector('#eraOutput').textContent=labels[e.target.value]});
+      stage.querySelectorAll('[data-star], [data-meld-card]').forEach(el=>el.addEventListener('click',()=>el.classList.toggle('selected')));
+      stage.querySelector('[data-layer-slider]')?.addEventListener('input',e=>{const copy=[['Ebene 1 · Hand','7♦, 8♦ und 9♦ sind verbunden.'],['Ebene 2 · Kombination','Die Folge ist vollständig und bleibt in der Hand.'],['Ebene 3 · Auszahlung','Vier Chips lösen sich aus dem Regelspeicher.']][e.target.value-1];stage.querySelector('.layers-stage').dataset.lift=e.target.value;stage.querySelector('#layerTitle').textContent=copy[0];stage.querySelector('#layerCopy').textContent=copy[1]});
+      stage.querySelectorAll('[data-evidence]').forEach(el=>el.addEventListener('click',()=>{if(el.textContent.includes('Nicht vorhanden'))return;el.classList.toggle('marked');const n=stage.querySelectorAll('.evidence-slot.marked').length;stage.querySelector('#receipt').textContent=`${n} BELEGE MARKIERT · ${[0,3,8,12][n]} CHIPS`}));
+      stage.querySelectorAll('[data-theatre]').forEach(el=>el.addEventListener('click',()=>{const d={king:['König · 3 Chips',staticCard('K','♦'),'Einzelmeldung, sofort lesbar.'],marriage:['Hochzeit · 8 Chips',`<div style="display:flex;justify-content:center">${staticCard('K','♦')}${staticCard('Q','♦')}</div>`,'Zwei Karten treten als Paar ins Licht.'],sequence:['Folge · 4 Chips',`<div style="display:flex;justify-content:center">${staticCard('7','♦')}${staticCard('8','♦')}${staticCard('9','♦')}</div>`,'Die Kartenfolge wird als Rhythmus gelesen.']}[el.dataset.theatre];stage.querySelector('#theatreTitle').textContent=d[0];stage.querySelector('#theatreCard').innerHTML=d[1];stage.querySelector('#theatreCopy').textContent=d[2]}));
+      stage.querySelector('[data-lens-slider]')?.addEventListener('input',e=>{const p=e.target.value;stage.querySelector('.lens-pane.payout').style.clipPath=`inset(0 0 0 ${p}%)`;stage.querySelector('.lens-divider').style.left=`${p}%`;stage.querySelector('.lens-knob').style.left=`calc(${p}% - 23px)`});
+      let pressure=38,pot=6;
+      stage.querySelector('[data-raise]')?.addEventListener('click',()=>{pressure=Math.min(96,pressure+18);pot+=1;stage.querySelector('.pressure-meter span').style.transform=`scaleX(${pressure/100})`;stage.querySelector('.pressure-copy .eyebrow').textContent=`Druck ${pressure} %`;stage.querySelector('#pressureTitle').textContent=pressure>70?'Noahs Blick bricht zuerst.':'Noah hält dagegen.';stage.querySelector('#pressureCopy').textContent=`Pott ${pot} · nächster Schritt kostet ${Math.ceil(pot/4)}.`});
+      stage.querySelectorAll('[data-fold]').forEach(el=>el.addEventListener('click',()=>{el.textContent='Gepasst ✓';el.disabled=true}));
+      stage.querySelector('[data-duel-call]')?.addEventListener('click',e=>{const p=stage.querySelector('#duelPot');p.textContent=Number(p.textContent)+2;e.target.textContent='Hana entscheidet';stage.querySelector('.duel-face.left').classList.remove('active');stage.querySelector('.duel-face.right').classList.add('active')});
+      stage.querySelector('[data-orbit]')?.addEventListener('input',e=>{stage.querySelector('#orbitBid').textContent=e.target.value==0?'passt':e.target.value;stage.querySelector('#orbitPot').textContent=6+Number(e.target.value)});
+      stage.querySelectorAll('[data-glass-bid]').forEach(el=>el.addEventListener('click',()=>{stage.querySelectorAll('.glass-bid').forEach(x=>x.classList.remove('active'));el.classList.add('active');stage.querySelector('#stackTitle').textContent=`${el.dataset.glassBid}s Lage · 2 Chips`;stage.querySelector('#stackCopy').textContent=el.dataset.glassBid==='Du'?'Mitgehen bindet deinen bisherigen und zwei neue Chips.':'Diese Zusage bleibt sichtbar, bis der Pott entschieden ist.'}));
+      stage.querySelector('[data-runway]')?.addEventListener('click',e=>{const cards=[...stage.querySelectorAll('.run-card')];const target=cards.find(x=>!x.classList.contains('played'));if(target)target.classList.add('played');const left=cards.filter(x=>!x.classList.contains('played')).length;e.target.textContent=left?`${left} Karten auf der Bahn`:'Reihe geschlossen ✓'});
+      let timeline=2;
+      const updateTimeline=()=>{const events=[...stage.querySelectorAll('.timeline-event')];events.forEach((el,i)=>{el.classList.toggle('done',i<timeline);el.classList.toggle('current',i===timeline)});const ranks=['7','8','9','10','J','Q'];stage.querySelector('#timelineTitle').textContent=timeline<6?`${ranks[timeline]}♣ ist als Nächstes erlaubt.`:'Kreuz-Reihe geschlossen.';const b=stage.querySelector('[data-timeline-next]');b.textContent=timeline<6?`${ranks[timeline]}♣ legen`:'Fertig ✓';b.disabled=timeline>=6};
+      stage.querySelector('[data-timeline-next]')?.addEventListener('click',()=>{timeline=Math.min(6,timeline+1);updateTimeline()});stage.querySelector('[data-timeline-back]')?.addEventListener('click',()=>{timeline=Math.max(0,timeline-1);updateTimeline()});
+      stage.querySelector('[data-collapse]')?.addEventListener('click',e=>{stage.querySelector('.collapse-stage').classList.toggle('open');e.target.textContent=stage.querySelector('.collapse-stage').classList.contains('open')?'10♣ in die Linie spielen':'Brett in Wege öffnen'});
+      stage.querySelector('[data-spotlight-card]')?.addEventListener('click',e=>{e.currentTarget.classList.add('played');stage.querySelector('#spotlightTitle').textContent='10♣ liegt. Noah hat jetzt das Anspielrecht.'});
+      let relay=1;stage.querySelector('[data-relay]')?.addEventListener('click',()=>{relay=relay%4+1;const s=stage.querySelector('.relay-stage');s.dataset.seat=relay;s.querySelectorAll('.relay-seat').forEach(el=>el.classList.toggle('active',Number(el.dataset.relaySeat)===relay))});
+      stage.querySelectorAll('[data-scene-action]').forEach(el=>el.addEventListener('click',()=>{
+        const state=stage.querySelector('.scene-state');
+        if(state) state.textContent=el.dataset.state;
+        el.textContent=el.dataset.done || 'Gesetzt ✓';
+        el.closest('.cinematic')?.classList.add('scene-confirmed');
+      }));
+      stage.querySelectorAll('[data-scene-option]').forEach(el=>el.addEventListener('click',()=>{
+        const exclusive=el.closest('.scene-mini-options');
+        exclusive?.querySelectorAll('[data-scene-option]').forEach(option=>option.classList.remove('selected'));
+        el.classList.add('selected');
+        const state=stage.querySelector('.scene-state');
+        if(state) state.textContent=el.dataset.state;
+      }));
+      stage.querySelectorAll('[data-scene-range]').forEach(el=>el.addEventListener('input',()=>{
+        const output=stage.querySelector('[data-scene-output]');
+        const value=Number(el.value);
+        if(!output) return;
+        if(chapter===0) output.textContent=['1441','1900','2026','danach'][value];
+        else if(chapter===1 && current===1) output.textContent=`Ebene ${value} · ${['Hand','Kombination','Auszahlung'][value-1]}`;
+        else if(chapter===1 && current===4) output.textContent=`${value} % Hand · ${100-value} % Wirkung`;
+        else if(chapter===2 && current===3) output.textContent=value===0?'passen':`${value} Spielstein${value===1?'':'e'} · ${value<2?'prüfend':'offensiv'}`;
+      }));
+    }
+
+    items.forEach((el, i) => el.addEventListener('click', () => setActive(i)));
+    chapterTabs.forEach((el, i) => el.addEventListener('click', () => setChapter(i)));
+    replay?.addEventListener('click', () => mount(current));
+    window.addEventListener('resize', moveHighlight);
+
+    document.addEventListener('keydown', (e) => {
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= chapters[chapter].variants.length) setActive(num - 1);
+      else if (e.key === 'ArrowRight') setActive((current + 1) % chapters[chapter].variants.length);
+      else if (e.key === 'ArrowLeft') setActive((current - 1 + chapters[chapter].variants.length) % chapters[chapter].variants.length);
+      else if (e.key === 'r' || e.key === 'R') mount(current);
+    });
+
+    current = Math.max(0, Math.min(4, (parseInt(new URLSearchParams(location.search).get('v'), 10) || 1) - 1));
+    chapterTabs.forEach((el, j) => el.setAttribute('aria-selected', j === chapter ? 'true' : 'false'));
+    setActive(current);
+    requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute('data-ready', '')));
+  </script>
+</body>
+</html>

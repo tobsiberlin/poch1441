@@ -25,3 +25,5 @@ artifacts/
 !App/Audio/first-run-*.wav
 !App/Audio/cent-copper-polycarbonate-01.wav
 .poch-simulator-udid
+# Browser-Profile aus Review-Läufen bleiben lokal.
+chrome-profile/
